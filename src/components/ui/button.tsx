@@ -3,25 +3,36 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius)] text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98]",
+  [
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap",
+    "font-mono text-[11px] font-medium uppercase tracking-[0.12em]",
+    "transition-all duration-150",
+    "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-paper)] focus-visible:ring-[var(--color-ink)]",
+    "disabled:pointer-events-none disabled:opacity-50",
+    "[&_svg]:size-3.5 [&_svg]:shrink-0",
+    "active:translate-y-[1px]",
+  ].join(" "),
   {
     variants: {
       variant: {
         default:
-          "bg-[var(--color-primary)] text-[var(--color-primary-foreground)] shadow-sm hover:bg-[oklch(48%_0.20_258)]",
+          "bg-[var(--color-ink)] text-[var(--color-paper)] border border-[var(--color-ink)] hover:bg-[oklch(25%_0.02_50)]",
         destructive:
-          "bg-[var(--color-destructive)] text-[var(--color-destructive-foreground)] hover:bg-[oklch(52%_0.22_25)]",
+          "bg-[var(--color-destructive)] text-[var(--color-paper)] border border-[var(--color-destructive)]",
         outline:
-          "border border-[var(--color-border)] bg-[var(--color-card)] hover:bg-[var(--color-muted)]",
+          "border border-[var(--color-rule-strong)] bg-transparent text-[var(--color-ink)] hover:bg-[var(--color-paper-strong)]",
         secondary:
-          "bg-[var(--color-muted)] text-[var(--color-foreground)] hover:bg-[oklch(93%_0.012_240)]",
-        ghost: "hover:bg-[var(--color-muted)]",
-        link: "text-[var(--color-primary)] underline-offset-4 hover:underline",
+          "bg-[var(--color-paper-strong)] text-[var(--color-ink)] border border-[var(--color-rule)] hover:bg-[oklch(92%_0.02_75)]",
+        ghost:
+          "text-[var(--color-ink)] hover:bg-[var(--color-paper-strong)]",
+        link: "text-[var(--color-ink)] underline underline-offset-4 decoration-[var(--color-rule-strong)] hover:decoration-[var(--color-ink)] normal-case tracking-normal font-sans text-[13px]",
+        stamp:
+          "border border-[var(--color-stamp)] text-[var(--color-stamp)] bg-transparent hover:bg-[var(--color-stamp-soft)]",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 px-3 text-xs",
-        lg: "h-10 px-6",
+        default: "h-9 px-4",
+        sm: "h-8 px-3 text-[10px]",
+        lg: "h-11 px-6 text-[12px]",
         icon: "h-9 w-9",
       },
     },

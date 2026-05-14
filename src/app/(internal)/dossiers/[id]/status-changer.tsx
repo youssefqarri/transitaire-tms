@@ -8,6 +8,8 @@ import { STATUS_LABELS } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/dossier/status-badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 export function StatusChanger({
   dossierId,
@@ -43,37 +45,38 @@ export function StatusChanger({
   return (
     <div className="relative">
       <Button variant="outline" size="sm" onClick={() => setOpen((o) => !o)}>
-        Changer le statut <ChevronDown className="size-4" />
+        Changer le statut <ChevronDown className="size-3" strokeWidth={1.5} />
       </Button>
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-[var(--color-card)] border border-[var(--color-border)] rounded-[var(--radius)] shadow-xl z-20 p-4 animate-fade-in">
-          <div className="text-xs text-[var(--color-muted-foreground)] mb-1">Statut actuel</div>
-          <div className="mb-3">
-            <StatusBadge status={currentStatus} />
+        <div className="absolute right-0 top-full mt-2 w-[340px] bg-[var(--color-card)] border border-[var(--color-rule-strong)] shadow-[0_12px_32px_-16px_rgba(0,0,0,0.2)] p-5 z-30 animate-fade-up">
+          <div className="label-eyebrow mb-2">Statut actuel</div>
+          <div className="mb-5">
+            <StatusBadge status={currentStatus} size="sm" />
           </div>
-          <label className="text-xs text-[var(--color-muted-foreground)] mb-1 block">
-            Nouveau statut
-          </label>
-          <select
-            className="w-full h-9 px-3 rounded-[var(--radius)] border border-[var(--color-border)] bg-[var(--color-card)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)] mb-3"
-            value={target}
-            onChange={(e) => setTarget(e.target.value as DossierStatus)}
-          >
-            {Object.entries(STATUS_LABELS).map(([k, label]) => (
-              <option key={k} value={k}>
-                {label}
-              </option>
-            ))}
-          </select>
-          <label className="text-xs text-[var(--color-muted-foreground)] mb-1 block">
-            Note (optionnel)
-          </label>
-          <textarea
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="Contexte du changement…"
-            className="w-full min-h-[60px] rounded-[var(--radius)] border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)] mb-3 resize-y"
-          />
+          <div className="space-y-2 mb-4">
+            <Label htmlFor="target">Nouveau statut</Label>
+            <select
+              id="target"
+              value={target}
+              onChange={(e) => setTarget(e.target.value as DossierStatus)}
+              className="h-9 w-full text-[14px] bg-transparent border-0 border-b border-[var(--color-rule-strong)] focus:outline-none focus:border-[var(--color-ink)]"
+            >
+              {Object.entries(STATUS_LABELS).map(([k, label]) => (
+                <option key={k} value={k}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2 mb-5">
+            <Label htmlFor="note">Note (facultatif)</Label>
+            <Textarea
+              id="note"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Contexte du changement…"
+            />
+          </div>
           <div className="flex justify-end gap-2">
             <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
               Annuler

@@ -17,7 +17,7 @@ export default async function InternalLayout({ children }: { children: React.Rea
   });
 
   return (
-    <div className="flex min-h-screen bg-[var(--color-background)]">
+    <div className="flex min-h-screen bg-[var(--color-paper)]">
       <Sidebar role={session.user.role} unreadCount={unreadCount} />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar
@@ -25,7 +25,7 @@ export default async function InternalLayout({ children }: { children: React.Rea
           email={session.user.email}
           role={session.user.role}
         />
-        <main className="flex-1 p-6 lg:p-8">{children}</main>
+        <main className="flex-1 px-8 lg:px-12 py-10 lg:py-14">{children}</main>
       </div>
     </div>
   );

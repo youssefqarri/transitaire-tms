@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 
 export function LoginForm({ from }: { from?: string }) {
@@ -20,7 +19,7 @@ export function LoginForm({ from }: { from?: string }) {
     start(async () => {
       const res = await signIn("credentials", { email, password, redirect: false });
       if (res?.error) {
-        toast.error("Email ou mot de passe incorrect");
+        toast.error("Identifiants invalides");
         return;
       }
       router.push(from || "/");
@@ -29,34 +28,32 @@ export function LoginForm({ from }: { from?: string }) {
   }
 
   return (
-    <Card className="p-6 shadow-xl">
-      <form onSubmit={submit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="vous@entreprise.ma"
-            autoFocus
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Mot de passe</Label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <Button className="w-full" disabled={pending}>
-          {pending ? "Connexion…" : "Se connecter"}
-        </Button>
-      </form>
-    </Card>
+    <form onSubmit={submit} className="space-y-7">
+      <div className="space-y-2">
+        <Label htmlFor="email">Adresse</Label>
+        <Input
+          id="email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="vous@maison-transit.ma"
+          autoFocus
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="password">Mot de passe</Label>
+        <Input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </div>
+      <Button className="w-full mt-2" disabled={pending} size="lg">
+        {pending ? "Vérification…" : "Entrer dans le registre"}
+      </Button>
+    </form>
   );
 }

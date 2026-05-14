@@ -3,11 +3,11 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { FileText, Plus, CheckCircle2, AlertCircle } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Plus, CheckCircle2, AlertCircle, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
 import type { DocumentCategory } from "@/generated/prisma/enums";
@@ -41,7 +41,10 @@ export function DocumentsPanel({
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name) { toast.error("Nom requis"); return; }
+    if (!name) {
+      toast.error("Nom requis");
+      return;
+    }
     start(async () => {
       const fd = new FormData();
       fd.append("name", name);
@@ -51,7 +54,10 @@ export function DocumentsPanel({
         method: "POST",
         body: fd,
       });
-      if (!res.ok) { toast.error("Erreur"); return; }
+      if (!res.ok) {
+        toast.error("Erreur");
+        return;
+      }
       toast.success("Document ajouté");
       setName("");
       setFile(null);
@@ -63,25 +69,54 @@ export function DocumentsPanel({
   const presentCats = new Set(documents.map((d) => d.category));
 
   return (
-    <Card>
-      <div className="p-5 border-b border-[var(--color-border)] flex items-center justify-between">
-        <div className="font-semibold flex items-center gap-2">
-          <FileText className="size-4" /> Documents
-          <span className="text-xs text-[var(--color-muted-foreground)] font-normal">
-            ({documents.length})
+    <section>
+      <header className="flex items-baseline justify-between mb-4">
+        <h2
+          className="font-display text-[28px] tracking-[-0.018em]"
+          style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 420' }}
+        >
+          Pièces du dossier
+          <span className="ml-3 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--color-ink-mute)] tabular">
+            · {documents.length}
           </span>
-        </div>
+        </h2>
         <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
-          <Plus className="size-4" /> Ajouter
+          <Plus className="size-3" /> Ajouter
         </Button>
+      </header>
+
+      {/* checklist obligatoires */}
+      <div className="border-t border-[var(--color-rule-strong)] pt-3 pb-4">
+        <div className="label-eyebrow mb-3">Documents obligatoires</div>
+        <div className="flex flex-wrap gap-2">
+          {requiredCategories.map((c) => {
+            const ok = presentCats.has(c);
+            return (
+              <span
+                key={c}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.10em] border ${
+                  ok
+                    ? "border-[var(--color-leaf)] text-[var(--color-leaf)] bg-[var(--color-leaf-soft)]/40"
+                    : "border-[var(--color-stamp)] text-[var(--color-stamp)] bg-[var(--color-stamp-soft)]/40"
+                }`}
+              >
+                {ok ? <CheckCircle2 className="size-3" strokeWidth={1.5} /> : <AlertCircle className="size-3" strokeWidth={1.5} />}
+                {DOCUMENT_CATEGORY_LABELS[c]}
+              </span>
+            );
+          })}
+        </div>
       </div>
 
       {open && (
-        <form onSubmit={submit} className="p-5 border-b border-[var(--color-border)] bg-[var(--color-muted)]/40 space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-[var(--color-muted-foreground)] mb-1 block">Catégorie</label>
-              <Select value={category} onChange={(e) => setCategory(e.target.value as DocumentCategory)}>
+        <form
+          onSubmit={submit}
+          className="mb-4 border border-[var(--color-rule-strong)] bg-[var(--color-paper-strong)] p-5 space-y-4 animate-fade-up"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-2">
+              <Label htmlFor="category">Catégorie</Label>
+              <Select id="category" value={category} onChange={(e) => setCategory(e.target.value as DocumentCategory)}>
                 {Object.entries(DOCUMENT_CATEGORY_LABELS).map(([k, l]) => (
                   <option key={k} value={k}>
                     {l}
@@ -89,14 +124,19 @@ export function DocumentsPanel({
                 ))}
               </Select>
             </div>
-            <div>
-              <label className="text-xs text-[var(--color-muted-foreground)] mb-1 block">Nom</label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex. Facture #INV-001" />
+            <div className="space-y-2">
+              <Label htmlFor="name">Nom</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ex. Facture #INV-001"
+              />
             </div>
           </div>
-          <div>
-            <label className="text-xs text-[var(--color-muted-foreground)] mb-1 block">Fichier (optionnel)</label>
-            <Input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+          <div className="space-y-2">
+            <Label htmlFor="file">Fichier (facultatif)</Label>
+            <Input id="file" type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
@@ -109,65 +149,56 @@ export function DocumentsPanel({
         </form>
       )}
 
-      {/* Vue checklist obligatoires */}
-      <div className="p-5 border-b border-[var(--color-border)]">
-        <div className="text-xs uppercase tracking-wide text-[var(--color-muted-foreground)] mb-2">
-          Documents obligatoires
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {requiredCategories.map((c) => {
-            const ok = presentCats.has(c);
-            return (
-              <span
-                key={c}
-                className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full ${
-                  ok
-                    ? "bg-[oklch(95%_0.07_150)] text-[oklch(35%_0.18_150)]"
-                    : "bg-[oklch(96%_0.08_75)] text-[oklch(40%_0.17_60)]"
-                }`}
-              >
-                {ok ? <CheckCircle2 className="size-3" /> : <AlertCircle className="size-3" />}
-                {DOCUMENT_CATEGORY_LABELS[c]}
-              </span>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="divide-y divide-[var(--color-border)]">
+      <div className="border-t border-b border-[var(--color-rule-strong)]">
         {documents.length === 0 && (
-          <div className="p-8 text-sm text-[var(--color-muted-foreground)] text-center">
-            Aucun document pour l'instant.
+          <div className="py-10 text-center text-[14px] text-[var(--color-ink-mute)] font-display italic">
+            Aucune pièce déposée.
           </div>
         )}
-        {documents.map((d) => (
-          <div key={d.id} className="p-4 flex items-center gap-3 hover:bg-[var(--color-muted)]/40">
-            <div className="size-9 rounded-lg bg-[var(--color-muted)] flex items-center justify-center shrink-0">
-              <FileText className="size-4 text-[var(--color-muted-foreground)]" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium truncate">{d.name}</div>
-              <div className="text-xs text-[var(--color-muted-foreground)]">
+        {documents.map((d, idx) => (
+          <div
+            key={d.id}
+            className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-4 py-3 px-1 border-b border-[var(--color-rule)] last:border-b-0 hover:bg-[var(--color-paper-strong)] transition-colors"
+          >
+            <span className="font-mono text-[10px] text-[var(--color-ink-mute)] tabular w-6">
+              {String(idx + 1).padStart(2, "0")}
+            </span>
+            <div className="min-w-0">
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <FileText className="size-3.5 text-[var(--color-ink-mute)]" strokeWidth={1.5} />
+                <span className="text-[14px] text-[var(--color-ink)] truncate">{d.name}</span>
+                {d.version > 1 && (
+                  <span className="font-mono text-[10px] text-[var(--color-stamp)]">
+                    v{d.version}
+                  </span>
+                )}
+              </div>
+              <div className="mt-1 flex items-center gap-2 flex-wrap">
                 <Badge tone="outline">{DOCUMENT_CATEGORY_LABELS[d.category]}</Badge>
-                <span className="ml-2">
-                  v{d.version} · {formatDate(d.receivedAt)}
+                <span className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-[var(--color-ink-mute)]">
+                  {formatDate(d.receivedAt)}
                   {d.uploadedByName && ` · ${d.uploadedByName}`}
                 </span>
               </div>
             </div>
-            {d.fileUrl && (
+            <div />
+            {d.fileUrl ? (
               <a
                 href={d.fileUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-sm text-[var(--color-primary)] hover:underline"
+                className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-[var(--color-ink)] hover:underline inline-flex items-center gap-1"
               >
-                Ouvrir
+                <Download className="size-3" strokeWidth={1.5} /> Ouvrir
               </a>
+            ) : (
+              <span className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-[var(--color-ink-mute)]">
+                —
+              </span>
             )}
           </div>
         ))}
       </div>
-    </Card>
+    </section>
   );
 }

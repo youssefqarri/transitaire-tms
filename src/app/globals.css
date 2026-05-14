@@ -1,70 +1,171 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: oklch(99% 0.005 240);
-  --color-foreground: oklch(15% 0.03 250);
-  --color-card: oklch(100% 0 0);
-  --color-card-foreground: oklch(15% 0.03 250);
-  --color-muted: oklch(96% 0.01 240);
-  --color-muted-foreground: oklch(45% 0.02 250);
-  --color-border: oklch(91% 0.01 240);
-  --color-input: oklch(91% 0.01 240);
-  --color-ring: oklch(60% 0.18 255);
-  --color-primary: oklch(54% 0.20 258);
-  --color-primary-foreground: oklch(99% 0 0);
-  --color-accent: oklch(94% 0.04 250);
-  --color-accent-foreground: oklch(20% 0.05 258);
-  --color-destructive: oklch(58% 0.22 25);
-  --color-destructive-foreground: oklch(99% 0 0);
-  --color-success: oklch(65% 0.17 150);
-  --color-warning: oklch(75% 0.16 75);
-  --color-info: oklch(65% 0.15 230);
+  /* ─── couleurs : papier × encre × tampon ─── */
+  --color-paper:        oklch(97.5% 0.012 82);    /* fond crème papier */
+  --color-paper-strong: oklch(95% 0.018 82);
+  --color-ink:          oklch(17% 0.018 50);      /* encre noire chaude */
+  --color-ink-soft:     oklch(35% 0.02 50);
+  --color-ink-mute:     oklch(52% 0.018 60);
+  --color-rule:         oklch(85% 0.015 70);      /* filets/règles */
+  --color-rule-strong:  oklch(72% 0.018 60);
 
-  --color-sidebar: oklch(15% 0.025 258);
-  --color-sidebar-foreground: oklch(90% 0.01 240);
-  --color-sidebar-muted: oklch(60% 0.02 250);
-  --color-sidebar-accent: oklch(22% 0.04 258);
+  --color-stamp:        oklch(48% 0.18 32);       /* terracotta — sceau */
+  --color-stamp-soft:   oklch(94% 0.04 32);
+  --color-archive:      oklch(34% 0.06 230);      /* bleu archive */
+  --color-archive-soft: oklch(94% 0.04 230);
+  --color-leaf:         oklch(45% 0.10 145);      /* vert validation */
+  --color-leaf-soft:    oklch(93% 0.05 145);
 
-  --radius: 0.7rem;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* aliases pour compat */
+  --color-background:        var(--color-paper);
+  --color-foreground:        var(--color-ink);
+  --color-card:              oklch(99% 0.006 82);
+  --color-card-foreground:   var(--color-ink);
+  --color-muted:             var(--color-paper-strong);
+  --color-muted-foreground:  var(--color-ink-mute);
+  --color-border:            var(--color-rule);
+  --color-input:             var(--color-rule);
+  --color-ring:              var(--color-archive);
+  --color-primary:           var(--color-ink);
+  --color-primary-foreground: var(--color-paper);
+  --color-accent:            var(--color-stamp-soft);
+  --color-accent-foreground: var(--color-stamp);
+  --color-destructive:       oklch(48% 0.20 25);
+  --color-destructive-foreground: var(--color-paper);
+
+  --color-sidebar:            oklch(16% 0.02 50);   /* encre profonde, légère chaleur */
+  --color-sidebar-foreground: oklch(92% 0.012 80);
+  --color-sidebar-muted:      oklch(60% 0.02 60);
+
+  /* ─── typo ─── */
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-sans:    var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    var(--font-geist-mono), ui-monospace, Menlo, monospace;
+
+  --radius: 2px;
 }
 
 @layer base {
-  * {
-    border-color: var(--color-border);
-  }
+  * { border-color: var(--color-rule); }
+
   html, body {
-    background: var(--color-background);
-    color: var(--color-foreground);
+    background: var(--color-paper);
+    color: var(--color-ink);
     font-family: var(--font-sans);
+    font-feature-settings: "ss01", "ss03", "cv11";
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
+
+  /* fond papier subtil — bruit + très léger grain */
   body {
-    font-feature-settings: "cv11", "ss01", "ss03";
+    background-image:
+      radial-gradient(ellipse 100% 60% at 50% 0%, oklch(94% 0.02 75) 0%, transparent 50%),
+      radial-gradient(ellipse 80% 50% at 100% 100%, oklch(95% 0.025 35 / .35) 0%, transparent 50%);
+    background-attachment: fixed;
   }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-feature-settings: "ss01";
+    font-variation-settings: "opsz" 144, "SOFT" 100;
+    letter-spacing: -0.022em;
+    color: var(--color-ink);
+  }
+
+  /* tabulaire par défaut sur les chiffres */
+  .tabular { font-variant-numeric: tabular-nums; }
+  .tnum    { font-variant-numeric: tabular-nums lining-nums; }
 }
 
 @layer components {
+  /* étiquette éditoriale : "N° 01 — DOSSIERS OUVERTS" */
+  .label-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-mute);
+  }
+
+  /* marque de registre (corner marks) */
+  .corner-marks {
+    position: relative;
+  }
+  .corner-marks::before,
+  .corner-marks::after,
+  .corner-marks > .corner-tl,
+  .corner-marks > .corner-tr,
+  .corner-marks > .corner-bl,
+  .corner-marks > .corner-br { display: none; }
+
+  /* filets verticaux décoratifs */
+  .rule-double {
+    border-top: 1px solid var(--color-rule-strong);
+    box-shadow: 0 3px 0 -2px var(--color-rule-strong);
+  }
+
+  /* scrollbar discrète */
   .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
-  .scrollbar-thin::-webkit-scrollbar-thumb { background: oklch(85% 0.01 240); border-radius: 4px; }
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: oklch(75% 0.01 240); }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: oklch(80% 0.012 60);
+    border-radius: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: oklch(65% 0.015 60);
+  }
 }
 
 @layer utilities {
-  .glass {
-    background: color-mix(in oklch, var(--color-card) 70%, transparent);
-    backdrop-filter: saturate(150%) blur(10px);
+  .font-display { font-family: var(--font-display); }
+  .font-mono    { font-family: var(--font-mono); }
+
+  /* tampon "stamp" — légère rotation + bord double */
+  .stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0.18em 0.7em;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    border: 1px solid currentColor;
+    border-radius: 2px;
+    box-shadow: inset 0 0 0 1px var(--color-paper), inset 0 0 0 2px currentColor;
   }
-  .pattern-grid {
-    background-image:
-      linear-gradient(to right, oklch(92% 0.005 240) 1px, transparent 1px),
-      linear-gradient(to bottom, oklch(92% 0.005 240) 1px, transparent 1px);
-    background-size: 24px 24px;
+  .stamp-flat {
+    border-radius: 2px;
+    box-shadow: none;
+  }
+
+  /* lien souligné éditorial */
+  .link-edit {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: oklch(75% 0.02 60);
+  }
+  .link-edit:hover { text-decoration-color: var(--color-ink); }
+
+  /* texture papier (très subtile, en SVG inline) */
+  .paper-grain {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.12  0 0 0 0 0.10  0 0 0 0 0.08  0 0 0 0.025 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   }
 }
 
 /* animations */
-@keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-.animate-fade-in { animation: fade-in 0.25s ease-out both; }
-@keyframes shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fade-up 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+@keyframes stamp-in {
+  0%   { opacity: 0; transform: scale(1.15) rotate(-4deg); }
+  60%  { opacity: 1; transform: scale(0.98) rotate(-1deg); }
+  100% { opacity: 1; transform: scale(1) rotate(-1.2deg); }
+}
+.animate-stamp { animation: stamp-in 0.5s cubic-bezier(0.2, 1.2, 0.4, 1) both; }

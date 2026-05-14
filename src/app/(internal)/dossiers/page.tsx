@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Folder, Plus, Filter, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Select } from "@/components/ui/select";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatDate, formatCurrency, formatNumber } from "@/lib/utils";
 import { canCreateDossier } from "@/lib/roles";
@@ -43,130 +43,164 @@ export default async function DossiersPage({
   });
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+    <div className="space-y-10 animate-fade-up">
+      {/* ── En-tête ── */}
+      <header className="flex items-end justify-between gap-6 flex-wrap pb-6 border-b border-[var(--color-rule-strong)]">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Dossiers</h1>
-          <p className="text-sm text-[var(--color-muted-foreground)] mt-1">
-            {dossiers.length} dossier{dossiers.length > 1 ? "s" : ""}
-            {q ? ` correspondant à "${q}"` : ""}
+          <div className="label-eyebrow mb-3">— Section 02 · Dossiers</div>
+          <h1
+            className="font-display text-[52px] leading-[0.95] tracking-[-0.025em]"
+            style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 420' }}
+          >
+            Registre des dossiers
+          </h1>
+          <p className="mt-3 text-[14px] text-[var(--color-ink-soft)]">
+            {dossiers.length} dossier{dossiers.length > 1 ? "s" : ""} affiché
+            {dossiers.length > 1 ? "s" : ""}
+            {q ? (
+              <>
+                {" "}
+                · recherche{" "}
+                <em className="font-display italic text-[var(--color-ink)]">« {q} »</em>
+              </>
+            ) : (
+              ""
+            )}
           </p>
         </div>
         {canCreateDossier(session.user.role) && (
           <Link href="/dossiers/nouveau">
             <Button>
-              <Plus className="size-4" /> Nouveau dossier
+              <Plus className="size-3.5" /> Nouveau dossier
             </Button>
           </Link>
         )}
-      </div>
+      </header>
 
-      <Card>
-        <form
-          method="GET"
-          className="p-4 flex flex-wrap items-center gap-3 border-b border-[var(--color-border)]"
-        >
-          <div className="relative flex-1 min-w-[240px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[var(--color-muted-foreground)]" />
+      {/* ── Filtres ── */}
+      <form method="GET" className="flex flex-wrap items-end gap-6">
+        <div className="flex-1 min-w-[280px]">
+          <label className="label-eyebrow block mb-2">Recherche</label>
+          <div className="relative flex items-center">
+            <Search className="absolute left-0 size-3.5 text-[var(--color-ink-mute)]" strokeWidth={1.5} />
             <input
               name="q"
               defaultValue={q ?? ""}
               placeholder="N° dossier, DUM, client, référence…"
-              className="w-full h-9 pl-9 pr-3 rounded-[var(--radius)] border border-[var(--color-border)] bg-[var(--color-card)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
+              className="w-full h-9 pl-6 pr-3 text-[14px] bg-transparent border-0 border-b border-[var(--color-rule-strong)] rounded-none focus:outline-none focus:border-[var(--color-ink)]"
             />
           </div>
-          <select
-            name="status"
-            defaultValue={params.status ?? ""}
-            className="h-9 px-3 rounded-[var(--radius)] border border-[var(--color-border)] bg-[var(--color-card)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)]"
-          >
-            <option value="">Tous les statuts</option>
+        </div>
+        <div className="min-w-[220px]">
+          <label className="label-eyebrow block mb-2">Statut</label>
+          <Select name="status" defaultValue={params.status ?? ""}>
+            <option value="">Tous</option>
             {Object.entries(STATUS_LABELS).map(([k, label]) => (
               <option key={k} value={k}>
                 {label}
               </option>
             ))}
-          </select>
-          <Button variant="secondary" size="sm">
-            <Filter className="size-4" /> Filtrer
-          </Button>
-        </form>
+          </Select>
+        </div>
+        <Button variant="secondary" size="sm" type="submit">Filtrer</Button>
+      </form>
 
-        {dossiers.length === 0 ? (
-          <div className="p-16 text-center">
-            <Folder className="size-10 mx-auto text-[var(--color-muted-foreground)] mb-3" />
-            <div className="font-medium">Aucun dossier</div>
-            <div className="text-sm text-[var(--color-muted-foreground)] mt-1">
-              {q ? "Aucun résultat pour cette recherche." : "Créez votre premier dossier pour commencer."}
-            </div>
+      {/* ── Table ── */}
+      {dossiers.length === 0 ? (
+        <div className="py-24 text-center border-t border-b border-[var(--color-rule-strong)]">
+          <div className="font-display text-[24px] italic text-[var(--color-ink-mute)]">
+            {q ? "Aucun résultat." : "Le registre est vide."}
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[var(--color-border)] text-xs text-[var(--color-muted-foreground)] uppercase tracking-wide">
-                  <th className="text-left font-medium px-5 py-3">N°</th>
-                  <th className="text-left font-medium px-5 py-3">Client</th>
-                  <th className="text-left font-medium px-5 py-3">Référence</th>
-                  <th className="text-left font-medium px-5 py-3">DUM(s)</th>
-                  <th className="text-right font-medium px-5 py-3">Valeur</th>
-                  <th className="text-right font-medium px-5 py-3">Colis</th>
-                  <th className="text-right font-medium px-5 py-3">Poids</th>
-                  <th className="text-left font-medium px-5 py-3">Docs</th>
-                  <th className="text-left font-medium px-5 py-3">Statut</th>
-                  <th className="text-right font-medium px-5 py-3">Maj</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dossiers.map((d) => (
-                  <tr
-                    key={d.id}
-                    className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-muted)]/50 transition-colors"
+          <div className="text-[13px] text-[var(--color-ink-mute)] mt-2">
+            {q
+              ? "Essayez un autre terme de recherche."
+              : "Ouvrez le premier dossier pour commencer."}
+          </div>
+        </div>
+      ) : (
+        <div className="border-t border-b border-[var(--color-rule-strong)] overflow-x-auto">
+          <table className="w-full text-[13px]">
+            <thead>
+              <tr className="border-b border-[var(--color-rule)]">
+                {[
+                  ["N°", "left"],
+                  ["Dossier", "left"],
+                  ["Client", "left"],
+                  ["Référence", "left"],
+                  ["DUM(s)", "left"],
+                  ["Valeur", "right"],
+                  ["Colis", "right"],
+                  ["Poids", "right"],
+                  ["Docs", "right"],
+                  ["Statut", "left"],
+                  ["Maj", "right"],
+                ].map(([label, align]) => (
+                  <th
+                    key={label}
+                    className={`font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--color-ink-mute)] font-medium px-4 py-3 ${
+                      align === "right" ? "text-right" : "text-left"
+                    }`}
                   >
-                    <td className="px-5 py-3">
-                      <Link href={`/dossiers/${d.id}`} className="font-medium text-[var(--color-primary)] hover:underline">
-                        {d.number}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-3 truncate max-w-[200px]">{d.client.name}</td>
-                    <td className="px-5 py-3 text-[var(--color-muted-foreground)]">
-                      {d.reference ?? "—"}
-                    </td>
-                    <td className="px-5 py-3 text-xs">
-                      {d.dums.length === 0 ? (
-                        <span className="text-[var(--color-muted-foreground)]">—</span>
-                      ) : (
-                        d.dums.map((dum) => dum.number).join(", ")
-                      )}
-                    </td>
-                    <td className="px-5 py-3 text-right tabular-nums">
-                      {formatCurrency(
-                        d.goodsValue ? Number(d.goodsValue) : null,
-                        d.goodsCurrency ?? "EUR",
-                      )}
-                    </td>
-                    <td className="px-5 py-3 text-right tabular-nums text-[var(--color-muted-foreground)]">
-                      {formatNumber(d.goodsPackages)}
-                    </td>
-                    <td className="px-5 py-3 text-right tabular-nums text-[var(--color-muted-foreground)]">
-                      {d.goodsWeight ? `${formatNumber(Number(d.goodsWeight))} kg` : "—"}
-                    </td>
-                    <td className="px-5 py-3 text-[var(--color-muted-foreground)]">
-                      {d._count.documents}
-                    </td>
-                    <td className="px-5 py-3">
-                      <StatusBadge status={d.status} />
-                    </td>
-                    <td className="px-5 py-3 text-right text-xs text-[var(--color-muted-foreground)] whitespace-nowrap">
-                      {formatDate(d.updatedAt)}
-                    </td>
-                  </tr>
+                    {label}
+                  </th>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+              </tr>
+            </thead>
+            <tbody>
+              {dossiers.map((d, idx) => (
+                <tr
+                  key={d.id}
+                  className="border-b border-[var(--color-rule)] last:border-0 hover:bg-[var(--color-paper-strong)] transition-colors"
+                >
+                  <td className="px-4 py-3 font-mono text-[10.5px] text-[var(--color-ink-mute)] tabular">
+                    {String(idx + 1).padStart(3, "0")}
+                  </td>
+                  <td className="px-4 py-3">
+                    <Link
+                      href={`/dossiers/${d.id}`}
+                      className="font-mono tabular link-edit"
+                    >
+                      {d.number}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 font-display italic">{d.client.name}</td>
+                  <td className="px-4 py-3 font-mono text-[12px] text-[var(--color-ink-soft)]">
+                    {d.reference ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 font-mono text-[12px] tabular">
+                    {d.dums.length === 0 ? (
+                      <span className="text-[var(--color-ink-mute)]">—</span>
+                    ) : (
+                      d.dums.map((dum) => dum.number).join(", ")
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-right font-mono tabular text-[13px]">
+                    {formatCurrency(
+                      d.goodsValue ? Number(d.goodsValue) : null,
+                      d.goodsCurrency ?? "EUR",
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-right font-mono tabular text-[12px] text-[var(--color-ink-soft)]">
+                    {formatNumber(d.goodsPackages)}
+                  </td>
+                  <td className="px-4 py-3 text-right font-mono tabular text-[12px] text-[var(--color-ink-soft)]">
+                    {d.goodsWeight ? `${formatNumber(Number(d.goodsWeight))} kg` : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-right font-mono tabular text-[12px] text-[var(--color-ink-soft)]">
+                    {String(d._count.documents).padStart(2, "0")}
+                  </td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={d.status} size="sm" />
+                  </td>
+                  <td className="px-4 py-3 text-right font-mono text-[10.5px] uppercase tracking-[0.10em] text-[var(--color-ink-mute)] tabular whitespace-nowrap">
+                    {formatDate(d.updatedAt)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

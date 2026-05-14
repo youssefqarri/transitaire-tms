@@ -1,30 +1,16 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  FileText,
-  Folder,
-  Calendar,
-  Building2,
-  Truck,
-  Package,
-  Scale,
-  Tag,
-  AlertTriangle,
-} from "lucide-react";
+import { ArrowLeft, AlertTriangle } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/dossier/status-badge";
+import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate, formatDateTime, formatNumber } from "@/lib/utils";
 import {
   STATUS_LABELS,
-  DUM_STATUS_LABELS,
   DOCUMENT_CATEGORY_LABELS,
   requiredDocuments,
 } from "@/lib/statuses";
-import { ROLE_LABELS } from "@/lib/roles";
 import { StatusChanger } from "./status-changer";
 import { DocumentsPanel } from "./documents-panel";
 import { DUMsPanel } from "./dums-panel";
@@ -67,109 +53,110 @@ export default async function DossierDetailPage({
   const missing = required.filter((c) => !presentCategories.has(c));
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-7xl">
-      <div>
-        <Link
-          href="/dossiers"
-          className="inline-flex items-center gap-1.5 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
-        >
-          <ArrowLeft className="size-4" /> Retour aux dossiers
-        </Link>
-        <div className="mt-3 flex items-start justify-between gap-4 flex-wrap">
+    <div className="space-y-12 animate-fade-up max-w-[1280px]">
+      <Link
+        href="/dossiers"
+        className="inline-flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--color-ink-mute)] hover:text-[var(--color-ink)]"
+      >
+        <ArrowLeft className="size-3" strokeWidth={1.5} /> Retour au registre
+      </Link>
+
+      {/* ── Bandeau dossier (document officiel) ── */}
+      <header className="relative pb-8 border-b border-[var(--color-rule-strong)]">
+        <div className="flex items-baseline justify-between gap-4 flex-wrap">
+          <span className="label-eyebrow text-[var(--color-ink)]">
+            — Dossier · réf. {dossier.reference ?? "—"}
+          </span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--color-ink-mute)] tabular">
+            Ouvert le {formatDate(dossier.createdAt)}
+          </span>
+        </div>
+        <div className="mt-3 flex items-end justify-between gap-6 flex-wrap">
           <div>
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl font-semibold tracking-tight">
-                Dossier {dossier.number}
-              </h1>
+            <h1
+              className="font-display text-[68px] leading-[0.92] tracking-[-0.028em] tabular"
+              style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 420' }}
+            >
+              {dossier.number}
+            </h1>
+            <div className="mt-4 flex items-center gap-3 flex-wrap">
               <StatusBadge status={dossier.status} />
               <Badge tone={dossier.type === "IMPORT" ? "info" : "ok"}>{dossier.type}</Badge>
               {dossier.paymentMode === "WITH_PAYMENT" && (
                 <Badge tone="outline">Avec paiement</Badge>
               )}
-            </div>
-            <div className="text-sm text-[var(--color-muted-foreground)] mt-1">
-              {dossier.reference ? `Réf. ${dossier.reference} · ` : ""}
-              Créé le {formatDate(dossier.createdAt)}
-              {dossier.createdBy && ` par ${dossier.createdBy.name}`}
+              {dossier.createdBy && (
+                <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--color-ink-mute)]">
+                  · Saisi par {dossier.createdBy.name}
+                </span>
+              )}
             </div>
           </div>
           <StatusChanger dossierId={dossier.id} currentStatus={dossier.status} />
         </div>
-      </div>
+      </header>
 
+      {/* ── Alerte documents manquants ── */}
       {missing.length > 0 && (
-        <Card className="border-[oklch(80%_0.18_75)] bg-[oklch(98%_0.06_75)]">
-          <div className="p-4 flex items-start gap-3">
-            <AlertTriangle className="size-5 text-[oklch(55%_0.18_60)] shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <div className="font-medium text-sm">
-                {missing.length} document{missing.length > 1 ? "s" : ""} manquant
-                {missing.length > 1 ? "s" : ""}
-              </div>
-              <div className="text-sm text-[var(--color-muted-foreground)] mt-1 flex flex-wrap gap-1.5">
-                {missing.map((c) => (
-                  <Badge tone="warn" key={c}>
-                    {DOCUMENT_CATEGORY_LABELS[c]}
-                  </Badge>
-                ))}
-              </div>
-            </div>
+        <section className="border-l-2 border-[var(--color-stamp)] pl-6 py-2">
+          <div className="flex items-baseline gap-3 flex-wrap">
+            <AlertTriangle
+              className="size-4 text-[var(--color-stamp)] shrink-0"
+              strokeWidth={1.5}
+            />
+            <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-[var(--color-stamp)]">
+              {missing.length} document{missing.length > 1 ? "s" : ""} manquant
+              {missing.length > 1 ? "s" : ""}
+            </span>
           </div>
-        </Card>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {missing.map((c) => (
+              <Badge tone="warn" key={c}>
+                {DOCUMENT_CATEGORY_LABELS[c]}
+              </Badge>
+            ))}
+          </div>
+        </section>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          {/* Informations */}
-          <Card>
-            <div className="p-5 border-b border-[var(--color-border)] font-semibold flex items-center gap-2">
-              <Folder className="size-4" /> Informations du dossier
+      {/* ── Métadonnées du dossier ── */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-6 pb-8 border-b border-[var(--color-rule-strong)]">
+        <Field label="Client" value={<em className="font-display italic">{dossier.client.name}</em>} />
+        <Field label="Fournisseur" value={dossier.supplier?.name ?? "—"} />
+        <Field
+          label="Valeur"
+          mono
+          value={formatCurrency(
+            dossier.goodsValue ? Number(dossier.goodsValue) : null,
+            dossier.goodsCurrency ?? "EUR",
+          )}
+        />
+        <Field
+          label="Poids"
+          mono
+          value={dossier.goodsWeight ? `${formatNumber(Number(dossier.goodsWeight))} kg` : "—"}
+        />
+        <Field label="Colis" mono value={formatNumber(dossier.goodsPackages)} />
+        <Field label="Bureau" value={dossier.controlOffice ?? "—"} />
+        <Field label="Visite" mono value={formatDate(dossier.visitDate)} />
+        <Field label="Assigné" value={dossier.assignedTo?.name ?? "—"} />
+        {dossier.goodsDescription && (
+          <div className="md:col-span-4">
+            <div className="label-eyebrow mb-2">Description marchandise</div>
+            <div className="text-[14px] text-[var(--color-ink)] leading-relaxed">
+              {dossier.goodsDescription}
             </div>
-            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-              <InfoRow icon={Building2} label="Client" value={dossier.client.name} />
-              <InfoRow icon={Truck} label="Fournisseur" value={dossier.supplier?.name ?? "—"} />
-              <InfoRow
-                icon={Tag}
-                label="Valeur"
-                value={formatCurrency(
-                  dossier.goodsValue ? Number(dossier.goodsValue) : null,
-                  dossier.goodsCurrency ?? "EUR",
-                )}
-              />
-              <InfoRow
-                icon={Package}
-                label="Colis"
-                value={formatNumber(dossier.goodsPackages)}
-              />
-              <InfoRow
-                icon={Scale}
-                label="Poids"
-                value={dossier.goodsWeight ? `${formatNumber(Number(dossier.goodsWeight))} kg` : "—"}
-              />
-              <InfoRow
-                icon={Calendar}
-                label="Date visite"
-                value={formatDate(dossier.visitDate)}
-              />
-              <InfoRow icon={Tag} label="Bureau" value={dossier.controlOffice ?? "—"} />
-              <InfoRow
-                icon={Tag}
-                label="Assigné à"
-                value={dossier.assignedTo?.name ?? "—"}
-              />
-              {dossier.goodsDescription && (
-                <div className="md:col-span-2">
-                  <div className="text-xs uppercase tracking-wide text-[var(--color-muted-foreground)] mb-1">
-                    Description marchandise
-                  </div>
-                  <div className="text-sm">{dossier.goodsDescription}</div>
-                </div>
-              )}
-            </div>
-          </Card>
+          </div>
+        )}
+      </section>
 
-          <DUMsPanel dossierId={dossier.id} dums={dossier.dums} canCreate={["ADMIN", "DECLARANT"].includes(session.user.role)} />
-
+      <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-10">
+        <div className="space-y-10">
+          <DUMsPanel
+            dossierId={dossier.id}
+            dums={dossier.dums}
+            canCreate={["ADMIN", "DECLARANT"].includes(session.user.role)}
+          />
           <DocumentsPanel
             dossierId={dossier.id}
             documents={dossier.documents.map((d) => ({
@@ -178,7 +165,6 @@ export default async function DossierDetailPage({
             }))}
             requiredCategories={required}
           />
-
           <CommentsPanel
             dossierId={dossier.id}
             comments={dossier.comments.map((c) => ({
@@ -191,50 +177,63 @@ export default async function DossierDetailPage({
           />
         </div>
 
-        <div className="space-y-6">
-          <Card>
-            <div className="p-5 border-b border-[var(--color-border)] font-semibold">Timeline</div>
-            <div className="p-5">
-              <ol className="relative space-y-4 before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-px before:bg-[var(--color-border)]">
-                {dossier.statusChanges.map((sc) => (
-                  <li key={sc.id} className="relative pl-6">
-                    <span className="absolute left-0 top-1 size-3.5 rounded-full bg-[var(--color-primary)] ring-4 ring-[var(--color-card)]" />
-                    <div className="text-sm font-medium">{STATUS_LABELS[sc.toStatus]}</div>
-                    <div className="text-xs text-[var(--color-muted-foreground)]">
-                      {formatDateTime(sc.createdAt)}
-                      {sc.changedBy && ` · ${sc.changedBy.name}`}
-                    </div>
-                    {sc.note && (
-                      <div className="text-xs mt-1 text-[var(--color-muted-foreground)] italic">
-                        {sc.note}
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </Card>
-        </div>
+        <aside>
+          <h2
+            className="font-display text-[26px] tracking-[-0.018em] mb-4"
+            style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 420' }}
+          >
+            Chronologie
+          </h2>
+          <ol className="border-t border-[var(--color-rule-strong)]">
+            {dossier.statusChanges.map((sc) => (
+              <li key={sc.id} className="py-3.5 border-b border-[var(--color-rule)] last:border-b-0">
+                <div className="flex items-baseline justify-between gap-3">
+                  <div className="text-[14px] text-[var(--color-ink)] font-medium">
+                    {STATUS_LABELS[sc.toStatus]}
+                  </div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.10em] text-[var(--color-ink-mute)] tabular whitespace-nowrap">
+                    {formatDateTime(sc.createdAt)}
+                  </div>
+                </div>
+                {sc.changedBy && (
+                  <div className="text-[12px] text-[var(--color-ink-mute)] mt-0.5">
+                    par <span className="font-display italic">{sc.changedBy.name}</span>
+                  </div>
+                )}
+                {sc.note && (
+                  <div className="mt-1.5 text-[13px] text-[var(--color-ink-soft)] italic font-display leading-snug">
+                    « {sc.note} »
+                  </div>
+                )}
+              </li>
+            ))}
+          </ol>
+        </aside>
       </div>
     </div>
   );
 }
 
-function InfoRow({
-  icon: Icon,
+function Field({
   label,
   value,
+  mono = false,
 }: {
-  icon: typeof Folder;
   label: string;
   value: React.ReactNode;
+  mono?: boolean;
 }) {
   return (
-    <div className="flex items-start gap-2.5">
-      <Icon className="size-4 text-[var(--color-muted-foreground)] mt-0.5 shrink-0" />
-      <div className="flex-1 min-w-0">
-        <div className="text-xs text-[var(--color-muted-foreground)]">{label}</div>
-        <div className="text-sm font-medium truncate">{value}</div>
+    <div>
+      <div className="label-eyebrow mb-1.5">{label}</div>
+      <div
+        className={
+          mono
+            ? "font-mono text-[15px] tabular text-[var(--color-ink)]"
+            : "text-[15px] text-[var(--color-ink)]"
+        }
+      >
+        {value}
       </div>
     </div>
   );

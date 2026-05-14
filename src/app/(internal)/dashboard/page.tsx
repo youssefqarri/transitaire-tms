@@ -1,16 +1,8 @@
-import {
-  Folder,
-  Clock,
-  AlertCircle,
-  CheckCircle2,
-  Mail,
-  FileText,
-} from "lucide-react";
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { StatCard } from "@/components/ui/stat-card";
-import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { STATUS_LABELS } from "@/lib/statuses";
@@ -33,9 +25,7 @@ export default async function DashboardPage() {
     statusGroups,
   ] = await Promise.all([
     prisma.dossier.count(),
-    prisma.dossier.count({
-      where: { status: { notIn: ["CLOTURE", "ANNULE"] } },
-    }),
+    prisma.dossier.count({ where: { status: { notIn: ["CLOTURE", "ANNULE"] } } }),
     prisma.dossier.count({
       where: {
         status: { in: ["DOCUMENTS_MANQUANTS", "DEMANDE_DOCUMENTS", "BUREAU_VALEUR"] },
@@ -44,15 +34,13 @@ export default async function DashboardPage() {
     prisma.dossier.count({
       where: {
         status: "CLOTURE",
-        closedAt: {
-          gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-        },
+        closedAt: { gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) },
       },
     }),
     prisma.emailMessage.count({ where: { isRead: false } }),
     prisma.dUM.count(),
     prisma.dossier.findMany({
-      take: 8,
+      take: 10,
       orderBy: { updatedAt: "desc" },
       include: { client: true, dums: true },
     }),
@@ -63,172 +51,188 @@ export default async function DashboardPage() {
     }),
   ]);
 
+  const todayFr = new Intl.DateTimeFormat("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
+  const totalActive = statusGroups.reduce((s, g) => s + g._count._all, 0);
+
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Bonjour, {session.user.name.split(" ")[0]} 👋
+    <div className="space-y-12 animate-fade-up max-w-[1280px]">
+      {/* En-tête éditorial */}
+      <header>
+        <div className="flex items-baseline justify-between mb-6 flex-wrap gap-3">
+          <span className="label-eyebrow text-[var(--color-ink)]">
+            — Édition du jour · {todayFr}
+          </span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--color-ink-mute)] tabular">
+            N° {String(totalDossiers).padStart(4, "0")}
+          </span>
+        </div>
+        <h1
+          className="font-display text-[64px] leading-[0.95] tracking-[-0.028em] max-w-3xl"
+          style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 420' }}
+        >
+          Bonjour {session.user.name.split(" ")[0]}
+          <span className="text-[var(--color-stamp)]">,</span>{" "}
+          <em
+            style={{
+              fontStyle: "italic",
+              fontVariationSettings: '"opsz" 144, "SOFT" 90, "wght" 350',
+            }}
+          >
+            voici l'état du registre
+          </em>
+          .
         </h1>
-        <p className="text-sm text-[var(--color-muted-foreground)] mt-1">
-          Voici l'état actuel des dossiers de transit.
-        </p>
-      </div>
+        <div className="mt-5 max-w-2xl text-[15px] leading-relaxed text-[var(--color-ink-soft)]">
+          {totalActive} dossier{totalActive > 1 ? "s" : ""} en cours · {totalDUMs} DUM
+          {totalDUMs > 1 ? "s" : ""} enregistrée{totalDUMs > 1 ? "s" : ""} ·{" "}
+          {closedThisMonth} clôture{closedThisMonth > 1 ? "s" : ""} ce mois.
+        </div>
+      </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label="Dossiers ouverts"
-          value={openDossiers}
-          hint={`${totalDossiers} au total`}
-          icon={Folder}
-          tone="primary"
-        />
-        <StatCard
-          label="À traiter"
-          value={blockedDossiers}
-          hint="documents manquants / valeur"
-          icon={AlertCircle}
-          tone="warn"
-        />
-        <StatCard
-          label="Clôturés ce mois"
-          value={closedThisMonth}
-          icon={CheckCircle2}
-          tone="ok"
-        />
-        <StatCard
-          label="Emails non lus"
-          value={unreadEmails}
-          hint={`${totalDUMs} DUMs enregistrées`}
-          icon={Mail}
-          tone="info"
-        />
-      </div>
+      {/* ── Indicateurs ── */}
+      <section>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 border-t border-[var(--color-rule-strong)]">
+          <StatCard index="01" label="Dossiers ouverts" value={openDossiers} hint={`${totalDossiers} au registre`} className="border-r-0 lg:border-r border-t-0 border-b-0" />
+          <StatCard index="02" label="À traiter" value={blockedDossiers} tone="stamp" hint="documents · valeur · MCI" className="border-r-0 lg:border-r border-t-0 border-b-0" />
+          <StatCard index="03" label="Clôturés ce mois" value={closedThisMonth} tone="leaf" hint="depuis le 1er" className="border-r-0 lg:border-r border-t-0 border-b-0" />
+          <StatCard index="04" label="Correspondance" value={unreadEmails} tone="archive" hint="non lue" className="border-t-0 border-b-0" />
+        </div>
+      </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2">
-          <div className="p-5 border-b border-[var(--color-border)] flex items-center justify-between">
-            <div>
-              <div className="font-semibold">Dossiers récents</div>
-              <div className="text-xs text-[var(--color-muted-foreground)]">
-                8 derniers mouvements
-              </div>
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-10">
+        {/* ── Mouvements récents ── */}
+        <section>
+          <div className="flex items-baseline justify-between mb-4">
+            <h2
+              className="font-display text-[28px] tracking-[-0.018em]"
+              style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 420' }}
+            >
+              Mouvements récents
+            </h2>
             <Link
               href="/dossiers"
-              className="text-sm text-[var(--color-primary)] hover:underline"
+              className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-[var(--color-ink-soft)] hover:text-[var(--color-ink)] inline-flex items-center gap-1"
             >
-              Voir tout →
+              Tout consulter <ArrowUpRight className="size-3" strokeWidth={1.5} />
             </Link>
           </div>
-          <div className="divide-y divide-[var(--color-border)]">
+
+          <div className="border-t border-b border-[var(--color-rule-strong)]">
             {recentDossiers.length === 0 && (
-              <div className="p-8 text-center text-sm text-[var(--color-muted-foreground)]">
-                Aucun dossier pour l'instant.
+              <div className="py-16 text-center text-[14px] text-[var(--color-ink-mute)] font-display italic">
+                Aucun mouvement à ce jour.
               </div>
             )}
-            {recentDossiers.map((d) => (
+            {recentDossiers.map((d, idx) => (
               <Link
                 key={d.id}
                 href={`/dossiers/${d.id}`}
-                className="flex items-center gap-4 p-4 hover:bg-[var(--color-muted)] transition-colors"
+                className="group grid grid-cols-[auto_1fr_auto_auto] items-center gap-5 py-3.5 px-1 border-b border-[var(--color-rule)] last:border-b-0 hover:bg-[var(--color-paper-strong)] transition-colors"
               >
-                <div className="size-10 rounded-lg bg-[var(--color-muted)] flex items-center justify-center shrink-0">
-                  <Folder className="size-4 text-[var(--color-muted-foreground)]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm">{d.number}</span>
+                <span className="font-mono text-[10px] text-[var(--color-ink-mute)] tabular w-6">
+                  {String(idx + 1).padStart(2, "0")}
+                </span>
+                <div className="min-w-0">
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <span className="font-mono text-[13px] tabular text-[var(--color-ink)] group-hover:underline underline-offset-3 decoration-[var(--color-rule-strong)]">
+                      {d.number}
+                    </span>
                     {d.reference && (
-                      <span className="text-xs text-[var(--color-muted-foreground)]">
+                      <span className="font-mono text-[11px] text-[var(--color-ink-mute)]">
                         · {d.reference}
                       </span>
                     )}
                   </div>
-                  <div className="text-xs text-[var(--color-muted-foreground)] truncate mt-0.5">
-                    {d.client.name}
+                  <div className="text-[14px] text-[var(--color-ink-soft)] truncate">
+                    <span className="font-display italic mr-1">{d.client.name}</span>
                     {d.dums.length > 0 && (
-                      <span> · DUM {d.dums.map((dum) => dum.number).join(", ")}</span>
+                      <span className="font-mono text-[11px] text-[var(--color-ink-mute)]">
+                        — DUM {d.dums.map((dum) => dum.number).join(", ")}
+                      </span>
                     )}
                   </div>
                 </div>
-                <div className="hidden sm:block text-right text-xs text-[var(--color-muted-foreground)]">
-                  {formatCurrency(
-                    d.goodsValue ? Number(d.goodsValue) : null,
-                    d.goodsCurrency ?? "EUR",
-                  )}
-                  <div className="mt-0.5">{formatDate(d.updatedAt)}</div>
+                <div className="hidden sm:block text-right">
+                  <div className="font-mono text-[12px] tabular text-[var(--color-ink)]">
+                    {formatCurrency(
+                      d.goodsValue ? Number(d.goodsValue) : null,
+                      d.goodsCurrency ?? "EUR",
+                    )}
+                  </div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--color-ink-mute)] tabular">
+                    {formatDate(d.updatedAt)}
+                  </div>
                 </div>
-                <StatusBadge status={d.status} />
+                <StatusBadge status={d.status} size="sm" />
               </Link>
             ))}
           </div>
-        </Card>
+        </section>
 
-        <Card>
-          <div className="p-5 border-b border-[var(--color-border)]">
-            <div className="font-semibold">Statuts en cours</div>
-            <div className="text-xs text-[var(--color-muted-foreground)]">
-              Répartition des dossiers actifs
-            </div>
-          </div>
-          <div className="p-5 space-y-3">
+        {/* ── Répartition / colonne droite ── */}
+        <aside>
+          <h2
+            className="font-display text-[28px] tracking-[-0.018em] mb-4"
+            style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 420' }}
+          >
+            Répartition
+          </h2>
+          <div className="border-t border-[var(--color-rule-strong)]">
             {statusGroups.length === 0 && (
-              <div className="text-sm text-[var(--color-muted-foreground)]">
+              <div className="py-12 text-[14px] text-[var(--color-ink-mute)] font-display italic">
                 Aucun dossier actif.
               </div>
             )}
             {statusGroups
               .sort((a, b) => b._count._all - a._count._all)
-              .map((g) => {
-                const total = statusGroups.reduce((s, x) => s + x._count._all, 0);
-                const pct = total ? (g._count._all / total) * 100 : 0;
+              .map((g, i) => {
+                const pct = totalActive ? (g._count._all / totalActive) * 100 : 0;
                 return (
-                  <div key={g.status}>
-                    <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="truncate">
+                  <div
+                    key={g.status}
+                    className="grid grid-cols-[auto_1fr_auto] items-center gap-3 py-3 border-b border-[var(--color-rule)] last:border-b-0"
+                  >
+                    <span className="font-mono text-[10px] text-[var(--color-ink-mute)] tabular w-6">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <div>
+                      <div className="text-[13px] text-[var(--color-ink)]">
                         {STATUS_LABELS[g.status as DossierStatus]}
-                      </span>
-                      <span className="font-medium tabular-nums">
-                        {g._count._all}
-                      </span>
+                      </div>
+                      <div className="mt-1.5 h-[2px] bg-[var(--color-rule)] overflow-hidden">
+                        <div
+                          className="h-full bg-[var(--color-ink)]"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="h-1.5 rounded-full bg-[var(--color-muted)] overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-[var(--color-primary)] to-[oklch(60%_0.18_280)] rounded-full transition-all"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
+                    <span className="font-mono text-[14px] tabular text-[var(--color-ink)] tnum">
+                      {String(g._count._all).padStart(2, "0")}
+                    </span>
                   </div>
                 );
               })}
           </div>
-        </Card>
-      </div>
 
-      <Card>
-        <div className="p-5 border-b border-[var(--color-border)] flex items-center justify-between">
-          <div className="font-semibold flex items-center gap-2">
-            <FileText className="size-4" /> Raccourcis
-          </div>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-5">
-          {[
-            { href: "/dossiers/nouveau", label: "Nouveau dossier", icon: Folder },
-            { href: "/dums", label: "DUMs", icon: FileText },
-            { href: "/emails", label: "Inbox", icon: Mail },
-            { href: "/notifications", label: "Notifications", icon: Clock },
-          ].map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className="border border-[var(--color-border)] rounded-xl p-4 hover:bg-[var(--color-muted)] hover:border-[var(--color-primary)]/30 transition-all group"
+          {/* citation éditoriale */}
+          <blockquote className="mt-10 pl-5 border-l-2 border-[var(--color-stamp)]">
+            <p
+              className="font-display italic text-[18px] leading-snug text-[var(--color-ink-soft)]"
+              style={{ fontVariationSettings: '"opsz" 32, "SOFT" 100, "wght" 380' }}
             >
-              <Icon className="size-5 text-[var(--color-primary)] mb-3" />
-              <div className="text-sm font-medium">{label}</div>
-            </Link>
-          ))}
-        </div>
-      </Card>
+              « La douane n'est pas qu'un guichet — c'est un récit qui demande à être tenu, page après page. »
+            </p>
+            <footer className="mt-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--color-ink-mute)]">
+              — Manuel du transitaire
+            </footer>
+          </blockquote>
+        </aside>
+      </div>
     </div>
   );
 }
