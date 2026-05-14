@@ -44,22 +44,40 @@ Plateforme de gestion des dossiers de transit douanier (import/export) pour les 
 
 ### Prérequis
 - Node.js ≥ 20
-- Docker (pour la base Postgres locale)
+- Une base Postgres : **Supabase** (recommandé) ou Docker en local
 
-### Installation
+### Installation avec Supabase
 ```bash
-# 1. installer les dépendances
-npm install
+# 1. cloner .env.example en .env et renseigner DATABASE_URL
+cp .env.example .env
+# Récupérer la connection string "Session Pooler" sur le dashboard Supabase :
+#   bouton "Connect" → onglet "Direct" → section Session pooler
+#   Hostname : aws-X-<region>.pooler.supabase.com:5432
+#   Ajouter ?uselibpqcompat=true&sslmode=require à l'URL
 
-# 2. démarrer Postgres + appliquer le schéma + seed
-npm run setup
-# (équivalent à: docker compose up -d && prisma migrate deploy && prisma generate && tsx prisma/seed.ts)
+# 2. installer les dépendances + appliquer migrations + seed
+npm install
+npx prisma migrate deploy
+npx prisma generate
+npm run db:seed
 
 # 3. lancer le serveur
 npm run dev
 ```
 
+### Installation locale (Docker)
+```bash
+npm install
+npm run setup    # docker compose up + migrate + generate + seed
+npm run dev
+```
+
 App : http://localhost:3000
+
+### Notes Supabase
+- Utiliser **toujours** le Session Pooler (port 5432) ou le Transaction Pooler (port 6543), pas la connexion directe `db.<project>.supabase.co` qui est en IPv6 uniquement.
+- Le paramètre `uselibpqcompat=true&sslmode=require` est requis avec la nouvelle version de `pg` pour accepter le certificat Supabase.
+- Pour la production sur Vercel/serverless : utiliser le **Transaction Pooler** (port 6543) avec `?pgbouncer=true&connection_limit=1`.
 
 ### Comptes de démo
 Mot de passe pour tous : `password123`
