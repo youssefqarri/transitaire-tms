@@ -1,36 +1,176 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Transitaire TMS
 
-## Getting Started
+Plateforme de gestion des dossiers de transit douanier (import/export) pour les transitaires marocains.
 
-First, run the development server:
+**Stack** : Next.js 16 (App Router) · React 19 · TypeScript · Prisma 7 · PostgreSQL · NextAuth 5 · Tailwind 4.
 
+## Fonctionnalités
+
+### Gestion opérationnelle
+- **Dossiers** : numérotation, client, fournisseur, marchandise (valeur/poids/colis), références, mode de paiement.
+- **Workflow** : 17 statuts (ouverture → clôture) avec historique horodaté et notes.
+- **DUM** : un dossier peut avoir plusieurs DUM, statut indépendant, lien BADR.
+- **Documents** : catégories standardisées (facture, colisage, BL, BAD, engagement importation…), versions, détection automatique des documents manquants selon mode de paiement.
+- **Clients** & fournisseurs : fiches complètes (ICE, RC, identifiant fiscal).
+- **Commentaires** : par dossier, internes ou visibles au client.
+
+### Emails (Gmail / Workspace)
+- OAuth Google → connexion d'un compte Gmail.
+- Synchronisation des emails entrants (douane, Portnet, MCI, clients, compagnies maritimes).
+- **Classification automatique** par règles (regex sur from/subject/body).
+- **Rattachement automatique** aux dossiers :
+  - Cas DUM validée → match par numéro de DUM.
+  - Cas dossier non validé → match par référence ou numéro.
+- Filtre par source. Comptabilité ne voit que ses emails (factures/quittances/clients).
+
+### Notifications
+- Internes : changement de statut, documents manquants, action urgente, etc.
+- Diffusion par rôle ou par utilisateur.
+- Marquer tout comme lu.
+
+### Rôles
+- `ADMIN` : tout.
+- `EXPLOITATION` : ouverture dossiers, suivi.
+- `DECLARANT` : DUM, validation, dossiers.
+- `COMMIS_DOUANE` : suivi emails douane/MCI, anticipation actions.
+- `BUREAU` : engagement, levée sur réserve, comm. clients.
+- `COMPTABILITE` : emails comptables (factures/quittances) uniquement.
+- `CLIENT` : portail restreint (`/portail`) — voit ses propres dossiers, documents, statuts.
+
+### Audit
+- Journal complet des actions (création, modification, statut, upload).
+
+## Démarrage
+
+### Prérequis
+- Node.js ≥ 20
+- Docker (pour la base Postgres locale)
+
+### Installation
 ```bash
+# 1. installer les dépendances
+npm install
+
+# 2. démarrer Postgres + appliquer le schéma + seed
+npm run setup
+# (équivalent à: docker compose up -d && prisma migrate deploy && prisma generate && tsx prisma/seed.ts)
+
+# 3. lancer le serveur
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+App : http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Comptes de démo
+Mot de passe pour tous : `password123`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Email | Rôle |
+|---|---|
+| `admin@transitaire.ma` | Administrateur |
+| `exploitation@transitaire.ma` | Exploitation |
+| `declarant@transitaire.ma` | Déclarant |
+| `commis@transitaire.ma` | Commis en douane |
+| `bureau@transitaire.ma` | Bureau administratif |
+| `compta@transitaire.ma` | Comptabilité |
+| `client@atlasimport.ma` | Client (portail) |
 
-## Learn More
+## Scripts
 
-To learn more about Next.js, take a look at the following resources:
+| Commande | Description |
+|---|---|
+| `npm run dev` | Serveur de développement |
+| `npm run build` | Build de production |
+| `npm run start` | Serveur de production |
+| `npm run db:up` | Démarre Postgres (docker) |
+| `npm run db:down` | Arrête Postgres |
+| `npm run db:migrate` | Crée/applique une migration |
+| `npm run db:reset` | Reset complet de la base |
+| `npm run db:seed` | Charge les données de démo |
+| `npm run db:studio` | Prisma Studio (UI BDD) |
+| `npm run setup` | Bootstrap complet |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Configuration Gmail
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Créer un projet Google Cloud → activer Gmail API.
+2. Créer un OAuth Client ID (type: Web application).
+3. Redirect URI : `http://localhost:3000/api/auth/gmail/callback` (et l'équivalent prod).
+4. Renseigner dans `.env` :
+   ```
+   GOOGLE_CLIENT_ID=...
+   GOOGLE_CLIENT_SECRET=...
+   ```
+5. Dans l'app : Paramètres → Connecter Gmail.
+6. Aller dans Emails → Synchroniser.
 
-## Deploy on Vercel
+> En production, déclencher `POST /api/emails/sync` via un cron (toutes les 5 min) pour synchroniser automatiquement.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+├── app/
+│   ├── (internal)/        # back-office équipe (sidebar + topbar)
+│   │   ├── dashboard/
+│   │   ├── dossiers/
+│   │   ├── dums/
+│   │   ├── documents/
+│   │   ├── emails/
+│   │   ├── clients/
+│   │   ├── fournisseurs/
+│   │   ├── utilisateurs/
+│   │   ├── notifications/
+│   │   ├── audit/
+│   │   └── parametres/
+│   ├── portail/           # portail client (séparé)
+│   ├── login/
+│   └── api/
+├── components/
+│   ├── ui/                # design system (Button, Card, Input, Badge, etc.)
+│   ├── layout/            # Sidebar, Topbar
+│   └── dossier/           # StatusBadge, etc.
+├── lib/
+│   ├── auth.ts            # NextAuth (handlers complets)
+│   ├── auth.config.ts     # config Edge-safe (middleware)
+│   ├── db.ts              # client Prisma + adapter pg
+│   ├── statuses.ts        # labels statuts/catégories/documents requis
+│   ├── roles.ts           # permissions par rôle
+│   ├── audit.ts           # helper audit log
+│   ├── email-classifier.ts
+│   ├── email-linker.ts    # rattachement auto emails ↔ dossiers
+│   └── gmail.ts           # OAuth Google
+├── middleware.ts          # ACL routes (CLIENT → /portail, autres → /)
+└── generated/prisma/      # client Prisma généré
+```
+
+## Modèle de données
+
+Points clés du schéma (`prisma/schema.prisma`) :
+- **Dossier** : statut workflow, mode de paiement, client/fournisseur, marchandise, dates clés.
+- **DUM** : 1..N par dossier. Une DUM validée verrouille le changement de client.
+- **Document** : versions (replaces/replacedBy), catégorie standardisée.
+- **EmailMessage / EmailLink** : auto-rattachement aux dossiers.
+- **Notification** : par utilisateur ou par rôle.
+- **DossierStatusChange** : historique horodaté.
+- **AuditLog** : trace complète.
+
+## Production
+
+### À configurer
+- `AUTH_SECRET` : générer avec `openssl rand -base64 32`.
+- `DATABASE_URL` : Postgres production (Neon, Supabase, RDS…).
+- Stockage fichiers : actuellement local (`UPLOAD_DIR`). Pour la prod, migrer vers S3.
+- SMTP : configurer pour les notifications sortantes clients.
+- Cron Gmail sync (toutes les 5–15 min).
+
+### Idées d'évolutions (post-MVP)
+- OCR sur les documents uploadés (Tesseract / Google Vision) → pré-remplissage facture/BL.
+- Classification email par LLM (Claude/GPT) en plus des règles regex.
+- Intégration WinApp (import/sync n° de dossier + annulations).
+- Intégration BADR / Portnet (scraping ou API si dispo).
+- Export comptable (factures honoraires + débours) au format Sage/CIEL.
+- Signature électronique des bons côté client.
+- SLA tracking + alertes pour dossiers stagnants.
+- App mobile native (Expo) — actuellement responsive.
+
+## Licence
+Privé.

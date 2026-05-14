@@ -1,0 +1,504 @@
+// Transitaire TMS - Schema Prisma
+// Plateforme de gestion de transit douanier (Maroc)
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  runtime  = "nodejs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// AUTH & USERS
+// ============================================================
+
+enum UserRole {
+  ADMIN
+  EXPLOITATION
+  DECLARANT
+  COMMIS_DOUANE
+  BUREAU
+  COMPTABILITE
+  CLIENT
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String
+  image         String?
+  password      String?   // hashed (credentials provider)
+  role          UserRole  @default(EXPLOITATION)
+  active        Boolean   @default(true)
+  phone         String?
+
+  // si role = CLIENT, relié à un Client (le compte porte le portail)
+  clientId      String?
+  client        Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  accounts          Account[]
+  sessions          Session[]
+  emailAccounts     EmailAccount[]
+  notifications     Notification[]
+  auditLogs         AuditLog[]
+  dossierComments   DossierComment[]
+  statusChanges     DossierStatusChange[]
+  uploadedDocs      Document[]            @relation("UploadedBy")
+  createdDossiers   Dossier[]             @relation("CreatedBy")
+  assignedDossiers  Dossier[]             @relation("AssignedTo")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([role])
+  @@index([clientId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?  @db.Text
+  access_token      String?  @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?  @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============================================================
+// CLIENTS & SUPPLIERS
+// ============================================================
+
+model Client {
+  id           String   @id @default(cuid())
+  name         String
+  code         String?  @unique   // code client interne
+  ice          String?  // identifiant commun de l'entreprise (Maroc)
+  rc           String?  // registre de commerce
+  taxId        String?  // identifiant fiscal
+  email        String?
+  phone        String?
+  address      String?
+  city         String?
+  contactName  String?
+  notes        String?  @db.Text
+  active       Boolean  @default(true)
+
+  dossiers Dossier[]
+  users    User[]   // utilisateurs portail client
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+model Supplier {
+  id          String   @id @default(cuid())
+  name        String
+  country     String?
+  email       String?
+  phone       String?
+  address     String?
+  notes       String?  @db.Text
+
+  dossiers Dossier[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+// ============================================================
+// DOSSIERS
+// ============================================================
+
+enum DossierType {
+  IMPORT
+  EXPORT
+}
+
+enum PaymentMode {
+  WITH_PAYMENT      // avec paiement (engagement d'importation obligatoire)
+  WITHOUT_PAYMENT   // sans paiement
+}
+
+enum DossierStatus {
+  OUVERTURE                 // ouverture dossier
+  RECEPTIONNE               // réceptionné
+  DOCUMENTS_MANQUANTS       // documents manquants
+  DOCUMENTS_RECUS           // réception des documents manquants
+  BON_A_DELIVRER_RECU       // réception bon à délivrer
+  DECLARATION_EN_COURS      // déclaration en cours
+  VALIDATION_DOUANE         // validation en douane
+  VISITE                    // date de visite
+  CONFORME                  // conforme (sans visite)
+  BUREAU_VALEUR             // soumis au bureau de valeur
+  DEMANDE_DOCUMENTS         // demande de documents douane / MCI
+  LIQUIDE                   // liquidé
+  BON_A_ENLEVER_RESERVE     // bon à enlever sous réserve
+  VALIDATION_MCA            // validation MCA
+  BON_A_ENLEVER_DEFINITIF   // bon à enlever définitif
+  CLOTURE                   // dossier clôturé
+  ANNULE                    // annulé (via WinApp externe)
+}
+
+model Dossier {
+  id            String        @id @default(cuid())
+  number        String        @unique          // numéro fourni par WinApp
+  reference     String?                        // référence fournisseur (objet mail)
+  type          DossierType   @default(IMPORT)
+  paymentMode   PaymentMode   @default(WITH_PAYMENT)
+  status        DossierStatus @default(OUVERTURE)
+
+  clientId      String
+  client        Client        @relation(fields: [clientId], references: [id])
+
+  supplierId    String?
+  supplier      Supplier?     @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+
+  // marchandise
+  goodsValue       Decimal? @db.Decimal(14, 2)
+  goodsCurrency    String?  @default("EUR")
+  goodsWeight      Decimal? @db.Decimal(12, 3)  // en kg
+  goodsPackages    Int?     // nb de colis
+  goodsDescription String?  @db.Text
+
+  // dates clés
+  receivedAt           DateTime?  // date de réception du dossier
+  docsCompleteAt       DateTime?
+  bonADelivrerAt       DateTime?
+  declarationAt        DateTime?
+  visitDate            DateTime?
+  liquidationAt        DateTime?
+  closedAt             DateTime?
+
+  // contrôle
+  controlOffice   String?      // bureau de contrôle
+  hasVisit        Boolean      @default(false)
+  hasBureauValeur Boolean      @default(false)
+
+  // staff
+  createdById   String?
+  createdBy     User?    @relation("CreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  assignedToId  String?
+  assignedTo    User?    @relation("AssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  // relations
+  dums            DUM[]
+  documents       Document[]
+  statusChanges   DossierStatusChange[]
+  comments        DossierComment[]
+  emails          EmailLink[]
+  notifications   Notification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([clientId])
+  @@index([reference])
+  @@index([number])
+}
+
+model DossierStatusChange {
+  id          String        @id @default(cuid())
+  dossierId   String
+  dossier     Dossier       @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  fromStatus  DossierStatus?
+  toStatus    DossierStatus
+  note        String?       @db.Text
+  changedById String?
+  changedBy   User?         @relation(fields: [changedById], references: [id], onDelete: SetNull)
+  createdAt   DateTime      @default(now())
+
+  @@index([dossierId])
+}
+
+model DossierComment {
+  id        String   @id @default(cuid())
+  dossierId String
+  dossier   Dossier  @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  body      String   @db.Text
+  // commentaire interne ou visible au portail client
+  internal  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([dossierId])
+}
+
+// ============================================================
+// DUM (Déclaration Unique de Marchandise)
+// ============================================================
+
+enum DUMStatus {
+  DRAFT
+  ENREGISTRE       // enregistré dans BADR
+  VALIDE
+  LIQUIDE
+  CLOTURE
+}
+
+model DUM {
+  id          String     @id @default(cuid())
+  number      String     @unique          // numéro DUM officiel
+  dossierId   String
+  dossier     Dossier    @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  status      DUMStatus  @default(DRAFT)
+  bureau      String?    // bureau douane
+  registeredAt DateTime?
+  liquidatedAt DateTime?
+  notes       String?    @db.Text
+
+  // une DUM peut référencer plusieurs documents
+  documents   Document[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([dossierId])
+  @@index([number])
+}
+
+// ============================================================
+// DOCUMENTS
+// ============================================================
+
+// catégorie standardisée — détectable pour "documents manquants"
+enum DocumentCategory {
+  FACTURE_COMMERCIALE
+  COLISAGE
+  FACTURE_FRET
+  CONNAISSEMENT          // BL
+  ENGAGEMENT_IMPORTATION
+  BON_A_DELIVRER
+  CERTIFICAT_ORIGINE
+  ASSURANCE
+  LICENCE
+  CERTIFICAT_SANITAIRE
+  CERTIFICAT_CONFORMITE
+  FICHE_LIQUIDATION
+  TICKET_PAIEMENT
+  BON_A_ENLEVER
+  AUTRE
+}
+
+model Document {
+  id          String           @id @default(cuid())
+  dossierId   String
+  dossier     Dossier          @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  dumId       String?
+  dum         DUM?             @relation(fields: [dumId], references: [id], onDelete: SetNull)
+  category    DocumentCategory
+  name        String
+  fileUrl     String?          // chemin local ou S3
+  fileSize    Int?
+  mimeType    String?
+  version     Int              @default(1)
+  // si version > 1, remplace un document précédent
+  replacesId  String?          @unique
+  replaces    Document?        @relation("DocumentVersions", fields: [replacesId], references: [id], onDelete: SetNull)
+  replacedBy  Document?        @relation("DocumentVersions")
+
+  uploadedById String?
+  uploadedBy   User?    @relation("UploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  receivedAt DateTime @default(now())
+  notes      String?  @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([dossierId, category])
+}
+
+// ============================================================
+// EMAILS
+// ============================================================
+
+enum EmailSource {
+  DOUANE
+  PORTNET
+  MCI
+  CLIENT
+  COMPAGNIE_MARITIME
+  INTERNE
+  AUTRE
+}
+
+enum EmailDirection {
+  INCOMING
+  OUTGOING
+}
+
+model EmailAccount {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider      String   @default("gmail")  // gmail, outlook, imap
+  emailAddress  String
+  accessToken   String?  @db.Text
+  refreshToken  String?  @db.Text
+  tokenExpiresAt DateTime?
+  historyId     String?  // dernier history Gmail synced
+  active        Boolean  @default(true)
+
+  messages EmailMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([emailAddress])
+}
+
+model EmailMessage {
+  id           String         @id @default(cuid())
+  accountId    String
+  account      EmailAccount   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  externalId   String         // gmail id
+  threadId     String?
+  direction    EmailDirection @default(INCOMING)
+  fromAddress  String
+  fromName     String?
+  toAddresses  String[]       // array
+  cc           String[]
+  subject      String?
+  snippet      String?        @db.Text
+  bodyText     String?        @db.Text
+  bodyHtml     String?        @db.Text
+  receivedAt   DateTime
+  source       EmailSource    @default(AUTRE)
+  // classification IA
+  category     String?
+  isRead       Boolean        @default(false)
+  isImportant  Boolean        @default(false)
+
+  attachments EmailAttachment[]
+  links       EmailLink[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([accountId, externalId])
+  @@index([receivedAt])
+  @@index([source])
+}
+
+model EmailAttachment {
+  id         String        @id @default(cuid())
+  messageId  String
+  message    EmailMessage  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  filename   String
+  mimeType   String?
+  size       Int?
+  fileUrl    String?
+
+  createdAt DateTime @default(now())
+}
+
+// lien email <-> dossier (auto par DUM number ou reference)
+model EmailLink {
+  id        String        @id @default(cuid())
+  messageId String
+  message   EmailMessage  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  dossierId String
+  dossier   Dossier       @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  // automatique ou manuel
+  auto      Boolean       @default(true)
+  matchedOn String?       // "DUM:1234567" ou "REF:ABC"
+
+  createdAt DateTime @default(now())
+
+  @@unique([messageId, dossierId])
+  @@index([dossierId])
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+enum NotificationKind {
+  DOCUMENT_MANQUANT
+  DOSSIER_BLOQUE
+  ACTION_URGENTE_DOUANE
+  DEMANDE_INSPECTEUR
+  DEMANDE_MCI
+  SUIVI_LIQUIDATION
+  STATUS_CHANGE
+  EMAIL_NEW
+  CLIENT_INFO          // notification à envoyer au client
+  AUTRE
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String?
+  user      User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // ou diffusion à un rôle
+  role      UserRole?
+  dossierId String?
+  dossier   Dossier?         @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  kind      NotificationKind
+  title     String
+  body      String?          @db.Text
+  link      String?
+  read      Boolean          @default(false)
+  // envoyé au client par mail ?
+  emailSent Boolean          @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+  @@index([role, read])
+}
+
+// ============================================================
+// AUDIT LOG
+// ============================================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String   // CREATE_DOSSIER, UPDATE_STATUS, ...
+  entity    String   // Dossier, DUM, Document, ...
+  entityId  String?
+  metadata  Json?
+  ip        String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity, entityId])
+}

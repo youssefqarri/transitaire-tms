@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: transitaire-postgres
+    environment:
+      POSTGRES_USER: transitaire
+      POSTGRES_PASSWORD: transitaire
+      POSTGRES_DB: transitaire_tms
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
