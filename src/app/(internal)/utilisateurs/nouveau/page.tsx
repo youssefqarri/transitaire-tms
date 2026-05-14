@@ -19,7 +19,12 @@ export default async function NewUserPage() {
       </Link>
       <h1 className="text-2xl font-semibold tracking-tight">Nouvel utilisateur</h1>
       <Card className="p-6">
-        <UserForm clients={clients.map((c) => ({ id: c.id, name: c.name }))} />
+        <UserForm
+          clients={clients.map((c) => ({
+            id: c.id,
+            label: c.code ? `${c.name} (${c.code})` : c.name,
+          }))}
+        />
       </Card>
     </div>
   );
