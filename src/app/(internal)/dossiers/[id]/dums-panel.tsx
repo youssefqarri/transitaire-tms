@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus, FileText } from "lucide-react";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -60,34 +61,28 @@ export function DUMsPanel({
   }
 
   return (
-    <section>
-      <header className="flex items-baseline justify-between mb-4">
-        <h2
-          className="font-display text-[28px] tracking-[-0.018em]"
-          style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 420' }}
-        >
-          Déclarations
-          <span className="ml-3 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--color-ink-mute)] tabular">
-            · {dums.length}
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          DUMs
+          <span className="ml-2 text-[11.5px] font-normal text-[var(--color-fg-3)] tnum">
+            {dums.length}
           </span>
-        </h2>
+        </CardTitle>
         {canCreate && (
           <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
-            <Plus className="size-3" /> Nouvelle DUM
+            <Plus /> Nouvelle DUM
           </Button>
         )}
-      </header>
+      </CardHeader>
 
       {open && (
-        <form
-          onSubmit={submit}
-          className="mb-4 border border-[var(--color-rule-strong)] bg-[var(--color-paper-strong)] p-5 grid grid-cols-1 md:grid-cols-2 gap-5 animate-fade-up"
-        >
-          <div className="space-y-2">
+        <form onSubmit={submit} className="px-5 py-4 bg-[var(--color-surface-2)] border-b border-[var(--color-border)] grid grid-cols-1 md:grid-cols-2 gap-3 animate-fade-in">
+          <div className="space-y-1.5">
             <Label htmlFor="dumnum">Numéro DUM</Label>
             <Input id="dumnum" value={number} onChange={(e) => setNumber(e.target.value)} />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="bureau">Bureau douane</Label>
             <Input id="bureau" value={bureau} onChange={(e) => setBureau(e.target.value)} />
           </div>
@@ -102,30 +97,25 @@ export function DUMsPanel({
         </form>
       )}
 
-      <div className="border-t border-b border-[var(--color-rule-strong)]">
+      <div className="divide-y divide-[var(--color-border)]">
         {dums.length === 0 && (
-          <div className="py-10 text-center text-[14px] text-[var(--color-ink-mute)] font-display italic">
+          <div className="py-8 text-center text-[13px] text-[var(--color-fg-3)]">
             Aucune DUM enregistrée. Elle sera créée après dépôt sur BADR.
           </div>
         )}
-        {dums.map((d, idx) => (
-          <div
-            key={d.id}
-            className="grid grid-cols-[auto_1fr_auto] items-center gap-4 py-3 px-1 border-b border-[var(--color-rule)] last:border-b-0"
-          >
-            <span className="font-mono text-[10px] text-[var(--color-ink-mute)] tabular w-6">
-              {String(idx + 1).padStart(2, "0")}
-            </span>
-            <div>
-              <div className="font-mono text-[15px] tabular text-[var(--color-ink)]">{d.number}</div>
-              <div className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-[var(--color-ink-mute)] mt-0.5">
-                {d.bureau ?? "—"} · enregistré le {formatDate(d.registeredAt)}
+        {dums.map((d) => (
+          <div key={d.id} className="px-5 py-3 flex items-center gap-3">
+            <FileText className="size-4 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
+            <div className="flex-1 min-w-0">
+              <div className="font-mono text-[13px] font-medium text-[var(--color-fg)]">{d.number}</div>
+              <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+                {d.bureau ?? "Bureau ?"} · enregistré le {formatDate(d.registeredAt)}
               </div>
             </div>
             <Badge tone="info">{DUM_STATUS_LABELS[d.status]}</Badge>
           </div>
         ))}
       </div>
-    </section>
+    </Card>
   );
 }

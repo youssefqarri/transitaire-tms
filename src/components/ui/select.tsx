@@ -1,25 +1,30 @@
 import * as React from "react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Select = React.forwardRef<
   HTMLSelectElement,
   React.SelectHTMLAttributes<HTMLSelectElement>
 >(({ className, children, ...props }, ref) => (
-  <select
-    ref={ref}
-    className={cn(
-      "flex h-10 w-full px-3 text-[14px] font-sans",
-      "bg-[var(--color-card)] border-b border-[var(--color-rule-strong)] border-x-0 border-t-0 rounded-none appearance-none",
-      "focus-visible:outline-none focus-visible:border-[var(--color-ink)]",
-      "disabled:opacity-50",
-      "bg-[length:10px] bg-no-repeat bg-[right_8px_center]",
-      "bg-[url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path fill='none' stroke='%231a1814' stroke-width='1.2' d='M2 4.5l4 4 4-4'/></svg>\")]",
-      "pr-7",
-      className,
-    )}
-    {...props}
-  >
-    {children}
-  </select>
+  <div className="relative">
+    <select
+      ref={ref}
+      className={cn(
+        "flex h-9 w-full pl-3 pr-8 text-[13px] appearance-none",
+        "bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)] focus-visible:border-transparent",
+        "disabled:opacity-50",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </select>
+    <ChevronDown
+      aria-hidden
+      className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 text-[var(--color-fg-mute)]"
+      strokeWidth={1.75}
+    />
+  </div>
 ));
 Select.displayName = "Select";

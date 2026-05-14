@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Plus, CheckCircle2, AlertCircle, FileText, Download } from "lucide-react";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -69,38 +70,36 @@ export function DocumentsPanel({
   const presentCats = new Set(documents.map((d) => d.category));
 
   return (
-    <section>
-      <header className="flex items-baseline justify-between mb-4">
-        <h2
-          className="font-display text-[28px] tracking-[-0.018em]"
-          style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 420' }}
-        >
-          Pièces du dossier
-          <span className="ml-3 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--color-ink-mute)] tabular">
-            · {documents.length}
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          Documents
+          <span className="ml-2 text-[11.5px] font-normal text-[var(--color-fg-3)] tnum">
+            {documents.length}
           </span>
-        </h2>
+        </CardTitle>
         <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
-          <Plus className="size-3" /> Ajouter
+          <Plus /> Ajouter
         </Button>
-      </header>
+      </CardHeader>
 
-      {/* checklist obligatoires */}
-      <div className="border-t border-[var(--color-rule-strong)] pt-3 pb-4">
-        <div className="label-eyebrow mb-3">Documents obligatoires</div>
-        <div className="flex flex-wrap gap-2">
+      <div className="px-5 py-3 border-b border-[var(--color-border)]">
+        <div className="text-[11.5px] font-medium text-[var(--color-fg-3)] mb-2">
+          Documents obligatoires
+        </div>
+        <div className="flex flex-wrap gap-1.5">
           {requiredCategories.map((c) => {
             const ok = presentCats.has(c);
             return (
               <span
                 key={c}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.10em] border ${
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium ${
                   ok
-                    ? "border-[var(--color-leaf)] text-[var(--color-leaf)] bg-[var(--color-leaf-soft)]/40"
-                    : "border-[var(--color-stamp)] text-[var(--color-stamp)] bg-[var(--color-stamp-soft)]/40"
+                    ? "bg-[var(--color-success-soft)] text-[var(--color-success)]"
+                    : "bg-[var(--color-warning-soft)] text-[var(--color-warning)]"
                 }`}
               >
-                {ok ? <CheckCircle2 className="size-3" strokeWidth={1.5} /> : <AlertCircle className="size-3" strokeWidth={1.5} />}
+                {ok ? <CheckCircle2 className="size-3" strokeWidth={2} /> : <AlertCircle className="size-3" strokeWidth={2} />}
                 {DOCUMENT_CATEGORY_LABELS[c]}
               </span>
             );
@@ -109,33 +108,23 @@ export function DocumentsPanel({
       </div>
 
       {open && (
-        <form
-          onSubmit={submit}
-          className="mb-4 border border-[var(--color-rule-strong)] bg-[var(--color-paper-strong)] p-5 space-y-4 animate-fade-up"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="space-y-2">
+        <form onSubmit={submit} className="px-5 py-4 bg-[var(--color-surface-2)] border-b border-[var(--color-border)] space-y-3 animate-fade-in">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="space-y-1.5">
               <Label htmlFor="category">Catégorie</Label>
               <Select id="category" value={category} onChange={(e) => setCategory(e.target.value as DocumentCategory)}>
                 {Object.entries(DOCUMENT_CATEGORY_LABELS).map(([k, l]) => (
-                  <option key={k} value={k}>
-                    {l}
-                  </option>
+                  <option key={k} value={k}>{l}</option>
                 ))}
               </Select>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="name">Nom</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Ex. Facture #INV-001"
-              />
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex. Facture #INV-001" />
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="file">Fichier (facultatif)</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="file">Fichier (optionnel)</Label>
             <Input id="file" type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
           </div>
           <div className="flex justify-end gap-2">
@@ -149,56 +138,45 @@ export function DocumentsPanel({
         </form>
       )}
 
-      <div className="border-t border-b border-[var(--color-rule-strong)]">
+      <div className="divide-y divide-[var(--color-border)]">
         {documents.length === 0 && (
-          <div className="py-10 text-center text-[14px] text-[var(--color-ink-mute)] font-display italic">
-            Aucune pièce déposée.
+          <div className="py-8 text-center text-[13px] text-[var(--color-fg-3)]">
+            Aucun document pour l'instant.
           </div>
         )}
-        {documents.map((d, idx) => (
-          <div
-            key={d.id}
-            className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-4 py-3 px-1 border-b border-[var(--color-rule)] last:border-b-0 hover:bg-[var(--color-paper-strong)] transition-colors"
-          >
-            <span className="font-mono text-[10px] text-[var(--color-ink-mute)] tabular w-6">
-              {String(idx + 1).padStart(2, "0")}
-            </span>
-            <div className="min-w-0">
-              <div className="flex items-baseline gap-2 flex-wrap">
-                <FileText className="size-3.5 text-[var(--color-ink-mute)]" strokeWidth={1.5} />
-                <span className="text-[14px] text-[var(--color-ink)] truncate">{d.name}</span>
+        {documents.map((d) => (
+          <div key={d.id} className="px-5 py-3 flex items-center gap-3 hover:bg-[var(--color-surface-2)] transition-colors">
+            <FileText className="size-4 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[13px] font-medium text-[var(--color-fg)] truncate">{d.name}</span>
                 {d.version > 1 && (
-                  <span className="font-mono text-[10px] text-[var(--color-stamp)]">
-                    v{d.version}
-                  </span>
+                  <span className="font-mono text-[10.5px] text-[var(--color-fg-3)]">v{d.version}</span>
                 )}
               </div>
-              <div className="mt-1 flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2 mt-0.5 text-[11.5px] text-[var(--color-fg-3)]">
                 <Badge tone="outline">{DOCUMENT_CATEGORY_LABELS[d.category]}</Badge>
-                <span className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-[var(--color-ink-mute)]">
+                <span>
                   {formatDate(d.receivedAt)}
                   {d.uploadedByName && ` · ${d.uploadedByName}`}
                 </span>
               </div>
             </div>
-            <div />
             {d.fileUrl ? (
               <a
                 href={d.fileUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-[var(--color-ink)] hover:underline inline-flex items-center gap-1"
+                className="inline-flex items-center gap-1 text-[12px] text-[var(--color-accent)] hover:underline"
               >
-                <Download className="size-3" strokeWidth={1.5} /> Ouvrir
+                <Download className="size-3" strokeWidth={2} /> Ouvrir
               </a>
             ) : (
-              <span className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-[var(--color-ink-mute)]">
-                —
-              </span>
+              <span className="text-[11.5px] text-[var(--color-fg-mute)]">—</span>
             )}
           </div>
         ))}
       </div>
-    </section>
+    </Card>
   );
 }

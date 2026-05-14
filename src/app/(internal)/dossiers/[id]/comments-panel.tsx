@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
@@ -47,32 +48,31 @@ export function CommentsPanel({
   }
 
   return (
-    <section>
-      <h2
-        className="font-display text-[28px] tracking-[-0.018em] mb-4"
-        style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 420' }}
-      >
-        Annotations
-        <span className="ml-3 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--color-ink-mute)] tabular">
-          · {comments.length}
-        </span>
-      </h2>
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          Commentaires
+          <span className="ml-2 text-[11.5px] font-normal text-[var(--color-fg-3)] tnum">
+            {comments.length}
+          </span>
+        </CardTitle>
+      </CardHeader>
 
-      <form onSubmit={submit} className="space-y-3 mb-6">
+      <form onSubmit={submit} className="px-5 py-4 border-b border-[var(--color-border)] space-y-3">
         <Textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="Ajouter une annotation…"
+          placeholder="Ajouter un commentaire…"
         />
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <label className="flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.10em] text-[var(--color-ink-soft)] cursor-pointer">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <label className="flex items-center gap-2 text-[12px] text-[var(--color-fg-2)] cursor-pointer">
             <input
               type="checkbox"
               checked={internal}
               onChange={(e) => setInternal(e.target.checked)}
-              className="accent-[var(--color-ink)]"
+              className="accent-[var(--color-accent)]"
             />
-            Interne · non visible au client
+            Interne (non visible au client)
           </label>
           <Button size="sm" disabled={pending || !body.trim()}>
             {pending ? "Envoi…" : "Publier"}
@@ -80,32 +80,30 @@ export function CommentsPanel({
         </div>
       </form>
 
-      <div className="border-t border-b border-[var(--color-rule-strong)]">
+      <div className="divide-y divide-[var(--color-border)]">
         {comments.length === 0 && (
-          <div className="py-10 text-center text-[14px] text-[var(--color-ink-mute)] font-display italic">
-            Aucune annotation.
+          <div className="py-8 text-center text-[13px] text-[var(--color-fg-3)]">
+            Aucun commentaire.
           </div>
         )}
         {comments.map((c) => (
-          <div key={c.id} className="py-4 border-b border-[var(--color-rule)] last:border-b-0 flex gap-4">
-            <Avatar name={c.authorName} size={32} />
+          <div key={c.id} className="px-5 py-3 flex gap-3">
+            <Avatar name={c.authorName} size={28} />
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline gap-2 flex-wrap">
-                <span className="font-display italic text-[15px]">{c.authorName}</span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.10em] text-[var(--color-ink-mute)] tabular">
+                <span className="text-[13px] font-medium">{c.authorName}</span>
+                <span className="text-[11px] text-[var(--color-fg-3)]">
                   {formatDateTime(c.createdAt)}
                 </span>
                 {!c.internal && (
-                  <span className="font-mono text-[10px] uppercase tracking-[0.10em] text-[var(--color-stamp)]">
-                    · visible client
-                  </span>
+                  <span className="text-[11px] text-[var(--color-accent)]">· visible client</span>
                 )}
               </div>
-              <div className="text-[14px] mt-2 whitespace-pre-wrap leading-relaxed">{c.body}</div>
+              <div className="text-[13px] mt-1 whitespace-pre-wrap text-[var(--color-fg-2)]">{c.body}</div>
             </div>
           </div>
         ))}
       </div>
-    </section>
+    </Card>
   );
 }

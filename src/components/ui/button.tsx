@@ -4,35 +4,33 @@ import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
   [
-    "inline-flex items-center justify-center gap-2 whitespace-nowrap",
-    "font-mono text-[11px] font-medium uppercase tracking-[0.12em]",
-    "transition-all duration-150",
-    "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-paper)] focus-visible:ring-[var(--color-ink)]",
+    "inline-flex items-center justify-center gap-1.5 whitespace-nowrap",
+    "rounded-[var(--radius)] text-[13px] font-medium",
+    "transition-colors duration-150",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)] focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--color-bg)]",
     "disabled:pointer-events-none disabled:opacity-50",
     "[&_svg]:size-3.5 [&_svg]:shrink-0",
-    "active:translate-y-[1px]",
   ].join(" "),
   {
     variants: {
       variant: {
         default:
-          "bg-[var(--color-ink)] text-[var(--color-paper)] border border-[var(--color-ink)] hover:bg-[oklch(25%_0.02_50)]",
+          "bg-[var(--color-fg)] text-[var(--color-surface)] hover:bg-[oklch(25%_0.01_250)] shadow-[0_1px_0_rgba(0,0,0,0.04)]",
         destructive:
-          "bg-[var(--color-destructive)] text-[var(--color-paper)] border border-[var(--color-destructive)]",
+          "bg-[var(--color-danger)] text-white hover:bg-[oklch(45%_0.20_25)]",
         outline:
-          "border border-[var(--color-rule-strong)] bg-transparent text-[var(--color-ink)] hover:bg-[var(--color-paper-strong)]",
+          "border border-[var(--color-border-2)] bg-[var(--color-surface)] text-[var(--color-fg)] hover:bg-[var(--color-surface-2)]",
         secondary:
-          "bg-[var(--color-paper-strong)] text-[var(--color-ink)] border border-[var(--color-rule)] hover:bg-[oklch(92%_0.02_75)]",
+          "bg-[var(--color-surface-2)] text-[var(--color-fg)] hover:bg-[oklch(94%_0.005_250)] border border-[var(--color-border)]",
         ghost:
-          "text-[var(--color-ink)] hover:bg-[var(--color-paper-strong)]",
-        link: "text-[var(--color-ink)] underline underline-offset-4 decoration-[var(--color-rule-strong)] hover:decoration-[var(--color-ink)] normal-case tracking-normal font-sans text-[13px]",
-        stamp:
-          "border border-[var(--color-stamp)] text-[var(--color-stamp)] bg-transparent hover:bg-[var(--color-stamp-soft)]",
+          "text-[var(--color-fg-2)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-fg)]",
+        link:
+          "text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-9 px-4",
-        sm: "h-8 px-3 text-[10px]",
-        lg: "h-11 px-6 text-[12px]",
+        default: "h-9 px-3.5",
+        sm: "h-8 px-3 text-[12px]",
+        lg: "h-10 px-5",
         icon: "h-9 w-9",
       },
     },

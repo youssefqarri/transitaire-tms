@@ -1,171 +1,106 @@
 @import "tailwindcss";
 
 @theme {
-  /* ─── couleurs : papier × encre × tampon ─── */
-  --color-paper:        oklch(97.5% 0.012 82);    /* fond crème papier */
-  --color-paper-strong: oklch(95% 0.018 82);
-  --color-ink:          oklch(17% 0.018 50);      /* encre noire chaude */
-  --color-ink-soft:     oklch(35% 0.02 50);
-  --color-ink-mute:     oklch(52% 0.018 60);
-  --color-rule:         oklch(85% 0.015 70);      /* filets/règles */
-  --color-rule-strong:  oklch(72% 0.018 60);
+  /* ── Neutres ── */
+  --color-bg:           oklch(98.5% 0.002 250);
+  --color-surface:      oklch(100% 0 0);
+  --color-surface-2:    oklch(97% 0.003 250);
+  --color-fg:           oklch(15% 0.01 250);
+  --color-fg-2:         oklch(32% 0.012 250);
+  --color-fg-3:         oklch(48% 0.012 250);
+  --color-fg-mute:      oklch(60% 0.012 250);
 
-  --color-stamp:        oklch(48% 0.18 32);       /* terracotta — sceau */
-  --color-stamp-soft:   oklch(94% 0.04 32);
-  --color-archive:      oklch(34% 0.06 230);      /* bleu archive */
-  --color-archive-soft: oklch(94% 0.04 230);
-  --color-leaf:         oklch(45% 0.10 145);      /* vert validation */
-  --color-leaf-soft:    oklch(93% 0.05 145);
+  --color-border:       oklch(92.5% 0.005 250);
+  --color-border-2:     oklch(88% 0.008 250);
 
-  /* aliases pour compat */
-  --color-background:        var(--color-paper);
-  --color-foreground:        var(--color-ink);
-  --color-card:              oklch(99% 0.006 82);
-  --color-card-foreground:   var(--color-ink);
-  --color-muted:             var(--color-paper-strong);
-  --color-muted-foreground:  var(--color-ink-mute);
-  --color-border:            var(--color-rule);
-  --color-input:             var(--color-rule);
-  --color-ring:              var(--color-archive);
-  --color-primary:           var(--color-ink);
-  --color-primary-foreground: var(--color-paper);
-  --color-accent:            var(--color-stamp-soft);
-  --color-accent-foreground: var(--color-stamp);
-  --color-destructive:       oklch(48% 0.20 25);
-  --color-destructive-foreground: var(--color-paper);
+  /* ── Accent (indigo discret) ── */
+  --color-accent:       oklch(48% 0.16 258);
+  --color-accent-hover: oklch(42% 0.18 258);
+  --color-accent-soft:  oklch(96% 0.03 258);
+  --color-accent-ring:  oklch(60% 0.14 258);
 
-  --color-sidebar:            oklch(16% 0.02 50);   /* encre profonde, légère chaleur */
-  --color-sidebar-foreground: oklch(92% 0.012 80);
-  --color-sidebar-muted:      oklch(60% 0.02 60);
+  /* ── Statuts ── */
+  --color-success:      oklch(45% 0.13 150);
+  --color-success-soft: oklch(96% 0.04 150);
+  --color-warning:      oklch(55% 0.13 60);
+  --color-warning-soft: oklch(97% 0.06 75);
+  --color-danger:       oklch(52% 0.20 25);
+  --color-danger-soft:  oklch(96% 0.04 25);
+  --color-info:         oklch(50% 0.14 240);
+  --color-info-soft:    oklch(96% 0.03 240);
 
-  /* ─── typo ─── */
-  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
-  --font-sans:    var(--font-geist), ui-sans-serif, system-ui, sans-serif;
-  --font-mono:    var(--font-geist-mono), ui-monospace, Menlo, monospace;
+  /* aliases shadcn-style */
+  --color-background:        var(--color-bg);
+  --color-foreground:        var(--color-fg);
+  --color-card:              var(--color-surface);
+  --color-card-foreground:   var(--color-fg);
+  --color-muted:             var(--color-surface-2);
+  --color-muted-foreground:  var(--color-fg-3);
+  --color-primary:           var(--color-fg);
+  --color-primary-foreground: var(--color-surface);
+  --color-destructive:       var(--color-danger);
+  --color-destructive-foreground: var(--color-surface);
+  --color-ring:              var(--color-accent-ring);
 
-  --radius: 2px;
+  /* ── Sidebar ── */
+  --color-sidebar:           oklch(99% 0.002 250);
+  --color-sidebar-fg:        var(--color-fg);
+  --color-sidebar-fg-mute:   var(--color-fg-3);
+  --color-sidebar-border:    var(--color-border);
+  --color-sidebar-hover:     var(--color-surface-2);
+  --color-sidebar-active:    oklch(94% 0.006 250);
+
+  /* ── Typo & rayons ── */
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, Menlo, monospace;
+
+  --radius:    6px;
+  --radius-sm: 4px;
+  --radius-lg: 8px;
 }
 
 @layer base {
-  * { border-color: var(--color-rule); }
+  * { border-color: var(--color-border); }
 
   html, body {
-    background: var(--color-paper);
-    color: var(--color-ink);
+    background: var(--color-bg);
+    color: var(--color-fg);
     font-family: var(--font-sans);
-    font-feature-settings: "ss01", "ss03", "cv11";
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-  }
-
-  /* fond papier subtil — bruit + très léger grain */
-  body {
-    background-image:
-      radial-gradient(ellipse 100% 60% at 50% 0%, oklch(94% 0.02 75) 0%, transparent 50%),
-      radial-gradient(ellipse 80% 50% at 100% 100%, oklch(95% 0.025 35 / .35) 0%, transparent 50%);
-    background-attachment: fixed;
+    font-feature-settings: "cv11", "ss01";
   }
 
   h1, h2, h3, h4 {
-    font-family: var(--font-display);
-    font-feature-settings: "ss01";
-    font-variation-settings: "opsz" 144, "SOFT" 100;
-    letter-spacing: -0.022em;
-    color: var(--color-ink);
+    color: var(--color-fg);
+    letter-spacing: -0.012em;
   }
 
-  /* tabulaire par défaut sur les chiffres */
-  .tabular { font-variant-numeric: tabular-nums; }
-  .tnum    { font-variant-numeric: tabular-nums lining-nums; }
+  /* tabulaire sur les chiffres dans les tableaux */
+  table { font-variant-numeric: tabular-nums; }
+  .tnum { font-variant-numeric: tabular-nums; }
 }
 
-@layer components {
-  /* étiquette éditoriale : "N° 01 — DOSSIERS OUVERTS" */
-  .label-eyebrow {
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--color-ink-mute);
-  }
-
-  /* marque de registre (corner marks) */
-  .corner-marks {
-    position: relative;
-  }
-  .corner-marks::before,
-  .corner-marks::after,
-  .corner-marks > .corner-tl,
-  .corner-marks > .corner-tr,
-  .corner-marks > .corner-bl,
-  .corner-marks > .corner-br { display: none; }
-
-  /* filets verticaux décoratifs */
-  .rule-double {
-    border-top: 1px solid var(--color-rule-strong);
-    box-shadow: 0 3px 0 -2px var(--color-rule-strong);
-  }
+@layer utilities {
+  .font-mono { font-family: var(--font-mono); }
 
   /* scrollbar discrète */
   .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: oklch(80% 0.012 60);
+    background: var(--color-border-2);
     border-radius: 4px;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: oklch(65% 0.015 60);
+    background: oklch(75% 0.01 250);
   }
+
+  /* texte mute hover -> fg */
+  .link-quiet { color: var(--color-fg-3); transition: color 150ms; }
+  .link-quiet:hover { color: var(--color-fg); }
 }
 
-@layer utilities {
-  .font-display { font-family: var(--font-display); }
-  .font-mono    { font-family: var(--font-mono); }
-
-  /* tampon "stamp" — légère rotation + bord double */
-  .stamp {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4em;
-    padding: 0.18em 0.7em;
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    font-weight: 500;
-    letter-spacing: 0.10em;
-    text-transform: uppercase;
-    border: 1px solid currentColor;
-    border-radius: 2px;
-    box-shadow: inset 0 0 0 1px var(--color-paper), inset 0 0 0 2px currentColor;
-  }
-  .stamp-flat {
-    border-radius: 2px;
-    box-shadow: none;
-  }
-
-  /* lien souligné éditorial */
-  .link-edit {
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 3px;
-    text-decoration-color: oklch(75% 0.02 60);
-  }
-  .link-edit:hover { text-decoration-color: var(--color-ink); }
-
-  /* texture papier (très subtile, en SVG inline) */
-  .paper-grain {
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.12  0 0 0 0 0.10  0 0 0 0 0.08  0 0 0 0.025 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  }
-}
-
-/* animations */
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(6px); }
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(2px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.animate-fade-up { animation: fade-up 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
-
-@keyframes stamp-in {
-  0%   { opacity: 0; transform: scale(1.15) rotate(-4deg); }
-  60%  { opacity: 1; transform: scale(0.98) rotate(-1deg); }
-  100% { opacity: 1; transform: scale(1) rotate(-1.2deg); }
-}
-.animate-stamp { animation: stamp-in 0.5s cubic-bezier(0.2, 1.2, 0.4, 1) both; }
+.animate-fade-in { animation: fade-in 0.22s ease-out both; }

@@ -19,7 +19,7 @@ export function LoginForm({ from }: { from?: string }) {
     start(async () => {
       const res = await signIn("credentials", { email, password, redirect: false });
       if (res?.error) {
-        toast.error("Identifiants invalides");
+        toast.error("Email ou mot de passe incorrect");
         return;
       }
       router.push(from || "/");
@@ -28,20 +28,20 @@ export function LoginForm({ from }: { from?: string }) {
   }
 
   return (
-    <form onSubmit={submit} className="space-y-7">
-      <div className="space-y-2">
-        <Label htmlFor="email">Adresse</Label>
+    <form onSubmit={submit} className="space-y-4">
+      <div className="space-y-1.5">
+        <Label htmlFor="email">Email</Label>
         <Input
           id="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="vous@maison-transit.ma"
+          placeholder="vous@entreprise.ma"
           autoFocus
           required
         />
       </div>
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <Label htmlFor="password">Mot de passe</Label>
         <Input
           id="password"
@@ -51,8 +51,8 @@ export function LoginForm({ from }: { from?: string }) {
           required
         />
       </div>
-      <Button className="w-full mt-2" disabled={pending} size="lg">
-        {pending ? "Vérification…" : "Entrer dans le registre"}
+      <Button className="w-full mt-2" disabled={pending}>
+        {pending ? "Connexion…" : "Se connecter"}
       </Button>
     </form>
   );

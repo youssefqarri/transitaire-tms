@@ -20,107 +20,101 @@ import type { UserRole } from "@/generated/prisma/enums";
 type NavItem = {
   href: string;
   label: string;
-  num: string;
   icon: typeof LayoutDashboard;
   roles?: UserRole[];
 };
 
-const SECTION_DOSSIERS: NavItem[] = [
-  { href: "/dashboard",    label: "Tableau",       num: "01", icon: LayoutDashboard },
-  { href: "/dossiers",     label: "Dossiers",      num: "02", icon: Folder },
-  { href: "/dums",         label: "DUMs",          num: "03", icon: FileText },
-];
-
-const SECTION_FLUX: NavItem[] = [
-  { href: "/emails",        label: "Correspondance", num: "04", icon: Mail },
-  { href: "/notifications", label: "Notifications",  num: "05", icon: Bell },
-];
-
-const SECTION_REGISTRE: NavItem[] = [
-  { href: "/clients",      label: "Clients",       num: "06", icon: Building2 },
-  { href: "/fournisseurs", label: "Fournisseurs",  num: "07", icon: Truck },
-];
-
-const SECTION_ADMIN: NavItem[] = [
-  { href: "/utilisateurs", label: "Utilisateurs",  num: "08", icon: Users,      roles: ["ADMIN"] },
-  { href: "/audit",        label: "Audit",         num: "09", icon: ScrollText, roles: ["ADMIN"] },
-  { href: "/parametres",   label: "Paramètres",    num: "10", icon: Settings,   roles: ["ADMIN"] },
+const SECTIONS: { title?: string; items: NavItem[] }[] = [
+  {
+    items: [
+      { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
+    ],
+  },
+  {
+    title: "Exploitation",
+    items: [
+      { href: "/dossiers", label: "Dossiers",      icon: Folder },
+      { href: "/dums",     label: "DUMs",          icon: FileText },
+      { href: "/emails",   label: "Emails",        icon: Mail },
+    ],
+  },
+  {
+    title: "Registre",
+    items: [
+      { href: "/clients",      label: "Clients",       icon: Building2 },
+      { href: "/fournisseurs", label: "Fournisseurs",  icon: Truck },
+      { href: "/notifications", label: "Notifications", icon: Bell },
+    ],
+  },
+  {
+    title: "Administration",
+    items: [
+      { href: "/utilisateurs", label: "Utilisateurs", icon: Users,      roles: ["ADMIN"] },
+      { href: "/audit",        label: "Audit",        icon: ScrollText, roles: ["ADMIN"] },
+      { href: "/parametres",   label: "Paramètres",   icon: Settings,   roles: ["ADMIN"] },
+    ],
+  },
 ];
 
 export function Sidebar({ role, unreadCount = 0 }: { role: UserRole; unreadCount?: number }) {
   const pathname = usePathname();
-
-  const filter = (items: NavItem[]) =>
-    items.filter((it) => !it.roles || it.roles.includes(role));
-
-  const sections = [
-    { title: "Exploitation", items: filter(SECTION_DOSSIERS) },
-    { title: "Flux",         items: filter(SECTION_FLUX) },
-    { title: "Registre",     items: filter(SECTION_REGISTRE) },
-    { title: "Administration", items: filter(SECTION_ADMIN) },
-  ].filter((s) => s.items.length > 0);
+  const visible = SECTIONS
+    .map((s) => ({
+      ...s,
+      items: s.items.filter((it) => !it.roles || it.roles.includes(role)),
+    }))
+    .filter((s) => s.items.length > 0);
 
   return (
     <aside
       className={cn(
-        "hidden md:flex flex-col w-[248px] shrink-0 h-screen sticky top-0",
-        "bg-[var(--color-sidebar)] text-[var(--color-sidebar-foreground)]",
-        "border-r border-[oklch(25%_0.02_50)]",
+        "hidden md:flex flex-col w-[232px] shrink-0 h-screen sticky top-0",
+        "bg-[var(--color-sidebar)] border-r border-[var(--color-sidebar-border)]",
       )}
     >
-      {/* logotype éditorial */}
-      <div className="px-6 pt-8 pb-7 border-b border-[oklch(22%_0.02_50)]">
-        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-sidebar-muted)]">
-          Maison de Transit
+      <div className="h-14 px-5 flex items-center gap-2.5 border-b border-[var(--color-sidebar-border)]">
+        <div className="size-7 rounded-[var(--radius-sm)] bg-[var(--color-fg)] flex items-center justify-center text-[var(--color-surface)] text-[12px] font-bold">
+          T
         </div>
-        <Link href="/dashboard" className="block mt-1">
-          <div
-            className="font-display text-[26px] leading-none text-[var(--color-paper)]"
-            style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 400' }}
-          >
-            Registre
-          </div>
-          <div
-            className="font-display italic text-[15px] leading-tight text-[oklch(75%_0.04_60)] -mt-0.5"
-            style={{ fontVariationSettings: '"opsz" 14, "SOFT" 50, "wght" 300' }}
-          >
-            des dossiers
-          </div>
-        </Link>
+        <span className="text-[14px] font-semibold tracking-tight">Transitaire</span>
       </div>
 
-      <nav className="flex-1 px-3 py-4 overflow-y-auto scrollbar-thin">
-        {sections.map((section) => (
-          <div key={section.title} className="mb-5">
-            <div className="px-3 mb-2 font-mono text-[9.5px] uppercase tracking-[0.18em] text-[var(--color-sidebar-muted)]">
-              — {section.title}
-            </div>
-            <div>
+      <nav className="flex-1 px-2.5 py-4 overflow-y-auto scrollbar-thin space-y-5">
+        {visible.map((section, idx) => (
+          <div key={section.title ?? idx}>
+            {section.title && (
+              <div className="px-2.5 mb-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-[var(--color-fg-mute)]">
+                {section.title}
+              </div>
+            )}
+            <div className="space-y-0.5">
               {section.items.map((it) => {
                 const active =
                   pathname === it.href ||
                   (it.href !== "/dashboard" && pathname.startsWith(it.href + "/"));
+                const Icon = it.icon;
                 return (
                   <Link
                     key={it.href}
                     href={it.href}
                     className={cn(
-                      "group relative flex items-baseline gap-3 px-3 py-1.5 text-[13px] transition-colors",
+                      "flex items-center gap-2.5 px-2.5 h-8 rounded-[var(--radius-sm)] text-[13px] transition-colors",
                       active
-                        ? "text-[var(--color-paper)]"
-                        : "text-[oklch(78%_0.012_70)] hover:text-[var(--color-paper)]",
+                        ? "bg-[var(--color-sidebar-active)] text-[var(--color-fg)] font-medium"
+                        : "text-[var(--color-fg-2)] hover:bg-[var(--color-sidebar-hover)] hover:text-[var(--color-fg)]",
                     )}
                   >
-                    {active && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[2px] bg-[var(--color-stamp)]" />
-                    )}
-                    <span className="font-mono text-[10px] text-[var(--color-sidebar-muted)] tabular">
-                      {it.num}
-                    </span>
-                    <span className={cn("flex-1", active && "font-medium")}>{it.label}</span>
+                    <Icon
+                      className={cn(
+                        "size-4 shrink-0",
+                        active ? "text-[var(--color-fg)]" : "text-[var(--color-fg-mute)]",
+                      )}
+                      strokeWidth={1.75}
+                    />
+                    <span className="flex-1 truncate">{it.label}</span>
                     {it.href === "/notifications" && unreadCount > 0 && (
-                      <span className="font-mono text-[9.5px] text-[var(--color-stamp)] tabular">
-                        ·{unreadCount}
+                      <span className="bg-[var(--color-accent)] text-white text-[10px] font-medium rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center tnum">
+                        {unreadCount > 99 ? "99+" : unreadCount}
                       </span>
                     )}
                   </Link>
@@ -131,9 +125,8 @@ export function Sidebar({ role, unreadCount = 0 }: { role: UserRole; unreadCount
         ))}
       </nav>
 
-      <div className="px-6 py-4 border-t border-[oklch(22%_0.02_50)] font-mono text-[9.5px] uppercase tracking-[0.16em] text-[var(--color-sidebar-muted)] flex items-center justify-between">
-        <span>vol. I · n° 1</span>
-        <span className="tabular">{new Date().getFullYear()}</span>
+      <div className="px-4 py-3 border-t border-[var(--color-sidebar-border)] text-[11px] text-[var(--color-fg-mute)]">
+        v1.0
       </div>
     </aside>
   );

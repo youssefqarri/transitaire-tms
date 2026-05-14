@@ -25,69 +25,55 @@ export function Topbar({
     router.refresh();
   }
 
-  const today = new Intl.DateTimeFormat("fr-FR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  }).format(new Date());
-
   return (
-    <header className="h-16 px-8 border-b border-[var(--color-rule)] bg-[var(--color-paper)] sticky top-0 z-30 flex items-center gap-6">
+    <header className="h-14 px-5 lg:px-6 border-b border-[var(--color-border)] bg-[var(--color-surface)] sticky top-0 z-30 flex items-center gap-4">
       <form
-        className="flex-1 max-w-2xl"
+        className="flex-1 max-w-md"
         onSubmit={(e) => {
           e.preventDefault();
           const q = (e.currentTarget.elements.namedItem("q") as HTMLInputElement).value;
           router.push(`/dossiers?q=${encodeURIComponent(q)}`);
         }}
       >
-        <div className="relative flex items-center">
-          <Search className="absolute left-0 size-3.5 text-[var(--color-ink-mute)]" strokeWidth={1.5} />
+        <div className="relative">
+          <Search
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-[var(--color-fg-mute)]"
+            strokeWidth={1.75}
+          />
           <input
             name="q"
-            placeholder="Rechercher un dossier, DUM, client, référence…"
-            className="w-full h-9 pl-6 pr-4 text-[14px] font-sans bg-transparent
-              border-0 border-b border-[var(--color-rule)] rounded-none
-              placeholder:text-[var(--color-ink-mute)] focus:outline-none focus:border-[var(--color-ink)]
-              transition-colors"
+            placeholder="Rechercher un dossier, DUM, client…"
+            className="w-full h-8 pl-8 pr-3 text-[13px] bg-[var(--color-surface-2)] border border-transparent rounded-[var(--radius)] placeholder:text-[var(--color-fg-mute)] focus:outline-none focus:bg-[var(--color-surface)] focus:border-[var(--color-border-2)] focus:ring-2 focus:ring-[var(--color-accent-ring)] transition-all"
           />
         </div>
       </form>
 
-      <div className="hidden lg:block font-mono text-[10.5px] uppercase tracking-[0.14em] text-[var(--color-ink-mute)]">
-        <span className="tabular">{today}</span>
-      </div>
-
       <div className="relative">
         <button
           onClick={() => setOpen((o) => !o)}
-          className="flex items-center gap-3 px-2 py-1.5 hover:bg-[var(--color-paper-strong)] transition-colors"
+          className="flex items-center gap-2 px-1.5 py-1 rounded-[var(--radius)] hover:bg-[var(--color-surface-2)] transition-colors"
         >
-          <Avatar name={name} size={32} />
+          <Avatar name={name} size={28} />
           <div className="text-left hidden lg:block leading-tight">
-            <div className="text-[13px] font-medium">{name}</div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.10em] text-[var(--color-ink-mute)]">
-              {ROLE_LABELS[role]}
-            </div>
+            <div className="text-[12.5px] font-medium">{name}</div>
+            <div className="text-[10.5px] text-[var(--color-fg-3)]">{ROLE_LABELS[role]}</div>
           </div>
-          <ChevronDown className="size-3.5 text-[var(--color-ink-mute)]" strokeWidth={1.5} />
+          <ChevronDown className="size-3 text-[var(--color-fg-mute)]" strokeWidth={2} />
         </button>
         {open && (
           <div
-            className="absolute right-0 top-full mt-1 w-60 bg-[var(--color-card)] border border-[var(--color-rule-strong)] shadow-[0_8px_24px_-12px_rgba(0,0,0,0.15)] z-40 animate-fade-up"
+            className="absolute right-0 top-full mt-1.5 w-56 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius)] shadow-[0_8px_24px_-12px_rgba(0,0,0,0.12)] overflow-hidden z-40 animate-fade-in"
             onMouseLeave={() => setOpen(false)}
           >
-            <div className="px-4 py-3 border-b border-[var(--color-rule)]">
+            <div className="px-3 py-2.5 border-b border-[var(--color-border)]">
               <div className="text-[13px] font-medium">{name}</div>
-              <div className="text-[11px] text-[var(--color-ink-mute)] truncate font-mono">
-                {email}
-              </div>
+              <div className="text-[11.5px] text-[var(--color-fg-3)] truncate">{email}</div>
             </div>
             <button
               onClick={logout}
-              className="w-full px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.10em] flex items-center gap-2 hover:bg-[var(--color-paper-strong)] text-left text-[var(--color-stamp)]"
+              className="w-full px-3 py-2 text-[13px] flex items-center gap-2 hover:bg-[var(--color-surface-2)] text-left text-[var(--color-fg-2)]"
             >
-              <LogOut className="size-3.5" strokeWidth={1.5} />
+              <LogOut className="size-3.5" strokeWidth={1.75} />
               Se déconnecter
             </button>
           </div>

@@ -3,22 +3,22 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center gap-1 px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.10em] border",
+  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium border",
   {
     variants: {
       tone: {
         neutral:
-          "border-[var(--color-rule-strong)] text-[var(--color-ink-soft)] bg-transparent",
+          "border-[var(--color-border-2)] bg-[var(--color-surface-2)] text-[var(--color-fg-2)]",
         info:
-          "border-[var(--color-archive)] text-[var(--color-archive)] bg-[var(--color-archive-soft)]/40",
+          "border-transparent bg-[var(--color-info-soft)] text-[var(--color-info)]",
         ok:
-          "border-[var(--color-leaf)] text-[var(--color-leaf)] bg-[var(--color-leaf-soft)]/40",
+          "border-transparent bg-[var(--color-success-soft)] text-[var(--color-success)]",
         warn:
-          "border-[oklch(58%_0.16_60)] text-[oklch(45%_0.16_55)] bg-[oklch(96%_0.08_70)]/60",
+          "border-transparent bg-[var(--color-warning-soft)] text-[var(--color-warning)]",
         danger:
-          "border-[var(--color-destructive)] text-[var(--color-destructive)] bg-[oklch(96%_0.05_25)]/60",
+          "border-transparent bg-[var(--color-danger-soft)] text-[var(--color-danger)]",
         outline:
-          "border-[var(--color-rule)] text-[var(--color-ink-mute)] bg-transparent",
+          "border-[var(--color-border)] text-[var(--color-fg-3)] bg-transparent",
       },
     },
     defaultVariants: { tone: "neutral" },

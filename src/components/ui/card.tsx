@@ -6,8 +6,7 @@ export const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDi
     <div
       ref={ref}
       className={cn(
-        "relative border border-[var(--color-rule)] bg-[var(--color-card)]",
-        "shadow-[0_1px_0_0_var(--color-rule)]",
+        "rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)]",
         className,
       )}
       {...props}
@@ -19,7 +18,7 @@ Card.displayName = "Card";
 export const CardHeader = ({ className, ...p }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex items-baseline justify-between gap-4 px-6 py-5 border-b border-[var(--color-rule)]",
+      "flex items-center justify-between gap-4 px-5 py-4 border-b border-[var(--color-border)]",
       className,
     )}
     {...p}
@@ -27,23 +26,17 @@ export const CardHeader = ({ className, ...p }: React.HTMLAttributes<HTMLDivElem
 );
 
 export const CardTitle = ({ className, ...p }: React.HTMLAttributes<HTMLDivElement>) => (
-  <h3
-    className={cn(
-      "font-display text-[19px] leading-tight tracking-[-0.012em]",
-      className,
-    )}
-    {...p}
-  />
+  <h3 className={cn("text-[14px] font-semibold text-[var(--color-fg)]", className)} {...p} />
 );
 
 export const CardDescription = ({ className, ...p }: React.HTMLAttributes<HTMLDivElement>) => (
-  <p className={cn("text-[13px] text-[var(--color-ink-mute)]", className)} {...p} />
+  <p className={cn("text-[13px] text-[var(--color-fg-3)]", className)} {...p} />
 );
 
 export const CardContent = ({ className, ...p }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("px-6 py-5", className)} {...p} />
+  <div className={cn("px-5 py-4", className)} {...p} />
 );
 
 export const CardFooter = ({ className, ...p }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("px-6 py-4 border-t border-[var(--color-rule)]", className)} {...p} />
+  <div className={cn("px-5 py-3 border-t border-[var(--color-border)]", className)} {...p} />
 );

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, FileText, AlertCircle, Download } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import {
@@ -43,179 +44,148 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
   const progressPct = progressIndex >= 0 ? ((progressIndex + 1) / totalSteps) * 100 : 0;
 
   return (
-    <div className="space-y-12 animate-fade-up">
+    <div className="space-y-5">
       <Link
         href="/portail"
-        className="inline-flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--color-ink-mute)] hover:text-[var(--color-ink)]"
+        className="inline-flex items-center gap-1 text-[12.5px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)]"
       >
-        <ArrowLeft className="size-3" strokeWidth={1.5} /> Mes dossiers
+        <ArrowLeft className="size-3.5" strokeWidth={1.75} /> Mes dossiers
       </Link>
 
-      <header className="pb-8 border-b border-[var(--color-rule-strong)]">
-        <div className="flex items-baseline justify-between gap-4 flex-wrap">
-          <span className="label-eyebrow text-[var(--color-ink)]">
-            — Dossier · réf. {dossier.reference ?? "—"}
-          </span>
-          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--color-ink-mute)] tabular">
-            Ouvert le {formatDate(dossier.createdAt)}
-          </span>
-        </div>
-        <div className="mt-3 flex items-end justify-between gap-6 flex-wrap">
-          <div>
-            <h1
-              className="font-display text-[60px] leading-[0.92] tracking-[-0.028em] tabular"
-              style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 420' }}
-            >
-              {dossier.number}
-            </h1>
-            <div className="mt-4 flex items-center gap-3 flex-wrap">
-              <StatusBadge status={dossier.status} />
-              <Badge tone={dossier.type === "IMPORT" ? "info" : "ok"}>{dossier.type}</Badge>
+      <Card>
+        <div className="p-5">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h1 className="text-[22px] font-semibold tracking-tight font-mono">
+                  {dossier.number}
+                </h1>
+                <StatusBadge status={dossier.status} />
+              </div>
+              <p className="text-[12.5px] text-[var(--color-fg-3)]">
+                {dossier.reference ? <>Réf. <span className="font-mono">{dossier.reference}</span> · </> : ""}
+                Créé le {formatDate(dossier.createdAt)}
+              </p>
+            </div>
+            <div className="text-right">
+              <div className="text-[11.5px] text-[var(--color-fg-3)]">Valeur</div>
+              <div className="text-[18px] font-semibold font-mono tnum">
+                {formatCurrency(
+                  dossier.goodsValue ? Number(dossier.goodsValue) : null,
+                  dossier.goodsCurrency ?? "EUR",
+                )}
+              </div>
             </div>
           </div>
-          <div className="text-right">
-            <div className="label-eyebrow mb-1">Valeur</div>
-            <div className="font-display text-[28px] tabular tracking-tight">
-              {formatCurrency(
-                dossier.goodsValue ? Number(dossier.goodsValue) : null,
-                dossier.goodsCurrency ?? "EUR",
-              )}
-            </div>
-          </div>
-        </div>
 
-        {/* progression */}
-        <div className="mt-10">
-          <div className="flex items-baseline justify-between mb-2">
-            <span className="label-eyebrow">Avancement</span>
-            <span className="font-mono text-[12px] tabular text-[var(--color-ink)]">
-              {Math.round(progressPct)}%
-            </span>
-          </div>
-          <div className="h-[3px] bg-[var(--color-rule)] overflow-hidden">
-            <div
-              className="h-full bg-[var(--color-ink)]"
-              style={{ width: `${progressPct}%` }}
-            />
+          <div className="mt-5">
+            <div className="flex items-center justify-between text-[11.5px] text-[var(--color-fg-3)] mb-1.5">
+              <span>Avancement</span>
+              <span className="tnum">{Math.round(progressPct)}%</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-[var(--color-surface-2)] overflow-hidden">
+              <div
+                className="h-full bg-[var(--color-accent)] rounded-full transition-all"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
           </div>
         </div>
-      </header>
+      </Card>
 
       {missing.length > 0 && (
-        <section className="border-l-2 border-[var(--color-stamp)] pl-6 py-2">
-          <div className="flex items-baseline gap-3 flex-wrap">
-            <AlertCircle className="size-4 text-[var(--color-stamp)]" strokeWidth={1.5} />
-            <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-[var(--color-stamp)]">
-              Documents à fournir
-            </span>
+        <Card className="border-[var(--color-warning)]/30 bg-[var(--color-warning-soft)]">
+          <div className="p-4 flex items-start gap-3">
+            <AlertCircle className="size-4 text-[var(--color-warning)] shrink-0 mt-0.5" strokeWidth={1.75} />
+            <div>
+              <div className="text-[13px] font-medium">Documents à fournir</div>
+              <div className="text-[12.5px] text-[var(--color-fg-2)] mt-1">
+                Merci de transmettre les pièces suivantes à notre équipe :
+              </div>
+              <div className="mt-2.5 flex flex-wrap gap-1.5">
+                {missing.map((c) => (
+                  <Badge tone="warn" key={c}>
+                    {DOCUMENT_CATEGORY_LABELS[c]}
+                  </Badge>
+                ))}
+              </div>
+            </div>
           </div>
-          <p className="mt-2 text-[14px] text-[var(--color-ink-soft)] leading-relaxed max-w-xl">
-            Merci de transmettre les pièces suivantes à notre équipe afin de poursuivre le
-            traitement de votre dossier :
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {missing.map((c) => (
-              <Badge tone="warn" key={c}>
-                {DOCUMENT_CATEGORY_LABELS[c]}
-              </Badge>
-            ))}
-          </div>
-        </section>
+        </Card>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-12">
-        <section>
-          <h2
-            className="font-display text-[28px] tracking-[-0.018em] mb-4"
-            style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 420' }}
-          >
-            Pièces du dossier
-          </h2>
-          <div className="border-t border-b border-[var(--color-rule-strong)]">
+      <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-5">
+        <Card>
+          <CardHeader>
+            <CardTitle>Documents</CardTitle>
+          </CardHeader>
+          <div className="divide-y divide-[var(--color-border)]">
             {dossier.documents.length === 0 && (
-              <div className="py-10 text-center text-[14px] text-[var(--color-ink-mute)] font-display italic">
-                Aucune pièce disponible.
+              <div className="py-8 text-center text-[13px] text-[var(--color-fg-3)]">
+                Aucun document disponible.
               </div>
             )}
-            {dossier.documents.map((d, idx) => (
-              <div
-                key={d.id}
-                className="grid grid-cols-[auto_1fr_auto] items-center gap-4 py-3 px-1 border-b border-[var(--color-rule)] last:border-b-0"
-              >
-                <span className="font-mono text-[10px] text-[var(--color-ink-mute)] tabular w-6">
-                  {String(idx + 1).padStart(2, "0")}
-                </span>
-                <div>
-                  <div className="flex items-baseline gap-2">
-                    <FileText className="size-3.5 text-[var(--color-ink-mute)]" strokeWidth={1.5} />
-                    <span className="text-[14px]">{d.name}</span>
-                  </div>
-                  <div className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-[var(--color-ink-mute)] mt-1">
+            {dossier.documents.map((d) => (
+              <div key={d.id} className="px-5 py-3 flex items-center gap-3">
+                <FileText className="size-4 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] font-medium">{d.name}</div>
+                  <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
                     {DOCUMENT_CATEGORY_LABELS[d.category]} · {formatDate(d.receivedAt)}
                   </div>
                 </div>
-                {d.fileUrl ? (
+                {d.fileUrl && (
                   <a
                     href={d.fileUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-[var(--color-ink)] hover:underline inline-flex items-center gap-1"
+                    className="inline-flex items-center gap-1 text-[12px] text-[var(--color-accent)] hover:underline"
                   >
-                    <Download className="size-3" strokeWidth={1.5} /> Télécharger
+                    <Download className="size-3" strokeWidth={2} /> Télécharger
                   </a>
-                ) : (
-                  <span className="font-mono text-[10.5px] text-[var(--color-ink-mute)]">—</span>
                 )}
               </div>
             ))}
           </div>
+        </Card>
 
-          {dossier.comments.length > 0 && (
-            <div className="mt-12">
-              <h2
-                className="font-display text-[28px] tracking-[-0.018em] mb-4"
-                style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 420' }}
-              >
-                Messages
-              </h2>
-              <div className="border-t border-b border-[var(--color-rule-strong)]">
-                {dossier.comments.map((c) => (
-                  <div key={c.id} className="py-4 border-b border-[var(--color-rule)] last:border-b-0">
-                    <div className="text-[14px] leading-relaxed">{c.body}</div>
-                    <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--color-ink-mute)]">
-                      <span className="font-sans italic font-display normal-case tracking-normal text-[12px]">
-                        {c.author.name}
-                      </span>{" "}
-                      · {formatDate(c.createdAt)}
-                    </div>
+        <Card className="self-start">
+          <CardHeader>
+            <CardTitle>Suivi</CardTitle>
+          </CardHeader>
+          <div className="px-5 py-4">
+            <ol className="relative space-y-3 before:absolute before:left-[5px] before:top-1.5 before:bottom-1.5 before:w-px before:bg-[var(--color-border)]">
+              {dossier.statusChanges.map((sc) => (
+                <li key={sc.id} className="relative pl-5">
+                  <span className="absolute left-0 top-1.5 size-2.5 rounded-full bg-[var(--color-fg)] ring-4 ring-[var(--color-surface)]" />
+                  <div className="text-[13px] font-medium">{STATUS_LABELS[sc.toStatus]}</div>
+                  <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+                    {formatDate(sc.createdAt)}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
-
-        <aside>
-          <h2
-            className="font-display text-[26px] tracking-[-0.018em] mb-4"
-            style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 420' }}
-          >
-            Chronologie
-          </h2>
-          <ol className="border-t border-[var(--color-rule-strong)]">
-            {dossier.statusChanges.map((sc) => (
-              <li key={sc.id} className="py-3 border-b border-[var(--color-rule)] last:border-b-0">
-                <div className="text-[14px] text-[var(--color-ink)]">
-                  {STATUS_LABELS[sc.toStatus]}
-                </div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.10em] text-[var(--color-ink-mute)] tabular mt-0.5">
-                  {formatDate(sc.createdAt)}
-                </div>
-              </li>
-            ))}
-          </ol>
-        </aside>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </Card>
       </div>
+
+      {dossier.comments.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Messages</CardTitle>
+          </CardHeader>
+          <div className="divide-y divide-[var(--color-border)]">
+            {dossier.comments.map((c) => (
+              <div key={c.id} className="px-5 py-3">
+                <div className="text-[13px] text-[var(--color-fg)]">{c.body}</div>
+                <div className="text-[11.5px] text-[var(--color-fg-3)] mt-1">
+                  {c.author.name} · {formatDate(c.createdAt)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
     </div>
   );
 }
