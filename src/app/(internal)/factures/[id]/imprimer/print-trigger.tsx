@@ -1,14 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
-
 export function PrintTrigger() {
-  // déclenche l'impression dès chargement
-  useEffect(() => {
-    const t = setTimeout(() => window.print(), 300);
-    return () => clearTimeout(t);
-  }, []);
-
   return (
     <button
       type="button"
