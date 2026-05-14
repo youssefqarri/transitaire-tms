@@ -1,27 +1,6 @@
 import "server-only";
 import nodemailer from "nodemailer";
-
-let cachedTransporter: nodemailer.Transporter | null = null;
-
-function getTransporter(): nodemailer.Transporter {
-  if (cachedTransporter) return cachedTransporter;
-  const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT ?? 587);
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  if (!host || !user || !pass) {
-    throw new Error(
-      "SMTP non configuré (SMTP_HOST, SMTP_USER, SMTP_PASS dans .env)",
-    );
-  }
-  cachedTransporter = nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465, // SSL pour 465, sinon STARTTLS
-    auth: { user, pass },
-  });
-  return cachedTransporter;
-}
+import { getSettings } from "./settings";
 
 export type SendMailOptions = {
   to: string;
@@ -31,9 +10,23 @@ export type SendMailOptions = {
   replyTo?: string;
 };
 
+async function buildTransporter(): Promise<nodemailer.Transporter> {
+  const s = await getSettings();
+  if (!s.smtpHost || !s.smtpUser || !s.smtpPass) {
+    throw new Error("SMTP non configuré (Paramètres → Email sortant)");
+  }
+  return nodemailer.createTransport({
+    host: s.smtpHost,
+    port: s.smtpPort ?? 587,
+    secure: s.smtpSecure || (s.smtpPort ?? 587) === 465,
+    auth: { user: s.smtpUser, pass: s.smtpPass },
+  });
+}
+
 export async function sendMail(opts: SendMailOptions): Promise<{ messageId: string }> {
-  const from = process.env.SMTP_FROM || process.env.SMTP_USER!;
-  const transporter = getTransporter();
+  const s = await getSettings();
+  const from = s.smtpFrom || s.smtpUser!;
+  const transporter = await buildTransporter();
   const info = await transporter.sendMail({
     from,
     to: opts.to,
@@ -45,13 +38,22 @@ export async function sendMail(opts: SendMailOptions): Promise<{ messageId: stri
   return { messageId: info.messageId };
 }
 
-/** Convertit un body texte (plain) en HTML simple en préservant les sauts de ligne et liens. */
+/** Vérifie juste la connexion SMTP (login). */
+export async function verifySmtp(): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const transporter = await buildTransporter();
+    await transporter.verify();
+    return { ok: true };
+  } catch (e: unknown) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
 export function textToHtml(text: string): string {
   const escaped = text
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
-  // liens http(s) → <a>
   const linked = escaped.replace(
     /(https?:\/\/[^\s<]+)/g,
     '<a href="$1" style="color:#3b5bdb">$1</a>',

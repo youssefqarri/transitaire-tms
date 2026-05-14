@@ -25,7 +25,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "_");
     const key = `${id}/${Date.now()}_${safeName}`;
     const buf = Buffer.from(await file.arrayBuffer());
-    const { key: storedKey, url } = await storage().put(key, buf, {
+    const driver = await storage();
+    const { key: storedKey, url } = await driver.put(key, buf, {
       mime: file.type,
       filename: file.name,
     });
