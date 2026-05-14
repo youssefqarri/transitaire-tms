@@ -28,7 +28,7 @@ export function Topbar({
   return (
     <header className="h-14 px-5 lg:px-6 border-b border-[var(--color-border)] bg-[var(--color-surface)] sticky top-0 z-30 flex items-center gap-4">
       <form
-        className="flex-1 max-w-md"
+        className="w-full max-w-md"
         onSubmit={(e) => {
           e.preventDefault();
           const q = (e.currentTarget.elements.namedItem("q") as HTMLInputElement).value;
@@ -48,7 +48,7 @@ export function Topbar({
         </div>
       </form>
 
-      <div className="relative">
+      <div className="relative ml-auto">
         <button
           onClick={() => setOpen((o) => !o)}
           className="flex items-center gap-2 px-1.5 py-1 rounded-[var(--radius)] hover:bg-[var(--color-surface-2)] transition-colors"

@@ -54,7 +54,7 @@ export default async function DossierDetailPage({
   const missing = required.filter((c) => !presentCategories.has(c));
 
   return (
-    <div className="space-y-5 max-w-[1280px]">
+    <div className="space-y-5">
       <Link
         href="/dossiers"
         className="inline-flex items-center gap-1 text-[12.5px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)]"

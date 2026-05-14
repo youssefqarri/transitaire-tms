@@ -51,7 +51,7 @@ export default async function DashboardPage() {
   const totalActive = statusGroups.reduce((s, g) => s + g._count._all, 0);
 
   return (
-    <div className="space-y-6 max-w-[1280px]">
+    <div className="space-y-6">
       <header>
         <h1 className="text-[22px] font-semibold tracking-tight">Tableau de bord</h1>
         <p className="text-[13px] text-[var(--color-fg-3)] mt-1">

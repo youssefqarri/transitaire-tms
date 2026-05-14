@@ -44,7 +44,7 @@ export default async function DossiersPage({
   });
 
   return (
-    <div className="space-y-5 max-w-[1280px]">
+    <div className="space-y-5">
       <header className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-[22px] font-semibold tracking-tight">Dossiers</h1>
