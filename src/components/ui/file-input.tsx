@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useState } from "react";
 import { Upload, FileText, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +30,8 @@ export function FileInput({
   id,
   className,
 }: Props) {
-  const ref = useRef<HTMLInputElement>(null);
+  const autoId = useId();
+  const inputId = id ?? autoId;
   const [dragOver, setDragOver] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -46,19 +47,9 @@ export function FileInput({
 
   return (
     <div className={className}>
-      <input
-        ref={ref}
-        id={id}
-        type="file"
-        accept={accept}
-        className="sr-only"
-        onChange={(e) => handle(e.target.files?.[0] ?? null)}
-      />
-
       {!value ? (
-        <button
-          type="button"
-          onClick={() => ref.current?.click()}
+        <label
+          htmlFor={inputId}
           onDragOver={(e) => {
             e.preventDefault();
             setDragOver(true);
@@ -71,9 +62,8 @@ export function FileInput({
             if (f) handle(f);
           }}
           className={cn(
-            "w-full flex items-center gap-3 px-3.5 py-3 text-left",
-            "rounded-[var(--radius)] border border-dashed transition-colors",
-            "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)]",
+            "w-full flex items-center gap-3 px-3.5 py-3 text-left cursor-pointer",
+            "rounded-[var(--radius)] border border-dashed transition-colors select-none",
             dragOver
               ? "border-[var(--color-accent)] bg-[var(--color-accent-soft)]"
               : "border-[var(--color-border-2)] bg-[var(--color-surface)] hover:border-[var(--color-fg-mute)] hover:bg-[var(--color-surface-2)]",
@@ -96,7 +86,14 @@ export function FileInput({
               PDF, image ou Office{maxSize && ` · max ${formatBytes(maxSize)}`}
             </div>
           </div>
-        </button>
+          <input
+            id={inputId}
+            type="file"
+            accept={accept}
+            className="sr-only"
+            onChange={(e) => handle(e.target.files?.[0] ?? null)}
+          />
+        </label>
       ) : (
         <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-[var(--radius)] border border-[var(--color-border-2)] bg-[var(--color-surface)]">
           <div className="size-8 rounded-full bg-[var(--color-accent-soft)] flex items-center justify-center shrink-0">
@@ -112,10 +109,7 @@ export function FileInput({
           </div>
           <button
             type="button"
-            onClick={() => {
-              handle(null);
-              if (ref.current) ref.current.value = "";
-            }}
+            onClick={() => handle(null)}
             aria-label="Retirer le fichier"
             className="size-7 rounded-[var(--radius-sm)] flex items-center justify-center text-[var(--color-fg-mute)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] transition-colors"
           >
