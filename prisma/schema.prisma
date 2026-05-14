@@ -51,6 +51,8 @@ model User {
   uploadedDocs      Document[]            @relation("UploadedBy")
   createdDossiers   Dossier[]             @relation("CreatedBy")
   assignedDossiers  Dossier[]             @relation("AssignedTo")
+  invoicesCreated   Invoice[]             @relation("InvoicesCreated")
+  messagesSent      OutgoingMessage[]     @relation("MessagesSent")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -132,6 +134,8 @@ model Client {
 
   dossiers Dossier[]
   users    User[]   // utilisateurs portail client
+  invoices Invoice[]
+  outgoingMessages OutgoingMessage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -238,6 +242,8 @@ model Dossier {
   comments        DossierComment[]
   emails          EmailLink[]
   notifications   Notification[]
+  invoiceItems    InvoiceItem[]
+  outgoingMessages OutgoingMessage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -498,6 +504,147 @@ model Notification {
 
   @@index([userId, read])
   @@index([role, read])
+}
+
+// ============================================================
+// AUDIT LOG
+// ============================================================
+
+// ============================================================
+// FACTURATION (Honoraires + Débours)
+// ============================================================
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PARTIALLY_PAID
+  PAID
+  CANCELLED
+  OVERDUE
+}
+
+enum InvoiceItemKind {
+  HONORAIRE       // honoraires soumis à TVA (20% au Maroc)
+  DEBOURS         // débours sans TVA (avance de frais douane, fret, etc.)
+  AUTRE
+}
+
+enum PaymentMethod {
+  VIREMENT
+  CHEQUE
+  ESPECES
+  CMI
+  TRAITE
+  AUTRE
+}
+
+model Invoice {
+  id            String         @id @default(cuid())
+  number        String         @unique           // ex: F-2026-0001
+  year          Int                              // pour numérotation annuelle
+  sequence      Int                              // séquence dans l'année
+
+  clientId      String
+  client        Client         @relation(fields: [clientId], references: [id])
+
+  status        InvoiceStatus  @default(DRAFT)
+
+  issuedAt      DateTime?
+  dueAt         DateTime?
+  paidAt        DateTime?
+  paidAmount    Decimal        @default(0) @db.Decimal(12, 2)
+
+  notes         String?        @db.Text
+  termsOfPayment String?
+  paymentMethod PaymentMethod?
+  paymentRef    String?
+
+  items         InvoiceItem[]
+
+  createdById   String?
+  createdBy     User?          @relation("InvoicesCreated", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@unique([year, sequence])
+  @@index([clientId, status])
+  @@index([status])
+}
+
+model InvoiceItem {
+  id          String          @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice         @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  kind        InvoiceItemKind @default(HONORAIRE)
+  description String
+  quantity    Decimal         @default(1) @db.Decimal(10, 2)
+  unitPrice   Decimal         @db.Decimal(12, 2)
+  vatRate     Decimal         @default(20) @db.Decimal(5, 2)
+  dossierId   String?
+  dossier     Dossier?        @relation(fields: [dossierId], references: [id], onDelete: SetNull)
+  order       Int             @default(0)
+
+  @@index([invoiceId])
+  @@index([dossierId])
+}
+
+// ============================================================
+// TEMPLATES DE MESSAGES (Email + WhatsApp)
+// ============================================================
+
+enum MessageChannel {
+  EMAIL
+  WHATSAPP
+}
+
+enum MessageLang {
+  FR
+  AR
+  EN
+}
+
+model MessageTemplate {
+  id        String          @id @default(cuid())
+  key       String                                // ex: "docs_manquants", "bae_pret", "fiche_liquidation"
+  channel   MessageChannel
+  lang      MessageLang     @default(FR)
+  subject   String?                               // email uniquement
+  body      String          @db.Text              // peut contenir {{client.name}}, {{dossier.number}}, etc.
+  active    Boolean         @default(true)
+  notes     String?         @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([key, channel, lang])
+}
+
+model OutgoingMessage {
+  id          String         @id @default(cuid())
+  channel     MessageChannel
+  lang        MessageLang
+  templateKey String?
+  toAddress   String                             // email ou +212XXXXXXXXX
+  subject     String?
+  body        String         @db.Text
+  status      String         @default("PENDING") // PENDING, SENT, FAILED, DELIVERED, READ
+  error       String?        @db.Text
+  externalId  String?                            // ID Meta/SMTP
+
+  dossierId   String?
+  dossier     Dossier?       @relation(fields: [dossierId], references: [id], onDelete: SetNull)
+  clientId    String?
+  client      Client?        @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  sentById    String?
+  sentBy      User?          @relation("MessagesSent", fields: [sentById], references: [id], onDelete: SetNull)
+
+  sentAt      DateTime?
+  createdAt   DateTime       @default(now())
+
+  @@index([dossierId])
+  @@index([clientId])
+  @@index([channel, status])
 }
 
 // ============================================================

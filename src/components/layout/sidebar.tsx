@@ -13,6 +13,8 @@ import {
   Truck,
   Settings,
   ScrollText,
+  Receipt,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/generated/prisma/enums";
@@ -39,6 +41,12 @@ const SECTIONS: { title?: string; items: NavItem[] }[] = [
     ],
   },
   {
+    title: "Facturation",
+    items: [
+      { href: "/factures", label: "Factures", icon: Receipt },
+    ],
+  },
+  {
     title: "Registre",
     items: [
       { href: "/clients",      label: "Clients",       icon: Building2 },
@@ -49,9 +57,10 @@ const SECTIONS: { title?: string; items: NavItem[] }[] = [
   {
     title: "Administration",
     items: [
-      { href: "/utilisateurs", label: "Utilisateurs", icon: Users,      roles: ["ADMIN"] },
-      { href: "/audit",        label: "Audit",        icon: ScrollText, roles: ["ADMIN"] },
-      { href: "/parametres",   label: "Paramètres",   icon: Settings,   roles: ["ADMIN"] },
+      { href: "/utilisateurs", label: "Utilisateurs", icon: Users,         roles: ["ADMIN"] },
+      { href: "/templates",    label: "Templates",    icon: MessageSquare, roles: ["ADMIN"] },
+      { href: "/audit",        label: "Audit",        icon: ScrollText,    roles: ["ADMIN"] },
+      { href: "/parametres",   label: "Paramètres",   icon: Settings,      roles: ["ADMIN"] },
     ],
   },
 ];

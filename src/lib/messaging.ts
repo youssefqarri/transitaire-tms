@@ -1,0 +1,160 @@
+import type { MessageChannel, MessageLang } from "@/generated/prisma/enums";
+import { prisma } from "./db";
+
+export const CHANNEL_LABELS: Record<MessageChannel, string> = {
+  EMAIL: "Email",
+  WHATSAPP: "WhatsApp",
+};
+
+export const LANG_LABELS: Record<MessageLang, string> = {
+  FR: "Français",
+  AR: "العربية",
+  EN: "English",
+};
+
+/** Clés de templates utilisées par l'app. Si manquant en DB, on retombe sur les défauts ci-dessous. */
+export const TEMPLATE_KEYS = {
+  DOCS_MANQUANTS: "docs_manquants",
+  DOCS_RECUS: "docs_recus",
+  DOSSIER_OUVERT: "dossier_ouvert",
+  ENREGISTRE_DOUANE: "enregistre_douane",
+  VISITE_PROGRAMMEE: "visite_programmee",
+  FICHE_LIQUIDATION: "fiche_liquidation",
+  BAE_PRET: "bae_pret",
+  DOSSIER_CLOTURE: "dossier_cloture",
+} as const;
+
+export type TemplateKey = (typeof TEMPLATE_KEYS)[keyof typeof TEMPLATE_KEYS];
+
+/** Variables remplaçables : {{client.name}}, {{dossier.number}}, etc. */
+export function renderTemplate(
+  template: string,
+  vars: Record<string, string | number | undefined | null>,
+): string {
+  return template.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_, key) => {
+    const v = vars[key];
+    return v == null ? "" : String(v);
+  });
+}
+
+/** Charge un template depuis la DB ou retourne le défaut. */
+export async function loadTemplate(
+  key: TemplateKey,
+  channel: MessageChannel,
+  lang: MessageLang = "FR",
+): Promise<{ subject: string | null; body: string }> {
+  const t = await prisma.messageTemplate.findUnique({
+    where: { key_channel_lang: { key, channel, lang } },
+  });
+  if (t && t.active) {
+    return { subject: t.subject, body: t.body };
+  }
+  return DEFAULT_TEMPLATES[lang]?.[key]?.[channel] ?? DEFAULT_TEMPLATES.FR[key][channel];
+}
+
+// ─── Templates par défaut (utilisés si rien en DB) ─────────────
+type ChannelDefaults = Record<MessageChannel, { subject: string | null; body: string }>;
+type LangDefaults = Record<TemplateKey, ChannelDefaults>;
+
+const TPL_FR: LangDefaults = {
+  docs_manquants: {
+    EMAIL: {
+      subject: "Documents manquants — Dossier {{dossier.number}}",
+      body:
+        "Bonjour {{client.contactName}},\n\n" +
+        "Pour finaliser votre dossier {{dossier.number}} ({{dossier.reference}}), nous avons besoin des pièces suivantes :\n\n" +
+        "{{missingList}}\n\n" +
+        "Merci de nous les transmettre dans les meilleurs délais.\n\n" +
+        "Cordialement,\n{{user.name}}\nMaison de Transit",
+    },
+    WHATSAPP: {
+      subject: null,
+      body:
+        "Bonjour {{client.contactName}}, pour avancer sur votre dossier *{{dossier.number}}* il nous manque :\n\n{{missingList}}\n\nMerci.",
+    },
+  },
+  docs_recus: {
+    EMAIL: {
+      subject: "Documents reçus — Dossier {{dossier.number}}",
+      body:
+        "Bonjour {{client.contactName}},\n\nNous avons bien reçu les documents pour le dossier {{dossier.number}}. Nous procédons aux prochaines étapes.\n\nCordialement,\n{{user.name}}",
+    },
+    WHATSAPP: {
+      subject: null,
+      body: "✅ Documents reçus pour le dossier *{{dossier.number}}*. Nous procédons à la suite.",
+    },
+  },
+  dossier_ouvert: {
+    EMAIL: {
+      subject: "Ouverture du dossier {{dossier.number}}",
+      body:
+        "Bonjour {{client.contactName}},\n\nNous avons ouvert le dossier {{dossier.number}} pour vos marchandises (réf. {{dossier.reference}}).\n\nVous pouvez en suivre l'avancement à tout moment depuis votre espace client.\n\nCordialement,\n{{user.name}}",
+    },
+    WHATSAPP: {
+      subject: null,
+      body: "Dossier *{{dossier.number}}* ouvert pour la réf. {{dossier.reference}}. Suivi : {{portalUrl}}",
+    },
+  },
+  enregistre_douane: {
+    EMAIL: {
+      subject: "DUM enregistrée — Dossier {{dossier.number}}",
+      body:
+        "Bonjour,\n\nLa DUM {{dum.number}} a été enregistrée pour votre dossier {{dossier.number}}.\n\nCordialement,\n{{user.name}}",
+    },
+    WHATSAPP: {
+      subject: null,
+      body: "DUM *{{dum.number}}* enregistrée pour le dossier {{dossier.number}}.",
+    },
+  },
+  visite_programmee: {
+    EMAIL: {
+      subject: "Visite douane programmée — {{dossier.number}}",
+      body:
+        "Bonjour,\n\nLa visite douane de votre dossier {{dossier.number}} est programmée le {{visitDate}}.\n\nCordialement,\n{{user.name}}",
+    },
+    WHATSAPP: {
+      subject: null,
+      body: "📅 Visite douane prévue le {{visitDate}} pour le dossier *{{dossier.number}}*.",
+    },
+  },
+  fiche_liquidation: {
+    EMAIL: {
+      subject: "Fiche de liquidation — Dossier {{dossier.number}}",
+      body:
+        "Bonjour,\n\nVeuillez trouver ci-joint la fiche de liquidation et le ticket de paiement pour votre dossier {{dossier.number}}.\n\nMerci d'effectuer le règlement et de nous transmettre la preuve afin que nous puissions lever la marchandise.\n\nCordialement,\n{{user.name}}",
+    },
+    WHATSAPP: {
+      subject: null,
+      body: "💳 Fiche de liquidation prête pour le dossier *{{dossier.number}}*. Vérifiez votre email pour le détail.",
+    },
+  },
+  bae_pret: {
+    EMAIL: {
+      subject: "Bon à enlever définitif — Dossier {{dossier.number}}",
+      body:
+        "Bonjour,\n\nBonne nouvelle : le bon à enlever définitif est obtenu pour votre dossier {{dossier.number}}. La marchandise peut être enlevée.\n\nCordialement,\n{{user.name}}",
+    },
+    WHATSAPP: {
+      subject: null,
+      body: "🎉 BAE définitif obtenu pour le dossier *{{dossier.number}}*. Marchandise prête à enlever.",
+    },
+  },
+  dossier_cloture: {
+    EMAIL: {
+      subject: "Dossier {{dossier.number}} clôturé",
+      body:
+        "Bonjour,\n\nVotre dossier {{dossier.number}} est clôturé. Merci de votre confiance.\n\nCordialement,\n{{user.name}}",
+    },
+    WHATSAPP: {
+      subject: null,
+      body: "✅ Dossier *{{dossier.number}}* clôturé. Merci de votre confiance.",
+    },
+  },
+};
+
+const DEFAULT_TEMPLATES: Record<MessageLang, LangDefaults> = {
+  FR: TPL_FR,
+  // Pour AR / EN on retombera sur FR si rien en DB. À étoffer plus tard.
+  AR: TPL_FR,
+  EN: TPL_FR,
+};
