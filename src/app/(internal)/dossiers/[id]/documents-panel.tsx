@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { FileInput } from "@/components/ui/file-input";
 import { DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
 import type { DocumentCategory } from "@/generated/prisma/enums";
 import { formatDate } from "@/lib/utils";
@@ -125,7 +126,14 @@ export function DocumentsPanel({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="file">Fichier (optionnel)</Label>
-            <Input id="file" type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+            <FileInput
+              id="file"
+              value={file}
+              onChange={setFile}
+              maxSize={25 * 1024 * 1024}
+              accept=".pdf,.png,.jpg,.jpeg,.webp,.xlsx,.xls,.docx,.doc,.csv"
+              placeholder="Cliquez ou glissez le fichier"
+            />
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
