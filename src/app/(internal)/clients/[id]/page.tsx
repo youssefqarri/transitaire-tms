@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Folder } from "lucide-react";
+import { ArrowLeft, Folder, Pencil } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatDate, formatCurrency } from "@/lib/utils";
 
@@ -33,13 +34,20 @@ export default async function ClientDetailPage({
         <ArrowLeft className="size-4" /> Retour aux clients
       </Link>
 
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{client.name}</h1>
-        <div className="text-sm text-[var(--color-muted-foreground)] mt-1">
-          {client.code && `Code ${client.code} · `}
-          {client.ice && `ICE ${client.ice} · `}
-          {client.city}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">{client.name}</h1>
+          <div className="text-sm text-[var(--color-muted-foreground)] mt-1">
+            {client.code && `Code ${client.code} · `}
+            {client.ice && `ICE ${client.ice} · `}
+            {client.city}
+          </div>
         </div>
+        <Link href={`/clients/${id}/modifier`}>
+          <Button variant="outline" size="sm">
+            <Pencil /> Modifier
+          </Button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

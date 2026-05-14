@@ -35,7 +35,11 @@ export default async function SuppliersPage() {
         ) : (
           <div className="divide-y divide-[var(--color-border)]">
             {suppliers.map((s) => (
-              <div key={s.id} className="flex items-center gap-4 p-4">
+              <Link
+                key={s.id}
+                href={`/fournisseurs/${s.id}`}
+                className="flex items-center gap-4 p-4 hover:bg-[var(--color-surface-2)] transition-colors"
+              >
                 <div className="size-10 rounded-lg bg-[var(--color-muted)] flex items-center justify-center">
                   <Truck className="size-4" />
                 </div>
@@ -48,7 +52,7 @@ export default async function SuppliersPage() {
                 <div className="text-xs text-[var(--color-muted-foreground)]">
                   {s._count.dossiers} dossier{s._count.dossiers > 1 ? "s" : ""}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

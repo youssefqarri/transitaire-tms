@@ -13,10 +13,38 @@ import { Combobox } from "@/components/ui/combobox";
 type Client = { id: string; name: string; code?: string | null; city?: string | null };
 type Supplier = { id: string; name: string; country?: string | null };
 
-export function NewDossierForm({ clients, suppliers }: { clients: Client[]; suppliers: Supplier[] }) {
+type FormState = {
+  number: string;
+  reference: string;
+  type: "IMPORT" | "EXPORT";
+  paymentMode: "WITH_PAYMENT" | "WITHOUT_PAYMENT";
+  clientId: string;
+  supplierId: string;
+  goodsValue: string;
+  goodsCurrency: string;
+  goodsWeight: string;
+  goodsPackages: string;
+  goodsDescription: string;
+  controlOffice?: string;
+  visitDate?: string;
+};
+
+export function NewDossierForm({
+  clients,
+  suppliers,
+  mode = "create",
+  dossierId,
+  initial,
+}: {
+  clients: Client[];
+  suppliers: Supplier[];
+  mode?: "create" | "edit";
+  dossierId?: string;
+  initial?: Partial<FormState>;
+}) {
   const router = useRouter();
   const [pending, start] = useTransition();
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormState>({
     number: "",
     reference: "",
     type: "IMPORT",
@@ -28,31 +56,58 @@ export function NewDossierForm({ clients, suppliers }: { clients: Client[]; supp
     goodsWeight: "",
     goodsPackages: "",
     goodsDescription: "",
+    controlOffice: "",
+    visitDate: "",
+    ...initial,
   });
 
-  function set<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
+  function set<K extends keyof FormState>(k: K, v: FormState[K]) {
     setForm((f) => ({ ...f, [k]: v }));
   }
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.number || !form.clientId) {
-      toast.error("Numéro de dossier et client requis");
+    if (!form.clientId) {
+      toast.error("Client requis");
       return;
     }
+    if (mode === "create" && !form.number) {
+      toast.error("Numéro de dossier requis");
+      return;
+    }
+
     start(async () => {
-      const res = await fetch("/api/dossiers", {
-        method: "POST",
+      const url = mode === "edit" ? `/api/dossiers/${dossierId}` : "/api/dossiers";
+      const method = mode === "edit" ? "PATCH" : "POST";
+      // PATCH attend les nombres en number, POST en string. On formate.
+      const body =
+        mode === "edit"
+          ? {
+              reference: form.reference || null,
+              clientId: form.clientId,
+              supplierId: form.supplierId || null,
+              goodsValue: form.goodsValue ? Number(form.goodsValue) : null,
+              goodsCurrency: form.goodsCurrency,
+              goodsWeight: form.goodsWeight ? Number(form.goodsWeight) : null,
+              goodsPackages: form.goodsPackages ? Number(form.goodsPackages) : null,
+              goodsDescription: form.goodsDescription || null,
+              controlOffice: form.controlOffice || null,
+              visitDate: form.visitDate || null,
+            }
+          : form;
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (!res.ok) {
-        toast.error(data.error || "Erreur lors de la création");
+        toast.error(data.error || "Erreur");
         return;
       }
-      toast.success("Dossier créé");
-      router.push(`/dossiers/${data.id}`);
+      toast.success(mode === "edit" ? "Dossier mis à jour" : "Dossier créé");
+      router.push(mode === "edit" ? `/dossiers/${dossierId}` : `/dossiers/${data.id}`);
       router.refresh();
     });
   }
@@ -61,14 +116,20 @@ export function NewDossierForm({ clients, suppliers }: { clients: Client[]; supp
     <form onSubmit={submit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="number">Numéro de dossier (WinApp) *</Label>
+          <Label htmlFor="number">Numéro de dossier (WinApp) {mode === "create" ? "*" : ""}</Label>
           <Input
             id="number"
             value={form.number}
             onChange={(e) => set("number", e.target.value)}
             placeholder="Ex. D-2026-00123"
-            required
+            required={mode === "create"}
+            disabled={mode === "edit"}
           />
+          {mode === "edit" && (
+            <p className="text-[11px] text-[var(--color-fg-mute)]">
+              Le numéro WinApp ne peut pas être modifié.
+            </p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="reference">Référence fournisseur</Label>
@@ -81,7 +142,12 @@ export function NewDossierForm({ clients, suppliers }: { clients: Client[]; supp
         </div>
         <div className="space-y-2">
           <Label htmlFor="type">Type</Label>
-          <Select id="type" value={form.type} onChange={(e) => set("type", e.target.value)}>
+          <Select
+            id="type"
+            value={form.type}
+            onChange={(e) => set("type", e.target.value as "IMPORT" | "EXPORT")}
+            disabled={mode === "edit"}
+          >
             <option value="IMPORT">Import</option>
             <option value="EXPORT">Export</option>
           </Select>
@@ -91,7 +157,10 @@ export function NewDossierForm({ clients, suppliers }: { clients: Client[]; supp
           <Select
             id="paymentMode"
             value={form.paymentMode}
-            onChange={(e) => set("paymentMode", e.target.value)}
+            onChange={(e) =>
+              set("paymentMode", e.target.value as "WITH_PAYMENT" | "WITHOUT_PAYMENT")
+            }
+            disabled={mode === "edit"}
           >
             <option value="WITH_PAYMENT">Avec paiement (engagement requis)</option>
             <option value="WITHOUT_PAYMENT">Sans paiement</option>
@@ -190,11 +259,45 @@ export function NewDossierForm({ clients, suppliers }: { clients: Client[]; supp
         </div>
       </div>
 
+      {mode === "edit" && (
+        <div className="border-t border-[var(--color-border)] pt-6">
+          <div className="text-sm font-medium mb-3">Douane</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="controlOffice">Bureau de contrôle</Label>
+              <Input
+                id="controlOffice"
+                value={form.controlOffice ?? ""}
+                onChange={(e) => set("controlOffice", e.target.value)}
+                placeholder="Ex. Casablanca-Port"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="visitDate">Date de visite</Label>
+              <Input
+                id="visitDate"
+                type="date"
+                value={form.visitDate ?? ""}
+                onChange={(e) => set("visitDate", e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={() => router.back()}>
           Annuler
         </Button>
-        <Button disabled={pending}>{pending ? "Création…" : "Créer le dossier"}</Button>
+        <Button disabled={pending}>
+          {pending
+            ? mode === "edit"
+              ? "Enregistrement…"
+              : "Création…"
+            : mode === "edit"
+            ? "Enregistrer"
+            : "Créer le dossier"}
+        </Button>
       </div>
     </form>
   );

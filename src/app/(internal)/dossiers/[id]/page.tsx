@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, AlertTriangle } from "lucide-react";
+import { ArrowLeft, AlertTriangle, Pencil } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,7 +81,14 @@ export default async function DossierDetailPage({
             {dossier.createdBy && ` par ${dossier.createdBy.name}`}
           </p>
         </div>
-        <StatusChanger dossierId={dossier.id} currentStatus={dossier.status} />
+        <div className="flex items-center gap-2">
+          <Link href={`/dossiers/${dossier.id}/modifier`}>
+            <Button variant="outline" size="sm">
+              <Pencil /> Modifier
+            </Button>
+          </Link>
+          <StatusChanger dossierId={dossier.id} currentStatus={dossier.status} />
+        </div>
       </header>
 
       {missing.length > 0 && (
