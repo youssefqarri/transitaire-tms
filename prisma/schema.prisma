@@ -42,6 +42,7 @@ model User {
 
   accounts          Account[]
   sessions          Session[]
+  apiTokens         ApiToken[]
   emailAccounts     EmailAccount[]
   notifications     Notification[]
   auditLogs         AuditLog[]
@@ -91,6 +92,23 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// Token d'accès API (pour intégrations externes, ex: Claude)
+model ApiToken {
+  id          String    @id @default(cuid())
+  label       String                          // étiquette (ex: "Claude - Karim")
+  tokenHash   String    @unique               // hash bcrypt du token
+  prefix      String                          // 8 premiers chars du token (affichage)
+  userId      String                          // hérite des permissions de cet user
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt   DateTime?
+  lastUsedAt  DateTime?
+  revokedAt   DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 // ============================================================

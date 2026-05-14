@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Mail, Database, Cloud } from "lucide-react";
+import { Mail, Database, Cloud, Key, ChevronRight } from "lucide-react";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -68,6 +69,23 @@ export default async function SettingsPage() {
           </div>
         </div>
       </Card>
+
+      <Link href="/parametres/tokens" className="block">
+        <Card className="hover:border-[var(--color-primary)]/40 transition-colors">
+          <div className="p-5 flex items-center gap-4">
+            <div className="size-10 rounded-xl bg-[oklch(95%_0.05_258)] text-[oklch(40%_0.18_258)] flex items-center justify-center">
+              <Key className="size-5" />
+            </div>
+            <div className="flex-1">
+              <div className="font-semibold">Tokens API</div>
+              <div className="text-sm text-[var(--color-muted-foreground)]">
+                Gérer les accès programmatiques (Claude, scripts d'import, intégrations…)
+              </div>
+            </div>
+            <ChevronRight className="size-4 text-[var(--color-muted-foreground)]" />
+          </div>
+        </Card>
+      </Link>
     </div>
   );
 }
