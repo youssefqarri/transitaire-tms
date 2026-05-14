@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
 import { ROLE_LABELS } from "@/lib/roles";
 import type { UserRole } from "@/generated/prisma/enums";
 
-export function UserForm({ clients }: { clients: { id: string; name: string }[] }) {
+export function UserForm({ clients }: { clients: { id: string; label: string }[] }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [form, setForm] = useState({
@@ -74,14 +75,15 @@ export function UserForm({ clients }: { clients: { id: string; name: string }[] 
         {form.role === "CLIENT" && (
           <div className="md:col-span-2 space-y-2">
             <Label htmlFor="clientId">Client associé *</Label>
-            <Select id="clientId" value={form.clientId} onChange={(e) => set("clientId", e.target.value)} required>
-              <option value="">— Sélectionner —</option>
-              {clients.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </Select>
+            <Combobox
+              id="clientId"
+              items={clients.map((c) => ({ id: c.id, label: c.label }))}
+              value={form.clientId}
+              onChange={(id) => set("clientId", id)}
+              placeholder="Sélectionner un client…"
+              searchPlaceholder="Rechercher un client…"
+              emptyText="Aucun client trouvé"
+            />
           </div>
         )}
       </div>

@@ -8,9 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Combobox } from "@/components/ui/combobox";
 
-type Client = { id: string; name: string };
-type Supplier = { id: string; name: string };
+type Client = { id: string; name: string; code?: string | null; city?: string | null };
+type Supplier = { id: string; name: string; country?: string | null };
 
 export function NewDossierForm({ clients, suppliers }: { clients: Client[]; suppliers: Supplier[] }) {
   const router = useRouter();
@@ -98,34 +99,36 @@ export function NewDossierForm({ clients, suppliers }: { clients: Client[]; supp
         </div>
         <div className="space-y-2">
           <Label htmlFor="clientId">Client *</Label>
-          <Select
+          <Combobox
             id="clientId"
+            items={clients.map((c) => ({
+              id: c.id,
+              label: c.name,
+              sublabel: [c.code, c.city].filter(Boolean).join(" · ") || undefined,
+            }))}
             value={form.clientId}
-            onChange={(e) => set("clientId", e.target.value)}
-            required
-          >
-            <option value="">— Sélectionner —</option>
-            {clients.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </Select>
+            onChange={(id) => set("clientId", id)}
+            placeholder="Sélectionner un client…"
+            searchPlaceholder="Rechercher par nom, code, ville…"
+            emptyText="Aucun client trouvé"
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="supplierId">Fournisseur</Label>
-          <Select
+          <Combobox
             id="supplierId"
+            items={suppliers.map((s) => ({
+              id: s.id,
+              label: s.name,
+              sublabel: s.country || undefined,
+            }))}
             value={form.supplierId}
-            onChange={(e) => set("supplierId", e.target.value)}
-          >
-            <option value="">—</option>
-            {suppliers.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </Select>
+            onChange={(id) => set("supplierId", id)}
+            placeholder="Aucun fournisseur"
+            searchPlaceholder="Rechercher un fournisseur…"
+            emptyText="Aucun fournisseur trouvé"
+            clearable
+          />
         </div>
       </div>
 
