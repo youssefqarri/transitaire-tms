@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-
-const UPLOAD_DIR = process.env.UPLOAD_DIR || "./uploads";
+import { storage } from "@/lib/storage";
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string; filename: string }> },
 ) {
   const { id, filename } = await params;
@@ -27,16 +24,23 @@ export async function GET(
   if (filename.includes("/") || filename.includes("..")) {
     return NextResponse.json({ error: "Bad" }, { status: 400 });
   }
-  const fullPath = path.join(UPLOAD_DIR, id, filename);
-  try {
-    const buf = await readFile(fullPath);
-    return new NextResponse(buf as unknown as BodyInit, {
-      headers: {
-        "Content-Type": "application/octet-stream",
-        "Content-Disposition": `inline; filename="${filename}"`,
-      },
-    });
-  } catch {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const key = `${id}/${filename}`;
+  const driver = storage();
+
+  // Si S3 : on redirige vers une URL signée (pas de bande passante sur Next.js)
+  if (process.env.STORAGE_DRIVER === "s3") {
+    const signed = await driver.presignGet(key, 300);
+    return NextResponse.redirect(signed);
   }
+
+  // Sinon : on stream depuis le driver local
+  const obj = await driver.get(key);
+  if (!obj) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  return new NextResponse(obj.body as unknown as BodyInit, {
+    headers: {
+      "Content-Type": obj.mime ?? "application/octet-stream",
+      "Content-Disposition": `inline; filename="${filename}"`,
+    },
+  });
 }

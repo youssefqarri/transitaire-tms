@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
-import { writeFile, mkdir } from "node:fs/promises";
-import path from "node:path";
-
-const UPLOAD_DIR = process.env.UPLOAD_DIR || "./uploads";
+import { storage } from "@/lib/storage";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -20,23 +17,24 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!name) return NextResponse.json({ error: "name requis" }, { status: 400 });
 
   let fileUrl: string | null = null;
+  let fileKey: string | null = null;
   let fileSize: number | null = null;
   let mimeType: string | null = null;
 
   if (file && typeof file === "object" && "arrayBuffer" in file) {
-    const dossierDir = path.join(UPLOAD_DIR, id);
-    await mkdir(dossierDir, { recursive: true });
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "_");
-    const filename = `${Date.now()}_${safeName}`;
-    const fullPath = path.join(dossierDir, filename);
+    const key = `${id}/${Date.now()}_${safeName}`;
     const buf = Buffer.from(await file.arrayBuffer());
-    await writeFile(fullPath, buf);
-    fileUrl = `/api/files/${id}/${filename}`;
+    const { key: storedKey, url } = await storage().put(key, buf, {
+      mime: file.type,
+      filename: file.name,
+    });
+    fileKey = storedKey;
+    fileUrl = url;
     fileSize = buf.length;
     mimeType = file.type;
   }
 
-  // détection version: s'il existe déjà un doc même catégorie + même nom -> v+1
   const previous = await prisma.document.findFirst({
     where: { dossierId: id, category: category as never, name },
     orderBy: { version: "desc" },
@@ -57,7 +55,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     },
   });
 
-  // si BAD reçu, mettre à jour le dossier
   if (category === "BON_A_DELIVRER") {
     await prisma.dossier.update({
       where: { id },
@@ -70,7 +67,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     action: "UPLOAD_DOCUMENT",
     entity: "Document",
     entityId: doc.id,
-    metadata: { name, category, dossierId: id },
+    metadata: { name, category, dossierId: id, fileKey },
   });
 
   return NextResponse.json(doc);

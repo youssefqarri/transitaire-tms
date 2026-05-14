@@ -49,7 +49,6 @@ export function FileInput({
     <div className={className}>
       {!value ? (
         <label
-          htmlFor={inputId}
           onDragOver={(e) => {
             e.preventDefault();
             setDragOver(true);

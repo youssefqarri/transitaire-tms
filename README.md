@@ -107,6 +107,30 @@ Mot de passe pour tous : `password123`
 | `npm run db:studio` | Prisma Studio (UI BDD) |
 | `npm run setup` | Bootstrap complet |
 
+## Configuration du stockage de fichiers
+
+Deux drivers de stockage sont disponibles, sélectionnés via `STORAGE_DRIVER` :
+
+### Driver `local` (par défaut, pour le dev)
+Fichiers stockés dans `./uploads`. Servis par notre proxy `/api/files/...` avec ACL.
+
+### Driver `s3` (Backblaze B2, AWS S3, Cloudflare R2…)
+
+1. Créer un bucket privé sur Backblaze.
+2. Créer une **Application Key** avec accès read+write sur ce bucket.
+3. Récupérer l'endpoint S3 (visible sur la page du bucket, format `s3.<region>.backblazeb2.com`).
+4. Mettre dans `.env` :
+   ```
+   STORAGE_DRIVER="s3"
+   S3_ENDPOINT="https://s3.eu-central-003.backblazeb2.com"
+   S3_REGION="eu-central-003"
+   S3_BUCKET="transitaire-tms-prod"
+   S3_ACCESS_KEY_ID="<KeyID>"
+   S3_SECRET_ACCESS_KEY="<ApplicationKey>"
+   ```
+
+L'app continue d'exposer les fichiers via `/api/files/<dossierId>/<filename>` avec contrôle d'accès, **mais redirige le client vers une URL signée S3** (5 min de durée de vie) — la bande passante ne transite pas par Next.js.
+
 ## Configuration Gmail
 
 1. Créer un projet Google Cloud → activer Gmail API.
