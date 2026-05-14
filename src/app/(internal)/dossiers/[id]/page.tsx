@@ -17,6 +17,8 @@ import { StatusChanger } from "./status-changer";
 import { DocumentsPanel } from "./documents-panel";
 import { DUMsPanel } from "./dums-panel";
 import { CommentsPanel } from "./comments-panel";
+import { NotifyClientButton } from "./notify-button";
+import { OutgoingMessagesPanel } from "./outgoing-messages-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +47,11 @@ export default async function DossierDetailPage({
       comments: {
         orderBy: { createdAt: "desc" },
         include: { author: { select: { name: true } } },
+      },
+      outgoingMessages: {
+        orderBy: { createdAt: "desc" },
+        take: 10,
+        include: { sentBy: { select: { name: true } } },
       },
     },
   });
@@ -81,7 +88,12 @@ export default async function DossierDetailPage({
             {dossier.createdBy && ` par ${dossier.createdBy.name}`}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <NotifyClientButton
+            dossierId={dossier.id}
+            clientEmail={dossier.client.email}
+            clientPhone={dossier.client.phone}
+          />
           <Link href={`/dossiers/${dossier.id}/modifier`}>
             <Button variant="outline" size="sm">
               <Pencil /> Modifier
@@ -177,6 +189,23 @@ export default async function DossierDetailPage({
               authorName: c.author.name,
             }))}
           />
+          {dossier.outgoingMessages.length > 0 && (
+            <OutgoingMessagesPanel
+              messages={dossier.outgoingMessages.map((m) => ({
+                id: m.id,
+                channel: m.channel,
+                subject: m.subject,
+                body: m.body,
+                status: m.status,
+                error: m.error,
+                toAddress: m.toAddress,
+                templateKey: m.templateKey,
+                sentByName: m.sentBy?.name ?? null,
+                createdAt: m.createdAt,
+                sentAt: m.sentAt,
+              }))}
+            />
+          )}
         </div>
 
         <Card className="self-start">

@@ -131,6 +131,38 @@ Fichiers stockés dans `./uploads`. Servis par notre proxy `/api/files/...` avec
 
 L'app continue d'exposer les fichiers via `/api/files/<dossierId>/<filename>` avec contrôle d'accès, **mais redirige le client vers une URL signée S3** (5 min de durée de vie) — la bande passante ne transite pas par Next.js.
 
+## Configuration email sortant (notifications clients)
+
+L'app envoie des emails de notification au client (« documents manquants », « BAE prêt », etc.) via SMTP. Configure dans `.env` :
+
+### Gmail (gratuit, jusqu'à 500 emails/jour)
+
+1. Activer la **vérification en 2 étapes** sur ton compte Google.
+2. Aller sur https://myaccount.google.com/apppasswords → générer un mot de passe d'application.
+3. Renseigner dans `.env` :
+   ```
+   SMTP_HOST="smtp.gmail.com"
+   SMTP_PORT="587"
+   SMTP_USER="ton-email@gmail.com"
+   SMTP_PASS="<mot de passe d'application 16 caractères>"
+   SMTP_FROM="Cabinet Transit <ton-email@gmail.com>"
+   ```
+
+### Outlook / Microsoft 365
+```
+SMTP_HOST="smtp.office365.com"
+SMTP_PORT="587"
+SMTP_USER="ton-email@entreprise.ma"
+SMTP_PASS="<mot de passe>"
+SMTP_FROM="ton-email@entreprise.ma"
+```
+
+### Serveur SMTP propre (ex. OVH, IONOS)
+Renseigne les valeurs fournies par ton hébergeur.
+
+### Utilisation
+Sur la page détail d'un dossier, bouton **« Notifier le client »** → choisir un template (docs manquants, BAE prêt, etc.) → preview + édition libre → envoi. L'historique des envois est conservé dans le dossier.
+
 ## Configuration Gmail
 
 1. Créer un projet Google Cloud → activer Gmail API.
