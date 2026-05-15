@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatDateTime } from "@/lib/utils";
 
 type Token = {
@@ -37,6 +38,7 @@ export function TokensClient({
   const [label, setLabel] = useState("");
   const [userId, setUserId] = useState(users[0]?.id ?? "");
   const [createdToken, setCreatedToken] = useState<string | null>(null);
+  const [revokeTarget, setRevokeTarget] = useState<Token | null>(null);
 
   function create(e: React.FormEvent) {
     e.preventDefault();
@@ -61,8 +63,9 @@ export function TokensClient({
     });
   }
 
-  function revoke(id: string) {
-    if (!confirm("Révoquer ce token ? L'intégration cessera de fonctionner immédiatement.")) return;
+  function doRevoke() {
+    if (!revokeTarget) return;
+    const id = revokeTarget.id;
     start(async () => {
       const res = await fetch(`/api/tokens/${id}`, { method: "DELETE" });
       if (!res.ok) {
@@ -70,6 +73,7 @@ export function TokensClient({
         return;
       }
       toast.success("Token révoqué");
+      setRevokeTarget(null);
       router.refresh();
     });
   }
@@ -188,13 +192,32 @@ export function TokensClient({
               </div>
             </div>
             {!t.revoked && (
-              <Button variant="ghost" size="icon" onClick={() => revoke(t.id)} title="Révoquer">
+              <Button variant="ghost" size="icon" onClick={() => setRevokeTarget(t)} title="Révoquer">
                 <Trash2 className="size-4 text-[var(--color-destructive)]" />
               </Button>
             )}
           </div>
         ))}
       </div>
+
+      <ConfirmDialog
+        open={!!revokeTarget}
+        onOpenChange={(o) => !o && setRevokeTarget(null)}
+        title="Révoquer ce token ?"
+        description={
+          <>
+            L&apos;intégration utilisant{" "}
+            <span className="font-medium text-[var(--color-fg)]">
+              {revokeTarget?.label}
+            </span>{" "}
+            cessera de fonctionner immédiatement. Cette action ne peut pas être annulée.
+          </>
+        }
+        confirmLabel="Révoquer"
+        tone="danger"
+        pending={pending}
+        onConfirm={doRevoke}
+      />
     </div>
   );
 }

@@ -30,6 +30,15 @@ export default async function LoginPage({
           <div className="mt-6">
             <LoginForm from={params.from} />
           </div>
+
+          <div className="mt-5 text-center">
+            <a
+              href="/mot-de-passe-oublie"
+              className="text-[12.5px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)] underline-offset-4 hover:underline"
+            >
+              Mot de passe oublié ?
+            </a>
+          </div>
         </div>
 
         <div className="mt-5 text-center text-[12px] text-[var(--color-fg-3)]">

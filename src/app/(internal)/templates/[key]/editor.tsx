@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 type Email = { subject: string | null; body: string };
 type WhatsApp = { body: string };
@@ -39,6 +40,7 @@ export function TemplateEditor({
   const [waBody, setWaBody] = useState(whatsappCustom?.body ?? whatsappDefault.body);
   const [waActive, setWaActive] = useState(whatsappCustom?.active ?? false);
   const waIsCustom = !!whatsappCustom;
+  const [resetTarget, setResetTarget] = useState<"EMAIL" | "WHATSAPP" | null>(null);
 
   function saveEmail() {
     start(async () => {
@@ -84,8 +86,9 @@ export function TemplateEditor({
     });
   }
 
-  function reset(channel: "EMAIL" | "WHATSAPP") {
-    if (!confirm("Supprimer la version personnalisée et revenir au défaut ?")) return;
+  function doReset() {
+    if (!resetTarget) return;
+    const channel = resetTarget;
     start(async () => {
       const res = await fetch(`/api/templates/${templateKey}?channel=${channel}&lang=FR`, {
         method: "DELETE",
@@ -95,6 +98,7 @@ export function TemplateEditor({
         return;
       }
       toast.success("Réinitialisé au défaut");
+      setResetTarget(null);
       router.refresh();
     });
   }
@@ -141,7 +145,7 @@ export function TemplateEditor({
           </div>
           <div className="flex items-center justify-end gap-2 pt-1">
             {emailIsCustom && (
-              <Button variant="ghost" size="sm" onClick={() => reset("EMAIL")} disabled={pending}>
+              <Button variant="ghost" size="sm" onClick={() => setResetTarget("EMAIL")} disabled={pending}>
                 <RotateCcw /> Réinitialiser
               </Button>
             )}
@@ -187,7 +191,7 @@ export function TemplateEditor({
           </div>
           <div className="flex items-center justify-end gap-2 pt-1">
             {waIsCustom && (
-              <Button variant="ghost" size="sm" onClick={() => reset("WHATSAPP")} disabled={pending}>
+              <Button variant="ghost" size="sm" onClick={() => setResetTarget("WHATSAPP")} disabled={pending}>
                 <RotateCcw /> Réinitialiser
               </Button>
             )}
@@ -197,6 +201,17 @@ export function TemplateEditor({
           </div>
         </div>
       </Card>
+
+      <ConfirmDialog
+        open={!!resetTarget}
+        onOpenChange={(o) => !o && setResetTarget(null)}
+        title="Réinitialiser au défaut ?"
+        description="Le template personnalisé sera supprimé et la version par défaut sera utilisée à la place."
+        confirmLabel="Réinitialiser"
+        tone="warn"
+        pending={pending}
+        onConfirm={doReset}
+      />
     </div>
   );
 }

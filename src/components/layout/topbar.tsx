@@ -1,6 +1,7 @@
 "use client";
 
-import { Search, LogOut, ChevronDown } from "lucide-react";
+import { Search, LogOut, ChevronDown, User } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { ROLE_LABELS } from "@/lib/roles";
@@ -69,9 +70,17 @@ export function Topbar({
               <div className="text-[13px] font-medium">{name}</div>
               <div className="text-[11.5px] text-[var(--color-fg-3)] truncate">{email}</div>
             </div>
+            <Link
+              href="/profil"
+              onClick={() => setOpen(false)}
+              className="w-full px-3 py-2 text-[13px] flex items-center gap-2 hover:bg-[var(--color-surface-2)] text-left text-[var(--color-fg-2)]"
+            >
+              <User className="size-3.5" strokeWidth={1.75} />
+              Mon profil
+            </Link>
             <button
               onClick={logout}
-              className="w-full px-3 py-2 text-[13px] flex items-center gap-2 hover:bg-[var(--color-surface-2)] text-left text-[var(--color-fg-2)]"
+              className="w-full px-3 py-2 text-[13px] flex items-center gap-2 hover:bg-[var(--color-surface-2)] text-left text-[var(--color-fg-2)] border-t border-[var(--color-border)]"
             >
               <LogOut className="size-3.5" strokeWidth={1.75} />
               Se déconnecter
