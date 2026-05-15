@@ -146,8 +146,8 @@ export function NewInvoiceForm({
             </Button>
           </div>
         </div>
-        <div className="border border-[var(--color-border)] rounded-[var(--radius)] divide-y divide-[var(--color-border)]">
-          <div className="grid grid-cols-[140px_1fr_80px_120px_70px_120px_36px] gap-3 px-3 py-2 text-[11px] font-medium text-[var(--color-fg-3)] uppercase tracking-wide bg-[var(--color-surface-2)]">
+        <div className="border border-[var(--color-border)] rounded-[var(--radius)] divide-y divide-[var(--color-border)] overflow-x-auto">
+          <div className="grid grid-cols-[140px_minmax(180px,1fr)_80px_120px_70px_120px_36px] gap-3 px-3 py-2 text-[11px] font-medium text-[var(--color-fg-3)] uppercase tracking-wide bg-[var(--color-surface-2)] min-w-[760px]">
             <div>Type</div>
             <div>Description</div>
             <div className="text-right">Qté</div>
@@ -161,7 +161,7 @@ export function NewInvoiceForm({
             return (
               <div
                 key={i}
-                className="grid grid-cols-[140px_1fr_80px_120px_70px_120px_36px] gap-3 items-center px-3 py-2"
+                className="grid grid-cols-[140px_minmax(180px,1fr)_80px_120px_70px_120px_36px] gap-3 items-center px-3 py-2 min-w-[760px]"
               >
                 <Select
                   value={it.kind}

@@ -73,65 +73,111 @@ export default async function InvoicesPage() {
             </div>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-[13px]">
-              <thead>
-                <tr className="border-b border-[var(--color-border)] text-[11.5px] font-medium text-[var(--color-fg-3)]">
-                  <th className="text-left px-5 py-2.5">N°</th>
-                  <th className="text-left px-5 py-2.5">Client</th>
-                  <th className="text-left px-5 py-2.5">Émise le</th>
-                  <th className="text-left px-5 py-2.5">Échéance</th>
-                  <th className="text-right px-5 py-2.5">Total TTC</th>
-                  <th className="text-left px-5 py-2.5">Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoices.map((inv) => {
-                  const t = totals(
-                    inv.items.map((it) => ({
-                      kind: it.kind,
-                      description: it.description,
-                      quantity: Number(it.quantity),
-                      unitPrice: Number(it.unitPrice),
-                      vatRate: Number(it.vatRate),
-                    })),
-                  );
-                  return (
-                    <tr
-                      key={inv.id}
-                      className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-2)]"
-                    >
-                      <td className="px-5 py-2.5">
-                        <Link
-                          href={`/factures/${inv.id}`}
-                          className="font-mono font-medium text-[var(--color-fg)] hover:text-[var(--color-accent)]"
-                        >
-                          {inv.number}
-                        </Link>
-                      </td>
-                      <td className="px-5 py-2.5 truncate max-w-[240px] text-[var(--color-fg-2)]">
-                        {inv.client.name}
-                      </td>
-                      <td className="px-5 py-2.5 text-[var(--color-fg-3)]">
+          <>
+            {/* Mobile: cartes */}
+            <div className="md:hidden divide-y divide-[var(--color-border)]">
+              {invoices.map((inv) => {
+                const t = totals(
+                  inv.items.map((it) => ({
+                    kind: it.kind,
+                    description: it.description,
+                    quantity: Number(it.quantity),
+                    unitPrice: Number(it.unitPrice),
+                    vatRate: Number(it.vatRate),
+                  })),
+                );
+                return (
+                  <Link
+                    key={inv.id}
+                    href={`/factures/${inv.id}`}
+                    className="block px-4 py-3 hover:bg-[var(--color-surface-2)] active:bg-[var(--color-surface-2)] transition-colors"
+                  >
+                    <div className="flex items-center justify-between gap-3 mb-1">
+                      <span className="font-mono font-medium text-[14px] text-[var(--color-fg)]">
+                        {inv.number}
+                      </span>
+                      <Badge tone={TONE_BY_STATUS[inv.status]}>
+                        {INVOICE_STATUS_LABELS[inv.status]}
+                      </Badge>
+                    </div>
+                    <div className="text-[13px] text-[var(--color-fg-2)] truncate">
+                      {inv.client.name}
+                    </div>
+                    <div className="flex items-center justify-between mt-1.5">
+                      <span className="text-[11px] text-[var(--color-fg-mute)]">
                         {formatDate(inv.issuedAt)}
-                      </td>
-                      <td className="px-5 py-2.5 text-[var(--color-fg-3)]">
-                        {formatDate(inv.dueAt)}
-                      </td>
-                      <td className="px-5 py-2.5 text-right font-mono tnum text-[var(--color-fg)]">
+                        {inv.dueAt && ` · Éch. ${formatDate(inv.dueAt)}`}
+                      </span>
+                      <span className="font-mono text-[13.5px] tnum font-medium text-[var(--color-fg)]">
                         {formatMAD(t.totalTTC)}
-                      </td>
-                      <td className="px-5 py-2.5">
-                        <Badge tone={TONE_BY_STATUS[inv.status]}>
-                          {INVOICE_STATUS_LABELS[inv.status]}
-                        </Badge>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Desktop: tableau */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-[13px]">
+                <thead>
+                  <tr className="border-b border-[var(--color-border)] text-[11.5px] font-medium text-[var(--color-fg-3)]">
+                    <th className="text-left px-5 py-2.5">N°</th>
+                    <th className="text-left px-5 py-2.5">Client</th>
+                    <th className="text-left px-5 py-2.5">Émise le</th>
+                    <th className="text-left px-5 py-2.5">Échéance</th>
+                    <th className="text-right px-5 py-2.5">Total TTC</th>
+                    <th className="text-left px-5 py-2.5">Statut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoices.map((inv) => {
+                    const t = totals(
+                      inv.items.map((it) => ({
+                        kind: it.kind,
+                        description: it.description,
+                        quantity: Number(it.quantity),
+                        unitPrice: Number(it.unitPrice),
+                        vatRate: Number(it.vatRate),
+                      })),
+                    );
+                    return (
+                      <tr
+                        key={inv.id}
+                        className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-2)]"
+                      >
+                        <td className="px-5 py-2.5">
+                          <Link
+                            href={`/factures/${inv.id}`}
+                            className="font-mono font-medium text-[var(--color-fg)] hover:text-[var(--color-accent)]"
+                          >
+                            {inv.number}
+                          </Link>
+                        </td>
+                        <td className="px-5 py-2.5 truncate max-w-[240px] text-[var(--color-fg-2)]">
+                          {inv.client.name}
+                        </td>
+                        <td className="px-5 py-2.5 text-[var(--color-fg-3)]">
+                          {formatDate(inv.issuedAt)}
+                        </td>
+                        <td className="px-5 py-2.5 text-[var(--color-fg-3)]">
+                          {formatDate(inv.dueAt)}
+                        </td>
+                        <td className="px-5 py-2.5 text-right font-mono tnum text-[var(--color-fg)]">
+                          {formatMAD(t.totalTTC)}
+                        </td>
+                        <td className="px-5 py-2.5">
+                          <Badge tone={TONE_BY_STATUS[inv.status]}>
+                            {INVOICE_STATUS_LABELS[inv.status]}
+                          </Badge>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </Card>
     </div>

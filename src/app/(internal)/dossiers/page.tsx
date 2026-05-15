@@ -102,71 +102,117 @@ export default async function DossiersPage({
             </div>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-[13px]">
-              <thead>
-                <tr className="border-b border-[var(--color-border)] text-[11.5px] font-medium text-[var(--color-fg-3)]">
-                  <th className="text-left px-5 py-2.5">Dossier</th>
-                  <th className="text-left px-5 py-2.5">Client</th>
-                  <th className="text-left px-5 py-2.5">Référence</th>
-                  <th className="text-left px-5 py-2.5">DUM(s)</th>
-                  <th className="text-right px-5 py-2.5">Valeur</th>
-                  <th className="text-right px-5 py-2.5">Colis</th>
-                  <th className="text-right px-5 py-2.5">Poids</th>
-                  <th className="text-right px-5 py-2.5">Docs</th>
-                  <th className="text-left px-5 py-2.5">Statut</th>
-                  <th className="text-right px-5 py-2.5">Maj</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dossiers.map((d) => (
-                  <tr
-                    key={d.id}
-                    className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-2)] transition-colors"
-                  >
-                    <td className="px-5 py-2.5">
-                      <Link
-                        href={`/dossiers/${d.id}`}
-                        className="font-mono font-medium text-[var(--color-fg)] hover:text-[var(--color-accent)]"
-                      >
-                        {d.number}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-2.5 truncate max-w-[200px] text-[var(--color-fg-2)]">
-                      {d.client.name}
-                    </td>
-                    <td className="px-5 py-2.5 text-[var(--color-fg-3)] font-mono text-[12px]">
+          <>
+            {/* Mobile: liste en cartes empilées */}
+            <div className="md:hidden divide-y divide-[var(--color-border)]">
+              {dossiers.map((d) => (
+                <Link
+                  key={d.id}
+                  href={`/dossiers/${d.id}`}
+                  className="block px-4 py-3 hover:bg-[var(--color-surface-2)] active:bg-[var(--color-surface-2)] transition-colors"
+                >
+                  <div className="flex items-center justify-between gap-3 mb-1">
+                    <span className="font-mono font-medium text-[14px] text-[var(--color-fg)]">
+                      {d.number}
+                    </span>
+                    <StatusBadge status={d.status} size="sm" />
+                  </div>
+                  <div className="text-[13px] text-[var(--color-fg-2)] truncate">
+                    {d.client.name}
+                  </div>
+                  <div className="flex items-center justify-between gap-2 mt-1.5">
+                    <span className="text-[11.5px] text-[var(--color-fg-3)] font-mono truncate">
                       {d.reference ?? "—"}
-                    </td>
-                    <td className="px-5 py-2.5 font-mono text-[12px] text-[var(--color-fg-3)]">
-                      {d.dums.length === 0 ? "—" : d.dums.map((dum) => dum.number).join(", ")}
-                    </td>
-                    <td className="px-5 py-2.5 text-right font-mono tnum text-[var(--color-fg)]">
+                      {d.dums.length > 0 && (
+                        <span className="ml-2">· DUM {d.dums.map((dum) => dum.number).join(", ")}</span>
+                      )}
+                    </span>
+                    <span className="font-mono text-[12.5px] tnum text-[var(--color-fg)] shrink-0">
                       {formatCurrency(
                         d.goodsValue ? Number(d.goodsValue) : null,
                         d.goodsCurrency ?? "EUR",
                       )}
-                    </td>
-                    <td className="px-5 py-2.5 text-right font-mono tnum text-[var(--color-fg-3)]">
-                      {formatNumber(d.goodsPackages)}
-                    </td>
-                    <td className="px-5 py-2.5 text-right font-mono tnum text-[var(--color-fg-3)]">
-                      {d.goodsWeight ? `${formatNumber(Number(d.goodsWeight))} kg` : "—"}
-                    </td>
-                    <td className="px-5 py-2.5 text-right tnum text-[var(--color-fg-3)]">
-                      {d._count.documents}
-                    </td>
-                    <td className="px-5 py-2.5">
-                      <StatusBadge status={d.status} size="sm" />
-                    </td>
-                    <td className="px-5 py-2.5 text-right text-[11.5px] text-[var(--color-fg-mute)] whitespace-nowrap">
-                      {formatDate(d.updatedAt)}
-                    </td>
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-1 text-[11px] text-[var(--color-fg-mute)]">
+                    <span>
+                      {formatNumber(d.goodsPackages)} colis
+                      {d.goodsWeight && ` · ${formatNumber(Number(d.goodsWeight))} kg`}
+                      {d._count.documents > 0 && ` · ${d._count.documents} doc${d._count.documents > 1 ? "s" : ""}`}
+                    </span>
+                    <span>{formatDate(d.updatedAt)}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {/* Desktop: tableau */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-[13px]">
+                <thead>
+                  <tr className="border-b border-[var(--color-border)] text-[11.5px] font-medium text-[var(--color-fg-3)]">
+                    <th className="text-left px-5 py-2.5">Dossier</th>
+                    <th className="text-left px-5 py-2.5">Client</th>
+                    <th className="text-left px-5 py-2.5">Référence</th>
+                    <th className="text-left px-5 py-2.5">DUM(s)</th>
+                    <th className="text-right px-5 py-2.5">Valeur</th>
+                    <th className="text-right px-5 py-2.5">Colis</th>
+                    <th className="text-right px-5 py-2.5">Poids</th>
+                    <th className="text-right px-5 py-2.5">Docs</th>
+                    <th className="text-left px-5 py-2.5">Statut</th>
+                    <th className="text-right px-5 py-2.5">Maj</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {dossiers.map((d) => (
+                    <tr
+                      key={d.id}
+                      className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-2)] transition-colors"
+                    >
+                      <td className="px-5 py-2.5">
+                        <Link
+                          href={`/dossiers/${d.id}`}
+                          className="font-mono font-medium text-[var(--color-fg)] hover:text-[var(--color-accent)]"
+                        >
+                          {d.number}
+                        </Link>
+                      </td>
+                      <td className="px-5 py-2.5 truncate max-w-[200px] text-[var(--color-fg-2)]">
+                        {d.client.name}
+                      </td>
+                      <td className="px-5 py-2.5 text-[var(--color-fg-3)] font-mono text-[12px]">
+                        {d.reference ?? "—"}
+                      </td>
+                      <td className="px-5 py-2.5 font-mono text-[12px] text-[var(--color-fg-3)]">
+                        {d.dums.length === 0 ? "—" : d.dums.map((dum) => dum.number).join(", ")}
+                      </td>
+                      <td className="px-5 py-2.5 text-right font-mono tnum text-[var(--color-fg)]">
+                        {formatCurrency(
+                          d.goodsValue ? Number(d.goodsValue) : null,
+                          d.goodsCurrency ?? "EUR",
+                        )}
+                      </td>
+                      <td className="px-5 py-2.5 text-right font-mono tnum text-[var(--color-fg-3)]">
+                        {formatNumber(d.goodsPackages)}
+                      </td>
+                      <td className="px-5 py-2.5 text-right font-mono tnum text-[var(--color-fg-3)]">
+                        {d.goodsWeight ? `${formatNumber(Number(d.goodsWeight))} kg` : "—"}
+                      </td>
+                      <td className="px-5 py-2.5 text-right tnum text-[var(--color-fg-3)]">
+                        {d._count.documents}
+                      </td>
+                      <td className="px-5 py-2.5">
+                        <StatusBadge status={d.status} size="sm" />
+                      </td>
+                      <td className="px-5 py-2.5 text-right text-[11.5px] text-[var(--color-fg-mute)] whitespace-nowrap">
+                        {formatDate(d.updatedAt)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </Card>
     </div>
