@@ -2,77 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  Folder,
-  FileText,
-  Mail,
-  Bell,
-  Users,
-  Building2,
-  Truck,
-  Settings,
-  ScrollText,
-  Receipt,
-  MessageSquare,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/generated/prisma/enums";
-
-type NavItem = {
-  href: string;
-  label: string;
-  icon: typeof LayoutDashboard;
-  roles?: UserRole[];
-};
-
-const SECTIONS: { title?: string; items: NavItem[] }[] = [
-  {
-    items: [
-      { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
-    ],
-  },
-  {
-    title: "Exploitation",
-    items: [
-      { href: "/dossiers", label: "Dossiers",      icon: Folder },
-      { href: "/dums",     label: "DUMs",          icon: FileText },
-      { href: "/emails",   label: "Emails",        icon: Mail },
-    ],
-  },
-  {
-    title: "Facturation",
-    items: [
-      { href: "/factures", label: "Factures", icon: Receipt },
-    ],
-  },
-  {
-    title: "Registre",
-    items: [
-      { href: "/clients",      label: "Clients",       icon: Building2 },
-      { href: "/fournisseurs", label: "Fournisseurs",  icon: Truck },
-      { href: "/notifications", label: "Notifications", icon: Bell },
-    ],
-  },
-  {
-    title: "Administration",
-    items: [
-      { href: "/utilisateurs", label: "Utilisateurs", icon: Users,         roles: ["ADMIN"] },
-      { href: "/templates",    label: "Templates",    icon: MessageSquare, roles: ["ADMIN"] },
-      { href: "/audit",        label: "Audit",        icon: ScrollText,    roles: ["ADMIN"] },
-      { href: "/parametres",   label: "Paramètres",   icon: Settings,      roles: ["ADMIN"] },
-    ],
-  },
-];
+import { visibleSections } from "./nav-items";
 
 export function Sidebar({ role, unreadCount = 0 }: { role: UserRole; unreadCount?: number }) {
   const pathname = usePathname();
-  const visible = SECTIONS
-    .map((s) => ({
-      ...s,
-      items: s.items.filter((it) => !it.roles || it.roles.includes(role)),
-    }))
-    .filter((s) => s.items.length > 0);
+  const sections = visibleSections(role);
 
   return (
     <aside
@@ -89,7 +25,7 @@ export function Sidebar({ role, unreadCount = 0 }: { role: UserRole; unreadCount
       </div>
 
       <nav className="flex-1 px-2.5 py-4 overflow-y-auto scrollbar-thin space-y-5">
-        {visible.map((section, idx) => (
+        {sections.map((section, idx) => (
           <div key={section.title ?? idx}>
             {section.title && (
               <div className="px-2.5 mb-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-[var(--color-fg-mute)]">
