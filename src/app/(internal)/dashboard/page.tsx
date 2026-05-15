@@ -129,7 +129,7 @@ export default async function DashboardPage() {
                     )}
                   </div>
                 </div>
-                <div className="hidden sm:block text-right">
+                <div className="hidden sm:block text-right shrink-0 w-[120px]">
                   <div className="font-mono text-[12.5px] text-[var(--color-fg)] tnum">
                     {formatCurrency(
                       d.goodsValue ? Number(d.goodsValue) : null,
@@ -140,7 +140,9 @@ export default async function DashboardPage() {
                     {formatDate(d.updatedAt)}
                   </div>
                 </div>
-                <StatusBadge status={d.status} size="sm" />
+                <div className="shrink-0 w-[160px] flex justify-start">
+                  <StatusBadge status={d.status} size="sm" />
+                </div>
               </Link>
             ))}
           </div>
