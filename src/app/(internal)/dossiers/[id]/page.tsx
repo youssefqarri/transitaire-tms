@@ -13,6 +13,12 @@ import {
   DOCUMENT_CATEGORY_LABELS,
   requiredDocuments,
 } from "@/lib/statuses";
+
+const PACKAGING_LABELS = {
+  COLIS: "Colis",
+  PALETTES: "Palettes",
+  CONTENEURS: "Conteneurs",
+} as const;
 import { StatusChanger } from "./status-changer";
 import { DocumentsPanel } from "./documents-panel";
 import { DUMsPanel } from "./dums-panel";
@@ -103,6 +109,38 @@ export default async function DossierDetailPage({
         </div>
       </header>
 
+      {/* Drapeaux parallèles (Facturé, Livré, BAE, MCI, etc.) */}
+      {(dossier.billed ||
+        dossier.delivered ||
+        dossier.baeUnderPayment ||
+        dossier.baeUnderConformity ||
+        dossier.awaitingConformityValidation ||
+        dossier.hasConformityVisit) && (
+        <div className="flex flex-wrap gap-1.5">
+          {dossier.billed && <Badge tone="ok">✓ Facturé</Badge>}
+          {dossier.delivered && <Badge tone="ok">✓ Livré</Badge>}
+          {dossier.baeUnderPayment && <Badge tone="warn">BAE sous réserve paiement</Badge>}
+          {dossier.baeUnderConformity && <Badge tone="warn">BAE sous réserve conformité</Badge>}
+          {dossier.awaitingConformityValidation && (
+            <Badge tone="info">⏳ En attente conformité MCI</Badge>
+          )}
+          {dossier.hasConformityVisit && dossier.conformityVisitDate && (
+            <Badge tone="info">
+              Visite conformité {formatDate(dossier.conformityVisitDate)}
+            </Badge>
+          )}
+        </div>
+      )}
+
+      {dossier.customNote && (
+        <Card className="border-[var(--color-accent)]/30 bg-[var(--color-accent-soft)]">
+          <div className="p-4 text-[13px] text-[var(--color-fg)] whitespace-pre-wrap">
+            <span className="font-medium">Note : </span>
+            {dossier.customNote}
+          </div>
+        </Card>
+      )}
+
       {missing.length > 0 && (
         <Card className="border-[var(--color-warning)]/30 bg-[var(--color-warning-soft)]">
           <div className="p-4 flex items-start gap-3">
@@ -149,9 +187,13 @@ export default async function DossierDetailPage({
                 mono
                 value={dossier.goodsWeight ? `${formatNumber(Number(dossier.goodsWeight))} kg` : "—"}
               />
-              <Field label="Colis" mono value={formatNumber(dossier.goodsPackages)} />
+              <Field
+                label={PACKAGING_LABELS[dossier.goodsPackagingUnit]}
+                mono
+                value={formatNumber(dossier.goodsPackages)}
+              />
               <Field label="Bureau" value={dossier.controlOffice ?? "—"} />
-              <Field label="Visite" mono value={formatDate(dossier.visitDate)} />
+              <Field label="Visite douane" mono value={formatDate(dossier.visitDate)} />
               <Field label="Assigné" value={dossier.assignedTo?.name ?? "—"} />
               {dossier.goodsDescription && (
                 <div className="md:col-span-4">

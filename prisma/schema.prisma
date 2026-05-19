@@ -175,6 +175,12 @@ enum PaymentMode {
   WITHOUT_PAYMENT   // sans paiement
 }
 
+enum PackagingUnit {
+  COLIS
+  PALETTES
+  CONTENEURS
+}
+
 enum DossierStatus {
   OUVERTURE                 // ouverture dossier
   RECEPTIONNE               // réceptionné
@@ -213,7 +219,8 @@ model Dossier {
   goodsValue       Decimal? @db.Decimal(14, 2)
   goodsCurrency    String?  @default("EUR")
   goodsWeight      Decimal? @db.Decimal(12, 3)  // en kg
-  goodsPackages    Int?     // nb de colis
+  goodsPackages    Int?     // quantité
+  goodsPackagingUnit PackagingUnit @default(COLIS)
   goodsDescription String?  @db.Text
 
   // dates clés
@@ -221,14 +228,24 @@ model Dossier {
   docsCompleteAt       DateTime?
   bonADelivrerAt       DateTime?
   declarationAt        DateTime?
-  visitDate            DateTime?
+  visitDate            DateTime?  // visite douane
+  conformityVisitDate  DateTime?  // visite conformité (MCI)
   liquidationAt        DateTime?
   closedAt             DateTime?
 
   // contrôle
   controlOffice   String?      // bureau de contrôle
   hasVisit        Boolean      @default(false)
+  hasConformityVisit Boolean    @default(false)
   hasBureauValeur Boolean      @default(false)
+
+  // drapeaux parallèles (cases à cocher multiples)
+  billed                       Boolean @default(false)
+  delivered                    Boolean @default(false)
+  baeUnderPayment              Boolean @default(false)
+  baeUnderConformity           Boolean @default(false)
+  awaitingConformityValidation Boolean @default(false)
+  customNote                   String? @db.Text
 
   // staff
   createdById   String?

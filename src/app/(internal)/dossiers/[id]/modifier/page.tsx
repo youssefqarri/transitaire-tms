@@ -55,11 +55,21 @@ export default async function EditDossierPage({
               goodsCurrency: dossier.goodsCurrency ?? "EUR",
               goodsWeight: dossier.goodsWeight ? String(dossier.goodsWeight) : "",
               goodsPackages: dossier.goodsPackages != null ? String(dossier.goodsPackages) : "",
+              goodsPackagingUnit: dossier.goodsPackagingUnit,
               goodsDescription: dossier.goodsDescription ?? "",
               controlOffice: dossier.controlOffice ?? "",
               visitDate: dossier.visitDate
                 ? new Date(dossier.visitDate).toISOString().slice(0, 10)
                 : "",
+              conformityVisitDate: dossier.conformityVisitDate
+                ? new Date(dossier.conformityVisitDate).toISOString().slice(0, 10)
+                : "",
+              billed: dossier.billed,
+              delivered: dossier.delivered,
+              baeUnderPayment: dossier.baeUnderPayment,
+              baeUnderConformity: dossier.baeUnderConformity,
+              awaitingConformityValidation: dossier.awaitingConformityValidation,
+              customNote: dossier.customNote ?? "",
             }}
           />
         </div>

@@ -13,6 +13,14 @@ import { Combobox } from "@/components/ui/combobox";
 type Client = { id: string; name: string; code?: string | null; city?: string | null };
 type Supplier = { id: string; name: string; country?: string | null };
 
+type PackagingUnit = "COLIS" | "PALETTES" | "CONTENEURS";
+
+const PACKAGING_LABELS: Record<PackagingUnit, string> = {
+  COLIS: "Colis",
+  PALETTES: "Palettes",
+  CONTENEURS: "Conteneurs",
+};
+
 type FormState = {
   number: string;
   reference: string;
@@ -24,9 +32,18 @@ type FormState = {
   goodsCurrency: string;
   goodsWeight: string;
   goodsPackages: string;
+  goodsPackagingUnit: PackagingUnit;
   goodsDescription: string;
   controlOffice?: string;
   visitDate?: string;
+  conformityVisitDate?: string;
+  // drapeaux parallèles (édition uniquement)
+  billed?: boolean;
+  delivered?: boolean;
+  baeUnderPayment?: boolean;
+  baeUnderConformity?: boolean;
+  awaitingConformityValidation?: boolean;
+  customNote?: string;
 };
 
 export function NewDossierForm({
@@ -55,9 +72,17 @@ export function NewDossierForm({
     goodsCurrency: "EUR",
     goodsWeight: "",
     goodsPackages: "",
+    goodsPackagingUnit: "COLIS",
     goodsDescription: "",
     controlOffice: "",
     visitDate: "",
+    conformityVisitDate: "",
+    billed: false,
+    delivered: false,
+    baeUnderPayment: false,
+    baeUnderConformity: false,
+    awaitingConformityValidation: false,
+    customNote: "",
     ...initial,
   });
 
@@ -71,10 +96,6 @@ export function NewDossierForm({
       toast.error("Client requis");
       return;
     }
-    if (mode === "create" && !form.number) {
-      toast.error("Numéro de dossier requis");
-      return;
-    }
 
     start(async () => {
       const url = mode === "edit" ? `/api/dossiers/${dossierId}` : "/api/dossiers";
@@ -83,6 +104,7 @@ export function NewDossierForm({
       const body =
         mode === "edit"
           ? {
+              number: form.number?.trim() || undefined,
               reference: form.reference || null,
               clientId: form.clientId,
               supplierId: form.supplierId || null,
@@ -90,9 +112,19 @@ export function NewDossierForm({
               goodsCurrency: form.goodsCurrency,
               goodsWeight: form.goodsWeight ? Number(form.goodsWeight) : null,
               goodsPackages: form.goodsPackages ? Number(form.goodsPackages) : null,
+              goodsPackagingUnit: form.goodsPackagingUnit,
               goodsDescription: form.goodsDescription || null,
               controlOffice: form.controlOffice || null,
               visitDate: form.visitDate || null,
+              conformityVisitDate: form.conformityVisitDate || null,
+              hasVisit: !!form.visitDate,
+              hasConformityVisit: !!form.conformityVisitDate,
+              billed: !!form.billed,
+              delivered: !!form.delivered,
+              baeUnderPayment: !!form.baeUnderPayment,
+              baeUnderConformity: !!form.baeUnderConformity,
+              awaitingConformityValidation: !!form.awaitingConformityValidation,
+              customNote: form.customNote || null,
             }
           : form;
 
@@ -116,20 +148,18 @@ export function NewDossierForm({
     <form onSubmit={submit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="number">Numéro de dossier (WinApp) {mode === "create" ? "*" : ""}</Label>
+          <Label htmlFor="number">Numéro de dossier (WinApp)</Label>
           <Input
             id="number"
             value={form.number}
             onChange={(e) => set("number", e.target.value)}
-            placeholder="Ex. D-2026-00123"
-            required={mode === "create"}
-            disabled={mode === "edit"}
+            placeholder={mode === "create" ? "Laisser vide pour un numéro provisoire" : "Ex. D-2026-00123"}
           />
-          {mode === "edit" && (
-            <p className="text-[11px] text-[var(--color-fg-mute)]">
-              Le numéro WinApp ne peut pas être modifié.
-            </p>
-          )}
+          <p className="text-[11px] text-[var(--color-fg-mute)]">
+            {mode === "create"
+              ? "Optionnel : un numéro PROV-AAAA-NNNN sera attribué si vide, à remplacer par le numéro WinApp réel quand disponible."
+              : "Modifiable — pour remplacer un numéro provisoire par le vrai numéro WinApp."}
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="reference">Référence fournisseur</Label>
@@ -137,7 +167,7 @@ export function NewDossierForm({
             id="reference"
             value={form.reference}
             onChange={(e) => set("reference", e.target.value)}
-            placeholder="Objet du mail / réf. expéditeur"
+            placeholder="Objet du mail / réf. expéditeur (optionnel)"
           />
         </div>
         <div className="space-y-2">
@@ -239,13 +269,27 @@ export function NewDossierForm({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="goodsPackages">Nb colis</Label>
-            <Input
-              id="goodsPackages"
-              type="number"
-              value={form.goodsPackages}
-              onChange={(e) => set("goodsPackages", e.target.value)}
-            />
+            <Label htmlFor="goodsPackages">Quantité</Label>
+            <div className="flex gap-2">
+              <Input
+                id="goodsPackages"
+                type="number"
+                value={form.goodsPackages}
+                onChange={(e) => set("goodsPackages", e.target.value)}
+                className="flex-1"
+              />
+              <Select
+                value={form.goodsPackagingUnit}
+                onChange={(e) => set("goodsPackagingUnit", e.target.value as PackagingUnit)}
+                className="w-32"
+              >
+                {Object.entries(PACKAGING_LABELS).map(([k, l]) => (
+                  <option key={k} value={k}>
+                    {l}
+                  </option>
+                ))}
+              </Select>
+            </div>
           </div>
         </div>
         <div className="space-y-2 mt-4">
@@ -260,29 +304,84 @@ export function NewDossierForm({
       </div>
 
       {mode === "edit" && (
-        <div className="border-t border-[var(--color-border)] pt-6">
-          <div className="text-sm font-medium mb-3">Douane</div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="controlOffice">Bureau de contrôle</Label>
-              <Input
-                id="controlOffice"
-                value={form.controlOffice ?? ""}
-                onChange={(e) => set("controlOffice", e.target.value)}
-                placeholder="Ex. Casablanca-Port"
+        <>
+          <div className="border-t border-[var(--color-border)] pt-6">
+            <div className="text-sm font-medium mb-3">Douane & MCI</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="controlOffice">Bureau de contrôle</Label>
+                <Input
+                  id="controlOffice"
+                  value={form.controlOffice ?? ""}
+                  onChange={(e) => set("controlOffice", e.target.value)}
+                  placeholder="Ex. Casablanca-Port"
+                />
+              </div>
+              <div />
+              <div className="space-y-2">
+                <Label htmlFor="visitDate">Visite douane</Label>
+                <Input
+                  id="visitDate"
+                  type="date"
+                  value={form.visitDate ?? ""}
+                  onChange={(e) => set("visitDate", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="conformityVisitDate">Visite conformité (MCI)</Label>
+                <Input
+                  id="conformityVisitDate"
+                  type="date"
+                  value={form.conformityVisitDate ?? ""}
+                  onChange={(e) => set("conformityVisitDate", e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-[var(--color-border)] pt-6">
+            <div className="text-sm font-medium mb-3">État du dossier</div>
+            <p className="text-[12px] text-[var(--color-fg-3)] mb-3">
+              Cochez tous les drapeaux applicables. Ces informations apparaissent en haut du dossier.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <FlagCheckbox
+                label="Facturé"
+                checked={!!form.billed}
+                onChange={(v) => set("billed", v)}
+              />
+              <FlagCheckbox
+                label="Livré"
+                checked={!!form.delivered}
+                onChange={(v) => set("delivered", v)}
+              />
+              <FlagCheckbox
+                label="BAE sous réserve de paiement"
+                checked={!!form.baeUnderPayment}
+                onChange={(v) => set("baeUnderPayment", v)}
+              />
+              <FlagCheckbox
+                label="BAE sous réserve de conformité"
+                checked={!!form.baeUnderConformity}
+                onChange={(v) => set("baeUnderConformity", v)}
+              />
+              <FlagCheckbox
+                label="En attente validation conformité"
+                checked={!!form.awaitingConformityValidation}
+                onChange={(v) => set("awaitingConformityValidation", v)}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="visitDate">Date de visite</Label>
-              <Input
-                id="visitDate"
-                type="date"
-                value={form.visitDate ?? ""}
-                onChange={(e) => set("visitDate", e.target.value)}
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="customNote">Autre message / note</Label>
+              <Textarea
+                id="customNote"
+                value={form.customNote ?? ""}
+                onChange={(e) => set("customNote", e.target.value)}
+                placeholder="Ex. Marchandise sensible, attention à la manutention…"
               />
             </div>
           </div>
-        </div>
+        </>
       )}
 
       <div className="flex items-center justify-end gap-2 pt-2">
@@ -300,5 +399,27 @@ export function NewDossierForm({
         </Button>
       </div>
     </form>
+  );
+}
+
+function FlagCheckbox({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <label className="flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] cursor-pointer transition-colors">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="accent-[var(--color-accent)] size-4"
+      />
+      <span className="text-[13px]">{label}</span>
+    </label>
   );
 }

@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { Folder, AlertCircle, CheckCircle2, Mail, ArrowUpRight } from "lucide-react";
+import {
+  Folder,
+  AlertCircle,
+  CheckCircle2,
+  Mail,
+  ArrowUpRight,
+  ChevronRight,
+} from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { StatCard } from "@/components/ui/stat-card";
@@ -23,6 +30,7 @@ export default async function DashboardPage() {
     unreadEmails,
     recentDossiers,
     statusGroups,
+    activeDossiers,
   ] = await Promise.all([
     prisma.dossier.count(),
     prisma.dossier.count({ where: { status: { notIn: ["CLOTURE", "ANNULE"] } } }),
@@ -46,16 +54,49 @@ export default async function DashboardPage() {
       _count: { _all: true },
       where: { status: { notIn: ["CLOTURE", "ANNULE"] } },
     }),
+    // Vue groupée par client : tous les dossiers actifs
+    prisma.dossier.findMany({
+      where: { status: { notIn: ["CLOTURE", "ANNULE"] } },
+      orderBy: [{ client: { name: "asc" } }, { updatedAt: "desc" }],
+      include: { client: true, dums: true },
+    }),
   ]);
 
   const totalActive = statusGroups.reduce((s, g) => s + g._count._all, 0);
+
+  // Grouper par client
+  const byClient = new Map<
+    string,
+    {
+      clientName: string;
+      clientId: string;
+      dossiers: typeof activeDossiers;
+      totalValue: number;
+    }
+  >();
+  for (const d of activeDossiers) {
+    if (!byClient.has(d.clientId)) {
+      byClient.set(d.clientId, {
+        clientName: d.client.name,
+        clientId: d.clientId,
+        dossiers: [],
+        totalValue: 0,
+      });
+    }
+    const g = byClient.get(d.clientId)!;
+    g.dossiers.push(d);
+    if (d.goodsValue) g.totalValue += Number(d.goodsValue);
+  }
+  const groupedClients = [...byClient.values()].sort(
+    (a, b) => b.dossiers.length - a.dossiers.length,
+  );
 
   return (
     <div className="space-y-6">
       <header>
         <h1 className="text-[22px] font-semibold tracking-tight">Tableau de bord</h1>
         <p className="text-[13px] text-[var(--color-fg-3)] mt-1">
-          Bonjour {session.user.name.split(" ")[0]}, voici l'état actuel des dossiers.
+          Bonjour {session.user.name.split(" ")[0]}, voici l&apos;état actuel des dossiers.
         </p>
       </header>
 
@@ -78,11 +119,7 @@ export default async function DashboardPage() {
           hint="depuis le 1er"
           icon={CheckCircle2}
         />
-        <StatCard
-          label="Emails non lus"
-          value={unreadEmails}
-          icon={Mail}
-        />
+        <StatCard label="Emails non lus" value={unreadEmails} icon={Mail} />
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-5">
@@ -100,7 +137,7 @@ export default async function DashboardPage() {
           <div className="divide-y divide-[var(--color-border)]">
             {recentDossiers.length === 0 && (
               <div className="py-10 text-center text-[13px] text-[var(--color-fg-3)]">
-                Aucun dossier pour l'instant.
+                Aucun dossier pour l&apos;instant.
               </div>
             )}
             {recentDossiers.map((d) => (
@@ -170,9 +207,7 @@ export default async function DashboardPage() {
                       <span className="text-[var(--color-fg-2)] truncate pr-2">
                         {STATUS_LABELS[g.status as DossierStatus]}
                       </span>
-                      <span className="text-[var(--color-fg-3)] tnum">
-                        {g._count._all}
-                      </span>
+                      <span className="text-[var(--color-fg-3)] tnum">{g._count._all}</span>
                     </div>
                     <div className="h-1 rounded-full bg-[var(--color-surface-2)] overflow-hidden">
                       <div
@@ -186,6 +221,84 @@ export default async function DashboardPage() {
           </div>
         </Card>
       </div>
+
+      {/* Dossiers actifs par client (déplié si peu de clients) */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Dossiers actifs par client</CardTitle>
+          <span className="text-[11.5px] text-[var(--color-fg-3)] tnum">
+            {groupedClients.length} client{groupedClients.length > 1 ? "s" : ""} ·{" "}
+            {totalActive} dossier{totalActive > 1 ? "s" : ""}
+          </span>
+        </CardHeader>
+        {groupedClients.length === 0 ? (
+          <div className="py-10 text-center text-[13px] text-[var(--color-fg-3)]">
+            Aucun dossier actif.
+          </div>
+        ) : (
+          <div className="divide-y divide-[var(--color-border)]">
+            {groupedClients.map((g) => (
+              <details key={g.clientId} className="group" open={groupedClients.length <= 3}>
+                <summary className="cursor-pointer list-none px-5 py-3 flex items-center gap-3 hover:bg-[var(--color-surface-2)] transition-colors">
+                  <ChevronRight
+                    className="size-4 text-[var(--color-fg-mute)] shrink-0 transition-transform group-open:rotate-90"
+                    strokeWidth={2}
+                  />
+                  <Link
+                    href={`/clients/${g.clientId}`}
+                    className="text-[13.5px] font-medium text-[var(--color-fg)] hover:text-[var(--color-accent)] truncate flex-1"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {g.clientName}
+                  </Link>
+                  <span className="text-[11.5px] text-[var(--color-fg-3)] shrink-0">
+                    {g.dossiers.length} dossier{g.dossiers.length > 1 ? "s" : ""}
+                  </span>
+                  {g.totalValue > 0 && (
+                    <span className="hidden sm:inline font-mono text-[12px] tnum text-[var(--color-fg-3)] shrink-0 w-[110px] text-right">
+                      {formatCurrency(g.totalValue, "EUR")}
+                    </span>
+                  )}
+                </summary>
+                <div className="bg-[var(--color-surface-2)]/40 divide-y divide-[var(--color-border)]">
+                  {g.dossiers.map((d) => (
+                    <Link
+                      key={d.id}
+                      href={`/dossiers/${d.id}`}
+                      className="flex items-center gap-3 pl-12 pr-5 py-2 hover:bg-[var(--color-surface-2)] transition-colors"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-mono text-[12.5px] text-[var(--color-fg)] font-medium">
+                            {d.number}
+                          </span>
+                          {d.reference && (
+                            <span className="text-[11.5px] text-[var(--color-fg-mute)]">
+                              · {d.reference}
+                            </span>
+                          )}
+                          {d.dums.length > 0 && (
+                            <span className="font-mono text-[11px] text-[var(--color-fg-mute)]">
+                              DUM {d.dums.map((dum) => dum.number).join(", ")}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="hidden sm:block font-mono text-[12px] tnum text-[var(--color-fg-3)] shrink-0">
+                        {formatCurrency(
+                          d.goodsValue ? Number(d.goodsValue) : null,
+                          d.goodsCurrency ?? "EUR",
+                        )}
+                      </div>
+                      <StatusBadge status={d.status} size="sm" />
+                    </Link>
+                  ))}
+                </div>
+              </details>
+            ))}
+          </div>
+        )}
+      </Card>
     </div>
   );
 }
