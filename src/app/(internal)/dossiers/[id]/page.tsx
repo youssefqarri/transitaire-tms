@@ -25,6 +25,7 @@ import { DUMsPanel } from "./dums-panel";
 import { CommentsPanel } from "./comments-panel";
 import { NotifyClientButton } from "./notify-button";
 import { OutgoingMessagesPanel } from "./outgoing-messages-panel";
+import { ExpectedDocumentsPanel } from "./expected-documents-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,10 @@ export default async function DossierDetailPage({
       assignedTo: { select: { id: true, name: true } },
       dums: { orderBy: { createdAt: "desc" } },
       documents: { orderBy: { receivedAt: "desc" }, include: { uploadedBy: { select: { name: true } } } },
+      expectedDocuments: {
+        orderBy: { createdAt: "asc" },
+        include: { requestedBy: { select: { name: true } } },
+      },
       statusChanges: {
         orderBy: { createdAt: "desc" },
         include: { changedBy: { select: { name: true } } },
@@ -220,6 +225,18 @@ export default async function DossierDetailPage({
               uploadedByName: d.uploadedBy?.name ?? null,
             }))}
             requiredCategories={required}
+          />
+          <ExpectedDocumentsPanel
+            dossierId={dossier.id}
+            expected={dossier.expectedDocuments.map((e) => ({
+              id: e.id,
+              category: e.category,
+              name: e.name,
+              note: e.note,
+              fulfilledAt: e.fulfilledAt,
+              requestedByName: e.requestedBy?.name ?? null,
+              createdAt: e.createdAt,
+            }))}
           />
           <CommentsPanel
             dossierId={dossier.id}

@@ -49,6 +49,7 @@ model User {
   dossierComments   DossierComment[]
   statusChanges     DossierStatusChange[]
   uploadedDocs      Document[]            @relation("UploadedBy")
+  expectedDocumentsRequested ExpectedDocument[] @relation("ExpectedDocumentsRequested")
   createdDossiers   Dossier[]             @relation("CreatedBy")
   assignedDossiers  Dossier[]             @relation("AssignedTo")
   invoicesCreated   Invoice[]             @relation("InvoicesCreated")
@@ -256,6 +257,7 @@ model Dossier {
   // relations
   dums            DUM[]
   documents       Document[]
+  expectedDocuments ExpectedDocument[]
   statusChanges   DossierStatusChange[]
   comments        DossierComment[]
   emails          EmailLink[]
@@ -354,6 +356,26 @@ enum DocumentCategory {
   TICKET_PAIEMENT
   BON_A_ENLEVER
   AUTRE
+}
+
+// Documents qu'un déclarant identifie comme manquants à demander au client.
+// Indépendant des documents obligatoires standards. Visible par tous les rôles internes.
+model ExpectedDocument {
+  id            String           @id @default(cuid())
+  dossierId     String
+  dossier       Dossier          @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  category      DocumentCategory
+  name          String?          // nom libre, ex: "Certificat halal", "Licence import"
+  note          String?          @db.Text
+  fulfilledAt   DateTime?        // marqué comme reçu manuellement (sans upload)
+
+  requestedById String?
+  requestedBy   User?            @relation("ExpectedDocumentsRequested", fields: [requestedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([dossierId])
 }
 
 model Document {
