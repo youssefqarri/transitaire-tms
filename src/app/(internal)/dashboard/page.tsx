@@ -54,10 +54,10 @@ export default async function DashboardPage() {
       _count: { _all: true },
       where: { status: { notIn: ["CLOTURE", "ANNULE"] } },
     }),
-    // Vue groupée par client : tous les dossiers actifs
+    // Vue groupée par client : tous les dossiers actifs (tri côté JS)
     prisma.dossier.findMany({
       where: { status: { notIn: ["CLOTURE", "ANNULE"] } },
-      orderBy: [{ client: { name: "asc" } }, { updatedAt: "desc" }],
+      orderBy: { updatedAt: "desc" },
       include: { client: true, dums: true },
     }),
   ]);
