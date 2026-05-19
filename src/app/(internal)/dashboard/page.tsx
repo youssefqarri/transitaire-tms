@@ -244,13 +244,9 @@ export default async function DashboardPage() {
                     className="size-4 text-[var(--color-fg-mute)] shrink-0 transition-transform group-open:rotate-90"
                     strokeWidth={2}
                   />
-                  <Link
-                    href={`/clients/${g.clientId}`}
-                    className="text-[13.5px] font-medium text-[var(--color-fg)] hover:text-[var(--color-accent)] truncate flex-1"
-                    onClick={(e) => e.stopPropagation()}
-                  >
+                  <span className="text-[13.5px] font-medium text-[var(--color-fg)] truncate flex-1">
                     {g.clientName}
-                  </Link>
+                  </span>
                   <span className="text-[11.5px] text-[var(--color-fg-3)] shrink-0">
                     {g.dossiers.length} dossier{g.dossiers.length > 1 ? "s" : ""}
                   </span>
@@ -261,6 +257,12 @@ export default async function DashboardPage() {
                   )}
                 </summary>
                 <div className="bg-[var(--color-surface-2)]/40 divide-y divide-[var(--color-border)]">
+                  <Link
+                    href={`/clients/${g.clientId}`}
+                    className="flex items-center justify-end gap-1 pl-12 pr-5 py-2 text-[11.5px] text-[var(--color-accent)] hover:underline border-b border-[var(--color-border)]"
+                  >
+                    Voir la fiche client →
+                  </Link>
                   {g.dossiers.map((d) => (
                     <Link
                       key={d.id}
