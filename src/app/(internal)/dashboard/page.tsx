@@ -202,8 +202,14 @@ export default async function DashboardPage() {
                     {formatDate(d.updatedAt)}
                   </div>
                 </div>
-                <div className="shrink-0 w-[160px] flex justify-start">
+                <div className="shrink-0 w-[160px] flex flex-col items-start gap-0.5">
                   <StatusBadge status={d.status} size="sm" />
+                  {(d.visitDate || d.deliveredAt) && (
+                    <div className="text-[10.5px] text-[var(--color-fg-3)] tnum flex flex-col">
+                      {d.visitDate && <span>📅 {formatDate(d.visitDate)}</span>}
+                      {d.deliveredAt && <span>🚚 {formatDate(d.deliveredAt)}</span>}
+                    </div>
+                  )}
                 </div>
               </Link>
             ))}
@@ -313,6 +319,16 @@ export default async function DashboardPage() {
                             <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)]">
                               <AlertTriangle className="size-2.5" strokeWidth={2.25} />
                               {countMissing(d)} doc{countMissing(d) > 1 ? "s" : ""}
+                            </span>
+                          )}
+                          {d.visitDate && (
+                            <span className="text-[10.5px] text-[var(--color-fg-3)] tnum">
+                              📅 {formatDate(d.visitDate)}
+                            </span>
+                          )}
+                          {d.deliveredAt && (
+                            <span className="text-[10.5px] text-[var(--color-fg-3)] tnum">
+                              🚚 {formatDate(d.deliveredAt)}
                             </span>
                           )}
                         </div>
