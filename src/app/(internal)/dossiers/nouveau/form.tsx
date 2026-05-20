@@ -37,6 +37,7 @@ type FormState = {
   controlOffice?: string;
   visitDate?: string;
   conformityVisitDate?: string;
+  deliveredAt?: string;
   // drapeaux parallèles (édition uniquement)
   billed?: boolean;
   delivered?: boolean;
@@ -77,6 +78,7 @@ export function NewDossierForm({
     controlOffice: "",
     visitDate: "",
     conformityVisitDate: "",
+    deliveredAt: "",
     billed: false,
     delivered: false,
     baeUnderPayment: false,
@@ -117,10 +119,11 @@ export function NewDossierForm({
               controlOffice: form.controlOffice || null,
               visitDate: form.visitDate || null,
               conformityVisitDate: form.conformityVisitDate || null,
+              deliveredAt: form.deliveredAt || null,
               hasVisit: !!form.visitDate,
               hasConformityVisit: !!form.conformityVisitDate,
               billed: !!form.billed,
-              delivered: !!form.delivered,
+              delivered: !!form.delivered || !!form.deliveredAt,
               baeUnderPayment: !!form.baeUnderPayment,
               baeUnderConformity: !!form.baeUnderConformity,
               awaitingConformityValidation: !!form.awaitingConformityValidation,
@@ -336,6 +339,16 @@ export function NewDossierForm({
                   onChange={(e) => set("conformityVisitDate", e.target.value)}
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="deliveredAt">Date de livraison</Label>
+                <Input
+                  id="deliveredAt"
+                  type="date"
+                  value={form.deliveredAt ?? ""}
+                  onChange={(e) => set("deliveredAt", e.target.value)}
+                />
+              </div>
+              <div />
             </div>
           </div>
 

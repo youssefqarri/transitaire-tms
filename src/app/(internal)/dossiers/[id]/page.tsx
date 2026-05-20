@@ -220,6 +220,7 @@ export default async function DossierDetailPage({
               />
               <Field label="Bureau" value={dossier.controlOffice ?? "—"} />
               <Field label="Visite douane" mono value={formatDate(dossier.visitDate)} />
+              <Field label="Date livraison" mono value={formatDate(dossier.deliveredAt)} />
               <Field label="Assigné" value={dossier.assignedTo?.name ?? "—"} />
               {dossier.goodsDescription && (
                 <div className="md:col-span-4">

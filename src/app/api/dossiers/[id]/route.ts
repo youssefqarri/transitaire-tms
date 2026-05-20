@@ -22,6 +22,7 @@ const patchSchema = z.object({
   hasBureauValeur: z.boolean().optional(),
   visitDate: z.string().nullable().optional(),
   conformityVisitDate: z.string().nullable().optional(),
+  deliveredAt: z.string().nullable().optional(),
   assignedToId: z.string().nullable().optional(),
   // drapeaux parallèles
   billed: z.boolean().optional(),
@@ -76,6 +77,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
             ? undefined
             : parsed.data.conformityVisitDate
             ? new Date(parsed.data.conformityVisitDate)
+            : null,
+        deliveredAt:
+          parsed.data.deliveredAt === undefined
+            ? undefined
+            : parsed.data.deliveredAt
+            ? new Date(parsed.data.deliveredAt)
             : null,
       },
     });

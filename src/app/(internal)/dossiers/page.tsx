@@ -1,15 +1,15 @@
 import Link from "next/link";
-import { Folder, Plus, Search, AlertTriangle } from "lucide-react";
+import { Folder, Plus, AlertTriangle } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatDate, formatCurrency, formatNumber } from "@/lib/utils";
 import { canCreateDossier } from "@/lib/roles";
-import { STATUS_LABELS, requiredDocuments } from "@/lib/statuses";
+import { requiredDocuments } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
+import { DossiersFilterBar } from "./filter-bar";
 
 export const dynamic = "force-dynamic";
 
@@ -102,31 +102,7 @@ export default async function DossiersPage({
       </header>
 
       <Card>
-        <form method="GET" className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-[var(--color-border)]">
-          <div className="relative flex-1 min-w-[260px]">
-            <Search
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-[var(--color-fg-mute)]"
-              strokeWidth={1.75}
-            />
-            <input
-              name="q"
-              defaultValue={q ?? ""}
-              placeholder="N° dossier, DUM, client, référence…"
-              className="w-full h-9 pl-8 pr-3 text-[13px] bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)] placeholder:text-[var(--color-fg-mute)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-ring)] focus:border-transparent"
-            />
-          </div>
-          <div className="min-w-[200px]">
-            <Select name="status" defaultValue={params.status ?? ""}>
-              <option value="">Tous les statuts</option>
-              {Object.entries(STATUS_LABELS).map(([k, label]) => (
-                <option key={k} value={k}>
-                  {label}
-                </option>
-              ))}
-            </Select>
-          </div>
-          <Button variant="secondary" size="sm" type="submit">Filtrer</Button>
-        </form>
+        <DossiersFilterBar initialQ={q} initialStatus={params.status} />
 
         {enriched.length === 0 ? (
           <div className="py-16 text-center">

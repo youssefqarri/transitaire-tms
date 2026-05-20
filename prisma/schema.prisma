@@ -238,6 +238,7 @@ model Dossier {
   visitDate            DateTime?  // visite douane
   conformityVisitDate  DateTime?  // visite conformité (MCI)
   liquidationAt        DateTime?
+  deliveredAt          DateTime?  // date de livraison
   closedAt             DateTime?
 
   // contrôle
