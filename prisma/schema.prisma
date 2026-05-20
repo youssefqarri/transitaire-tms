@@ -542,6 +542,7 @@ enum NotificationKind {
   EMAIL_NEW
   CLIENT_INFO          // notification à envoyer au client
   CLIENT_DOC_UPLOAD    // le client a déposé un document via le portail
+  CLIENT_NEW_DOSSIER   // le client a ouvert un nouveau dossier via le portail
   AUTRE
 }
 

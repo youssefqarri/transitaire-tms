@@ -20,6 +20,7 @@ const KIND_LABELS: Record<string, string> = {
   EMAIL_NEW: "Nouveau email",
   CLIENT_INFO: "Info client",
   CLIENT_DOC_UPLOAD: "Document reçu du client",
+  CLIENT_NEW_DOSSIER: "Nouveau dossier client",
   AUTRE: "Autre",
 };
 

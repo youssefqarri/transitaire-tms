@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Folder, ChevronRight } from "lucide-react";
+import { Folder, ChevronRight, Plus } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatDate, formatCurrency } from "@/lib/utils";
 
@@ -19,18 +20,32 @@ export default async function PortalHomePage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h1 className="text-[22px] font-semibold tracking-tight">Mes dossiers</h1>
-        <p className="text-[13px] text-[var(--color-fg-3)] mt-1">
-          Bonjour {session.user.name.split(" ")[0]}, voici l'état de vos dossiers en cours.
-        </p>
+      <header className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-[22px] font-semibold tracking-tight">Mes dossiers</h1>
+          <p className="text-[13px] text-[var(--color-fg-3)] mt-1">
+            Bonjour {session.user.name.split(" ")[0]}, voici l&apos;état de vos dossiers en cours.
+          </p>
+        </div>
+        <Link href="/portail/nouveau">
+          <Button>
+            <Plus /> Nouveau dossier
+          </Button>
+        </Link>
       </header>
 
       <Card>
         {dossiers.length === 0 ? (
           <div className="py-16 text-center">
             <Folder className="size-8 mx-auto text-[var(--color-fg-mute)] mb-2" strokeWidth={1.5} />
-            <div className="text-[13px] text-[var(--color-fg-3)]">Aucun dossier pour le moment.</div>
+            <div className="text-[13px] text-[var(--color-fg-3)] mb-4">
+              Aucun dossier pour le moment.
+            </div>
+            <Link href="/portail/nouveau">
+              <Button size="sm">
+                <Plus /> Créer mon premier dossier
+              </Button>
+            </Link>
           </div>
         ) : (
           <div className="divide-y divide-[var(--color-border)]">

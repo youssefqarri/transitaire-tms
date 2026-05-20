@@ -41,6 +41,7 @@ export default async function DossiersPage({
     include: {
       client: true,
       dums: true,
+      createdBy: { select: { role: true } },
       documents: {
         select: { category: true, uploadedBy: { select: { role: true } } },
       },
@@ -58,11 +59,14 @@ export default async function DossiersPage({
       const fromClientCount = d.documents.filter(
         (doc) => doc.uploadedBy?.role === "CLIENT",
       ).length;
+      const isNewFromClient =
+        d.createdBy?.role === "CLIENT" && d.status === "OUVERTURE";
       return {
         ...d,
         missingCount: missing.length,
         docCount: d.documents.length,
         fromClientCount,
+        isNewFromClient,
       };
     })
     // tri secondaire : regrouper les dossiers du même client, puis par date de maj
@@ -144,7 +148,14 @@ export default async function DossiersPage({
                 >
                   {/* ligne 1 : statut large + numéro */}
                   <div className="flex items-center justify-between gap-3">
-                    <StatusBadge status={d.status} />
+                    <div className="flex items-center gap-2">
+                      <StatusBadge status={d.status} />
+                      {d.isNewFromClient && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--color-danger)] text-white animate-pulse">
+                          NOUVEAU CLIENT
+                        </span>
+                      )}
+                    </div>
                     <span className="font-mono font-semibold text-[14px] text-[var(--color-fg)]">
                       {d.number}
                     </span>
@@ -215,7 +226,14 @@ export default async function DossiersPage({
                       className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-2)] transition-colors"
                     >
                       <td className="px-5 py-2.5">
-                        <StatusBadge status={d.status} size="sm" />
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <StatusBadge status={d.status} size="sm" />
+                          {d.isNewFromClient && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--color-danger)] text-white animate-pulse">
+                              NOUVEAU
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-5 py-2.5">
                         <Link
