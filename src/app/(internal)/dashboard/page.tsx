@@ -17,6 +17,8 @@ import { formatDate, formatCurrency } from "@/lib/utils";
 import { STATUS_LABELS, requiredDocuments } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
 import { KeyDates } from "@/components/dossier/key-dates";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const dynamic = "force-dynamic";
 
@@ -113,12 +115,10 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-[22px] font-semibold tracking-tight">Tableau de bord</h1>
-        <p className="text-[13px] text-[var(--color-fg-3)] mt-1">
-          Bonjour {session.user.name.split(" ")[0]}, voici l&apos;état actuel des dossiers.
-        </p>
-      </header>
+      <PageHeader
+        title="Tableau de bord"
+        subtitle={`Bonjour ${session.user.name.split(" ")[0]}, voici l'état actuel des dossiers.`}
+      />
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
@@ -126,20 +126,29 @@ export default async function DashboardPage() {
           value={openDossiers}
           hint={`${totalDossiers} au total`}
           icon={Folder}
+          href="/dossiers"
         />
         <StatCard
           label="À traiter"
           value={blockedDossiers}
           hint="documents · valeur · MCI"
           icon={AlertCircle}
+          tone={blockedDossiers > 0 ? "warn" : "default"}
+          href="/dossiers?status=BUREAU_VALEUR"
         />
         <StatCard
           label="Clôturés ce mois"
           value={closedThisMonth}
           hint="depuis le 1er"
           icon={CheckCircle2}
+          tone={closedThisMonth > 0 ? "success" : "default"}
         />
-        <StatCard label="Emails non lus" value={unreadEmails} icon={Mail} />
+        <StatCard
+          label="Emails non lus"
+          value={unreadEmails}
+          icon={Mail}
+          href="/emails"
+        />
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-5">

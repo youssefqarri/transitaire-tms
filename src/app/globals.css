@@ -1,14 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Neutres ── */
+  /* ── Neutres ──
+     fg    = texte principal (titres, body important)
+     fg-2  = texte secondaire (labels, infos importantes)
+     fg-3  = texte tertiaire (métadonnées, lecture)
+     fg-mute = décoratif uniquement (séparateurs, icônes ; ≥18px ou non-text)
+  */
   --color-bg:           oklch(98.5% 0.002 250);
   --color-surface:      oklch(100% 0 0);
   --color-surface-2:    oklch(97% 0.003 250);
+  --color-surface-3:    oklch(94.5% 0.005 250);
   --color-fg:           oklch(15% 0.01 250);
+  --color-fg-hover:     oklch(25% 0.01 250);
   --color-fg-2:         oklch(32% 0.012 250);
   --color-fg-3:         oklch(48% 0.012 250);
-  --color-fg-mute:      oklch(60% 0.012 250);
+  --color-fg-mute:      oklch(62% 0.012 250);
 
   --color-border:       oklch(92.5% 0.005 250);
   --color-border-2:     oklch(88% 0.008 250);
@@ -20,27 +27,16 @@
   --color-accent-ring:  oklch(60% 0.14 258);
 
   /* ── Statuts ── */
-  --color-success:      oklch(45% 0.13 150);
-  --color-success-soft: oklch(96% 0.04 150);
-  --color-warning:      oklch(55% 0.13 60);
-  --color-warning-soft: oklch(97% 0.06 75);
-  --color-danger:       oklch(52% 0.20 25);
-  --color-danger-soft:  oklch(96% 0.04 25);
-  --color-info:         oklch(50% 0.14 240);
-  --color-info-soft:    oklch(96% 0.03 240);
-
-  /* aliases shadcn-style */
-  --color-background:        var(--color-bg);
-  --color-foreground:        var(--color-fg);
-  --color-card:              var(--color-surface);
-  --color-card-foreground:   var(--color-fg);
-  --color-muted:             var(--color-surface-2);
-  --color-muted-foreground:  var(--color-fg-3);
-  --color-primary:           var(--color-fg);
-  --color-primary-foreground: var(--color-surface);
-  --color-destructive:       var(--color-danger);
-  --color-destructive-foreground: var(--color-surface);
-  --color-ring:              var(--color-accent-ring);
+  --color-success:       oklch(45% 0.13 150);
+  --color-success-hover: oklch(40% 0.14 150);
+  --color-success-soft:  oklch(96% 0.04 150);
+  --color-warning:       oklch(55% 0.13 60);
+  --color-warning-soft:  oklch(97% 0.06 75);
+  --color-danger:        oklch(52% 0.20 25);
+  --color-danger-hover:  oklch(45% 0.22 25);
+  --color-danger-soft:   oklch(96% 0.04 25);
+  --color-info:          oklch(50% 0.14 240);
+  --color-info-soft:     oklch(96% 0.03 240);
 
   /* ── Sidebar ── */
   --color-sidebar:           oklch(99% 0.002 250);
@@ -57,6 +53,26 @@
   --radius:    6px;
   --radius-sm: 4px;
   --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* ── Ombres ── */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow:    0 2px 6px -2px rgba(15,23,42,0.06), 0 4px 12px -4px rgba(15,23,42,0.06);
+  --shadow-md: 0 8px 24px -12px rgba(15,23,42,0.12);
+  --shadow-lg: 0 24px 64px -16px rgba(15,23,42,0.16);
+
+  /* aliases shadcn-style (compat ; à éviter pour les nouveaux écrans) */
+  --color-background:           var(--color-bg);
+  --color-foreground:           var(--color-fg);
+  --color-card:                 var(--color-surface);
+  --color-card-foreground:      var(--color-fg);
+  --color-muted:                var(--color-surface-2);
+  --color-muted-foreground:     var(--color-fg-3);
+  --color-primary:              var(--color-accent); /* ← corrigé : c'est l'accent, pas le fg */
+  --color-primary-foreground:   var(--color-surface);
+  --color-destructive:          var(--color-danger);
+  --color-destructive-foreground: var(--color-surface);
+  --color-ring:                 var(--color-accent-ring);
 }
 
 @layer base {
@@ -139,12 +155,47 @@
     border-radius: 4px;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: oklch(75% 0.01 250);
+    background: oklch(72% 0.01 250);
   }
 
   /* texte mute hover -> fg */
   .link-quiet { color: var(--color-fg-3); transition: color 150ms; }
   .link-quiet:hover { color: var(--color-fg); }
+
+  /* utilitaires d'ombre */
+  .shadow-card  { box-shadow: var(--shadow-sm); }
+  .shadow-pop   { box-shadow: var(--shadow-md); }
+  .shadow-modal { box-shadow: var(--shadow-lg); }
+
+  /* shimmer pour skeletons */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--color-surface-2) 0%,
+      var(--color-surface-3) 50%,
+      var(--color-surface-2) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+}
+
+/* Focus visible polish — anneau accent partout pour la nav clavier */
+@layer base {
+  a:focus-visible,
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--color-accent-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+  /* Les liens "row" (table/list) ont leur propre highlight */
+  a.row-link:focus-visible {
+    outline: none;
+    box-shadow: inset 2px 0 0 var(--color-accent);
+    background: var(--color-surface-2);
+  }
 }
 
 @keyframes fade-in {
@@ -152,3 +203,14 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 .animate-fade-in { animation: fade-in 0.22s ease-out both; }
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in { animation: scale-in 0.16s cubic-bezier(0.16, 1, 0.3, 1) both; }

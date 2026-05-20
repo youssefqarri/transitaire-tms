@@ -1,9 +1,11 @@
 import Link from "next/link";
-import { Bell, CheckCircle2 } from "lucide-react";
+import { Bell } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
 import { formatDateTime } from "@/lib/utils";
 import { MarkAllRead } from "./mark-all-read";
 
@@ -37,51 +39,46 @@ export default async function NotificationsPage() {
     include: { dossier: { select: { number: true } } },
   });
 
+  const unread = notifications.filter((n) => !n.read).length;
+
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Notifications</h1>
-          <p className="text-sm text-[var(--color-muted-foreground)] mt-1">
-            {notifications.filter((n) => !n.read).length} non lue{notifications.filter((n) => !n.read).length > 1 ? "s" : ""}
-          </p>
-        </div>
-        <MarkAllRead />
-      </div>
+      <PageHeader
+        title="Notifications"
+        subtitle={`${unread} non lue${unread > 1 ? "s" : ""}`}
+        actions={<MarkAllRead />}
+      />
       <Card>
         {notifications.length === 0 ? (
-          <div className="p-16 text-center">
-            <Bell className="size-10 mx-auto text-[var(--color-muted-foreground)] mb-3" />
-            <div className="font-medium">Aucune notification</div>
-          </div>
+          <EmptyState icon={Bell} title="Aucune notification" />
         ) : (
           <div className="divide-y divide-[var(--color-border)]">
             {notifications.map((n) => (
               <Link
                 key={n.id}
                 href={n.link ?? "#"}
-                className={`flex items-start gap-3 p-4 hover:bg-[var(--color-muted)]/50 ${
-                  !n.read ? "bg-[var(--color-primary)]/5" : ""
+                className={`flex items-start gap-3 p-4 hover:bg-[var(--color-surface-2)]/50 ${
+                  !n.read ? "bg-[var(--color-accent)]/5" : ""
                 }`}
               >
-                <div className={`size-2 rounded-full mt-2 shrink-0 ${!n.read ? "bg-[var(--color-primary)]" : "bg-transparent"}`} />
+                <div className={`size-2 rounded-full mt-2 shrink-0 ${!n.read ? "bg-[var(--color-accent)]" : "bg-transparent"}`} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-sm">{n.title}</span>
+                    <span className="font-medium text-[13px]">{n.title}</span>
                     <Badge tone="outline">{KIND_LABELS[n.kind] ?? n.kind}</Badge>
                     {n.dossier && (
-                      <span className="text-xs text-[var(--color-muted-foreground)]">
+                      <span className="text-[11.5px] text-[var(--color-fg-mute)]">
                         Dossier {n.dossier.number}
                       </span>
                     )}
                   </div>
                   {n.body && (
-                    <div className="text-sm text-[var(--color-muted-foreground)] mt-1">
+                    <div className="text-[13px] text-[var(--color-fg-3)] mt-1">
                       {n.body}
                     </div>
                   )}
                 </div>
-                <div className="text-xs text-[var(--color-muted-foreground)] whitespace-nowrap">
+                <div className="text-[11.5px] text-[var(--color-fg-mute)] whitespace-nowrap">
                   {formatDateTime(n.createdAt)}
                 </div>
               </Link>

@@ -17,11 +17,25 @@ export function Sidebar({ role, unreadCount = 0 }: { role: UserRole; unreadCount
         "bg-[var(--color-sidebar)] border-r border-[var(--color-sidebar-border)]",
       )}
     >
-      <div className="h-14 px-5 flex items-center gap-2.5 border-b border-[var(--color-sidebar-border)]">
-        <div className="size-7 rounded-[var(--radius-sm)] bg-[var(--color-fg)] flex items-center justify-center text-[var(--color-surface)] text-[12px] font-bold">
+      {/* Logo / branding */}
+      <div className="h-14 px-4 flex items-center gap-2.5 border-b border-[var(--color-sidebar-border)]">
+        <div
+          className="size-8 rounded-[var(--radius)] flex items-center justify-center text-white text-[13px] font-bold tracking-tight"
+          style={{
+            background:
+              "linear-gradient(135deg, var(--color-accent), oklch(38% 0.18 270))",
+          }}
+        >
           T
         </div>
-        <span className="text-[14px] font-semibold tracking-tight">Transitaire</span>
+        <div className="flex-1 min-w-0">
+          <div className="text-[14px] font-semibold tracking-tight leading-tight">
+            Transitaire
+          </div>
+          <div className="text-[10.5px] text-[var(--color-fg-mute)] leading-tight">
+            TMS · Douane Maroc
+          </div>
+        </div>
       </div>
 
       <nav className="flex-1 px-2.5 py-4 overflow-y-auto scrollbar-thin space-y-5">
@@ -43,22 +57,31 @@ export function Sidebar({ role, unreadCount = 0 }: { role: UserRole; unreadCount
                     key={it.href}
                     href={it.href}
                     className={cn(
-                      "flex items-center gap-2.5 px-2.5 h-8 rounded-[var(--radius-sm)] text-[13px] transition-colors",
+                      "group relative flex items-center gap-2.5 px-2.5 h-8 rounded-[var(--radius-sm)] text-[13px]",
+                      "transition-all duration-150",
                       active
                         ? "bg-[var(--color-sidebar-active)] text-[var(--color-fg)] font-medium"
                         : "text-[var(--color-fg-2)] hover:bg-[var(--color-sidebar-hover)] hover:text-[var(--color-fg)]",
                     )}
                   >
+                    {active && (
+                      <span
+                        aria-hidden
+                        className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full bg-[var(--color-accent)]"
+                      />
+                    )}
                     <Icon
                       className={cn(
-                        "size-4 shrink-0",
-                        active ? "text-[var(--color-fg)]" : "text-[var(--color-fg-mute)]",
+                        "size-4 shrink-0 transition-colors",
+                        active
+                          ? "text-[var(--color-accent)]"
+                          : "text-[var(--color-fg-mute)] group-hover:text-[var(--color-fg-2)]",
                       )}
                       strokeWidth={1.75}
                     />
                     <span className="flex-1 truncate">{it.label}</span>
                     {it.href === "/notifications" && unreadCount > 0 && (
-                      <span className="bg-[var(--color-accent)] text-white text-[10px] font-medium rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center tnum">
+                      <span className="bg-[var(--color-accent)] text-white text-[10px] font-semibold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center tnum">
                         {unreadCount > 99 ? "99+" : unreadCount}
                       </span>
                     )}
@@ -70,8 +93,9 @@ export function Sidebar({ role, unreadCount = 0 }: { role: UserRole; unreadCount
         ))}
       </nav>
 
-      <div className="px-4 py-3 border-t border-[var(--color-sidebar-border)] text-[11px] text-[var(--color-fg-mute)]">
-        v1.0
+      <div className="px-4 py-3 border-t border-[var(--color-sidebar-border)] flex items-center justify-between text-[10.5px] text-[var(--color-fg-mute)]">
+        <span>v1.0</span>
+        <span className="size-1.5 rounded-full bg-[var(--color-success)]" title="En ligne" />
       </div>
     </aside>
   );

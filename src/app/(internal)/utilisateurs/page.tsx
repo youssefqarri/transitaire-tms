@@ -8,6 +8,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const dynamic = "force-dynamic";
 
@@ -22,34 +24,29 @@ export default async function UsersPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Utilisateurs</h1>
-          <p className="text-sm text-[var(--color-muted-foreground)] mt-1">
-            {users.length} compte{users.length > 1 ? "s" : ""}
-          </p>
-        </div>
-        <Link href="/utilisateurs/nouveau">
-          <Button>
-            <Plus className="size-4" /> Nouvel utilisateur
-          </Button>
-        </Link>
-      </div>
+      <PageHeader
+        title="Utilisateurs"
+        subtitle={`${users.length} compte${users.length > 1 ? "s" : ""}`}
+        actions={
+          <Link href="/utilisateurs/nouveau">
+            <Button>
+              <Plus className="size-4" /> Nouvel utilisateur
+            </Button>
+          </Link>
+        }
+      />
 
       <Card>
         {users.length === 0 ? (
-          <div className="p-16 text-center">
-            <Users className="size-10 mx-auto text-[var(--color-muted-foreground)] mb-3" />
-            <div className="font-medium">Aucun utilisateur</div>
-          </div>
+          <EmptyState icon={Users} title="Aucun utilisateur" />
         ) : (
           <div className="divide-y divide-[var(--color-border)]">
             {users.map((u) => (
               <div key={u.id} className="flex items-center gap-4 p-4">
                 <Avatar name={u.name} size={36} />
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm">{u.name}</div>
-                  <div className="text-xs text-[var(--color-muted-foreground)]">
+                  <div className="font-medium text-[13px]">{u.name}</div>
+                  <div className="text-[11.5px] text-[var(--color-fg-mute)]">
                     {u.email}
                     {u.client && ` · ${u.client.name}`}
                   </div>

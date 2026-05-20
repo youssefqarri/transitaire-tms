@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Truck, Pencil } from "lucide-react";
+import { Truck, Pencil } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { BackLink } from "@/components/ui/back-link";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatDate, formatCurrency } from "@/lib/utils";
 
@@ -33,27 +35,24 @@ export default async function SupplierDetailPage({
 
   return (
     <div className="space-y-5">
-      <Link
-        href="/fournisseurs"
-        className="inline-flex items-center gap-1 text-[12.5px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)]"
-      >
-        <ArrowLeft className="size-3.5" strokeWidth={1.75} /> Retour aux fournisseurs
-      </Link>
+      <BackLink href="/fournisseurs">Retour aux fournisseurs</BackLink>
 
-      <header className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-[22px] font-semibold tracking-tight">{supplier.name}</h1>
-          <p className="text-[13px] text-[var(--color-fg-3)] mt-0.5">
+      <PageHeader
+        title={supplier.name}
+        subtitle={
+          <>
             {supplier.country ?? "—"}
             {supplier.email && ` · ${supplier.email}`}
-          </p>
-        </div>
-        <Link href={`/fournisseurs/${id}/modifier`}>
-          <Button variant="outline" size="sm">
-            <Pencil /> Modifier
-          </Button>
-        </Link>
-      </header>
+          </>
+        }
+        actions={
+          <Link href={`/fournisseurs/${id}/modifier`}>
+            <Button variant="outline" size="sm">
+              <Pencil /> Modifier
+            </Button>
+          </Link>
+        }
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5">
         <Card>

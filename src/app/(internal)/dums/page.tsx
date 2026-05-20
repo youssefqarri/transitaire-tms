@@ -3,6 +3,8 @@ import { FileText } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
 import { DUM_STATUS_LABELS } from "@/lib/statuses";
 import { formatDate } from "@/lib/utils";
 
@@ -19,21 +21,17 @@ export default async function DUMsPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">DUMs</h1>
-        <p className="text-sm text-[var(--color-muted-foreground)] mt-1">
-          {dums.length} déclaration{dums.length > 1 ? "s" : ""}
-        </p>
-      </div>
+      <PageHeader
+        title="DUMs"
+        subtitle={`${dums.length} déclaration${dums.length > 1 ? "s" : ""}`}
+      />
       <Card>
         {dums.length === 0 ? (
-          <div className="p-16 text-center">
-            <FileText className="size-10 mx-auto text-[var(--color-muted-foreground)] mb-3" />
-            <div className="font-medium">Aucune DUM</div>
-            <div className="text-sm text-[var(--color-muted-foreground)] mt-1">
-              Les DUMs sont créées depuis chaque dossier.
-            </div>
-          </div>
+          <EmptyState
+            icon={FileText}
+            title="Aucune DUM"
+            hint="Les DUMs sont créées depuis chaque dossier."
+          />
         ) : (
           <>
             {/* Mobile: cartes */}
@@ -63,47 +61,47 @@ export default async function DUMsPage() {
 
             {/* Desktop: tableau */}
             <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-[13px]">
                 <thead>
-                  <tr className="border-b border-[var(--color-border)] text-xs uppercase tracking-wide text-[var(--color-muted-foreground)]">
-                    <th className="text-left font-medium px-5 py-3">N° DUM</th>
-                    <th className="text-left font-medium px-5 py-3">Dossier</th>
-                    <th className="text-left font-medium px-5 py-3">Client</th>
-                    <th className="text-left font-medium px-5 py-3">Bureau</th>
-                    <th className="text-left font-medium px-5 py-3">Statut</th>
-                    <th className="text-right font-medium px-5 py-3">Enregistré</th>
+                  <tr className="border-b border-[var(--color-border)] text-[11.5px] font-medium text-[var(--color-fg-3)]">
+                    <th className="text-left px-5 py-2.5">N° DUM</th>
+                    <th className="text-left px-5 py-2.5">Dossier</th>
+                    <th className="text-left px-5 py-2.5">Client</th>
+                    <th className="text-left px-5 py-2.5">Bureau</th>
+                    <th className="text-left px-5 py-2.5">Statut</th>
+                    <th className="text-right px-5 py-2.5">Enregistré</th>
                   </tr>
                 </thead>
                 <tbody>
                   {dums.map((d) => (
                     <tr
                       key={d.id}
-                      className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-muted)]/50"
+                      className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-2)]/50"
                     >
-                      <td className="px-5 py-3 font-medium">{d.number}</td>
-                      <td className="px-5 py-3">
+                      <td className="px-5 py-2.5 font-medium">{d.number}</td>
+                      <td className="px-5 py-2.5">
                         <Link
-                          className="text-[var(--color-primary)] hover:underline"
+                          className="text-[var(--color-accent)] hover:underline"
                           href={`/dossiers/${d.dossier.id}`}
                         >
                           {d.dossier.number}
                         </Link>
                       </td>
-                      <td className="px-5 py-3">
+                      <td className="px-5 py-2.5">
                         <Link
-                          className="text-[var(--color-primary)] hover:underline"
+                          className="text-[var(--color-accent)] hover:underline"
                           href={`/clients/${d.dossier.client.id}`}
                         >
                           {d.dossier.client.name}
                         </Link>
                       </td>
-                      <td className="px-5 py-3 text-[var(--color-muted-foreground)]">
+                      <td className="px-5 py-2.5 text-[var(--color-fg-3)]">
                         {d.bureau ?? "—"}
                       </td>
-                      <td className="px-5 py-3">
+                      <td className="px-5 py-2.5">
                         <Badge tone="info">{DUM_STATUS_LABELS[d.status]}</Badge>
                       </td>
-                      <td className="px-5 py-3 text-right text-xs text-[var(--color-muted-foreground)]">
+                      <td className="px-5 py-2.5 text-right text-[11.5px] text-[var(--color-fg-3)]">
                         {formatDate(d.registeredAt)}
                       </td>
                     </tr>

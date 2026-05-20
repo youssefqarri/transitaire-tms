@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { Mail, RefreshCw, Inbox } from "lucide-react";
+import { Inbox } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
 import { formatDateTime } from "@/lib/utils";
-import { canViewAccountingEmails, canViewCustomsEmails } from "@/lib/roles";
 import { SyncButton } from "./sync-button";
 
 export const dynamic = "force-dynamic";
@@ -64,27 +65,27 @@ export default async function EmailsPage({
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Emails</h1>
-          <p className="text-sm text-[var(--color-muted-foreground)] mt-1">
+      <PageHeader
+        title="Emails"
+        subtitle={
+          <>
             {emails.length} message{emails.length > 1 ? "s" : ""}
             {account && ` · compte ${account.emailAddress}`}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {account ? (
+          </>
+        }
+        actions={
+          account ? (
             <SyncButton />
           ) : (
             <Link
               href="/parametres"
-              className="text-sm text-[var(--color-primary)] hover:underline"
+              className="text-[13px] text-[var(--color-accent)] hover:underline"
             >
               Connecter Gmail →
             </Link>
-          )}
-        </div>
-      </div>
+          )
+        }
+      />
 
       {!isCompta && (
         <div className="flex items-center gap-2 flex-wrap">
@@ -101,27 +102,27 @@ export default async function EmailsPage({
 
       <Card>
         {emails.length === 0 ? (
-          <div className="p-16 text-center">
-            <Inbox className="size-10 mx-auto text-[var(--color-muted-foreground)] mb-3" />
-            <div className="font-medium">Aucun email</div>
-            <div className="text-sm text-[var(--color-muted-foreground)] mt-1">
-              {account
+          <EmptyState
+            icon={Inbox}
+            title="Aucun email"
+            hint={
+              account
                 ? "Cliquez sur Synchroniser pour récupérer les derniers emails."
-                : "Connectez un compte Gmail dans Paramètres."}
-            </div>
-          </div>
+                : "Connectez un compte Gmail dans Paramètres."
+            }
+          />
         ) : (
           <div className="divide-y divide-[var(--color-border)]">
             {emails.map((e) => (
               <div
                 key={e.id}
-                className={`p-4 hover:bg-[var(--color-muted)]/50 ${!e.isRead ? "bg-[var(--color-primary)]/[0.02]" : ""}`}
+                className={`p-4 hover:bg-[var(--color-surface-2)]/50 ${!e.isRead ? "bg-[var(--color-accent)]/[0.02]" : ""}`}
               >
                 <div className="flex items-start gap-3">
-                  <div className={`size-2 rounded-full mt-2 shrink-0 ${!e.isRead ? "bg-[var(--color-primary)]" : "bg-transparent"}`} />
+                  <div className={`size-2 rounded-full mt-2 shrink-0 ${!e.isRead ? "bg-[var(--color-accent)]" : "bg-transparent"}`} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-sm">
+                      <span className="font-medium text-[13px]">
                         {e.fromName ?? e.fromAddress}
                       </span>
                       <Badge tone={SOURCE_TONES[e.source] ?? "neutral"}>
@@ -133,12 +134,12 @@ export default async function EmailsPage({
                         </Link>
                       ))}
                     </div>
-                    <div className="text-sm mt-1">{e.subject || "(sans objet)"}</div>
-                    <div className="text-xs text-[var(--color-muted-foreground)] mt-1 truncate">
+                    <div className="text-[13px] mt-1">{e.subject || "(sans objet)"}</div>
+                    <div className="text-[11.5px] text-[var(--color-fg-mute)] mt-1 truncate">
                       {e.snippet}
                     </div>
                   </div>
-                  <div className="text-xs text-[var(--color-muted-foreground)] whitespace-nowrap">
+                  <div className="text-[11.5px] text-[var(--color-fg-mute)] whitespace-nowrap">
                     {formatDateTime(e.receivedAt)}
                   </div>
                 </div>

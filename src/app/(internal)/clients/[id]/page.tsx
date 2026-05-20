@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Folder, Pencil } from "lucide-react";
+import { Folder, Pencil } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { BackLink } from "@/components/ui/back-link";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { DeleteClientButton } from "./delete-button";
@@ -31,32 +33,32 @@ export default async function ClientDetailPage({
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <Link href="/clients" className="inline-flex items-center gap-1.5 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]">
-        <ArrowLeft className="size-4" /> Retour aux clients
-      </Link>
+      <BackLink href="/clients">Retour aux clients</BackLink>
 
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{client.name}</h1>
-          <div className="text-sm text-[var(--color-muted-foreground)] mt-1">
+      <PageHeader
+        title={client.name}
+        subtitle={
+          <>
             {client.code && `Code ${client.code} · `}
             {client.ice && `ICE ${client.ice} · `}
             {client.city}
-          </div>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Link href={`/clients/${id}/modifier`}>
-            <Button variant="outline" size="sm">
-              <Pencil /> Modifier
-            </Button>
-          </Link>
-          <DeleteClientButton
-            clientId={id}
-            clientName={client.name}
-            hasDossiers={client.dossiers.length > 0}
-          />
-        </div>
-      </div>
+          </>
+        }
+        actions={
+          <>
+            <Link href={`/clients/${id}/modifier`}>
+              <Button variant="outline" size="sm">
+                <Pencil /> Modifier
+              </Button>
+            </Link>
+            <DeleteClientButton
+              clientId={id}
+              clientName={client.name}
+              hasDossiers={client.dossiers.length > 0}
+            />
+          </>
+        }
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
@@ -64,7 +66,7 @@ export default async function ClientDetailPage({
             Dossiers ({client.dossiers.length})
           </div>
           {client.dossiers.length === 0 ? (
-            <div className="p-8 text-center text-sm text-[var(--color-muted-foreground)]">
+            <div className="p-8 text-center text-[13px] text-[var(--color-fg-3)]">
               Aucun dossier.
             </div>
           ) : (
@@ -73,16 +75,16 @@ export default async function ClientDetailPage({
                 <Link
                   key={d.id}
                   href={`/dossiers/${d.id}`}
-                  className="flex items-center gap-3 p-4 hover:bg-[var(--color-muted)]"
+                  className="flex items-center gap-3 p-4 hover:bg-[var(--color-surface-2)]"
                 >
-                  <Folder className="size-4 text-[var(--color-muted-foreground)]" />
+                  <Folder className="size-4 text-[var(--color-fg-3)]" />
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium">{d.number}</div>
-                    <div className="text-xs text-[var(--color-muted-foreground)]">
+                    <div className="text-[13px] font-medium">{d.number}</div>
+                    <div className="text-[11.5px] text-[var(--color-fg-mute)]">
                       {d.reference} · {formatDate(d.updatedAt)}
                     </div>
                   </div>
-                  <div className="text-xs text-[var(--color-muted-foreground)] hidden sm:block">
+                  <div className="text-[11.5px] text-[var(--color-fg-mute)] hidden sm:block">
                     {formatCurrency(
                       d.goodsValue ? Number(d.goodsValue) : null,
                       d.goodsCurrency ?? "EUR",
@@ -97,44 +99,44 @@ export default async function ClientDetailPage({
 
         <Card>
           <div className="p-5 border-b border-[var(--color-border)] font-semibold">Coordonnées</div>
-          <div className="p-5 text-sm space-y-2">
+          <div className="p-5 text-[13px] space-y-2">
             {client.email && (
               <div>
-                <span className="text-[var(--color-muted-foreground)]">Email: </span>
+                <span className="text-[var(--color-fg-3)]">Email: </span>
                 {client.email}
               </div>
             )}
             {client.phone && (
               <div>
-                <span className="text-[var(--color-muted-foreground)]">Tél: </span>
+                <span className="text-[var(--color-fg-3)]">Tél: </span>
                 {client.phone}
               </div>
             )}
             {client.address && (
               <div>
-                <span className="text-[var(--color-muted-foreground)]">Adresse: </span>
+                <span className="text-[var(--color-fg-3)]">Adresse: </span>
                 {client.address}
               </div>
             )}
             {client.contactName && (
               <div>
-                <span className="text-[var(--color-muted-foreground)]">Contact: </span>
+                <span className="text-[var(--color-fg-3)]">Contact: </span>
                 {client.contactName}
               </div>
             )}
           </div>
           <div className="p-5 border-t border-[var(--color-border)]">
-            <div className="text-xs uppercase tracking-wide text-[var(--color-muted-foreground)] mb-2">
+            <div className="text-[11.5px] uppercase tracking-wide text-[var(--color-fg-3)] mb-2">
               Accès portail ({client.users.length})
             </div>
             {client.users.map((u) => (
-              <div key={u.id} className="text-sm">
+              <div key={u.id} className="text-[13px]">
                 {u.name}{" "}
-                <span className="text-[var(--color-muted-foreground)]">· {u.email}</span>
+                <span className="text-[var(--color-fg-3)]">· {u.email}</span>
               </div>
             ))}
             {client.users.length === 0 && (
-              <div className="text-sm text-[var(--color-muted-foreground)]">
+              <div className="text-[13px] text-[var(--color-fg-3)]">
                 Aucun accès configuré.
               </div>
             )}
