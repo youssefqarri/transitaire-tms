@@ -8,7 +8,7 @@ export const STATUS_LABELS: Record<DossierStatus, string> = {
   BON_A_DELIVRER_RECU: "BAD reçu",
   DECLARATION_EN_COURS: "Déclaration en cours",
   VALIDATION_DOUANE: "Validation douane",
-  VISITE: "Visite",
+  VISITE: "Visite planifiée",
   CONFORME: "Conforme",
   BUREAU_VALEUR: "Bureau de valeur",
   DEMANDE_DOCUMENTS: "Demande documents",
