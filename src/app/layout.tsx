@@ -17,8 +17,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Transitaire",
-  description: "Gestion des dossiers de transit douanier",
+  title: {
+    default: "Transitaire",
+    template: "%s · Transitaire",
+  },
+  description: "Plateforme de gestion des dossiers de transit douanier au Maroc.",
+  applicationName: "Transitaire",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -27,7 +31,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen antialiased">
         {children}
         <ProgressBar />
-        <Toaster position="top-right" richColors closeButton />
+        <Toaster
+          position="top-right"
+          richColors
+          closeButton
+          toastOptions={{
+            style: {
+              borderRadius: "var(--radius)",
+              fontSize: "13px",
+            },
+          }}
+        />
       </body>
     </html>
   );

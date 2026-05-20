@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Printer, Download, MoreHorizontal } from "lucide-react";
+import { Printer } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { BackLink } from "@/components/ui/back-link";
 import {
   INVOICE_STATUS_LABELS,
   INVOICE_ITEM_KIND_LABELS,
@@ -59,18 +60,13 @@ export default async function InvoiceDetailPage({
   );
 
   return (
-    <div className="space-y-5 max-w-4xl">
-      <Link
-        href="/factures"
-        className="inline-flex items-center gap-1 text-[12.5px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)]"
-      >
-        <ArrowLeft className="size-3.5" strokeWidth={1.75} /> Retour aux factures
-      </Link>
+    <div className="space-y-5 max-w-4xl animate-fade-in">
+      <BackLink href="/factures">Retour aux factures</BackLink>
 
       <header className="flex items-start justify-between gap-4 flex-wrap">
         <div className="space-y-2">
           <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className="text-[22px] font-semibold tracking-tight font-mono">
+            <h1 className="text-[22px] font-mono font-semibold tracking-tight text-[var(--color-fg)]">
               {invoice.number}
             </h1>
             <Badge tone={TONE_BY_STATUS[invoice.status]}>
@@ -78,7 +74,7 @@ export default async function InvoiceDetailPage({
             </Badge>
           </div>
           <p className="text-[13px] text-[var(--color-fg-3)]">
-            Pour <span className="text-[var(--color-fg)]">{invoice.client.name}</span>
+            Pour <span className="text-[var(--color-fg)] font-medium">{invoice.client.name}</span>
             {invoice.issuedAt && ` · émise le ${formatDate(invoice.issuedAt)}`}
             {invoice.createdBy && ` · par ${invoice.createdBy.name}`}
           </p>

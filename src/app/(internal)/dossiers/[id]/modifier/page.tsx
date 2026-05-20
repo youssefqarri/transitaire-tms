@@ -1,9 +1,9 @@
 import { notFound, redirect } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { canModifyDossier } from "@/lib/roles";
+import { BackLink } from "@/components/ui/back-link";
+import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { NewDossierForm } from "../../nouveau/form";
 
@@ -27,16 +27,11 @@ export default async function EditDossierPage({
 
   return (
     <div className="max-w-3xl space-y-5">
-      <Link
-        href={`/dossiers/${id}`}
-        className="inline-flex items-center gap-1 text-[12.5px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)]"
-      >
-        <ArrowLeft className="size-3.5" strokeWidth={1.75} /> Retour au dossier
-      </Link>
-      <div>
-        <h1 className="text-[22px] font-semibold tracking-tight">Modifier le dossier</h1>
-        <p className="text-[13px] text-[var(--color-fg-3)] mt-0.5 font-mono">{dossier.number}</p>
-      </div>
+      <BackLink href={`/dossiers/${id}`}>Retour au dossier</BackLink>
+      <PageHeader
+        title="Modifier le dossier"
+        subtitle={<span className="font-mono">{dossier.number}</span>}
+      />
       <Card>
         <div className="p-5">
           <NewDossierForm

@@ -89,7 +89,7 @@ export function ConfirmDialog({
             <button
               type="button"
               onClick={() => !pending && onOpenChange(false)}
-              className="size-7 rounded-[var(--radius-sm)] flex items-center justify-center text-[var(--color-fg-mute)] hover:text-[var(--color-fg)] hover:bg-[var(--color-surface-2)] shrink-0"
+              className="size-9 -mr-2 -mt-1 rounded-[var(--radius-sm)] flex items-center justify-center text-[var(--color-fg-mute)] hover:text-[var(--color-fg)] hover:bg-[var(--color-surface-2)] shrink-0 transition-colors"
               aria-label="Fermer"
             >
               <X className="size-4" strokeWidth={2} />

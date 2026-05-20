@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canCreateDossier } from "@/lib/roles";
 import { Card } from "@/components/ui/card";
+import { BackLink } from "@/components/ui/back-link";
+import { PageHeader } from "@/components/ui/page-header";
 import { NewDossierForm } from "./form";
 
 export default async function NewDossierPage() {
@@ -18,21 +18,11 @@ export default async function NewDossierPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
-      <div>
-        <Link
-          href="/dossiers"
-          className="inline-flex items-center gap-1.5 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
-        >
-          <ArrowLeft className="size-4" /> Retour aux dossiers
-        </Link>
-        <h1 className="text-2xl font-semibold tracking-tight mt-3">
-          Nouveau dossier
-        </h1>
-        <p className="text-sm text-[var(--color-muted-foreground)] mt-1">
-          Saisissez les informations initiales. Vous pourrez ajouter documents, DUM et statuts ensuite.
-        </p>
-      </div>
-
+      <BackLink href="/dossiers">Retour aux dossiers</BackLink>
+      <PageHeader
+        title="Nouveau dossier"
+        subtitle="Saisissez les informations initiales. Vous pourrez ajouter documents, DUM et statuts ensuite."
+      />
       <Card className="p-6">
         <NewDossierForm clients={clients} suppliers={suppliers} />
       </Card>

@@ -62,8 +62,13 @@ export default async function ClientDetailPage({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
-          <div className="p-5 border-b border-[var(--color-border)] font-semibold">
-            Dossiers ({client.dossiers.length})
+          <div className="px-5 py-3.5 border-b border-[var(--color-border)] flex items-center justify-between gap-4">
+            <h3 className="text-[14px] font-semibold tracking-tight text-[var(--color-fg)]">
+              Dossiers
+            </h3>
+            <span className="text-[11.5px] text-[var(--color-fg-3)] tnum">
+              {client.dossiers.length}
+            </span>
           </div>
           {client.dossiers.length === 0 ? (
             <div className="p-8 text-center text-[13px] text-[var(--color-fg-3)]">
@@ -75,22 +80,26 @@ export default async function ClientDetailPage({
                 <Link
                   key={d.id}
                   href={`/dossiers/${d.id}`}
-                  className="flex items-center gap-3 p-4 hover:bg-[var(--color-surface-2)]"
+                  className="row-link flex items-center gap-3 p-4 hover:bg-[var(--color-surface-2)] transition-colors"
                 >
-                  <Folder className="size-4 text-[var(--color-fg-3)]" />
+                  <Folder className="size-4 text-[var(--color-fg-mute)]" strokeWidth={1.75} />
                   <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-medium">{d.number}</div>
-                    <div className="text-[11.5px] text-[var(--color-fg-3)]">
-                      {d.reference} · {formatDate(d.updatedAt)}
+                    <div className="text-[13px] font-mono font-medium text-[var(--color-fg)]">
+                      {d.number}
+                    </div>
+                    <div className="text-[11.5px] text-[var(--color-fg-3)] truncate">
+                      {d.reference && <span className="font-mono">{d.reference}</span>}
+                      {d.reference && <span className="text-[var(--color-fg-mute)]"> · </span>}
+                      {formatDate(d.updatedAt)}
                     </div>
                   </div>
-                  <div className="text-[11.5px] text-[var(--color-fg-3)] hidden sm:block">
+                  <div className="text-[11.5px] font-mono tnum text-[var(--color-fg-3)] hidden sm:block">
                     {formatCurrency(
                       d.goodsValue ? Number(d.goodsValue) : null,
                       d.goodsCurrency ?? "EUR",
                     )}
                   </div>
-                  <StatusBadge status={d.status} />
+                  <StatusBadge status={d.status} size="sm" />
                 </Link>
               ))}
             </div>
@@ -98,47 +107,62 @@ export default async function ClientDetailPage({
         </Card>
 
         <Card>
-          <div className="p-5 border-b border-[var(--color-border)] font-semibold">Coordonnées</div>
-          <div className="p-5 text-[13px] space-y-2">
+          <div className="px-5 py-3.5 border-b border-[var(--color-border)]">
+            <h3 className="text-[14px] font-semibold tracking-tight text-[var(--color-fg)]">
+              Coordonnées
+            </h3>
+          </div>
+          <dl className="px-5 py-4 text-[13px] space-y-2.5">
             {client.email && (
-              <div>
-                <span className="text-[var(--color-fg-3)]">Email: </span>
-                {client.email}
+              <div className="flex gap-2">
+                <dt className="w-16 shrink-0 text-[var(--color-fg-3)]">Email</dt>
+                <dd className="text-[var(--color-fg)] break-all">{client.email}</dd>
               </div>
             )}
             {client.phone && (
-              <div>
-                <span className="text-[var(--color-fg-3)]">Tél: </span>
-                {client.phone}
+              <div className="flex gap-2">
+                <dt className="w-16 shrink-0 text-[var(--color-fg-3)]">Tél.</dt>
+                <dd className="text-[var(--color-fg)] tnum">{client.phone}</dd>
               </div>
             )}
             {client.address && (
-              <div>
-                <span className="text-[var(--color-fg-3)]">Adresse: </span>
-                {client.address}
+              <div className="flex gap-2">
+                <dt className="w-16 shrink-0 text-[var(--color-fg-3)]">Adresse</dt>
+                <dd className="text-[var(--color-fg)]">{client.address}</dd>
               </div>
             )}
             {client.contactName && (
-              <div>
-                <span className="text-[var(--color-fg-3)]">Contact: </span>
-                {client.contactName}
+              <div className="flex gap-2">
+                <dt className="w-16 shrink-0 text-[var(--color-fg-3)]">Contact</dt>
+                <dd className="text-[var(--color-fg)]">{client.contactName}</dd>
               </div>
             )}
-          </div>
-          <div className="p-5 border-t border-[var(--color-border)]">
-            <div className="text-[11.5px] uppercase tracking-wide text-[var(--color-fg-3)] mb-2">
-              Accès portail ({client.users.length})
-            </div>
-            {client.users.map((u) => (
-              <div key={u.id} className="text-[13px]">
-                {u.name}{" "}
-                <span className="text-[var(--color-fg-3)]">· {u.email}</span>
+            {!client.email && !client.phone && !client.address && !client.contactName && (
+              <div className="text-[var(--color-fg-3)]">Aucune coordonnée renseignée.</div>
+            )}
+          </dl>
+          <div className="px-5 py-4 border-t border-[var(--color-border)]">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-[10.5px] uppercase tracking-wider font-semibold text-[var(--color-fg-3)]">
+                Accès portail
               </div>
-            ))}
-            {client.users.length === 0 && (
-              <div className="text-[13px] text-[var(--color-fg-3)]">
+              <span className="text-[11.5px] text-[var(--color-fg-3)] tnum">
+                {client.users.length}
+              </span>
+            </div>
+            {client.users.length === 0 ? (
+              <div className="text-[12.5px] text-[var(--color-fg-3)]">
                 Aucun accès configuré.
               </div>
+            ) : (
+              <ul className="space-y-1.5">
+                {client.users.map((u) => (
+                  <li key={u.id} className="text-[13px] text-[var(--color-fg)]">
+                    {u.name}{" "}
+                    <span className="text-[var(--color-fg-3)]">· {u.email}</span>
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
         </Card>
