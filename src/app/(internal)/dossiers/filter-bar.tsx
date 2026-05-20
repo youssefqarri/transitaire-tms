@@ -38,25 +38,41 @@ export function DossiersFilterBar({
     start(() => router.push("/dossiers"));
   }
 
+  const hasFilter = !!q || !!status;
+
   return (
-    <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-[var(--color-border)]">
+    <div className="flex flex-wrap items-center gap-2.5 px-4 py-3 border-b border-[var(--color-border)]">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           apply({});
         }}
-        className="relative flex-1 min-w-[260px]"
+        className="relative flex-1 min-w-[240px]"
       >
         <Search
-          className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-[var(--color-fg-mute)]"
+          className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-[var(--color-fg-mute)] pointer-events-none"
           strokeWidth={1.75}
         />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="N° dossier, DUM, client, référence…"
-          className="w-full h-9 pl-8 pr-3 text-[13px] bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)] placeholder:text-[var(--color-fg-mute)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-ring)] focus:border-transparent"
+          aria-label="Rechercher un dossier"
+          className="w-full h-9 pl-8 pr-9 text-[13px] bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)] placeholder:text-[var(--color-fg-mute)] hover:border-[var(--color-fg-mute)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-ring)] focus:border-transparent transition-shadow"
         />
+        {q && (
+          <button
+            type="button"
+            onClick={() => {
+              setQ("");
+              apply({ q: "" });
+            }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 size-5 rounded flex items-center justify-center text-[var(--color-fg-mute)] hover:text-[var(--color-fg)] hover:bg-[var(--color-surface-2)]"
+            aria-label="Effacer la recherche"
+          >
+            <X className="size-3" strokeWidth={2} />
+          </button>
+        )}
       </form>
       <div className="min-w-[220px]">
         <Select
@@ -64,9 +80,9 @@ export function DossiersFilterBar({
           onChange={(e) => {
             const v = e.target.value;
             setStatus(v);
-            // application immédiate au changement
             apply({ status: v });
           }}
+          aria-label="Filtrer par statut"
         >
           <option value="">Tous les statuts</option>
           {Object.entries(STATUS_LABELS).map(([k, label]) => (
@@ -76,10 +92,15 @@ export function DossiersFilterBar({
           ))}
         </Select>
       </div>
-      <Button variant="secondary" size="sm" onClick={() => apply({})} disabled={pending}>
-        {pending ? "…" : "Filtrer"}
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={() => apply({})}
+        loading={pending}
+      >
+        Filtrer
       </Button>
-      {(q || status) && (
+      {hasFilter && (
         <Button variant="ghost" size="sm" onClick={reset} disabled={pending}>
           <X /> Réinitialiser
         </Button>

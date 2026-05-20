@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Folder, Plus, AlertTriangle } from "lucide-react";
+import { Folder, Plus, AlertTriangle, FilterX } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import { requiredDocuments } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
 import { DossiersFilterBar } from "./filter-bar";
 import { KeyDates } from "@/components/dossier/key-dates";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const dynamic = "force-dynamic";
 
@@ -79,40 +81,66 @@ export default async function DossiersPage({
       return b.updatedAt.getTime() - a.updatedAt.getTime();
     });
 
+  const hasFilter = !!q || !!params.status;
+
   return (
-    <div className="space-y-5">
-      <header className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-[22px] font-semibold tracking-tight">Dossiers</h1>
-          <p className="text-[13px] text-[var(--color-fg-3)] mt-0.5">
+    <div className="space-y-5 animate-fade-in">
+      <PageHeader
+        title="Dossiers"
+        subtitle={
+          <>
             {enriched.length} dossier{enriched.length > 1 ? "s" : ""}
             {q && (
               <>
                 {" "}· recherche <span className="text-[var(--color-fg)]">« {q} »</span>
               </>
             )}
-          </p>
-        </div>
-        {canCreateDossier(session.user.role) && (
-          <Link href="/dossiers/nouveau">
-            <Button>
-              <Plus /> Nouveau dossier
-            </Button>
-          </Link>
-        )}
-      </header>
+          </>
+        }
+        actions={
+          canCreateDossier(session.user.role) && (
+            <Link href="/dossiers/nouveau">
+              <Button>
+                <Plus /> Nouveau dossier
+              </Button>
+            </Link>
+          )
+        }
+      />
 
       <Card>
         <DossiersFilterBar initialQ={q} initialStatus={params.status} />
 
         {enriched.length === 0 ? (
-          <div className="py-16 text-center">
-            <Folder className="size-8 mx-auto text-[var(--color-fg-mute)] mb-2" strokeWidth={1.5} />
-            <div className="text-[14px] font-medium">Aucun dossier</div>
-            <div className="text-[12.5px] text-[var(--color-fg-3)] mt-1">
-              {q ? "Aucun résultat pour cette recherche." : "Créez votre premier dossier pour commencer."}
-            </div>
-          </div>
+          hasFilter ? (
+            <EmptyState
+              icon={FilterX}
+              title="Aucun résultat"
+              hint="Aucun dossier ne correspond à vos filtres. Essayez d'élargir la recherche."
+              cta={
+                <Link href="/dossiers">
+                  <Button variant="outline" size="sm">
+                    Réinitialiser les filtres
+                  </Button>
+                </Link>
+              }
+            />
+          ) : (
+            <EmptyState
+              icon={Folder}
+              title="Aucun dossier"
+              hint="Créez votre premier dossier pour commencer le suivi en douane."
+              cta={
+                canCreateDossier(session.user.role) && (
+                  <Link href="/dossiers/nouveau">
+                    <Button size="sm">
+                      <Plus /> Nouveau dossier
+                    </Button>
+                  </Link>
+                )
+              }
+            />
+          )
         ) : (
           <>
             {/* Mobile: liste en cartes empilées, statut + référence mis en avant */}

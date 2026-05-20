@@ -49,12 +49,12 @@ export function MobileNav({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Ouvrir le menu"
-        className="md:hidden size-9 -ml-1 rounded-[var(--radius)] flex items-center justify-center text-[var(--color-fg-2)] hover:bg-[var(--color-surface-2)]"
+        aria-label={unreadCount > 0 ? `Ouvrir le menu (${unreadCount} non lu)` : "Ouvrir le menu"}
+        className="md:hidden relative size-9 -ml-1 rounded-[var(--radius)] flex items-center justify-center text-[var(--color-fg-2)] hover:bg-[var(--color-surface-2)] transition-colors"
       >
         <Menu className="size-5" strokeWidth={1.75} />
         {unreadCount > 0 && (
-          <span className="absolute mt-[-14px] ml-3 size-2 rounded-full bg-[var(--color-accent)]" />
+          <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-[var(--color-accent)] ring-2 ring-[var(--color-surface)]" />
         )}
       </button>
 
@@ -73,12 +73,25 @@ export function MobileNav({
             aria-modal="true"
             aria-label="Menu"
           >
-            <div className="h-14 px-5 flex items-center justify-between border-b border-[var(--color-sidebar-border)]">
+            <div className="h-14 px-4 flex items-center justify-between border-b border-[var(--color-sidebar-border)]">
               <div className="flex items-center gap-2.5">
-                <div className="size-7 rounded-[var(--radius-sm)] bg-[var(--color-fg)] flex items-center justify-center text-[var(--color-surface)] text-[12px] font-bold">
+                <div
+                  className="size-8 rounded-[var(--radius)] flex items-center justify-center text-white text-[13px] font-bold tracking-tight"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, var(--color-accent), oklch(38% 0.18 270))",
+                  }}
+                >
                   T
                 </div>
-                <span className="text-[14px] font-semibold tracking-tight">Transitaire</span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[14px] font-semibold tracking-tight leading-tight">
+                    Transitaire
+                  </div>
+                  <div className="text-[10.5px] text-[var(--color-fg-mute)] leading-tight">
+                    TMS · Douane Maroc
+                  </div>
+                </div>
               </div>
               <button
                 type="button"
@@ -109,16 +122,22 @@ export function MobileNav({
                           key={it.href}
                           href={it.href}
                           className={cn(
-                            "flex items-center gap-3 px-3 h-10 rounded-[var(--radius-sm)] text-[14px] transition-colors",
+                            "group relative flex items-center gap-3 px-3 h-10 rounded-[var(--radius-sm)] text-[14px] transition-colors",
                             active
                               ? "bg-[var(--color-sidebar-active)] text-[var(--color-fg)] font-medium"
                               : "text-[var(--color-fg-2)] hover:bg-[var(--color-sidebar-hover)] hover:text-[var(--color-fg)]",
                           )}
                         >
+                          {active && (
+                            <span
+                              aria-hidden
+                              className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full bg-[var(--color-accent)]"
+                            />
+                          )}
                           <Icon
                             className={cn(
                               "size-4 shrink-0",
-                              active ? "text-[var(--color-fg)]" : "text-[var(--color-fg-mute)]",
+                              active ? "text-[var(--color-accent)]" : "text-[var(--color-fg-mute)]",
                             )}
                             strokeWidth={1.75}
                           />

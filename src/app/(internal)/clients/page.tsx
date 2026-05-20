@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Avatar } from "@/components/ui/avatar";
 
 export const dynamic = "force-dynamic";
 
@@ -39,22 +40,25 @@ export default async function ClientsPage() {
                 href={`/clients/${c.id}`}
                 className="flex items-center gap-4 p-4 hover:bg-[var(--color-surface-2)] transition-colors"
               >
-                <div className="size-10 rounded-lg bg-gradient-to-br from-[oklch(85%_0.08_258)] to-[oklch(70%_0.12_280)] flex items-center justify-center text-white font-semibold text-[13px]">
-                  {c.name.slice(0, 2).toUpperCase()}
-                </div>
+                <Avatar name={c.name} size={40} />
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-[13px]">{c.name}</div>
-                  <div className="text-[11.5px] text-[var(--color-fg-mute)]">
-                    {c.code ? `${c.code} · ` : ""}
-                    {c.ice ? `ICE ${c.ice} · ` : ""}
-                    {c.city ?? ""}
+                  <div className="font-medium text-[13px] text-[var(--color-fg)] truncate">
+                    {c.name}
+                  </div>
+                  <div className="text-[11.5px] text-[var(--color-fg-3)] truncate">
+                    {c.code && <span>{c.code}</span>}
+                    {c.code && (c.ice || c.city) && <span className="text-[var(--color-fg-mute)]"> · </span>}
+                    {c.ice && <span>ICE {c.ice}</span>}
+                    {c.ice && c.city && <span className="text-[var(--color-fg-mute)]"> · </span>}
+                    {c.city}
                   </div>
                 </div>
-                <div className="text-right text-[11.5px] text-[var(--color-fg-mute)]">
+                <div className="text-right text-[11.5px] text-[var(--color-fg-3)] tnum">
                   <div>
-                    {c._count.dossiers} dossier{c._count.dossiers > 1 ? "s" : ""}
+                    <span className="font-semibold text-[var(--color-fg-2)]">{c._count.dossiers}</span>{" "}
+                    dossier{c._count.dossiers > 1 ? "s" : ""}
                   </div>
-                  <div>
+                  <div className="text-[var(--color-fg-mute)]">
                     {c._count.users} utilisateur{c._count.users > 1 ? "s" : ""}
                   </div>
                 </div>

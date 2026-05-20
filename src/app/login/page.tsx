@@ -12,19 +12,49 @@ export default async function LoginPage({
   const params = await searchParams;
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 bg-[var(--color-bg)]">
-      <div className="w-full max-w-[380px]">
+    <div className="min-h-screen relative flex items-center justify-center px-6 bg-[var(--color-bg)] overflow-hidden">
+      {/* Décor : gradients subtils en arrière-plan */}
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(ellipse 600px 400px at 20% 10%, oklch(96% 0.03 258 / 0.6), transparent 60%),
+            radial-gradient(ellipse 500px 350px at 80% 90%, oklch(95% 0.04 280 / 0.5), transparent 60%)
+          `,
+        }}
+      />
+
+      <div className="relative w-full max-w-[400px] animate-fade-in">
+        {/* Logo */}
         <div className="flex items-center gap-2.5 mb-8">
-          <div className="size-9 rounded-[var(--radius)] bg-[var(--color-fg)] flex items-center justify-center text-[var(--color-surface)] text-[14px] font-bold">
+          <div
+            className="size-10 rounded-[var(--radius-lg)] flex items-center justify-center text-white text-[15px] font-bold tracking-tight"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--color-accent), oklch(38% 0.18 270))",
+              boxShadow: "0 8px 24px -8px oklch(48% 0.16 258 / 0.4)",
+            }}
+          >
             T
           </div>
-          <span className="text-[16px] font-semibold tracking-tight">Transitaire</span>
+          <div>
+            <div className="text-[16px] font-semibold tracking-tight leading-tight">
+              Transitaire
+            </div>
+            <div className="text-[11px] text-[var(--color-fg-mute)] leading-tight">
+              TMS · Douane Maroc
+            </div>
+          </div>
         </div>
 
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-7">
-          <h1 className="text-[20px] font-semibold tracking-tight">Connexion</h1>
+        {/* Card */}
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-7 shadow-[var(--shadow-lg)]">
+          <h1 className="text-[20px] font-semibold tracking-tight text-[var(--color-fg)]">
+            Bienvenue
+          </h1>
           <p className="text-[13px] text-[var(--color-fg-3)] mt-1">
-            Accédez à votre espace de gestion.
+            Connectez-vous à votre espace de gestion.
           </p>
 
           <div className="mt-6">
@@ -34,14 +64,14 @@ export default async function LoginPage({
           <div className="mt-5 text-center">
             <a
               href="/mot-de-passe-oublie"
-              className="text-[12.5px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)] underline-offset-4 hover:underline"
+              className="text-[12.5px] text-[var(--color-fg-3)] hover:text-[var(--color-accent)] underline-offset-4 hover:underline transition-colors"
             >
               Mot de passe oublié ?
             </a>
           </div>
         </div>
 
-        <div className="mt-5 text-center text-[12px] text-[var(--color-fg-3)]">
+        <div className="mt-5 text-center text-[12px] text-[var(--color-fg-mute)]">
           En cas de difficulté, contactez votre administrateur.
         </div>
       </div>

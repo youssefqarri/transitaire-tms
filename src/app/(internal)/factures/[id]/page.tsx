@@ -167,26 +167,34 @@ export default async function InvoiceDetailPage({
           <div className="px-5 py-4 space-y-2 text-[13px]">
             <Row label="Total HT" value={formatMAD(computed.totalHT)} />
             <Row label="TVA" value={formatMAD(computed.totalVAT)} />
-            <div className="border-t border-[var(--color-border)] my-2" />
-            <Row label="Total TTC" value={formatMAD(computed.totalTTC)} bold />
-            {Number(invoice.paidAmount) > 0 && (
-              <>
-                <div className="border-t border-[var(--color-border)] my-2" />
-                <Row
-                  label="Réglé"
-                  value={formatMAD(Number(invoice.paidAmount))}
-                  className="text-[var(--color-success)]"
-                />
-                {Number(invoice.paidAmount) < computed.totalTTC && (
-                  <Row
-                    label="Reste dû"
-                    value={formatMAD(computed.totalTTC - Number(invoice.paidAmount))}
-                    className="text-[var(--color-warning)]"
-                  />
-                )}
-              </>
-            )}
           </div>
+          {/* Bloc TTC mis en avant */}
+          <div className="px-5 py-3 bg-[var(--color-surface-2)] border-t border-b border-[var(--color-border)]">
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="text-[12px] text-[var(--color-fg-3)] font-medium">
+                Total TTC
+              </span>
+              <span className="text-[22px] font-mono font-semibold tnum tracking-tight text-[var(--color-fg)]">
+                {formatMAD(computed.totalTTC)}
+              </span>
+            </div>
+          </div>
+          {Number(invoice.paidAmount) > 0 && (
+            <div className="px-5 py-3 space-y-2 text-[13px] border-b border-[var(--color-border)]">
+              <Row
+                label="Réglé"
+                value={formatMAD(Number(invoice.paidAmount))}
+                className="text-[var(--color-success)]"
+              />
+              {Number(invoice.paidAmount) < computed.totalTTC && (
+                <Row
+                  label="Reste dû"
+                  value={formatMAD(computed.totalTTC - Number(invoice.paidAmount))}
+                  className="text-[var(--color-warning)]"
+                />
+              )}
+            </div>
+          )}
           {(invoice.dueAt || invoice.termsOfPayment) && (
             <div className="px-5 py-3 border-t border-[var(--color-border)] text-[12px] text-[var(--color-fg-3)] space-y-1">
               {invoice.dueAt && (

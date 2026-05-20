@@ -37,17 +37,26 @@ export default async function SuppliersPage() {
                 href={`/fournisseurs/${s.id}`}
                 className="flex items-center gap-4 p-4 hover:bg-[var(--color-surface-2)] transition-colors"
               >
-                <div className="size-10 rounded-lg bg-[var(--color-surface-2)] flex items-center justify-center">
-                  <Truck className="size-4" />
+                <div className="size-10 rounded-[var(--radius-lg)] bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg-3)]">
+                  <Truck className="size-4" strokeWidth={1.75} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-[13px]">{s.name}</div>
-                  <div className="text-[11.5px] text-[var(--color-fg-mute)]">
-                    {s.country ?? ""}{s.country && s.email && " · "}{s.email ?? ""}
+                  <div className="font-medium text-[13px] text-[var(--color-fg)] truncate">
+                    {s.name}
+                  </div>
+                  <div className="text-[11.5px] text-[var(--color-fg-3)] truncate">
+                    {s.country}
+                    {s.country && s.email && (
+                      <span className="text-[var(--color-fg-mute)]"> · </span>
+                    )}
+                    {s.email}
                   </div>
                 </div>
-                <div className="text-[11.5px] text-[var(--color-fg-mute)]">
-                  {s._count.dossiers} dossier{s._count.dossiers > 1 ? "s" : ""}
+                <div className="text-[11.5px] text-[var(--color-fg-3)] tnum text-right">
+                  <span className="font-semibold text-[var(--color-fg-2)]">
+                    {s._count.dossiers}
+                  </span>{" "}
+                  dossier{s._count.dossiers > 1 ? "s" : ""}
                 </div>
               </Link>
             ))}

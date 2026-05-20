@@ -4,6 +4,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { KeyDates } from "@/components/dossier/key-dates";
 import { formatDate, formatCurrency } from "@/lib/utils";
@@ -21,33 +23,32 @@ export default async function PortalHomePage() {
 
   return (
     <div className="space-y-5">
-      <header className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-[22px] font-semibold tracking-tight">Mes dossiers</h1>
-          <p className="text-[13px] text-[var(--color-fg-3)] mt-1">
-            Bonjour {session.user.name.split(" ")[0]}, voici l&apos;état de vos dossiers en cours.
-          </p>
-        </div>
-        <Link href="/portail/nouveau">
-          <Button>
-            <Plus /> Nouveau dossier
-          </Button>
-        </Link>
-      </header>
+      <PageHeader
+        title="Mes dossiers"
+        subtitle={`Bonjour ${session.user.name.split(" ")[0]}, voici l'état de vos dossiers en cours.`}
+        actions={
+          <Link href="/portail/nouveau">
+            <Button>
+              <Plus /> Nouveau dossier
+            </Button>
+          </Link>
+        }
+      />
 
       <Card>
         {dossiers.length === 0 ? (
-          <div className="py-16 text-center">
-            <Folder className="size-8 mx-auto text-[var(--color-fg-mute)] mb-2" strokeWidth={1.5} />
-            <div className="text-[13px] text-[var(--color-fg-3)] mb-4">
-              Aucun dossier pour le moment.
-            </div>
-            <Link href="/portail/nouveau">
-              <Button size="sm">
-                <Plus /> Créer mon premier dossier
-              </Button>
-            </Link>
-          </div>
+          <EmptyState
+            icon={Folder}
+            title="Aucun dossier pour le moment"
+            hint="Créez votre premier dossier pour commencer le suivi."
+            cta={
+              <Link href="/portail/nouveau">
+                <Button size="sm">
+                  <Plus /> Créer mon premier dossier
+                </Button>
+              </Link>
+            }
+          />
         ) : (
           <div className="divide-y divide-[var(--color-border)]">
             {dossiers.map((d) => (

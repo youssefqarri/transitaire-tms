@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, AlertTriangle, Pencil } from "lucide-react";
+import { AlertTriangle, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BackLink } from "@/components/ui/back-link";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,18 +80,13 @@ export default async function DossierDetailPage({
   const missing = required.filter((c) => !presentCategories.has(c));
 
   return (
-    <div className="space-y-5">
-      <Link
-        href="/dossiers"
-        className="inline-flex items-center gap-1 text-[12.5px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)]"
-      >
-        <ArrowLeft className="size-3.5" strokeWidth={1.75} /> Retour aux dossiers
-      </Link>
+    <div className="space-y-5 animate-fade-in">
+      <BackLink href="/dossiers">Retour aux dossiers</BackLink>
 
       <header className="flex items-start justify-between gap-4 flex-wrap">
-        <div className="space-y-2">
+        <div className="space-y-2 min-w-0">
           <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className="text-[22px] font-semibold tracking-tight font-mono">
+            <h1 className="text-[22px] font-mono font-semibold tracking-tight text-[var(--color-fg)]">
               {dossier.number}
             </h1>
             <StatusBadge status={dossier.status} />
@@ -100,7 +96,7 @@ export default async function DossierDetailPage({
             )}
           </div>
           <p className="text-[13px] text-[var(--color-fg-3)]">
-            {dossier.reference ? <>Réf. <span className="font-mono">{dossier.reference}</span> · </> : ""}
+            {dossier.reference ? <>Réf. <span className="font-mono text-[var(--color-fg-2)]">{dossier.reference}</span> · </> : ""}
             Créé le {formatDate(dossier.createdAt)}
             {dossier.createdBy && ` par ${dossier.createdBy.name}`}
           </p>
@@ -166,16 +162,16 @@ export default async function DossierDetailPage({
       )}
 
       {dossier.customNote && (
-        <Card className="border-[var(--color-accent)]/30 bg-[var(--color-accent-soft)]">
+        <Card className="border-l-4 border-l-[var(--color-accent)] border-[var(--color-accent)]/20 bg-[var(--color-accent-soft)]">
           <div className="p-4 text-[13px] text-[var(--color-fg)] whitespace-pre-wrap">
-            <span className="font-medium">Note : </span>
+            <span className="font-medium text-[var(--color-accent)]">Note : </span>
             {dossier.customNote}
           </div>
         </Card>
       )}
 
       {missing.length > 0 && (
-        <Card className="border-[var(--color-warning)]/30 bg-[var(--color-warning-soft)]">
+        <Card className="border-l-4 border-l-[var(--color-warning)] border-[var(--color-warning)]/20 bg-[var(--color-warning-soft)]">
           <div className="p-4 flex items-start gap-3">
             <AlertTriangle
               className="size-4 text-[var(--color-warning)] shrink-0 mt-0.5"
