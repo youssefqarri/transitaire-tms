@@ -329,40 +329,28 @@ export function NewDossierForm({
               </div>
               <div />
               <div className="space-y-2">
-                <Label htmlFor="visitDate">Visite douane prévue</Label>
+                <Label htmlFor="visitDate">Date de visite douane</Label>
                 <Input
                   id="visitDate"
                   type="date"
                   value={form.visitDate ?? ""}
                   onChange={(e) => set("visitDate", e.target.value)}
                 />
+                <p className="text-[11px] text-[var(--color-fg-mute)]">
+                  Date où la visite a eu lieu (effective).
+                </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="visitEffectiveDate">Visite douane effective</Label>
-                <Input
-                  id="visitEffectiveDate"
-                  type="date"
-                  value={form.visitEffectiveDate ?? ""}
-                  onChange={(e) => set("visitEffectiveDate", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="conformityVisitDate">Visite MCI prévue</Label>
+                <Label htmlFor="conformityVisitDate">Date de visite MCI</Label>
                 <Input
                   id="conformityVisitDate"
                   type="date"
                   value={form.conformityVisitDate ?? ""}
                   onChange={(e) => set("conformityVisitDate", e.target.value)}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="conformityVisitEffectiveDate">Visite MCI effective</Label>
-                <Input
-                  id="conformityVisitEffectiveDate"
-                  type="date"
-                  value={form.conformityVisitEffectiveDate ?? ""}
-                  onChange={(e) => set("conformityVisitEffectiveDate", e.target.value)}
-                />
+                <p className="text-[11px] text-[var(--color-fg-mute)]">
+                  Date où la visite conformité a eu lieu (effective).
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="deliveredAt">Date de livraison</Label>
@@ -373,6 +361,7 @@ export function NewDossierForm({
                   onChange={(e) => set("deliveredAt", e.target.value)}
                 />
               </div>
+              <div />
             </div>
           </div>
 

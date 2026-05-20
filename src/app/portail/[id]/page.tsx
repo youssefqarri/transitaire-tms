@@ -202,32 +202,16 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
                 }
                 if (dossier.visitDate) {
                   events.push({
-                    key: "visit-douane-planned",
+                    key: "visit-douane",
                     date: dossier.visitDate,
-                    label: "Visite douane prévue",
-                    dot: "bg-[var(--color-accent)]",
-                  });
-                }
-                if (dossier.visitEffectiveDate) {
-                  events.push({
-                    key: "visit-douane-done",
-                    date: dossier.visitEffectiveDate,
                     label: "Visite douane effectuée",
                     dot: "bg-[var(--color-success)]",
                   });
                 }
                 if (dossier.conformityVisitDate) {
                   events.push({
-                    key: "visit-mci-planned",
+                    key: "visit-mci",
                     date: dossier.conformityVisitDate,
-                    label: "Visite MCI prévue",
-                    dot: "bg-[var(--color-accent)]",
-                  });
-                }
-                if (dossier.conformityVisitEffectiveDate) {
-                  events.push({
-                    key: "visit-mci-done",
-                    date: dossier.conformityVisitEffectiveDate,
                     label: "Visite MCI effectuée",
                     dot: "bg-[var(--color-success)]",
                   });
