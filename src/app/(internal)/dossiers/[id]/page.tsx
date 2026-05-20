@@ -140,7 +140,9 @@ export default async function DossierDetailPage({
       {/* Dates clés (visite douane, MCI, livraison) avec icônes */}
       <KeyDates
         visitDate={dossier.visitDate}
+        visitEffectiveDate={dossier.visitEffectiveDate}
         conformityVisitDate={dossier.conformityVisitDate}
+        conformityVisitEffectiveDate={dossier.conformityVisitEffectiveDate}
         deliveredAt={dossier.deliveredAt}
         layout="row"
         size="md"
@@ -341,18 +343,34 @@ export default async function DossierDetailPage({
                 }
                 if (dossier.visitDate) {
                   events.push({
-                    key: "visit-douane",
+                    key: "visit-douane-planned",
                     date: dossier.visitDate,
-                    label: "Visite douane",
+                    label: "Visite douane prévue",
                     dot: "bg-[var(--color-accent)]",
+                  });
+                }
+                if (dossier.visitEffectiveDate) {
+                  events.push({
+                    key: "visit-douane-done",
+                    date: dossier.visitEffectiveDate,
+                    label: "Visite douane effectuée",
+                    dot: "bg-[var(--color-success)]",
                   });
                 }
                 if (dossier.conformityVisitDate) {
                   events.push({
-                    key: "visit-mci",
+                    key: "visit-mci-planned",
                     date: dossier.conformityVisitDate,
-                    label: "Visite MCI",
+                    label: "Visite MCI prévue",
                     dot: "bg-[var(--color-accent)]",
+                  });
+                }
+                if (dossier.conformityVisitEffectiveDate) {
+                  events.push({
+                    key: "visit-mci-done",
+                    date: dossier.conformityVisitEffectiveDate,
+                    label: "Visite MCI effectuée",
+                    dot: "bg-[var(--color-success)]",
                   });
                 }
                 if (dossier.deliveredAt) {

@@ -75,7 +75,9 @@ export default async function PortalHomePage() {
                 <div className="hidden sm:block shrink-0">
                   <KeyDates
                     visitDate={d.visitDate}
+                    visitEffectiveDate={d.visitEffectiveDate}
                     conformityVisitDate={d.conformityVisitDate}
+                    conformityVisitEffectiveDate={d.conformityVisitEffectiveDate}
                     deliveredAt={d.deliveredAt}
                   />
                 </div>

@@ -207,10 +207,12 @@ export default async function DashboardPage() {
                 </div>
                 {/* Col 3 : Dates visite douane / MCI / livraison */}
                 <div className="hidden sm:block">
-                  {d.visitDate || d.conformityVisitDate || d.deliveredAt ? (
+                  {d.visitDate || d.visitEffectiveDate || d.conformityVisitDate || d.conformityVisitEffectiveDate || d.deliveredAt ? (
                     <KeyDates
                       visitDate={d.visitDate}
+                      visitEffectiveDate={d.visitEffectiveDate}
                       conformityVisitDate={d.conformityVisitDate}
+                      conformityVisitEffectiveDate={d.conformityVisitEffectiveDate}
                       deliveredAt={d.deliveredAt}
                     />
                   ) : (
@@ -333,7 +335,9 @@ export default async function DashboardPage() {
                           )}
                           <KeyDates
                             visitDate={d.visitDate}
+                            visitEffectiveDate={d.visitEffectiveDate}
                             conformityVisitDate={d.conformityVisitDate}
+                            conformityVisitEffectiveDate={d.conformityVisitEffectiveDate}
                             deliveredAt={d.deliveredAt}
                             layout="row"
                           />

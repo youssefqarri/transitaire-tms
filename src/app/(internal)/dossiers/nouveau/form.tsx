@@ -37,7 +37,9 @@ type FormState = {
   goodsDescription: string;
   controlOffice?: string;
   visitDate?: string;
+  visitEffectiveDate?: string;
   conformityVisitDate?: string;
+  conformityVisitEffectiveDate?: string;
   deliveredAt?: string;
   // drapeaux parallèles (édition uniquement)
   billed?: boolean;
@@ -78,7 +80,9 @@ export function NewDossierForm({
     goodsDescription: "",
     controlOffice: "",
     visitDate: "",
+    visitEffectiveDate: "",
     conformityVisitDate: "",
+    conformityVisitEffectiveDate: "",
     deliveredAt: "",
     billed: false,
     delivered: false,
@@ -119,7 +123,9 @@ export function NewDossierForm({
               goodsDescription: form.goodsDescription || null,
               controlOffice: form.controlOffice || null,
               visitDate: form.visitDate || null,
+              visitEffectiveDate: form.visitEffectiveDate || null,
               conformityVisitDate: form.conformityVisitDate || null,
+              conformityVisitEffectiveDate: form.conformityVisitEffectiveDate || null,
               deliveredAt: form.deliveredAt || null,
               hasVisit: !!form.visitDate,
               hasConformityVisit: !!form.conformityVisitDate,
@@ -323,7 +329,7 @@ export function NewDossierForm({
               </div>
               <div />
               <div className="space-y-2">
-                <Label htmlFor="visitDate">Visite douane</Label>
+                <Label htmlFor="visitDate">Visite douane prévue</Label>
                 <Input
                   id="visitDate"
                   type="date"
@@ -332,12 +338,30 @@ export function NewDossierForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="conformityVisitDate">Visite conformité (MCI)</Label>
+                <Label htmlFor="visitEffectiveDate">Visite douane effective</Label>
+                <Input
+                  id="visitEffectiveDate"
+                  type="date"
+                  value={form.visitEffectiveDate ?? ""}
+                  onChange={(e) => set("visitEffectiveDate", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="conformityVisitDate">Visite MCI prévue</Label>
                 <Input
                   id="conformityVisitDate"
                   type="date"
                   value={form.conformityVisitDate ?? ""}
                   onChange={(e) => set("conformityVisitDate", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="conformityVisitEffectiveDate">Visite MCI effective</Label>
+                <Input
+                  id="conformityVisitEffectiveDate"
+                  type="date"
+                  value={form.conformityVisitEffectiveDate ?? ""}
+                  onChange={(e) => set("conformityVisitEffectiveDate", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -349,7 +373,6 @@ export function NewDossierForm({
                   onChange={(e) => set("deliveredAt", e.target.value)}
                 />
               </div>
-              <div />
             </div>
           </div>
 

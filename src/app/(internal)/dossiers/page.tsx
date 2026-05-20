@@ -134,7 +134,9 @@ export default async function DossiersPage({
                       )}
                       <KeyDates
                         visitDate={d.visitDate}
+                        visitEffectiveDate={d.visitEffectiveDate}
                         conformityVisitDate={d.conformityVisitDate}
+                        conformityVisitEffectiveDate={d.conformityVisitEffectiveDate}
                         deliveredAt={d.deliveredAt}
                         layout="row"
                       />
@@ -262,10 +264,12 @@ export default async function DossiersPage({
                         </div>
                       </td>
                       <td className="px-3 py-2.5">
-                        {d.visitDate || d.conformityVisitDate || d.deliveredAt ? (
+                        {d.visitDate || d.visitEffectiveDate || d.conformityVisitDate || d.conformityVisitEffectiveDate || d.deliveredAt ? (
                           <KeyDates
                             visitDate={d.visitDate}
+                            visitEffectiveDate={d.visitEffectiveDate}
                             conformityVisitDate={d.conformityVisitDate}
+                            conformityVisitEffectiveDate={d.conformityVisitEffectiveDate}
                             deliveredAt={d.deliveredAt}
                           />
                         ) : (

@@ -236,11 +236,13 @@ model Dossier {
   docsCompleteAt       DateTime?
   bonADelivrerAt       DateTime?
   declarationAt        DateTime?
-  visitDate            DateTime?  // visite douane
-  conformityVisitDate  DateTime?  // visite conformité (MCI)
-  liquidationAt        DateTime?
-  deliveredAt          DateTime?  // date de livraison
-  closedAt             DateTime?
+  visitDate                    DateTime?  // visite douane prévue
+  visitEffectiveDate           DateTime?  // visite douane effective
+  conformityVisitDate          DateTime?  // visite MCI prévue
+  conformityVisitEffectiveDate DateTime?  // visite MCI effective
+  liquidationAt                DateTime?
+  deliveredAt                  DateTime?  // date de livraison
+  closedAt                     DateTime?
 
   // contrôle
   controlOffice   String?      // bureau de contrôle

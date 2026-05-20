@@ -61,8 +61,14 @@ export default async function EditDossierPage({
               visitDate: dossier.visitDate
                 ? new Date(dossier.visitDate).toISOString().slice(0, 10)
                 : "",
+              visitEffectiveDate: dossier.visitEffectiveDate
+                ? new Date(dossier.visitEffectiveDate).toISOString().slice(0, 10)
+                : "",
               conformityVisitDate: dossier.conformityVisitDate
                 ? new Date(dossier.conformityVisitDate).toISOString().slice(0, 10)
+                : "",
+              conformityVisitEffectiveDate: dossier.conformityVisitEffectiveDate
+                ? new Date(dossier.conformityVisitEffectiveDate).toISOString().slice(0, 10)
                 : "",
               deliveredAt: dossier.deliveredAt
                 ? new Date(dossier.deliveredAt).toISOString().slice(0, 10)
