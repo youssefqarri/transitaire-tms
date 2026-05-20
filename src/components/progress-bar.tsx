@@ -1,19 +1,16 @@
 "use client";
 
-import dynamic from "next/dynamic";
-
-const AppProgressBar = dynamic(
-  () => import("next-nprogress-bar").then((m) => m.AppProgressBar),
-  { ssr: false },
-);
+import NextTopLoader from "nextjs-toploader";
 
 export function ProgressBar() {
   return (
-    <AppProgressBar
-      height="2.5px"
+    <NextTopLoader
       color="#2563eb"
-      options={{ showSpinner: false }}
-      shallowRouting
+      height={3}
+      showSpinner={false}
+      shadow="0 0 8px #2563eb, 0 0 4px #2563eb"
+      easing="ease"
+      speed={250}
     />
   );
 }
