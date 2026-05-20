@@ -3,6 +3,7 @@
 import { Search, LogOut, ChevronDown, User } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { signOut } from "next-auth/react";
 import { Avatar } from "@/components/ui/avatar";
 import { ROLE_LABELS } from "@/lib/roles";
 import type { UserRole } from "@/generated/prisma/enums";
@@ -24,7 +25,7 @@ export function Topbar({
   const [open, setOpen] = useState(false);
 
   async function logout() {
-    await fetch("/api/auth/signout", { method: "POST" });
+    await signOut({ redirect: false });
     router.push("/login");
     router.refresh();
   }
