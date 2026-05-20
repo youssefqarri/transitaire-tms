@@ -135,25 +135,33 @@ export default async function DossierDetailPage({
         )}
       </header>
 
-      {/* Drapeaux parallèles (Facturé, Livré, BAE, MCI, etc.) */}
+      {/* Drapeaux parallèles + dates clés (Visite, Livraison, BAE, MCI, etc.) */}
       {(dossier.billed ||
         dossier.delivered ||
         dossier.baeUnderPayment ||
         dossier.baeUnderConformity ||
         dossier.awaitingConformityValidation ||
-        dossier.hasConformityVisit) && (
+        dossier.visitDate ||
+        dossier.conformityVisitDate ||
+        dossier.deliveredAt) && (
         <div className="flex flex-wrap gap-1.5">
+          {dossier.visitDate && (
+            <Badge tone="info">📅 Visite douane {formatDate(dossier.visitDate)}</Badge>
+          )}
+          {dossier.conformityVisitDate && (
+            <Badge tone="info">
+              📅 Visite conformité {formatDate(dossier.conformityVisitDate)}
+            </Badge>
+          )}
+          {dossier.deliveredAt && (
+            <Badge tone="ok">🚚 Livré le {formatDate(dossier.deliveredAt)}</Badge>
+          )}
           {dossier.billed && <Badge tone="ok">✓ Facturé</Badge>}
-          {dossier.delivered && <Badge tone="ok">✓ Livré</Badge>}
+          {dossier.delivered && !dossier.deliveredAt && <Badge tone="ok">✓ Livré</Badge>}
           {dossier.baeUnderPayment && <Badge tone="warn">BAE sous réserve paiement</Badge>}
           {dossier.baeUnderConformity && <Badge tone="warn">BAE sous réserve conformité</Badge>}
           {dossier.awaitingConformityValidation && (
             <Badge tone="info">⏳ En attente conformité MCI</Badge>
-          )}
-          {dossier.hasConformityVisit && dossier.conformityVisitDate && (
-            <Badge tone="info">
-              Visite conformité {formatDate(dossier.conformityVisitDate)}
-            </Badge>
           )}
         </div>
       )}
