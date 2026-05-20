@@ -133,12 +133,17 @@ export default async function DossiersPage({
                       )}
                       {d.visitDate && (
                         <span className="text-[11px] text-[var(--color-fg-3)] tnum">
-                          📅 {formatDate(d.visitDate)}
+                          <span className="font-semibold">Douane</span> {formatDate(d.visitDate)}
+                        </span>
+                      )}
+                      {d.conformityVisitDate && (
+                        <span className="text-[11px] text-[var(--color-fg-3)] tnum">
+                          <span className="font-semibold">MCI</span> {formatDate(d.conformityVisitDate)}
                         </span>
                       )}
                       {d.deliveredAt && (
                         <span className="text-[11px] text-[var(--color-fg-3)] tnum">
-                          🚚 {formatDate(d.deliveredAt)}
+                          <span className="font-semibold">Livr.</span> {formatDate(d.deliveredAt)}
                         </span>
                       )}
                     </div>
@@ -265,16 +270,24 @@ export default async function DossiersPage({
                         </div>
                       </td>
                       <td className="px-3 py-2.5 text-[11.5px] tnum">
-                        {d.visitDate || d.deliveredAt ? (
+                        {d.visitDate || d.conformityVisitDate || d.deliveredAt ? (
                           <div className="flex flex-col gap-0.5">
                             {d.visitDate && (
                               <span className="text-[var(--color-fg-2)] whitespace-nowrap">
-                                📅 {formatDate(d.visitDate)}
+                                <span className="font-semibold">Douane</span>{" "}
+                                {formatDate(d.visitDate)}
+                              </span>
+                            )}
+                            {d.conformityVisitDate && (
+                              <span className="text-[var(--color-fg-2)] whitespace-nowrap">
+                                <span className="font-semibold">MCI</span>{" "}
+                                {formatDate(d.conformityVisitDate)}
                               </span>
                             )}
                             {d.deliveredAt && (
                               <span className="text-[var(--color-fg-2)] whitespace-nowrap">
-                                🚚 {formatDate(d.deliveredAt)}
+                                <span className="font-semibold">Livr.</span>{" "}
+                                {formatDate(d.deliveredAt)}
                               </span>
                             )}
                           </div>

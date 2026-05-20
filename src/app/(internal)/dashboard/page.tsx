@@ -204,11 +204,27 @@ export default async function DashboardPage() {
                     {formatDate(d.updatedAt)}
                   </div>
                 </div>
-                {/* Col 3 : Dates visite / livraison */}
+                {/* Col 3 : Dates visite douane / MCI / livraison */}
                 <div className="text-[10.5px] text-[var(--color-fg-3)] tnum hidden sm:flex flex-col items-start gap-0.5">
-                  {d.visitDate && <span>📅 {formatDate(d.visitDate)}</span>}
-                  {d.deliveredAt && <span>🚚 {formatDate(d.deliveredAt)}</span>}
-                  {!d.visitDate && !d.deliveredAt && (
+                  {d.visitDate && (
+                    <span>
+                      <span className="font-semibold text-[var(--color-fg-2)]">Douane</span>{" "}
+                      {formatDate(d.visitDate)}
+                    </span>
+                  )}
+                  {d.conformityVisitDate && (
+                    <span>
+                      <span className="font-semibold text-[var(--color-fg-2)]">MCI</span>{" "}
+                      {formatDate(d.conformityVisitDate)}
+                    </span>
+                  )}
+                  {d.deliveredAt && (
+                    <span>
+                      <span className="font-semibold text-[var(--color-fg-2)]">Livraison</span>{" "}
+                      {formatDate(d.deliveredAt)}
+                    </span>
+                  )}
+                  {!d.visitDate && !d.conformityVisitDate && !d.deliveredAt && (
                     <span className="text-[var(--color-fg-mute)]">—</span>
                   )}
                 </div>
@@ -328,12 +344,17 @@ export default async function DashboardPage() {
                           )}
                           {d.visitDate && (
                             <span className="text-[10.5px] text-[var(--color-fg-3)] tnum">
-                              📅 {formatDate(d.visitDate)}
+                              <span className="font-semibold">Douane</span> {formatDate(d.visitDate)}
+                            </span>
+                          )}
+                          {d.conformityVisitDate && (
+                            <span className="text-[10.5px] text-[var(--color-fg-3)] tnum">
+                              <span className="font-semibold">MCI</span> {formatDate(d.conformityVisitDate)}
                             </span>
                           )}
                           {d.deliveredAt && (
                             <span className="text-[10.5px] text-[var(--color-fg-3)] tnum">
-                              🚚 {formatDate(d.deliveredAt)}
+                              <span className="font-semibold">Livraison</span> {formatDate(d.deliveredAt)}
                             </span>
                           )}
                         </div>
