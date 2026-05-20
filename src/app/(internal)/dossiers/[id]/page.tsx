@@ -319,23 +319,71 @@ export default async function DossierDetailPage({
           </CardHeader>
           <div className="px-5 py-4">
             <ol className="relative space-y-3.5 before:absolute before:left-[5px] before:top-1.5 before:bottom-1.5 before:w-px before:bg-[var(--color-border)]">
-              {dossier.statusChanges.map((sc) => (
-                <li key={sc.id} className="relative pl-5">
-                  <span className="absolute left-0 top-1.5 size-2.5 rounded-full bg-[var(--color-fg)] ring-4 ring-[var(--color-surface)]" />
-                  <div className="text-[13px] font-medium text-[var(--color-fg)]">
-                    {STATUS_LABELS[sc.toStatus]}
-                  </div>
-                  <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
-                    {formatDateTime(sc.createdAt)}
-                    {sc.changedBy && ` · ${sc.changedBy.name}`}
-                  </div>
-                  {sc.note && (
-                    <div className="text-[12px] text-[var(--color-fg-3)] mt-1 italic">
-                      {sc.note}
+              {(() => {
+                type Evt = {
+                  key: string;
+                  date: Date;
+                  label: string;
+                  meta?: string;
+                  note?: string;
+                  dot: string;
+                };
+                const events: Evt[] = [];
+                for (const sc of dossier.statusChanges) {
+                  events.push({
+                    key: `sc-${sc.id}`,
+                    date: sc.createdAt,
+                    label: STATUS_LABELS[sc.toStatus],
+                    meta: sc.changedBy?.name,
+                    note: sc.note ?? undefined,
+                    dot: "bg-[var(--color-fg)]",
+                  });
+                }
+                if (dossier.visitDate) {
+                  events.push({
+                    key: "visit-douane",
+                    date: dossier.visitDate,
+                    label: "Visite douane",
+                    dot: "bg-[var(--color-accent)]",
+                  });
+                }
+                if (dossier.conformityVisitDate) {
+                  events.push({
+                    key: "visit-mci",
+                    date: dossier.conformityVisitDate,
+                    label: "Visite MCI",
+                    dot: "bg-[var(--color-accent)]",
+                  });
+                }
+                if (dossier.deliveredAt) {
+                  events.push({
+                    key: "delivered",
+                    date: dossier.deliveredAt,
+                    label: "Livraison",
+                    dot: "bg-[var(--color-success)]",
+                  });
+                }
+                events.sort((a, b) => b.date.getTime() - a.date.getTime());
+                return events.map((e) => (
+                  <li key={e.key} className="relative pl-5">
+                    <span
+                      className={`absolute left-0 top-1.5 size-2.5 rounded-full ring-4 ring-[var(--color-surface)] ${e.dot}`}
+                    />
+                    <div className="text-[13px] font-medium text-[var(--color-fg)]">
+                      {e.label}
                     </div>
-                  )}
-                </li>
-              ))}
+                    <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+                      {formatDateTime(e.date)}
+                      {e.meta && ` · ${e.meta}`}
+                    </div>
+                    {e.note && (
+                      <div className="text-[12px] text-[var(--color-fg-3)] mt-1 italic">
+                        {e.note}
+                      </div>
+                    )}
+                  </li>
+                ));
+              })()}
             </ol>
           </div>
         </Card>
