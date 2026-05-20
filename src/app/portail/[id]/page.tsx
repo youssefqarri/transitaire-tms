@@ -4,7 +4,6 @@ import { ArrowLeft, FileText, AlertCircle, Download } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import {
   STATUS_LABELS,
@@ -13,6 +12,7 @@ import {
   requiredDocuments,
 } from "@/lib/statuses";
 import { formatDate, formatCurrency } from "@/lib/utils";
+import { ClientUploadForm } from "./upload-form";
 
 export const dynamic = "force-dynamic";
 
@@ -97,18 +97,28 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
         <Card className="border-[var(--color-warning)]/30 bg-[var(--color-warning-soft)]">
           <div className="p-4 flex items-start gap-3">
             <AlertCircle className="size-4 text-[var(--color-warning)] shrink-0 mt-0.5" strokeWidth={1.75} />
-            <div>
+            <div className="flex-1">
               <div className="text-[13px] font-medium">Documents à fournir</div>
-              <div className="text-[12.5px] text-[var(--color-fg-2)] mt-1">
-                Merci de transmettre les pièces suivantes à notre équipe :
+              <div className="text-[12.5px] text-[var(--color-fg-2)] mt-1 mb-3">
+                Cliquez sur un type ci-dessous pour téléverser le document correspondant.
               </div>
-              <div className="mt-2.5 flex flex-wrap gap-1.5">
-                {missing.map((c) => (
-                  <Badge tone="warn" key={c}>
-                    {DOCUMENT_CATEGORY_LABELS[c]}
-                  </Badge>
-                ))}
+              <ClientUploadForm dossierId={dossier.id} missing={missing} />
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Bouton d'ajout de pièce complémentaire même sans documents manquants */}
+      {missing.length === 0 && (
+        <Card>
+          <div className="p-4 flex items-start gap-3">
+            <div className="flex-1">
+              <div className="text-[13px] font-medium">Ajouter une pièce complémentaire</div>
+              <div className="text-[12.5px] text-[var(--color-fg-3)] mt-1 mb-3">
+                Tous les documents requis sont reçus. Vous pouvez néanmoins envoyer toute pièce
+                supplémentaire utile à notre équipe.
               </div>
+              <ClientUploadForm dossierId={dossier.id} missing={[]} />
             </div>
           </div>
         </Card>

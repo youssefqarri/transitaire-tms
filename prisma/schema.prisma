@@ -541,6 +541,7 @@ enum NotificationKind {
   STATUS_CHANGE
   EMAIL_NEW
   CLIENT_INFO          // notification à envoyer au client
+  CLIENT_DOC_UPLOAD    // le client a déposé un document via le portail
   AUTRE
 }
 
