@@ -102,20 +102,32 @@ export default async function DossierDetailPage({
         </div>
         {session.user.role !== "COMMIS_DOUANE" && (
           <div className="flex items-center gap-2 flex-wrap">
-            <NotifyClientButton
-              dossierId={dossier.id}
-              clientEmail={dossier.client.email}
-              clientPhone={dossier.client.phone}
-            />
-            <Link href={`/dossiers/${dossier.id}/modifier`}>
-              <Button variant="outline" size="sm">
-                <Pencil /> Modifier
-              </Button>
-            </Link>
+            {/* Comptable : pas de notification (sauf envoi de facture, autre endpoint) */}
+            {session.user.role !== "COMPTABILITE" && (
+              <NotifyClientButton
+                dossierId={dossier.id}
+                clientEmail={dossier.client.email}
+                clientPhone={dossier.client.phone}
+              />
+            )}
+            {/* Comptable : pas de modif des champs du dossier */}
+            {session.user.role !== "COMPTABILITE" && (
+              <Link href={`/dossiers/${dossier.id}/modifier`}>
+                <Button variant="outline" size="sm">
+                  <Pencil /> Modifier
+                </Button>
+              </Link>
+            )}
             {session.user.role === "ADMIN" && (
               <DeleteDossierButton dossierId={dossier.id} dossierNumber={dossier.number} />
             )}
-            <StatusChanger dossierId={dossier.id} currentStatus={dossier.status} />
+            <StatusChanger
+              dossierId={dossier.id}
+              currentStatus={dossier.status}
+              allowedStatuses={
+                session.user.role === "COMPTABILITE" ? ["FACTURE", "CLOTURE"] : undefined
+              }
+            />
           </div>
         )}
       </header>
@@ -220,13 +232,15 @@ export default async function DossierDetailPage({
           </Card>
 
           {(() => {
-            const readOnly = session.user.role === "COMMIS_DOUANE";
+            // COMMIS_DOUANE et COMPTABILITE = consultation seule sur les panels du dossier
+            const readOnly =
+              session.user.role === "COMMIS_DOUANE" || session.user.role === "COMPTABILITE";
             return (
               <>
                 <DUMsPanel
                   dossierId={dossier.id}
                   dums={dossier.dums}
-                  canCreate={!readOnly && ["ADMIN", "DECLARANT"].includes(session.user.role)}
+                  canCreate={["ADMIN", "DECLARANT"].includes(session.user.role)}
                 />
                 <DocumentsPanel
                   dossierId={dossier.id}

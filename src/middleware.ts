@@ -50,6 +50,16 @@ export default auth((req) => {
     }
   }
 
+  // DECLARANT / EXPLOITATION / BUREAU = pas d'accès à la facturation
+  if (role && ["DECLARANT", "EXPLOITATION", "BUREAU"].includes(role) && pathname.startsWith("/factures")) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+
+  // COMPTABILITE = pas d'accès aux notifications
+  if (role === "COMPTABILITE" && pathname.startsWith("/notifications")) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+
   return NextResponse.next();
 });
 

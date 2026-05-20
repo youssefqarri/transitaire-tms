@@ -203,6 +203,7 @@ enum DossierStatus {
   BON_A_ENLEVER_DEFINITIF         // bon à enlever définitif
   LIVRAISON                       // livraison en cours
   FACTURATION                     // facturation en cours
+  FACTURE                         // facturé (émis au client)
   CLOTURE                         // dossier clôturé
   ANNULE                          // annulé (via WinApp externe)
 }

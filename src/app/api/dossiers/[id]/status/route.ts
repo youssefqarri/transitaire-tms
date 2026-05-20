@@ -27,6 +27,7 @@ const schema = z.object({
     "BON_A_ENLEVER_DEFINITIF",
     "LIVRAISON",
     "FACTURATION",
+    "FACTURE",
     "CLOTURE",
     "ANNULE",
   ]),
@@ -37,11 +38,22 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params;
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!canModifyDossier(session.user.role))
+
+  const role = session.user.role;
+  const isComptable = role === "COMPTABILITE";
+  if (!canModifyDossier(role) && !isComptable)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+
+  // Comptable : seulement FACTURE ou CLOTURE
+  if (isComptable && !["FACTURE", "CLOTURE"].includes(parsed.data.status)) {
+    return NextResponse.json(
+      { error: "Comptabilité : seuls les statuts Facturé et Clôturé sont autorisés" },
+      { status: 403 },
+    );
+  }
 
   const dossier = await prisma.dossier.findUnique({ where: { id } });
   if (!dossier) return NextResponse.json({ error: "Not found" }, { status: 404 });

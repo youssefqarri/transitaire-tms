@@ -26,6 +26,7 @@ const DOSSIER_STATUSES = [
   "BON_A_ENLEVER_DEFINITIF",
   "LIVRAISON",
   "FACTURATION",
+  "FACTURE",
   "CLOTURE",
   "ANNULE",
 ] as const;

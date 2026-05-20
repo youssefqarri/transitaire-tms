@@ -14,15 +14,28 @@ import { Label } from "@/components/ui/label";
 export function StatusChanger({
   dossierId,
   currentStatus,
+  allowedStatuses,
 }: {
   dossierId: string;
   currentStatus: DossierStatus;
+  /** Si fourni, restreint la liste des statuts proposés (ex. comptable). */
+  allowedStatuses?: DossierStatus[];
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
   const [note, setNote] = useState("");
-  const [target, setTarget] = useState<DossierStatus>(currentStatus);
+  const initial =
+    allowedStatuses && !allowedStatuses.includes(currentStatus)
+      ? allowedStatuses[0]
+      : currentStatus;
+  const [target, setTarget] = useState<DossierStatus>(initial);
+
+  const options = allowedStatuses
+    ? (Object.entries(STATUS_LABELS) as [DossierStatus, string][]).filter(([k]) =>
+        allowedStatuses.includes(k),
+      )
+    : (Object.entries(STATUS_LABELS) as [DossierStatus, string][]);
 
   function submit() {
     start(async () => {
@@ -57,7 +70,7 @@ export function StatusChanger({
                 value={target}
                 onChange={(e) => setTarget(e.target.value as DossierStatus)}
               >
-                {Object.entries(STATUS_LABELS).map(([k, label]) => (
+                {options.map(([k, label]) => (
                   <option key={k} value={k}>
                     {label}
                   </option>

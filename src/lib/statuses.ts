@@ -21,6 +21,7 @@ export const STATUS_LABELS: Record<DossierStatus, string> = {
   BON_A_ENLEVER_DEFINITIF: "BAE définitif",
   LIVRAISON: "Livraison",
   FACTURATION: "Facturation",
+  FACTURE: "Facturé",
   CLOTURE: "Clôturé",
   ANNULE: "Annulé",
 };
@@ -47,6 +48,7 @@ export const STATUS_ORDER: DossierStatus[] = [
   "BON_A_ENLEVER_DEFINITIF",
   "LIVRAISON",
   "FACTURATION",
+  "FACTURE",
   "CLOTURE",
 ];
 
@@ -71,6 +73,7 @@ export const STATUS_TONE: Record<DossierStatus, "neutral" | "warn" | "info" | "o
   BON_A_ENLEVER_DEFINITIF: "ok",
   LIVRAISON: "info",
   FACTURATION: "info",
+  FACTURE: "ok",
   CLOTURE: "ok",
   ANNULE: "danger",
 };

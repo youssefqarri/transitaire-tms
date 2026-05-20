@@ -26,8 +26,12 @@ export type NavSection = {
   items: NavItem[];
 };
 
-// rôles internes ayant accès au domaine commercial (clients, factures, emails, notifications)
+// rôles internes ayant accès au domaine commercial (clients, fournisseurs, emails)
 const NON_COMMIS: UserRole[] = ["ADMIN", "EXPLOITATION", "DECLARANT", "BUREAU", "COMPTABILITE"];
+// /factures : uniquement comptable + admin (Déclarant, Exploitation, Bureau exclus)
+const FACTURATION_ACCESS: UserRole[] = ["ADMIN", "COMPTABILITE"];
+// /notifications : tout le monde sauf Comptabilité et Commis
+const NOTIF_ACCESS: UserRole[] = ["ADMIN", "EXPLOITATION", "DECLARANT", "BUREAU"];
 
 export const NAV_SECTIONS: NavSection[] = [
   {
@@ -46,7 +50,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     title: "Facturation",
     items: [
-      { href: "/factures", label: "Factures", icon: Receipt, roles: NON_COMMIS },
+      { href: "/factures", label: "Factures", icon: Receipt, roles: FACTURATION_ACCESS },
     ],
   },
   {
@@ -54,7 +58,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: "/clients", label: "Clients", icon: Building2, roles: NON_COMMIS },
       { href: "/fournisseurs", label: "Fournisseurs", icon: Truck, roles: NON_COMMIS },
-      { href: "/notifications", label: "Notifications", icon: Bell, roles: NON_COMMIS },
+      { href: "/notifications", label: "Notifications", icon: Bell, roles: NOTIF_ACCESS },
     ],
   },
   {
