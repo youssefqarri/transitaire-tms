@@ -16,6 +16,7 @@ import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { STATUS_LABELS, requiredDocuments } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
+import { KeyDates } from "@/components/dossier/key-dates";
 
 export const dynamic = "force-dynamic";
 
@@ -205,27 +206,15 @@ export default async function DashboardPage() {
                   </div>
                 </div>
                 {/* Col 3 : Dates visite douane / MCI / livraison */}
-                <div className="text-[10.5px] text-[var(--color-fg-3)] tnum hidden sm:flex flex-col items-start gap-0.5">
-                  {d.visitDate && (
-                    <span>
-                      <span className="font-semibold text-[var(--color-fg-2)]">Douane</span>{" "}
-                      {formatDate(d.visitDate)}
-                    </span>
-                  )}
-                  {d.conformityVisitDate && (
-                    <span>
-                      <span className="font-semibold text-[var(--color-fg-2)]">MCI</span>{" "}
-                      {formatDate(d.conformityVisitDate)}
-                    </span>
-                  )}
-                  {d.deliveredAt && (
-                    <span>
-                      <span className="font-semibold text-[var(--color-fg-2)]">Livraison</span>{" "}
-                      {formatDate(d.deliveredAt)}
-                    </span>
-                  )}
-                  {!d.visitDate && !d.conformityVisitDate && !d.deliveredAt && (
-                    <span className="text-[var(--color-fg-mute)]">—</span>
+                <div className="hidden sm:block">
+                  {d.visitDate || d.conformityVisitDate || d.deliveredAt ? (
+                    <KeyDates
+                      visitDate={d.visitDate}
+                      conformityVisitDate={d.conformityVisitDate}
+                      deliveredAt={d.deliveredAt}
+                    />
+                  ) : (
+                    <span className="text-[10.5px] text-[var(--color-fg-mute)]">—</span>
                   )}
                 </div>
                 {/* Col 4 : Statut */}
@@ -342,21 +331,12 @@ export default async function DashboardPage() {
                               {countMissing(d)} doc{countMissing(d) > 1 ? "s" : ""}
                             </span>
                           )}
-                          {d.visitDate && (
-                            <span className="text-[10.5px] text-[var(--color-fg-3)] tnum">
-                              <span className="font-semibold">Douane</span> {formatDate(d.visitDate)}
-                            </span>
-                          )}
-                          {d.conformityVisitDate && (
-                            <span className="text-[10.5px] text-[var(--color-fg-3)] tnum">
-                              <span className="font-semibold">MCI</span> {formatDate(d.conformityVisitDate)}
-                            </span>
-                          )}
-                          {d.deliveredAt && (
-                            <span className="text-[10.5px] text-[var(--color-fg-3)] tnum">
-                              <span className="font-semibold">Livraison</span> {formatDate(d.deliveredAt)}
-                            </span>
-                          )}
+                          <KeyDates
+                            visitDate={d.visitDate}
+                            conformityVisitDate={d.conformityVisitDate}
+                            deliveredAt={d.deliveredAt}
+                            layout="row"
+                          />
                         </div>
                       </div>
                       <div className="hidden sm:block font-mono text-[12px] tnum text-[var(--color-fg-3)] shrink-0">

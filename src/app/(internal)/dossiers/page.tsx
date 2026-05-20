@@ -10,6 +10,7 @@ import { canCreateDossier } from "@/lib/roles";
 import { requiredDocuments } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
 import { DossiersFilterBar } from "./filter-bar";
+import { KeyDates } from "@/components/dossier/key-dates";
 
 export const dynamic = "force-dynamic";
 
@@ -131,21 +132,12 @@ export default async function DossiersPage({
                           NOUVEAU CLIENT
                         </span>
                       )}
-                      {d.visitDate && (
-                        <span className="text-[11px] text-[var(--color-fg-3)] tnum">
-                          <span className="font-semibold">Douane</span> {formatDate(d.visitDate)}
-                        </span>
-                      )}
-                      {d.conformityVisitDate && (
-                        <span className="text-[11px] text-[var(--color-fg-3)] tnum">
-                          <span className="font-semibold">MCI</span> {formatDate(d.conformityVisitDate)}
-                        </span>
-                      )}
-                      {d.deliveredAt && (
-                        <span className="text-[11px] text-[var(--color-fg-3)] tnum">
-                          <span className="font-semibold">Livr.</span> {formatDate(d.deliveredAt)}
-                        </span>
-                      )}
+                      <KeyDates
+                        visitDate={d.visitDate}
+                        conformityVisitDate={d.conformityVisitDate}
+                        deliveredAt={d.deliveredAt}
+                        layout="row"
+                      />
                     </div>
                     <span className="font-mono font-semibold text-[14px] text-[var(--color-fg)]">
                       {d.number}
@@ -269,30 +261,15 @@ export default async function DossiersPage({
                           ) : null}
                         </div>
                       </td>
-                      <td className="px-3 py-2.5 text-[11.5px] tnum">
+                      <td className="px-3 py-2.5">
                         {d.visitDate || d.conformityVisitDate || d.deliveredAt ? (
-                          <div className="flex flex-col gap-0.5">
-                            {d.visitDate && (
-                              <span className="text-[var(--color-fg-2)] whitespace-nowrap">
-                                <span className="font-semibold">Douane</span>{" "}
-                                {formatDate(d.visitDate)}
-                              </span>
-                            )}
-                            {d.conformityVisitDate && (
-                              <span className="text-[var(--color-fg-2)] whitespace-nowrap">
-                                <span className="font-semibold">MCI</span>{" "}
-                                {formatDate(d.conformityVisitDate)}
-                              </span>
-                            )}
-                            {d.deliveredAt && (
-                              <span className="text-[var(--color-fg-2)] whitespace-nowrap">
-                                <span className="font-semibold">Livr.</span>{" "}
-                                {formatDate(d.deliveredAt)}
-                              </span>
-                            )}
-                          </div>
+                          <KeyDates
+                            visitDate={d.visitDate}
+                            conformityVisitDate={d.conformityVisitDate}
+                            deliveredAt={d.deliveredAt}
+                          />
                         ) : (
-                          <span className="text-[var(--color-fg-mute)]">—</span>
+                          <span className="text-[11px] text-[var(--color-fg-mute)]">—</span>
                         )}
                       </td>
                       <td className="px-5 py-2.5 text-right font-mono tnum text-[11.5px] text-[var(--color-fg-mute)]">

@@ -27,6 +27,7 @@ import { NotifyClientButton } from "./notify-button";
 import { OutgoingMessagesPanel } from "./outgoing-messages-panel";
 import { ExpectedDocumentsPanel } from "./expected-documents-panel";
 import { DeleteDossierButton } from "./delete-button";
+import { KeyDates } from "@/components/dossier/key-dates";
 
 export const dynamic = "force-dynamic";
 
@@ -135,27 +136,22 @@ export default async function DossierDetailPage({
         )}
       </header>
 
-      {/* Drapeaux parallèles + dates clés (Visite, Livraison, BAE, MCI, etc.) */}
+      {/* Dates clés (visite douane, MCI, livraison) avec icônes */}
+      <KeyDates
+        visitDate={dossier.visitDate}
+        conformityVisitDate={dossier.conformityVisitDate}
+        deliveredAt={dossier.deliveredAt}
+        layout="row"
+        size="md"
+      />
+
+      {/* Drapeaux parallèles (Facturé, BAE sous réserve, MCI en attente, etc.) */}
       {(dossier.billed ||
-        dossier.delivered ||
+        (dossier.delivered && !dossier.deliveredAt) ||
         dossier.baeUnderPayment ||
         dossier.baeUnderConformity ||
-        dossier.awaitingConformityValidation ||
-        dossier.visitDate ||
-        dossier.conformityVisitDate ||
-        dossier.deliveredAt) && (
+        dossier.awaitingConformityValidation) && (
         <div className="flex flex-wrap gap-1.5">
-          {dossier.visitDate && (
-            <Badge tone="info">📅 Visite douane {formatDate(dossier.visitDate)}</Badge>
-          )}
-          {dossier.conformityVisitDate && (
-            <Badge tone="info">
-              📅 Visite conformité {formatDate(dossier.conformityVisitDate)}
-            </Badge>
-          )}
-          {dossier.deliveredAt && (
-            <Badge tone="ok">🚚 Livré le {formatDate(dossier.deliveredAt)}</Badge>
-          )}
           {dossier.billed && <Badge tone="ok">✓ Facturé</Badge>}
           {dossier.delivered && !dossier.deliveredAt && <Badge tone="ok">✓ Livré</Badge>}
           {dossier.baeUnderPayment && <Badge tone="warn">BAE sous réserve paiement</Badge>}

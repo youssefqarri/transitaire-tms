@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/dossier/status-badge";
+import { KeyDates } from "@/components/dossier/key-dates";
 import { formatDate, formatCurrency } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -71,7 +72,14 @@ export default async function PortalHomePage() {
                     {formatDate(d.updatedAt)}
                   </div>
                 </div>
-                <div className="hidden sm:block text-right">
+                <div className="hidden sm:block shrink-0">
+                  <KeyDates
+                    visitDate={d.visitDate}
+                    conformityVisitDate={d.conformityVisitDate}
+                    deliveredAt={d.deliveredAt}
+                  />
+                </div>
+                <div className="hidden sm:block text-right shrink-0">
                   <div className="font-mono text-[13px] text-[var(--color-fg)] tnum">
                     {formatCurrency(
                       d.goodsValue ? Number(d.goodsValue) : null,

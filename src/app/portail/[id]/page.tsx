@@ -13,6 +13,7 @@ import {
 } from "@/lib/statuses";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { ClientUploadForm } from "./upload-form";
+import { KeyDates } from "@/components/dossier/key-dates";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +67,14 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
                 {dossier.reference ? <>Réf. <span className="font-mono">{dossier.reference}</span> · </> : ""}
                 Créé le {formatDate(dossier.createdAt)}
               </p>
+              <KeyDates
+                visitDate={dossier.visitDate}
+                conformityVisitDate={dossier.conformityVisitDate}
+                deliveredAt={dossier.deliveredAt}
+                layout="row"
+                size="md"
+                className="pt-1"
+              />
             </div>
             <div className="text-right">
               <div className="text-[11.5px] text-[var(--color-fg-3)]">Valeur</div>
