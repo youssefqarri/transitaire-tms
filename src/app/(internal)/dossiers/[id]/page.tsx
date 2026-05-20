@@ -225,8 +225,14 @@ export default async function DossierDetailPage({
           <DocumentsPanel
             dossierId={dossier.id}
             documents={dossier.documents.map((d) => ({
-              ...d,
+              id: d.id,
+              name: d.name,
+              category: d.category,
+              version: d.version,
+              receivedAt: d.receivedAt,
+              fileUrl: d.fileUrl,
               uploadedByName: d.uploadedBy?.name ?? null,
+              notes: d.notes,
             }))}
             requiredCategories={required}
           />

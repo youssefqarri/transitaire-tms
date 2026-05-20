@@ -12,6 +12,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const form = await req.formData();
   let name = String(form.get("name") ?? "").trim();
   const category = String(form.get("category") ?? "AUTRE");
+  const notes = String(form.get("notes") ?? "").trim() || null;
   const file = form.get("file") as File | null;
 
   // fallback : si pas de nom, utiliser le nom du fichier (sans extension)
@@ -54,6 +55,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       dossierId: id,
       name,
       category: category as never,
+      notes,
       fileUrl,
       fileSize,
       mimeType,

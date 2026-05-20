@@ -48,12 +48,21 @@ export default async function DossiersPage({
   });
 
   // Calcul des documents manquants par dossier
-  const enriched = dossiers.map((d) => {
-    const required = requiredDocuments(d.paymentMode);
-    const present = new Set(d.documents.map((doc) => doc.category));
-    const missing = required.filter((c) => !present.has(c));
-    return { ...d, missingCount: missing.length, docCount: d.documents.length };
-  });
+  const enriched = dossiers
+    .map((d) => {
+      const required = requiredDocuments(d.paymentMode);
+      const present = new Set(d.documents.map((doc) => doc.category));
+      const missing = required.filter((c) => !present.has(c));
+      return { ...d, missingCount: missing.length, docCount: d.documents.length };
+    })
+    // tri secondaire : regrouper les dossiers du même client, puis par date de maj
+    .sort((a, b) => {
+      const cmp = a.client.name.localeCompare(b.client.name, "fr", {
+        sensitivity: "base",
+      });
+      if (cmp !== 0) return cmp;
+      return b.updatedAt.getTime() - a.updatedAt.getTime();
+    });
 
   return (
     <div className="space-y-5">

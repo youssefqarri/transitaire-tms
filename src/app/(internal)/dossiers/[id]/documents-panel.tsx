@@ -24,6 +24,7 @@ type Doc = {
   receivedAt: Date;
   fileUrl: string | null;
   uploadedByName: string | null;
+  notes: string | null;
 };
 
 export function DocumentsPanel({
@@ -41,19 +42,18 @@ export function DocumentsPanel({
   const [name, setName] = useState("");
   const [category, setCategory] = useState<DocumentCategory>("FACTURE_COMMERCIALE");
   const [file, setFile] = useState<File | null>(null);
+  const [notes, setNotes] = useState("");
   const [toDelete, setToDelete] = useState<Doc | null>(null);
   const [deleting, startDelete] = useTransition();
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name && !file) {
-      toast.error("Ajoutez un fichier ou un nom");
-      return;
-    }
+    // pas d'obligation : on accepte aussi une simple catégorie (le serveur générera un nom)
     start(async () => {
       const fd = new FormData();
       fd.append("name", name);
       fd.append("category", category);
+      if (notes) fd.append("notes", notes);
       if (file) fd.append("file", file);
       const res = await fetch(`/api/dossiers/${dossierId}/documents`, {
         method: "POST",
@@ -65,6 +65,7 @@ export function DocumentsPanel({
       }
       toast.success("Document ajouté");
       setName("");
+      setNotes("");
       setFile(null);
       setOpen(false);
       router.refresh();
@@ -160,6 +161,22 @@ export function DocumentsPanel({
               placeholder="Cliquez ou glissez le fichier"
             />
           </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="notes">
+              Note / message <span className="text-[var(--color-fg-mute)] font-normal">(optionnel)</span>
+            </Label>
+            <textarea
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+              placeholder="Ex. Demande d'acceptation de la valeur, demande de ventilation, message PortNet…"
+              className="w-full px-3 py-2 text-[13px] bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)] placeholder:text-[var(--color-fg-mute)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-ring)] focus:border-transparent resize-y"
+            />
+            <p className="text-[11px] text-[var(--color-fg-mute)]">
+              Pratique pour les messages PortNet, douane, conformité — vous pourrez l&apos;envoyer au client plus tard.
+            </p>
+          </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
               Annuler
@@ -194,6 +211,11 @@ export function DocumentsPanel({
                   {d.uploadedByName && ` · ${d.uploadedByName}`}
                 </span>
               </div>
+              {d.notes && (
+                <div className="mt-1.5 text-[12px] text-[var(--color-fg-2)] bg-[var(--color-surface-2)] rounded px-2 py-1.5 whitespace-pre-wrap border border-[var(--color-border)]">
+                  {d.notes}
+                </div>
+              )}
             </div>
             {d.fileUrl ? (
               <a

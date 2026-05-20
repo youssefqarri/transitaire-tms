@@ -106,8 +106,12 @@ export const DOCUMENT_CATEGORY_LABELS: Record<DocumentCategory, string> = {
   FICHE_LIQUIDATION: "Fiche de liquidation",
   TICKET_PAIEMENT: "Ticket de paiement",
   BON_A_ENLEVER: "Bon à enlever",
+  MAIN_LEVEE_RESERVE_PAIEMENT: "Main levée sous réserve paiement",
   DEMANDE_SERVICE_MCI: "Demande service MCI",
   DEMANDE_SERVICE_PORTNET: "Demande service PortNet",
+  MESSAGE_PORTNET: "Message PortNet",
+  MESSAGE_DOUANE: "Message douane",
+  MESSAGE_CONFORMITE: "Message conformité (MCI)",
   AUTRE: "Autre",
 };
 
