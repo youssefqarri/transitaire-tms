@@ -63,26 +63,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     },
   });
 
-  // Notification interne pour traitement (Exploitation + Déclarant)
+  // Notification interne pour traitement (Admin + Exploitation + Déclarant + Bureau)
+  const title = `Document client reçu — ${dossier.number}`;
+  const body = `Le client a déposé : ${name}`;
   await prisma.notification.createMany({
-    data: [
-      {
-        role: "EXPLOITATION",
-        dossierId: id,
-        kind: "CLIENT_DOC_UPLOAD",
-        title: `Document client reçu — ${dossier.number}`,
-        body: `Le client a déposé : ${name}`,
-        link: `/dossiers/${id}`,
-      },
-      {
-        role: "DECLARANT",
-        dossierId: id,
-        kind: "CLIENT_DOC_UPLOAD",
-        title: `Document client reçu — ${dossier.number}`,
-        body: `Le client a déposé : ${name}`,
-        link: `/dossiers/${id}`,
-      },
-    ],
+    data: (["ADMIN", "EXPLOITATION", "DECLARANT", "BUREAU"] as const).map((role) => ({
+      role,
+      dossierId: id,
+      kind: "CLIENT_DOC_UPLOAD",
+      title,
+      body,
+      link: `/dossiers/${id}`,
+    })),
   });
 
   await audit({

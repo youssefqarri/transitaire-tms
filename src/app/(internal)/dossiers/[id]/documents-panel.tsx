@@ -24,6 +24,7 @@ type Doc = {
   receivedAt: Date;
   fileUrl: string | null;
   uploadedByName: string | null;
+  uploadedByIsClient: boolean;
   notes: string | null;
 };
 
@@ -199,13 +200,30 @@ export function DocumentsPanel({
           </div>
         )}
         {documents.map((d) => (
-          <div key={d.id} className="px-5 py-3 flex items-center gap-3 hover:bg-[var(--color-surface-2)] transition-colors">
-            <FileText className="size-4 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
+          <div
+            key={d.id}
+            className={`px-5 py-3 flex items-center gap-3 transition-colors ${
+              d.uploadedByIsClient
+                ? "bg-[var(--color-danger-soft)] hover:bg-[var(--color-danger-soft)]/80 border-l-2 border-[var(--color-danger)]"
+                : "hover:bg-[var(--color-surface-2)]"
+            }`}
+          >
+            <FileText
+              className={`size-4 shrink-0 ${
+                d.uploadedByIsClient ? "text-[var(--color-danger)]" : "text-[var(--color-fg-mute)]"
+              }`}
+              strokeWidth={1.75}
+            />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[13px] font-medium text-[var(--color-fg)] truncate">{d.name}</span>
                 {d.version > 1 && (
                   <span className="font-mono text-[10.5px] text-[var(--color-fg-3)]">v{d.version}</span>
+                )}
+                {d.uploadedByIsClient && (
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--color-danger)] text-white">
+                    Reçu du client
+                  </span>
                 )}
               </div>
               <div className="flex items-center gap-2 mt-0.5 text-[11.5px] text-[var(--color-fg-3)]">

@@ -47,7 +47,10 @@ export default async function DossierDetailPage({
       createdBy: { select: { id: true, name: true } },
       assignedTo: { select: { id: true, name: true } },
       dums: { orderBy: { createdAt: "desc" } },
-      documents: { orderBy: { receivedAt: "desc" }, include: { uploadedBy: { select: { name: true } } } },
+      documents: {
+        orderBy: { receivedAt: "desc" },
+        include: { uploadedBy: { select: { name: true, role: true } } },
+      },
       expectedDocuments: {
         orderBy: { createdAt: "asc" },
         include: { requestedBy: { select: { name: true } } },
@@ -252,6 +255,7 @@ export default async function DossierDetailPage({
                     receivedAt: d.receivedAt,
                     fileUrl: d.fileUrl,
                     uploadedByName: d.uploadedBy?.name ?? null,
+                    uploadedByIsClient: d.uploadedBy?.role === "CLIENT",
                     notes: d.notes,
                   }))}
                   requiredCategories={required}

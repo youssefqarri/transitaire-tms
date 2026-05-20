@@ -41,19 +41,29 @@ export default async function DossiersPage({
     include: {
       client: true,
       dums: true,
-      documents: { select: { category: true } },
+      documents: {
+        select: { category: true, uploadedBy: { select: { role: true } } },
+      },
     },
     orderBy: { updatedAt: "desc" },
     take: 100,
   });
 
-  // Calcul des documents manquants par dossier
+  // Calcul des documents manquants par dossier + docs reçus du client
   const enriched = dossiers
     .map((d) => {
       const required = requiredDocuments(d.paymentMode);
       const present = new Set(d.documents.map((doc) => doc.category));
       const missing = required.filter((c) => !present.has(c));
-      return { ...d, missingCount: missing.length, docCount: d.documents.length };
+      const fromClientCount = d.documents.filter(
+        (doc) => doc.uploadedBy?.role === "CLIENT",
+      ).length;
+      return {
+        ...d,
+        missingCount: missing.length,
+        docCount: d.documents.length,
+        fromClientCount,
+      };
     })
     // tri secondaire : regrouper les dossiers du même client, puis par date de maj
     .sort((a, b) => {
@@ -144,12 +154,19 @@ export default async function DossiersPage({
                     <span className="font-mono text-[13px] text-[var(--color-fg-2)] truncate">
                       {d.reference ?? <span className="text-[var(--color-fg-mute)] italic">sans réf.</span>}
                     </span>
-                    {d.missingCount > 0 && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10.5px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] shrink-0">
-                        <AlertTriangle className="size-2.5" strokeWidth={2.25} />
-                        {d.missingCount} doc{d.missingCount > 1 ? "s" : ""}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1 shrink-0">
+                      {d.fromClientCount > 0 && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10.5px] font-semibold bg-[var(--color-danger)] text-white">
+                          ● {d.fromClientCount} doc client
+                        </span>
+                      )}
+                      {d.missingCount > 0 && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10.5px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)]">
+                          <AlertTriangle className="size-2.5" strokeWidth={2.25} />
+                          {d.missingCount} doc{d.missingCount > 1 ? "s" : ""}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="text-[12px] text-[var(--color-fg-3)] truncate mt-0.5">
                     {d.client.name}
@@ -218,19 +235,29 @@ export default async function DossiersPage({
                         {d.dums.length === 0 ? "—" : d.dums.map((dum) => dum.number).join(", ")}
                       </td>
                       <td className="px-3 py-2.5 text-center">
-                        {d.missingCount > 0 ? (
-                          <span
-                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10.5px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)]"
-                            title={`${d.missingCount} document(s) manquant(s)`}
-                          >
-                            <AlertTriangle className="size-2.5" strokeWidth={2.25} />
-                            {d.missingCount}
-                          </span>
-                        ) : (
-                          <span className="text-[11px] text-[var(--color-fg-mute)] tnum">
-                            {d.docCount}
-                          </span>
-                        )}
+                        <div className="inline-flex items-center gap-1 flex-wrap justify-center">
+                          {d.fromClientCount > 0 && (
+                            <span
+                              className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10.5px] font-semibold bg-[var(--color-danger)] text-white"
+                              title={`${d.fromClientCount} document(s) reçu(s) du client`}
+                            >
+                              ● {d.fromClientCount}
+                            </span>
+                          )}
+                          {d.missingCount > 0 ? (
+                            <span
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10.5px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)]"
+                              title={`${d.missingCount} document(s) manquant(s)`}
+                            >
+                              <AlertTriangle className="size-2.5" strokeWidth={2.25} />
+                              {d.missingCount}
+                            </span>
+                          ) : d.fromClientCount === 0 ? (
+                            <span className="text-[11px] text-[var(--color-fg-mute)] tnum">
+                              {d.docCount}
+                            </span>
+                          ) : null}
+                        </div>
                       </td>
                       <td className="px-5 py-2.5 text-right font-mono tnum text-[11.5px] text-[var(--color-fg-mute)]">
                         {formatCurrency(
