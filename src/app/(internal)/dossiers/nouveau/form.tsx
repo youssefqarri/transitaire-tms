@@ -9,6 +9,7 @@ import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Combobox } from "@/components/ui/combobox";
+import { CURRENCIES } from "@/lib/currencies";
 
 type Client = { id: string; name: string; code?: string | null; city?: string | null };
 type Supplier = { id: string; name: string; country?: string | null };
@@ -255,17 +256,20 @@ export function NewDossierForm({
                 onChange={(e) => set("goodsValue", e.target.value)}
                 placeholder="0.00"
               />
-              <Select
-                value={form.goodsCurrency}
-                onChange={(e) => set("goodsCurrency", e.target.value)}
-                className="w-24"
-              >
-                <option>EUR</option>
-                <option>USD</option>
-                <option>MAD</option>
-                <option>GBP</option>
-                <option>CNY</option>
-              </Select>
+              <div className="w-32">
+                <Combobox
+                  items={CURRENCIES.map((c) => ({
+                    id: c.code,
+                    label: c.code,
+                    sublabel: c.name,
+                    pinned: c.pinned,
+                  }))}
+                  value={form.goodsCurrency}
+                  onChange={(v) => set("goodsCurrency", v)}
+                  placeholder="EUR"
+                  searchPlaceholder="Code ou nom…"
+                />
+              </div>
             </div>
           </div>
           <div className="space-y-2">

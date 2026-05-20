@@ -15,6 +15,8 @@ export type ComboboxItem = {
   id: string;
   label: string;
   sublabel?: string;
+  /** Si true, l'option est affichée en haut avec un séparateur avant le reste. */
+  pinned?: boolean;
 };
 
 type Props = {
@@ -210,37 +212,44 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
               filtered.map((it, idx) => {
                 const isActive = idx === activeIdx;
                 const isSelected = it.id === value;
+                const prev = idx > 0 ? filtered[idx - 1] : null;
+                // séparateur entre dernière option pinned et 1ère non-pinned
+                const showSeparator = prev?.pinned && !it.pinned;
                 return (
-                  <button
-                    key={it.id}
-                    type="button"
-                    role="option"
-                    aria-selected={isSelected}
-                    data-active={isActive}
-                    onMouseEnter={() => setActiveIdx(idx)}
-                    onClick={() => {
-                      onChange(it.id);
-                      setOpen(false);
-                    }}
-                    className={cn(
-                      "w-full flex items-center gap-2 px-3 py-1.5 text-[13px] text-left transition-colors",
-                      isActive
-                        ? "bg-[var(--color-surface-2)] text-[var(--color-fg)]"
-                        : "text-[var(--color-fg-2)]",
+                  <div key={it.id}>
+                    {showSeparator && (
+                      <div className="my-1 mx-2 border-t border-[var(--color-border)]" />
                     )}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="truncate">{it.label}</div>
-                      {it.sublabel && (
-                        <div className="text-[11.5px] text-[var(--color-fg-mute)] truncate">
-                          {it.sublabel}
-                        </div>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
+                      data-active={isActive}
+                      onMouseEnter={() => setActiveIdx(idx)}
+                      onClick={() => {
+                        onChange(it.id);
+                        setOpen(false);
+                      }}
+                      className={cn(
+                        "w-full flex items-center gap-2 px-3 py-1.5 text-[13px] text-left transition-colors",
+                        isActive
+                          ? "bg-[var(--color-surface-2)] text-[var(--color-fg)]"
+                          : "text-[var(--color-fg-2)]",
                       )}
-                    </div>
-                    {isSelected && (
-                      <Check className="size-3.5 text-[var(--color-accent)] shrink-0" strokeWidth={2} />
-                    )}
-                  </button>
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="truncate">{it.label}</div>
+                        {it.sublabel && (
+                          <div className="text-[11.5px] text-[var(--color-fg-mute)] truncate">
+                            {it.sublabel}
+                          </div>
+                        )}
+                      </div>
+                      {isSelected && (
+                        <Check className="size-3.5 text-[var(--color-accent)] shrink-0" strokeWidth={2} />
+                      )}
+                    </button>
+                  </div>
                 );
               })
             )}

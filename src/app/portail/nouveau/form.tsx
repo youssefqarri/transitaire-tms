@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Combobox } from "@/components/ui/combobox";
+import { CURRENCIES } from "@/lib/currencies";
 import { DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
 import type { DocumentCategory } from "@/generated/prisma/enums";
 
@@ -172,16 +173,19 @@ export function NewDossierForm() {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="currency">Devise</Label>
-          <Select
+          <Combobox
             id="currency"
+            items={CURRENCIES.map((c) => ({
+              id: c.code,
+              label: c.code,
+              sublabel: c.name,
+              pinned: c.pinned,
+            }))}
             value={goodsCurrency}
-            onChange={(e) => setGoodsCurrency(e.target.value)}
-          >
-            <option value="EUR">EUR</option>
-            <option value="USD">USD</option>
-            <option value="MAD">MAD</option>
-            <option value="GBP">GBP</option>
-          </Select>
+            onChange={setGoodsCurrency}
+            placeholder="EUR"
+            searchPlaceholder="Code ou nom…"
+          />
         </div>
       </div>
 
