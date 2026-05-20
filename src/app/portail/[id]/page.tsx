@@ -200,20 +200,24 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
                     dot: "bg-[var(--color-fg)]",
                   });
                 }
+                const todayMs = new Date().setHours(0, 0, 0, 0);
+                const isDone = (d: Date) => new Date(d).getTime() <= todayMs + 86_400_000 - 1;
                 if (dossier.visitDate) {
+                  const done = isDone(dossier.visitDate);
                   events.push({
                     key: "visit-douane",
                     date: dossier.visitDate,
-                    label: "Visite douane effectuée",
-                    dot: "bg-[var(--color-success)]",
+                    label: done ? "Visite douane effectuée" : "Visite douane à venir",
+                    dot: done ? "bg-[var(--color-success)]" : "bg-[var(--color-accent)]",
                   });
                 }
                 if (dossier.conformityVisitDate) {
+                  const done = isDone(dossier.conformityVisitDate);
                   events.push({
                     key: "visit-mci",
                     date: dossier.conformityVisitDate,
-                    label: "Visite MCI effectuée",
-                    dot: "bg-[var(--color-success)]",
+                    label: done ? "Visite MCI effectuée" : "Visite MCI à venir",
+                    dot: done ? "bg-[var(--color-success)]" : "bg-[var(--color-accent)]",
                   });
                 }
                 if (dossier.deliveredAt) {

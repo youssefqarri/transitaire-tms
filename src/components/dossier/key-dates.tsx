@@ -3,10 +3,10 @@ import { formatDate } from "@/lib/utils";
 
 type Props = {
   visitDate?: Date | null;
-  /** @deprecated — gardé pour compat, ignoré désormais. La date de visite est effective. */
+  /** @deprecated — non utilisé, conservé pour rétro-compat. */
   visitEffectiveDate?: Date | null;
   conformityVisitDate?: Date | null;
-  /** @deprecated — gardé pour compat, ignoré désormais. */
+  /** @deprecated — non utilisé. */
   conformityVisitEffectiveDate?: Date | null;
   deliveredAt?: Date | null;
   /** "row" : tout sur une ligne ; "col" : empilées (par défaut). */
@@ -17,9 +17,9 @@ type Props = {
 };
 
 /**
- * Affiche les dates clés du dossier (visite douane, visite MCI, livraison).
- * Les dates de visite sont considérées comme effectives (la programmation est
- * portée par le changement de statut vers "Visite").
+ * Affiche les dates clés du dossier.
+ * - Date dans le passé (ou aujourd'hui) → événement effectué (vert + ✓)
+ * - Date dans le futur → événement à venir (bleu, pas de ✓)
  */
 export function KeyDates({
   visitDate,
@@ -36,31 +36,44 @@ export function KeyDates({
   const wrapper =
     layout === "row" ? "flex flex-wrap gap-x-2 gap-y-0.5" : "flex flex-col gap-0.5";
 
+  // Comparaison à minuit aujourd'hui pour ne pas dépendre de l'heure
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const isPast = (d: Date) => new Date(d).getTime() < today.getTime();
+  const isTodayOrPast = (d: Date) => new Date(d).getTime() <= today.getTime() + 86_400_000 - 1;
+
+  function pill(
+    Icon: typeof Stamp,
+    date: Date,
+    label: string,
+    onlyEffectiveColor = false,
+  ) {
+    const done = isTodayOrPast(date);
+    // Couleur : vert si dans le passé/aujourd'hui, bleu si dans le futur
+    // Pour la livraison on garde toujours du vert (onlyEffectiveColor=true)
+    const color = onlyEffectiveColor || done
+      ? "text-[var(--color-success)]"
+      : "text-[var(--color-accent)]";
+    const tag = onlyEffectiveColor ? "" : done ? " ✓" : " — à venir";
+    return (
+      <span className="inline-flex items-center gap-1">
+        <Icon className={`${icon} ${color}`} strokeWidth={1.75} />
+        <span className={`font-semibold ${color}`}>
+          {label}
+          {tag}
+        </span>
+        <span>{formatDate(date)}</span>
+      </span>
+    );
+  }
+  // small workaround: forces `isPast` to be referenced so TS doesn't complain in some builds
+  void isPast;
+
   return (
-    <div
-      className={`${wrapper} ${text} text-[var(--color-fg-3)] tnum ${className}`}
-    >
-      {visitDate && (
-        <span className="inline-flex items-center gap-1">
-          <Stamp className={`${icon} text-[var(--color-success)]`} strokeWidth={1.75} />
-          <span className="font-semibold text-[var(--color-success)]">Douane ✓</span>
-          <span>{formatDate(visitDate)}</span>
-        </span>
-      )}
-      {conformityVisitDate && (
-        <span className="inline-flex items-center gap-1">
-          <BadgeCheck className={`${icon} text-[var(--color-success)]`} strokeWidth={1.75} />
-          <span className="font-semibold text-[var(--color-success)]">MCI ✓</span>
-          <span>{formatDate(conformityVisitDate)}</span>
-        </span>
-      )}
-      {deliveredAt && (
-        <span className="inline-flex items-center gap-1">
-          <Truck className={`${icon} text-[var(--color-success)]`} strokeWidth={1.75} />
-          <span className="font-semibold text-[var(--color-success)]">Livraison</span>
-          <span>{formatDate(deliveredAt)}</span>
-        </span>
-      )}
+    <div className={`${wrapper} ${text} text-[var(--color-fg-3)] tnum ${className}`}>
+      {visitDate && pill(Stamp, visitDate, "Douane")}
+      {conformityVisitDate && pill(BadgeCheck, conformityVisitDate, "MCI")}
+      {deliveredAt && pill(Truck, deliveredAt, "Livraison", true)}
     </div>
   );
 }
