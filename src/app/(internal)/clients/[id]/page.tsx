@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatDate, formatCurrency } from "@/lib/utils";
+import { DeleteClientButton } from "./delete-button";
 
 export const dynamic = "force-dynamic";
 
@@ -43,11 +44,18 @@ export default async function ClientDetailPage({
             {client.city}
           </div>
         </div>
-        <Link href={`/clients/${id}/modifier`}>
-          <Button variant="outline" size="sm">
-            <Pencil /> Modifier
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Link href={`/clients/${id}/modifier`}>
+            <Button variant="outline" size="sm">
+              <Pencil /> Modifier
+            </Button>
+          </Link>
+          <DeleteClientButton
+            clientId={id}
+            clientName={client.name}
+            hasDossiers={client.dossiers.length > 0}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -183,23 +183,28 @@ enum PackagingUnit {
 }
 
 enum DossierStatus {
-  OUVERTURE                 // ouverture dossier
-  RECEPTIONNE               // réceptionné
-  DOCUMENTS_MANQUANTS       // documents manquants
-  DOCUMENTS_RECUS           // réception des documents manquants
-  BON_A_DELIVRER_RECU       // réception bon à délivrer
-  DECLARATION_EN_COURS      // déclaration en cours
-  VALIDATION_DOUANE         // validation en douane
-  VISITE                    // date de visite
-  CONFORME                  // conforme (sans visite)
-  BUREAU_VALEUR             // soumis au bureau de valeur
-  DEMANDE_DOCUMENTS         // demande de documents douane / MCI
-  LIQUIDE                   // liquidé
-  BON_A_ENLEVER_RESERVE     // bon à enlever sous réserve
-  VALIDATION_MCA            // validation MCA
-  BON_A_ENLEVER_DEFINITIF   // bon à enlever définitif
-  CLOTURE                   // dossier clôturé
-  ANNULE                    // annulé (via WinApp externe)
+  OUVERTURE                       // ouverture dossier
+  RECEPTIONNE                     // réceptionné
+  DOCUMENTS_MANQUANTS             // documents manquants
+  DOCUMENTS_RECUS                 // réception des documents manquants
+  BON_A_DELIVRER_RECU             // réception bon à délivrer
+  DECLARATION_EN_COURS            // déclaration en cours
+  VALIDATION_DOUANE               // validation en douane
+  VISITE                          // date de visite
+  CONFORME                        // conforme (sans visite)
+  BUREAU_VALEUR                   // soumis au bureau de valeur
+  DEMANDE_DOCUMENTS               // demande de documents douane / MCI
+  INSTANCE_FICHE_LIQUIDATION      // en instance de fiche de liquidation
+  LIQUIDE                         // liquidé
+  BON_A_ENLEVER_RESERVE           // bon à enlever sous réserve
+  MAIN_LEVEE_RESERVE_CONFORMITE   // main levée sous réserve de conformité
+  VALIDATION_MCA                  // validation MCA
+  BON_A_ENLEVER                   // bon à enlever (générique)
+  BON_A_ENLEVER_DEFINITIF         // bon à enlever définitif
+  LIVRAISON                       // livraison en cours
+  FACTURATION                     // facturation en cours
+  CLOTURE                         // dossier clôturé
+  ANNULE                          // annulé (via WinApp externe)
 }
 
 model Dossier {
@@ -342,19 +347,29 @@ model DUM {
 // catégorie standardisée — détectable pour "documents manquants"
 enum DocumentCategory {
   FACTURE_COMMERCIALE
+  FACTURE_ORIGINALE
   COLISAGE
   FACTURE_FRET
   CONNAISSEMENT          // BL
+  LTA_ORIGINALE          // Lettre de Transport Aérien
+  CMR                    // Convention Marchandises Route
+  DMP                    // Déclaration mode paiement
   ENGAGEMENT_IMPORTATION
   BON_A_DELIVRER
   CERTIFICAT_ORIGINE
   ASSURANCE
   LICENCE
   CERTIFICAT_SANITAIRE
+  CERTIFICAT_PHYTOSANITAIRE
   CERTIFICAT_CONFORMITE
+  ATTESTATION_POIDS_MESURE
+  ATTESTATION_STOCKAGE
+  CATALOGUE
   FICHE_LIQUIDATION
   TICKET_PAIEMENT
   BON_A_ENLEVER
+  DEMANDE_SERVICE_MCI
+  DEMANDE_SERVICE_PORTNET
   AUTRE
 }
 

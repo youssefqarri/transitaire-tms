@@ -55,3 +55,41 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "Erreur" }, { status: 500 });
   }
 }
+
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const session = await auth();
+  if (!session || !isInternal(session.user.role))
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  const client = await prisma.client.findUnique({
+    where: { id },
+    include: { _count: { select: { dossiers: true } } },
+  });
+  if (!client) return NextResponse.json({ error: "Client introuvable" }, { status: 404 });
+
+  if (client._count.dossiers > 0) {
+    return NextResponse.json(
+      {
+        error: `Impossible de supprimer : ce client a ${client._count.dossiers} dossier(s). Supprimez ou réaffectez d'abord les dossiers.`,
+      },
+      { status: 409 },
+    );
+  }
+
+  try {
+    await prisma.client.delete({ where: { id } });
+    await audit({
+      userId: session.user.id,
+      action: "DELETE_CLIENT",
+      entity: "Client",
+      entityId: id,
+      metadata: { name: client.name },
+    });
+    return NextResponse.json({ ok: true });
+  } catch (e: unknown) {
+    const err = e as { code?: string };
+    if (err.code === "P2025") return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: "Erreur" }, { status: 500 });
+  }
+}

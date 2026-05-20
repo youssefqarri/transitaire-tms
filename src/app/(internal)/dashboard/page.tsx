@@ -6,6 +6,7 @@ import {
   Mail,
   ArrowUpRight,
   ChevronRight,
+  AlertTriangle,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
@@ -13,7 +14,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatDate, formatCurrency } from "@/lib/utils";
-import { STATUS_LABELS } from "@/lib/statuses";
+import { STATUS_LABELS, requiredDocuments } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
 
 export const dynamic = "force-dynamic";
@@ -47,7 +48,11 @@ export default async function DashboardPage() {
     prisma.dossier.findMany({
       take: 8,
       orderBy: { updatedAt: "desc" },
-      include: { client: true, dums: true },
+      include: {
+        client: true,
+        dums: true,
+        documents: { select: { category: true } },
+      },
     }),
     prisma.dossier.groupBy({
       by: ["status"],
@@ -58,11 +63,25 @@ export default async function DashboardPage() {
     prisma.dossier.findMany({
       where: { status: { notIn: ["CLOTURE", "ANNULE"] } },
       orderBy: { updatedAt: "desc" },
-      include: { client: true, dums: true },
+      include: {
+        client: true,
+        dums: true,
+        documents: { select: { category: true } },
+      },
     }),
   ]);
 
   const totalActive = statusGroups.reduce((s, g) => s + g._count._all, 0);
+
+  // Calcule le nombre de docs manquants pour un dossier donné
+  function countMissing(d: {
+    paymentMode: "WITH_PAYMENT" | "WITHOUT_PAYMENT";
+    documents: { category: string }[];
+  }): number {
+    const required = requiredDocuments(d.paymentMode);
+    const present = new Set(d.documents.map((doc) => doc.category));
+    return required.filter((c) => !present.has(c)).length;
+  }
 
   // Grouper par client
   const byClient = new Map<
@@ -157,11 +176,17 @@ export default async function DashboardPage() {
                       </span>
                     )}
                   </div>
-                  <div className="text-[12.5px] text-[var(--color-fg-3)] truncate mt-0.5">
-                    {d.client.name}
+                  <div className="text-[12.5px] text-[var(--color-fg-3)] truncate mt-0.5 flex items-center gap-1.5 flex-wrap">
+                    <span className="truncate">{d.client.name}</span>
                     {d.dums.length > 0 && (
-                      <span className="font-mono ml-1.5">
+                      <span className="font-mono">
                         · DUM {d.dums.map((dum) => dum.number).join(", ")}
+                      </span>
+                    )}
+                    {countMissing(d) > 0 && (
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)]">
+                        <AlertTriangle className="size-2.5" strokeWidth={2.25} />
+                        {countMissing(d)} doc{countMissing(d) > 1 ? "s" : ""}
                       </span>
                     )}
                   </div>
@@ -282,6 +307,12 @@ export default async function DashboardPage() {
                           {d.dums.length > 0 && (
                             <span className="font-mono text-[11px] text-[var(--color-fg-mute)]">
                               DUM {d.dums.map((dum) => dum.number).join(", ")}
+                            </span>
+                          )}
+                          {countMissing(d) > 0 && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)]">
+                              <AlertTriangle className="size-2.5" strokeWidth={2.25} />
+                              {countMissing(d)} doc{countMissing(d) > 1 ? "s" : ""}
                             </span>
                           )}
                         </div>

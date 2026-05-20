@@ -10,11 +10,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const form = await req.formData();
-  const name = String(form.get("name") ?? "").trim();
+  let name = String(form.get("name") ?? "").trim();
   const category = String(form.get("category") ?? "AUTRE");
   const file = form.get("file") as File | null;
 
-  if (!name) return NextResponse.json({ error: "name requis" }, { status: 400 });
+  // fallback : si pas de nom, utiliser le nom du fichier (sans extension)
+  if (!name && file && typeof file === "object" && "name" in file) {
+    name = String(file.name).replace(/\.[^.]+$/, "").trim();
+  }
+  if (!name) {
+    // dernier recours : catégorie + date
+    name = `${category}_${new Date().toISOString().slice(0, 10)}`;
+  }
 
   let fileUrl: string | null = null;
   let fileKey: string | null = null;

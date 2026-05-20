@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Plus, CheckCircle2, AlertCircle, FileText, Download } from "lucide-react";
+import { Plus, CheckCircle2, AlertCircle, FileText, Download, Trash2 } from "lucide-react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { FileInput } from "@/components/ui/file-input";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
 import type { DocumentCategory } from "@/generated/prisma/enums";
 import { formatDate } from "@/lib/utils";
@@ -40,11 +41,13 @@ export function DocumentsPanel({
   const [name, setName] = useState("");
   const [category, setCategory] = useState<DocumentCategory>("FACTURE_COMMERCIALE");
   const [file, setFile] = useState<File | null>(null);
+  const [toDelete, setToDelete] = useState<Doc | null>(null);
+  const [deleting, startDelete] = useTransition();
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name) {
-      toast.error("Nom requis");
+    if (!name && !file) {
+      toast.error("Ajoutez un fichier ou un nom");
       return;
     }
     start(async () => {
@@ -64,6 +67,21 @@ export function DocumentsPanel({
       setName("");
       setFile(null);
       setOpen(false);
+      router.refresh();
+    });
+  }
+
+  function confirmDelete() {
+    if (!toDelete) return;
+    const doc = toDelete;
+    startDelete(async () => {
+      const res = await fetch(`/api/documents/${doc.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        toast.error("Erreur lors de la suppression");
+        return;
+      }
+      toast.success("Document supprimé");
+      setToDelete(null);
       router.refresh();
     });
   }
@@ -120,8 +138,15 @@ export function DocumentsPanel({
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="name">Nom</Label>
-              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex. Facture #INV-001" />
+              <Label htmlFor="name">
+                Nom <span className="text-[var(--color-fg-mute)] font-normal">(optionnel)</span>
+              </Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={file ? file.name.replace(/\.[^.]+$/, "") : "Ex. Facture #INV-001"}
+              />
             </div>
           </div>
           <div className="space-y-1.5">
@@ -182,9 +207,36 @@ export function DocumentsPanel({
             ) : (
               <span className="text-[11.5px] text-[var(--color-fg-mute)]">—</span>
             )}
+            <button
+              type="button"
+              onClick={() => setToDelete(d)}
+              className="size-7 rounded-[var(--radius-sm)] flex items-center justify-center text-[var(--color-fg-mute)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] transition-colors shrink-0"
+              aria-label="Supprimer le document"
+              title="Supprimer"
+            >
+              <Trash2 className="size-3.5" strokeWidth={1.75} />
+            </button>
           </div>
         ))}
       </div>
+
+      <ConfirmDialog
+        open={!!toDelete}
+        onOpenChange={(o) => !o && setToDelete(null)}
+        title="Supprimer ce document ?"
+        description={
+          toDelete ? (
+            <>
+              Le document <span className="font-medium">{toDelete.name}</span> sera
+              définitivement supprimé. Cette action est irréversible.
+            </>
+          ) : null
+        }
+        confirmLabel="Supprimer"
+        tone="danger"
+        pending={deleting}
+        onConfirm={confirmDelete}
+      />
     </Card>
   );
 }

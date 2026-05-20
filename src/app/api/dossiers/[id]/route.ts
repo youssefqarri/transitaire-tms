@@ -96,3 +96,45 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: err.message || "Erreur" }, { status: 500 });
   }
 }
+
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const session = await auth();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // seul un ADMIN peut supprimer un dossier
+  if (session.user.role !== "ADMIN")
+    return NextResponse.json({ error: "Seul un admin peut supprimer un dossier" }, { status: 403 });
+
+  const dossier = await prisma.dossier.findUnique({
+    where: { id },
+    include: { _count: { select: { dums: true } } },
+  });
+  if (!dossier) return NextResponse.json({ error: "Dossier introuvable" }, { status: 404 });
+
+  // garde-fou: pas de suppression si DUM validée/liquidée/clôturée
+  const validatedDum = await prisma.dUM.count({
+    where: { dossierId: id, status: { in: ["VALIDE", "LIQUIDE", "CLOTURE"] } },
+  });
+  if (validatedDum > 0) {
+    return NextResponse.json(
+      { error: "Impossible : ce dossier a une DUM validée. Annulez d'abord la DUM." },
+      { status: 409 },
+    );
+  }
+
+  try {
+    await prisma.dossier.delete({ where: { id } });
+    await audit({
+      userId: session.user.id,
+      action: "DELETE_DOSSIER",
+      entity: "Dossier",
+      entityId: id,
+      metadata: { number: dossier.number, clientId: dossier.clientId },
+    });
+    return NextResponse.json({ ok: true });
+  } catch (e: unknown) {
+    const err = e as { code?: string; message?: string };
+    if (err.code === "P2025") return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: err.message || "Erreur" }, { status: 500 });
+  }
+}

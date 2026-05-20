@@ -26,6 +26,7 @@ import { CommentsPanel } from "./comments-panel";
 import { NotifyClientButton } from "./notify-button";
 import { OutgoingMessagesPanel } from "./outgoing-messages-panel";
 import { ExpectedDocumentsPanel } from "./expected-documents-panel";
+import { DeleteDossierButton } from "./delete-button";
 
 export const dynamic = "force-dynamic";
 
@@ -110,6 +111,9 @@ export default async function DossierDetailPage({
               <Pencil /> Modifier
             </Button>
           </Link>
+          {session.user.role === "ADMIN" && (
+            <DeleteDossierButton dossierId={dossier.id} dossierNumber={dossier.number} />
+          )}
           <StatusChanger dossierId={dossier.id} currentStatus={dossier.status} />
         </div>
       </header>
