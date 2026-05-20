@@ -163,9 +163,10 @@ export default async function DashboardPage() {
               <Link
                 key={d.id}
                 href={`/dossiers/${d.id}`}
-                className="flex items-center gap-4 px-5 py-3 hover:bg-[var(--color-surface-2)] transition-colors"
+                className="grid grid-cols-[minmax(0,1fr)_140px_130px_140px] items-center gap-4 px-5 py-3 hover:bg-[var(--color-surface-2)] transition-colors"
               >
-                <div className="flex-1 min-w-0">
+                {/* Col 1 : N° dossier + référence + client + docs manquants */}
+                <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-mono text-[12.5px] text-[var(--color-fg)] font-medium">
                       {d.number}
@@ -191,7 +192,8 @@ export default async function DashboardPage() {
                     )}
                   </div>
                 </div>
-                <div className="hidden sm:block text-right shrink-0 w-[120px]">
+                {/* Col 2 : Valeur + maj */}
+                <div className="text-right hidden sm:block">
                   <div className="font-mono text-[12.5px] text-[var(--color-fg)] tnum">
                     {formatCurrency(
                       d.goodsValue ? Number(d.goodsValue) : null,
@@ -202,14 +204,17 @@ export default async function DashboardPage() {
                     {formatDate(d.updatedAt)}
                   </div>
                 </div>
-                <div className="shrink-0 w-[160px] flex flex-col items-start gap-0.5">
-                  <StatusBadge status={d.status} size="sm" />
-                  {(d.visitDate || d.deliveredAt) && (
-                    <div className="text-[10.5px] text-[var(--color-fg-3)] tnum flex flex-col">
-                      {d.visitDate && <span>📅 {formatDate(d.visitDate)}</span>}
-                      {d.deliveredAt && <span>🚚 {formatDate(d.deliveredAt)}</span>}
-                    </div>
+                {/* Col 3 : Dates visite / livraison */}
+                <div className="text-[10.5px] text-[var(--color-fg-3)] tnum hidden sm:flex flex-col items-start gap-0.5">
+                  {d.visitDate && <span>📅 {formatDate(d.visitDate)}</span>}
+                  {d.deliveredAt && <span>🚚 {formatDate(d.deliveredAt)}</span>}
+                  {!d.visitDate && !d.deliveredAt && (
+                    <span className="text-[var(--color-fg-mute)]">—</span>
                   )}
+                </div>
+                {/* Col 4 : Statut */}
+                <div className="flex justify-end">
+                  <StatusBadge status={d.status} size="sm" />
                 </div>
               </Link>
             ))}
