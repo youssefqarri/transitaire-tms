@@ -14,7 +14,7 @@ const patchSchema = z.object({
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
-  if (!session || !isInternal(session.user.role))
+  if (!session || !isInternal(session.user.role) || session.user.role === "COMMIS_DOUANE")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const parsed = patchSchema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: "Invalid" }, { status: 400 });
@@ -40,7 +40,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
-  if (!session || !isInternal(session.user.role))
+  if (!session || !isInternal(session.user.role) || session.user.role === "COMMIS_DOUANE")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   await prisma.expectedDocument.delete({ where: { id } });
   await audit({

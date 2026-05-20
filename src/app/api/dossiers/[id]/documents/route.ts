@@ -3,11 +3,14 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { storage } from "@/lib/storage";
+import { canUploadDocument } from "@/lib/roles";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!canUploadDocument(session.user.role))
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const form = await req.formData();
   let name = String(form.get("name") ?? "").trim();

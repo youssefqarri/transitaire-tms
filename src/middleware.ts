@@ -32,6 +32,24 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
+  // COMMIS_DOUANE = consultation seulement, périmètre restreint
+  if (role === "COMMIS_DOUANE") {
+    const BLOCKED_PREFIXES = [
+      "/clients",
+      "/fournisseurs",
+      "/factures",
+      "/emails",
+      "/notifications",
+      "/utilisateurs",
+      "/templates",
+      "/audit",
+      "/parametres",
+    ];
+    if (BLOCKED_PREFIXES.some((p) => pathname.startsWith(p))) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+  }
+
   return NextResponse.next();
 });
 

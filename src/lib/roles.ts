@@ -49,5 +49,40 @@ export function canViewAccountingEmails(role: UserRole) {
 }
 
 export function canViewCustomsEmails(role: UserRole) {
-  return ["ADMIN", "COMMIS_DOUANE", "DECLARANT", "BUREAU"].includes(role);
+  // COMMIS_DOUANE = consultation seulement, pas d'accès emails
+  return ["ADMIN", "DECLARANT", "BUREAU"].includes(role);
+}
+
+// Profil "consultation seule" — réservé COMMIS_DOUANE pour l'instant.
+// Voir aussi can* ci-dessus qui doivent tous le retourner à false.
+export function isReadOnly(role: UserRole) {
+  return role === "COMMIS_DOUANE";
+}
+
+export function canViewClients(role: UserRole) {
+  return isInternal(role) && role !== "COMMIS_DOUANE";
+}
+
+export function canViewSuppliers(role: UserRole) {
+  return isInternal(role) && role !== "COMMIS_DOUANE";
+}
+
+export function canViewInvoices(role: UserRole) {
+  return ["ADMIN", "EXPLOITATION", "DECLARANT", "BUREAU", "COMPTABILITE"].includes(role);
+}
+
+export function canViewEmails(role: UserRole) {
+  return ["ADMIN", "EXPLOITATION", "DECLARANT", "BUREAU", "COMPTABILITE"].includes(role);
+}
+
+export function canViewNotifications(role: UserRole) {
+  return ["ADMIN", "EXPLOITATION", "DECLARANT", "BUREAU", "COMPTABILITE"].includes(role);
+}
+
+export function canUploadDocument(role: UserRole) {
+  return ["ADMIN", "EXPLOITATION", "DECLARANT", "BUREAU"].includes(role);
+}
+
+export function canNotifyClient(role: UserRole) {
+  return ["ADMIN", "EXPLOITATION", "DECLARANT", "BUREAU"].includes(role);
 }

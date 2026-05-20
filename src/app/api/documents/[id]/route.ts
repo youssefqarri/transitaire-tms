@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { storage } from "@/lib/storage";
+import { canUploadDocument } from "@/lib/roles";
 
 export async function DELETE(
   _req: Request,
@@ -11,6 +12,8 @@ export async function DELETE(
   const { id } = await params;
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!canUploadDocument(session.user.role))
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const doc = await prisma.document.findUnique({ where: { id } });
   if (!doc) return NextResponse.json({ error: "Document introuvable" }, { status: 404 });

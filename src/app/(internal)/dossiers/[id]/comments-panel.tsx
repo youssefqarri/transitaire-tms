@@ -20,9 +20,11 @@ type Comment = {
 export function CommentsPanel({
   dossierId,
   comments,
+  readOnly = false,
 }: {
   dossierId: string;
   comments: Comment[];
+  readOnly?: boolean;
 }) {
   const router = useRouter();
   const [body, setBody] = useState("");
@@ -58,27 +60,29 @@ export function CommentsPanel({
         </CardTitle>
       </CardHeader>
 
-      <form onSubmit={submit} className="px-5 py-4 border-b border-[var(--color-border)] space-y-3">
-        <Textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          placeholder="Ajouter un commentaire…"
-        />
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <label className="flex items-center gap-2 text-[12px] text-[var(--color-fg-2)] cursor-pointer">
-            <input
-              type="checkbox"
-              checked={internal}
-              onChange={(e) => setInternal(e.target.checked)}
-              className="accent-[var(--color-accent)]"
-            />
-            Interne (non visible au client)
-          </label>
-          <Button size="sm" disabled={pending || !body.trim()}>
-            {pending ? "Envoi…" : "Publier"}
-          </Button>
-        </div>
-      </form>
+      {!readOnly && (
+        <form onSubmit={submit} className="px-5 py-4 border-b border-[var(--color-border)] space-y-3">
+          <Textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder="Ajouter un commentaire…"
+          />
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <label className="flex items-center gap-2 text-[12px] text-[var(--color-fg-2)] cursor-pointer">
+              <input
+                type="checkbox"
+                checked={internal}
+                onChange={(e) => setInternal(e.target.checked)}
+                className="accent-[var(--color-accent)]"
+              />
+              Interne (non visible au client)
+            </label>
+            <Button size="sm" disabled={pending || !body.trim()}>
+              {pending ? "Envoi…" : "Publier"}
+            </Button>
+          </div>
+        </form>
+      )}
 
       <div className="divide-y divide-[var(--color-border)]">
         {comments.length === 0 && (

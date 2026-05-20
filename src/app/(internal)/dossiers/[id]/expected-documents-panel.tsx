@@ -28,9 +28,11 @@ type Expected = {
 export function ExpectedDocumentsPanel({
   dossierId,
   expected,
+  readOnly = false,
 }: {
   dossierId: string;
   expected: Expected[];
+  readOnly?: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -99,12 +101,14 @@ export function ExpectedDocumentsPanel({
             </Badge>
           )}
         </CardTitle>
-        <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
-          <Plus /> Demander
-        </Button>
+        {!readOnly && (
+          <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
+            <Plus /> Demander
+          </Button>
+        )}
       </CardHeader>
 
-      {open && (
+      {!readOnly && open && (
         <form
           onSubmit={submit}
           className="px-5 py-4 bg-[var(--color-surface-2)] border-b border-[var(--color-border)] space-y-3 animate-fade-in"
@@ -196,38 +200,40 @@ export function ExpectedDocumentsPanel({
                 · {formatDate(e.createdAt)}
               </div>
             </div>
-            <div className="flex items-center gap-1 shrink-0">
-              {!e.fulfilledAt ? (
+            {!readOnly && (
+              <div className="flex items-center gap-1 shrink-0">
+                {!e.fulfilledAt ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => markFulfilled(e.id, true)}
+                    disabled={pending}
+                    title="Marquer comme reçu"
+                  >
+                    <Check />
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => markFulfilled(e.id, false)}
+                    disabled={pending}
+                    title="Annuler la réception"
+                  >
+                    Annuler
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
-                  size="sm"
-                  onClick={() => markFulfilled(e.id, true)}
+                  size="icon"
+                  onClick={() => remove(e.id)}
                   disabled={pending}
-                  title="Marquer comme reçu"
+                  title="Retirer"
                 >
-                  <Check />
+                  <X className="text-[var(--color-fg-mute)]" />
                 </Button>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => markFulfilled(e.id, false)}
-                  disabled={pending}
-                  title="Annuler la réception"
-                >
-                  Annuler
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => remove(e.id)}
-                disabled={pending}
-                title="Retirer"
-              >
-                <X className="text-[var(--color-fg-mute)]" />
-              </Button>
-            </div>
+              </div>
+            )}
           </div>
         ))}
       </div>

@@ -32,7 +32,7 @@ const schema = z.object({
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
-  if (!session || !isInternal(session.user.role))
+  if (!session || !isInternal(session.user.role) || session.user.role === "COMMIS_DOUANE")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const parsed = schema.safeParse(await req.json());

@@ -12,6 +12,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params;
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (session.user.role === "COMMIS_DOUANE")
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: "Invalid" }, { status: 400 });

@@ -100,22 +100,24 @@ export default async function DossierDetailPage({
             {dossier.createdBy && ` par ${dossier.createdBy.name}`}
           </p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <NotifyClientButton
-            dossierId={dossier.id}
-            clientEmail={dossier.client.email}
-            clientPhone={dossier.client.phone}
-          />
-          <Link href={`/dossiers/${dossier.id}/modifier`}>
-            <Button variant="outline" size="sm">
-              <Pencil /> Modifier
-            </Button>
-          </Link>
-          {session.user.role === "ADMIN" && (
-            <DeleteDossierButton dossierId={dossier.id} dossierNumber={dossier.number} />
-          )}
-          <StatusChanger dossierId={dossier.id} currentStatus={dossier.status} />
-        </div>
+        {session.user.role !== "COMMIS_DOUANE" && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <NotifyClientButton
+              dossierId={dossier.id}
+              clientEmail={dossier.client.email}
+              clientPhone={dossier.client.phone}
+            />
+            <Link href={`/dossiers/${dossier.id}/modifier`}>
+              <Button variant="outline" size="sm">
+                <Pencil /> Modifier
+              </Button>
+            </Link>
+            {session.user.role === "ADMIN" && (
+              <DeleteDossierButton dossierId={dossier.id} dossierNumber={dossier.number} />
+            )}
+            <StatusChanger dossierId={dossier.id} currentStatus={dossier.status} />
+          </div>
+        )}
       </header>
 
       {/* Drapeaux parallèles (Facturé, Livré, BAE, MCI, etc.) */}
@@ -217,47 +219,57 @@ export default async function DossierDetailPage({
             </div>
           </Card>
 
-          <DUMsPanel
-            dossierId={dossier.id}
-            dums={dossier.dums}
-            canCreate={["ADMIN", "DECLARANT"].includes(session.user.role)}
-          />
-          <DocumentsPanel
-            dossierId={dossier.id}
-            documents={dossier.documents.map((d) => ({
-              id: d.id,
-              name: d.name,
-              category: d.category,
-              version: d.version,
-              receivedAt: d.receivedAt,
-              fileUrl: d.fileUrl,
-              uploadedByName: d.uploadedBy?.name ?? null,
-              notes: d.notes,
-            }))}
-            requiredCategories={required}
-          />
-          <ExpectedDocumentsPanel
-            dossierId={dossier.id}
-            expected={dossier.expectedDocuments.map((e) => ({
-              id: e.id,
-              category: e.category,
-              name: e.name,
-              note: e.note,
-              fulfilledAt: e.fulfilledAt,
-              requestedByName: e.requestedBy?.name ?? null,
-              createdAt: e.createdAt,
-            }))}
-          />
-          <CommentsPanel
-            dossierId={dossier.id}
-            comments={dossier.comments.map((c) => ({
-              id: c.id,
-              body: c.body,
-              internal: c.internal,
-              createdAt: c.createdAt,
-              authorName: c.author.name,
-            }))}
-          />
+          {(() => {
+            const readOnly = session.user.role === "COMMIS_DOUANE";
+            return (
+              <>
+                <DUMsPanel
+                  dossierId={dossier.id}
+                  dums={dossier.dums}
+                  canCreate={!readOnly && ["ADMIN", "DECLARANT"].includes(session.user.role)}
+                />
+                <DocumentsPanel
+                  dossierId={dossier.id}
+                  documents={dossier.documents.map((d) => ({
+                    id: d.id,
+                    name: d.name,
+                    category: d.category,
+                    version: d.version,
+                    receivedAt: d.receivedAt,
+                    fileUrl: d.fileUrl,
+                    uploadedByName: d.uploadedBy?.name ?? null,
+                    notes: d.notes,
+                  }))}
+                  requiredCategories={required}
+                  readOnly={readOnly}
+                />
+                <ExpectedDocumentsPanel
+                  dossierId={dossier.id}
+                  expected={dossier.expectedDocuments.map((e) => ({
+                    id: e.id,
+                    category: e.category,
+                    name: e.name,
+                    note: e.note,
+                    fulfilledAt: e.fulfilledAt,
+                    requestedByName: e.requestedBy?.name ?? null,
+                    createdAt: e.createdAt,
+                  }))}
+                  readOnly={readOnly}
+                />
+                <CommentsPanel
+                  dossierId={dossier.id}
+                  comments={dossier.comments.map((c) => ({
+                    id: c.id,
+                    body: c.body,
+                    internal: c.internal,
+                    createdAt: c.createdAt,
+                    authorName: c.author.name,
+                  }))}
+                  readOnly={readOnly}
+                />
+              </>
+            );
+          })()}
           {dossier.outgoingMessages.length > 0 && (
             <OutgoingMessagesPanel
               messages={dossier.outgoingMessages.map((m) => ({

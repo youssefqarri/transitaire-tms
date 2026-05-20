@@ -31,10 +31,12 @@ export function DocumentsPanel({
   dossierId,
   documents,
   requiredCategories,
+  readOnly = false,
 }: {
   dossierId: string;
   documents: Doc[];
   requiredCategories: DocumentCategory[];
+  readOnly?: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -98,9 +100,11 @@ export function DocumentsPanel({
             {documents.length}
           </span>
         </CardTitle>
-        <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
-          <Plus /> Ajouter
-        </Button>
+        {!readOnly && (
+          <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
+            <Plus /> Ajouter
+          </Button>
+        )}
       </CardHeader>
 
       <div className="px-5 py-3 border-b border-[var(--color-border)]">
@@ -127,7 +131,7 @@ export function DocumentsPanel({
         </div>
       </div>
 
-      {open && (
+      {!readOnly && open && (
         <form onSubmit={submit} className="px-5 py-4 bg-[var(--color-surface-2)] border-b border-[var(--color-border)] space-y-3 animate-fade-in">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -229,15 +233,17 @@ export function DocumentsPanel({
             ) : (
               <span className="text-[11.5px] text-[var(--color-fg-mute)]">—</span>
             )}
-            <button
-              type="button"
-              onClick={() => setToDelete(d)}
-              className="size-7 rounded-[var(--radius-sm)] flex items-center justify-center text-[var(--color-fg-mute)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] transition-colors shrink-0"
-              aria-label="Supprimer le document"
-              title="Supprimer"
-            >
-              <Trash2 className="size-3.5" strokeWidth={1.75} />
-            </button>
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={() => setToDelete(d)}
+                className="size-7 rounded-[var(--radius-sm)] flex items-center justify-center text-[var(--color-fg-mute)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] transition-colors shrink-0"
+                aria-label="Supprimer le document"
+                title="Supprimer"
+              >
+                <Trash2 className="size-3.5" strokeWidth={1.75} />
+              </button>
+            )}
           </div>
         ))}
       </div>

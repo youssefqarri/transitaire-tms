@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
-import { isInternal } from "@/lib/roles";
+import { canNotifyClient } from "@/lib/roles";
 import { notifyClient } from "@/lib/messaging-server";
 import { audit } from "@/lib/audit";
 import type { TemplateKey } from "@/lib/messaging";
@@ -17,7 +17,7 @@ const schema = z.object({
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
-  if (!session || !isInternal(session.user.role))
+  if (!session || !canNotifyClient(session.user.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: "Invalid" }, { status: 400 });
