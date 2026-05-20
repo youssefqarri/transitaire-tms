@@ -124,11 +124,21 @@ export default async function DossiersPage({
                 >
                   {/* ligne 1 : statut large + numéro */}
                   <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <StatusBadge status={d.status} />
                       {d.isNewFromClient && (
                         <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--color-danger)] text-white animate-pulse">
                           NOUVEAU CLIENT
+                        </span>
+                      )}
+                      {d.visitDate && (
+                        <span className="text-[11px] text-[var(--color-fg-3)] tnum">
+                          📅 {formatDate(d.visitDate)}
+                        </span>
+                      )}
+                      {d.deliveredAt && (
+                        <span className="text-[11px] text-[var(--color-fg-3)] tnum">
+                          🚚 {formatDate(d.deliveredAt)}
                         </span>
                       )}
                     </div>
@@ -190,6 +200,7 @@ export default async function DossiersPage({
                     <th className="text-left px-5 py-2.5">Client</th>
                     <th className="text-left px-5 py-2.5">DUM(s)</th>
                     <th className="text-center px-3 py-2.5">Docs</th>
+                    <th className="text-left px-3 py-2.5">Visite / Livraison</th>
                     <th className="text-right px-5 py-2.5 font-normal text-[var(--color-fg-mute)]">Valeur</th>
                     <th className="text-right px-5 py-2.5 font-normal text-[var(--color-fg-mute)]">Poids</th>
                     <th className="text-right px-5 py-2.5">Maj</th>
@@ -252,6 +263,24 @@ export default async function DossiersPage({
                             </span>
                           ) : null}
                         </div>
+                      </td>
+                      <td className="px-3 py-2.5 text-[11.5px] tnum">
+                        {d.visitDate || d.deliveredAt ? (
+                          <div className="flex flex-col gap-0.5">
+                            {d.visitDate && (
+                              <span className="text-[var(--color-fg-2)] whitespace-nowrap">
+                                📅 {formatDate(d.visitDate)}
+                              </span>
+                            )}
+                            {d.deliveredAt && (
+                              <span className="text-[var(--color-fg-2)] whitespace-nowrap">
+                                🚚 {formatDate(d.deliveredAt)}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-[var(--color-fg-mute)]">—</span>
+                        )}
                       </td>
                       <td className="px-5 py-2.5 text-right font-mono tnum text-[11.5px] text-[var(--color-fg-mute)]">
                         {formatCurrency(
