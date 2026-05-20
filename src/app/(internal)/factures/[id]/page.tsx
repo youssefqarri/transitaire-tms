@@ -16,6 +16,7 @@ import {
 } from "@/lib/invoicing";
 import { formatDate } from "@/lib/utils";
 import { InvoiceActions } from "./actions";
+import { SendInvoiceButton } from "./send-button";
 
 export const dynamic = "force-dynamic";
 
@@ -88,6 +89,13 @@ export default async function InvoiceDetailPage({
               <Printer /> Imprimer / PDF
             </Button>
           </Link>
+          {["ADMIN", "COMPTABILITE"].includes(session.user.role) && (
+            <SendInvoiceButton
+              invoiceId={invoice.id}
+              invoiceNumber={invoice.number}
+              clientEmail={invoice.client.email}
+            />
+          )}
           <InvoiceActions
             id={invoice.id}
             currentStatus={invoice.status}
