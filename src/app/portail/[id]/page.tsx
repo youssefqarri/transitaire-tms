@@ -136,23 +136,31 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
               </div>
             )}
             {dossier.documents.map((d) => (
-              <div key={d.id} className="px-5 py-3 flex items-center gap-3">
-                <FileText className="size-4 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13px] font-medium">{d.name}</div>
-                  <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
-                    {DOCUMENT_CATEGORY_LABELS[d.category]} · {formatDate(d.receivedAt)}
+              <div key={d.id} className="px-5 py-3">
+                <div className="flex items-center gap-3">
+                  <FileText className="size-4 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13px] font-medium">{d.name}</div>
+                    <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+                      {DOCUMENT_CATEGORY_LABELS[d.category]} · {formatDate(d.receivedAt)}
+                    </div>
                   </div>
+                  {d.fileUrl && (
+                    <a
+                      href={d.fileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-[12px] text-[var(--color-accent)] hover:underline"
+                    >
+                      <Download className="size-3" strokeWidth={2} /> Télécharger
+                    </a>
+                  )}
                 </div>
-                {d.fileUrl && (
-                  <a
-                    href={d.fileUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-[12px] text-[var(--color-accent)] hover:underline"
-                  >
-                    <Download className="size-3" strokeWidth={2} /> Télécharger
-                  </a>
+                {d.notes && (
+                  <div className="ml-7 mt-2 text-[12.5px] text-[var(--color-fg-2)] bg-[var(--color-accent-soft)] border border-[var(--color-accent)]/20 rounded px-3 py-2 whitespace-pre-wrap">
+                    <span className="font-medium text-[var(--color-accent)]">Note : </span>
+                    {d.notes}
+                  </div>
                 )}
               </div>
             ))}
