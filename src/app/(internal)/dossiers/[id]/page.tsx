@@ -201,8 +201,26 @@ export default async function DossierDetailPage({
               <CardTitle>Informations</CardTitle>
             </CardHeader>
             <div className="px-5 py-4 grid grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-4 text-[13px]">
-              <Field label="Client" value={dossier.client.name} />
-              <Field label="Fournisseur" value={dossier.supplier?.name ?? "—"} />
+              <Field label="Client" value={
+                <Link
+                  href={`/clients/${dossier.clientId}`}
+                  className="text-[var(--color-fg)] hover:text-[var(--color-accent)] hover:underline"
+                >
+                  {dossier.client.name}
+                </Link>
+              } />
+              <Field label="Fournisseur" value={
+                dossier.supplier ? (
+                  <Link
+                    href={`/fournisseurs/${dossier.supplier.id}`}
+                    className="text-[var(--color-fg)] hover:text-[var(--color-accent)] hover:underline"
+                  >
+                    {dossier.supplier.name}
+                  </Link>
+                ) : (
+                  <span className="text-[var(--color-fg-3)]">—</span>
+                )
+              } />
               <Field
                 label="Valeur"
                 mono
@@ -222,15 +240,14 @@ export default async function DossierDetailPage({
                 value={formatNumber(dossier.goodsPackages)}
               />
               <Field label="Bureau" value={dossier.controlOffice ?? "—"} />
-              <Field label="Visite douane" mono value={formatDate(dossier.visitDate)} />
-              <Field label="Date livraison" mono value={formatDate(dossier.deliveredAt)} />
               <Field label="Assigné" value={dossier.assignedTo?.name ?? "—"} />
+              <Field label="Type" value={dossier.type} />
               {dossier.goodsDescription && (
-                <div className="md:col-span-4">
+                <div className="md:col-span-4 pt-1">
                   <div className="text-[11.5px] font-medium text-[var(--color-fg-3)] mb-1">
                     Description marchandise
                   </div>
-                  <div className="text-[13px] text-[var(--color-fg)]">
+                  <div className="text-[13px] text-[var(--color-fg)] whitespace-pre-wrap">
                     {dossier.goodsDescription}
                   </div>
                 </div>

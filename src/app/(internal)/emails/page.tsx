@@ -116,7 +116,7 @@ export default async function EmailsPage({
             {emails.map((e) => (
               <div
                 key={e.id}
-                className={`p-4 hover:bg-[var(--color-surface-2)]/50 ${!e.isRead ? "bg-[var(--color-accent)]/[0.02]" : ""}`}
+                className={`p-4 hover:bg-[var(--color-surface-2)]/50 transition-colors ${!e.isRead ? "bg-[var(--color-accent)]/[0.02]" : ""}`}
               >
                 <div className="flex items-start gap-3">
                   <div className={`size-2 rounded-full mt-2 shrink-0 ${!e.isRead ? "bg-[var(--color-accent)]" : "bg-transparent"}`} />

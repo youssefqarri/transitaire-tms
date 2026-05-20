@@ -5,6 +5,8 @@ import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
 import { formatDate } from "@/lib/utils";
 import { INVOICE_STATUS_LABELS, formatMAD, totals } from "@/lib/invoicing";
 
@@ -45,33 +47,33 @@ export default async function InvoicesPage() {
     }, 0);
 
   return (
-    <div className="space-y-5">
-      <header className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-[22px] font-semibold tracking-tight">Factures</h1>
-          <p className="text-[13px] text-[var(--color-fg-3)] mt-0.5">
+    <div className="space-y-6 animate-fade-in">
+      <PageHeader
+        title="Factures"
+        subtitle={
+          <>
             {invoices.length} facture{invoices.length > 1 ? "s" : ""} · Total facturé{" "}
             <span className="text-[var(--color-fg)] font-medium tnum">
               {formatMAD(totalIssued)}
             </span>
-          </p>
-        </div>
-        <Link href="/factures/nouvelle">
-          <Button>
-            <Plus /> Nouvelle facture
-          </Button>
-        </Link>
-      </header>
+          </>
+        }
+        actions={
+          <Link href="/factures/nouvelle">
+            <Button>
+              <Plus /> Nouvelle facture
+            </Button>
+          </Link>
+        }
+      />
 
       <Card>
         {invoices.length === 0 ? (
-          <div className="py-16 text-center">
-            <Receipt className="size-8 mx-auto text-[var(--color-fg-mute)] mb-2" strokeWidth={1.5} />
-            <div className="text-[14px] font-medium">Aucune facture</div>
-            <div className="text-[12.5px] text-[var(--color-fg-3)] mt-1">
-              Créez votre première facture pour commencer.
-            </div>
-          </div>
+          <EmptyState
+            icon={Receipt}
+            title="Aucune facture"
+            hint="Créez votre première facture pour commencer."
+          />
         ) : (
           <>
             {/* Mobile: cartes */}
@@ -90,10 +92,10 @@ export default async function InvoicesPage() {
                   <Link
                     key={inv.id}
                     href={`/factures/${inv.id}`}
-                    className="block px-4 py-3 hover:bg-[var(--color-surface-2)] active:bg-[var(--color-surface-2)] transition-colors"
+                    className="row-link block px-4 py-3 hover:bg-[var(--color-surface-2)]/50 active:bg-[var(--color-surface-2)] transition-colors"
                   >
                     <div className="flex items-center justify-between gap-3 mb-1">
-                      <span className="font-mono font-medium text-[14px] text-[var(--color-fg)]">
+                      <span className="font-mono font-medium text-[13px] text-[var(--color-fg)]">
                         {inv.number}
                       </span>
                       <Badge tone={TONE_BY_STATUS[inv.status]}>
@@ -104,11 +106,11 @@ export default async function InvoicesPage() {
                       {inv.client.name}
                     </div>
                     <div className="flex items-center justify-between mt-1.5">
-                      <span className="text-[11px] text-[var(--color-fg-3)]">
+                      <span className="text-[11.5px] text-[var(--color-fg-3)]">
                         {formatDate(inv.issuedAt)}
                         {inv.dueAt && ` · Éch. ${formatDate(inv.dueAt)}`}
                       </span>
-                      <span className="font-mono text-[13.5px] tnum font-medium text-[var(--color-fg)]">
+                      <span className="font-mono text-[13px] tnum font-medium text-[var(--color-fg)]">
                         {formatMAD(t.totalTTC)}
                       </span>
                     </div>
@@ -121,13 +123,13 @@ export default async function InvoicesPage() {
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-[13px]">
                 <thead>
-                  <tr className="border-b border-[var(--color-border)] text-[11.5px] font-medium text-[var(--color-fg-3)]">
-                    <th className="text-left px-5 py-2.5">N°</th>
-                    <th className="text-left px-5 py-2.5">Client</th>
-                    <th className="text-left px-5 py-2.5">Émise le</th>
-                    <th className="text-left px-5 py-2.5">Échéance</th>
-                    <th className="text-right px-5 py-2.5">Total TTC</th>
-                    <th className="text-left px-5 py-2.5">Statut</th>
+                  <tr className="border-b border-[var(--color-border)]">
+                    <th className="text-left text-[11.5px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">N°</th>
+                    <th className="text-left text-[11.5px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Client</th>
+                    <th className="text-left text-[11.5px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Émise le</th>
+                    <th className="text-left text-[11.5px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Échéance</th>
+                    <th className="text-right text-[11.5px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Total TTC</th>
+                    <th className="text-left text-[11.5px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Statut</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -144,12 +146,12 @@ export default async function InvoicesPage() {
                     return (
                       <tr
                         key={inv.id}
-                        className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-2)]"
+                        className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-2)]/50 transition-colors"
                       >
                         <td className="px-5 py-2.5">
                           <Link
                             href={`/factures/${inv.id}`}
-                            className="font-mono font-medium text-[var(--color-fg)] hover:text-[var(--color-accent)]"
+                            className="row-link font-mono font-medium text-[var(--color-fg)] hover:text-[var(--color-accent)]"
                           >
                             {inv.number}
                           </Link>

@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { getSettings } from "@/lib/settings";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
 import { Mail, Cloud, Key, ChevronRight, MessageSquare, FileText } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -67,29 +68,31 @@ export default async function SettingsPage() {
   ];
 
   return (
-    <div className="space-y-5 max-w-3xl">
-      <div>
-        <h1 className="text-[22px] font-semibold tracking-tight">Paramètres</h1>
-        <p className="text-[13px] text-[var(--color-fg-3)] mt-0.5">
-          Configuration de la plateforme. Les valeurs définies ici prennent le pas sur celles du fichier{" "}
-          <code className="font-mono text-[12px] bg-[var(--color-surface-2)] px-1 py-0.5 rounded">
-            .env
-          </code>
-          .
-        </p>
-      </div>
+    <div className="space-y-6 animate-fade-in max-w-3xl">
+      <PageHeader
+        title="Paramètres"
+        subtitle={
+          <>
+            Configuration de la plateforme. Les valeurs définies ici prennent le pas sur celles du fichier{" "}
+            <code className="font-mono text-[11.5px] bg-[var(--color-surface-2)] px-1 py-0.5 rounded">
+              .env
+            </code>
+            .
+          </>
+        }
+      />
 
       <div className="space-y-2">
         {sections.map((s) => (
-          <Link key={s.href} href={s.href}>
-            <Card className="hover:border-[var(--color-fg-mute)] transition-colors">
+          <Link key={s.href} href={s.href} className="row-link block">
+            <Card className="hover:border-[var(--color-fg-mute)] hover:bg-[var(--color-surface-2)]/50 transition-colors">
               <div className="p-4 flex items-center gap-4">
                 <div className="size-9 rounded-[var(--radius)] bg-[var(--color-surface-2)] flex items-center justify-center shrink-0">
                   <s.icon className="size-4 text-[var(--color-fg-2)]" strokeWidth={1.75} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[14px] font-semibold">{s.title}</div>
-                  <div className="text-[12.5px] text-[var(--color-fg-3)] mt-0.5">
+                  <div className="text-[13px] font-semibold text-[var(--color-fg)]">{s.title}</div>
+                  <div className="text-[13px] text-[var(--color-fg-3)] mt-0.5">
                     {s.description}
                   </div>
                 </div>
