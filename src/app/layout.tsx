@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { ProgressBar } from "@/components/progress-bar";
 import "./globals.css";
 
 const geist = Geist({
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="fr" className={`${geist.variable} ${geistMono.variable}`}>
       <body className="min-h-screen antialiased">
         {children}
+        <ProgressBar />
         <Toaster position="top-right" richColors closeButton />
       </body>
     </html>
