@@ -13,12 +13,13 @@ import { Combobox } from "@/components/ui/combobox";
 type Client = { id: string; name: string; code?: string | null; city?: string | null };
 type Supplier = { id: string; name: string; country?: string | null };
 
-type PackagingUnit = "COLIS" | "PALETTES" | "CONTENEURS";
+type PackagingUnit = "COLIS" | "PALETTES" | "CONTENEURS" | "REMORQUES";
 
 const PACKAGING_LABELS: Record<PackagingUnit, string> = {
   COLIS: "Colis",
   PALETTES: "Palettes",
   CONTENEURS: "Conteneurs",
+  REMORQUES: "Remorques",
 };
 
 type FormState = {

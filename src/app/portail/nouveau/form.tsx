@@ -3,10 +3,19 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Plus, Trash2, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
+import type { DocumentCategory } from "@/generated/prisma/enums";
+
+type Attachment = {
+  id: string;
+  file: File;
+  category: DocumentCategory;
+};
 
 export function NewDossierForm() {
   const router = useRouter();
@@ -22,9 +31,31 @@ export function NewDossierForm() {
   const [goodsWeight, setGoodsWeight] = useState("");
   const [goodsPackages, setGoodsPackages] = useState("");
   const [goodsPackagingUnit, setGoodsPackagingUnit] = useState<
-    "COLIS" | "PALETTES" | "CONTENEURS"
+    "COLIS" | "PALETTES" | "CONTENEURS" | "REMORQUES"
   >("COLIS");
   const [goodsDescription, setGoodsDescription] = useState("");
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+
+  function addAttachments(files: FileList | null) {
+    if (!files) return;
+    const newOnes: Attachment[] = [];
+    for (const f of Array.from(files)) {
+      newOnes.push({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        file: f,
+        category: "AUTRE",
+      });
+    }
+    setAttachments((prev) => [...prev, ...newOnes]);
+  }
+
+  function setAttachmentCategory(id: string, category: DocumentCategory) {
+    setAttachments((prev) => prev.map((a) => (a.id === id ? { ...a, category } : a)));
+  }
+
+  function removeAttachment(id: string) {
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
+  }
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -51,7 +82,27 @@ export function NewDossierForm() {
         return;
       }
       const data = await res.json();
-      toast.success(`Dossier ${data.number} créé. Notre équipe est notifiée.`);
+
+      // Upload des documents joints (s'il y en a)
+      if (attachments.length > 0) {
+        let uploaded = 0;
+        for (const att of attachments) {
+          const fd = new FormData();
+          fd.append("category", att.category);
+          fd.append("file", att.file);
+          const upRes = await fetch(`/api/portail/dossiers/${data.id}/documents`, {
+            method: "POST",
+            body: fd,
+          });
+          if (upRes.ok) uploaded++;
+        }
+        toast.success(
+          `Dossier ${data.number} créé · ${uploaded}/${attachments.length} document(s) transmis.`,
+        );
+      } else {
+        toast.success(`Dossier ${data.number} créé. Notre équipe est notifiée.`);
+      }
+
       router.push(`/portail/${data.id}`);
       router.refresh();
     });
@@ -162,13 +213,14 @@ export function NewDossierForm() {
             value={goodsPackagingUnit}
             onChange={(e) =>
               setGoodsPackagingUnit(
-                e.target.value as "COLIS" | "PALETTES" | "CONTENEURS",
+                e.target.value as "COLIS" | "PALETTES" | "CONTENEURS" | "REMORQUES",
               )
             }
           >
             <option value="COLIS">Colis</option>
             <option value="PALETTES">Palettes</option>
             <option value="CONTENEURS">Conteneurs</option>
+            <option value="REMORQUES">Remorques</option>
           </Select>
         </div>
       </div>
@@ -188,9 +240,81 @@ export function NewDossierForm() {
         />
       </div>
 
+      {/* Pièces jointes optionnelles */}
+      <div className="space-y-2 border-t border-[var(--color-border)] pt-4">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <Label>
+              Pièces jointes{" "}
+              <span className="text-[var(--color-fg-mute)] font-normal">(optionnel)</span>
+            </Label>
+            <p className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+              Vous pouvez joindre dès maintenant facture, BL, etc. Ils seront rattachés au dossier.
+            </p>
+          </div>
+          <label className="inline-flex items-center gap-1.5 cursor-pointer px-3 h-8 rounded-[var(--radius)] border border-[var(--color-border-2)] bg-[var(--color-surface)] text-[12px] hover:bg-[var(--color-surface-2)] transition-colors">
+            <Plus className="size-3.5" strokeWidth={2} />
+            Ajouter
+            <input
+              type="file"
+              multiple
+              accept=".pdf,.png,.jpg,.jpeg,.webp,.xlsx,.xls,.docx,.doc,.csv"
+              className="hidden"
+              onChange={(e) => {
+                addAttachments(e.target.files);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        </div>
+
+        {attachments.length > 0 && (
+          <div className="space-y-2 mt-2">
+            {attachments.map((att) => (
+              <div
+                key={att.id}
+                className="flex items-center gap-2 bg-[var(--color-surface-2)] rounded-[var(--radius)] px-3 py-2"
+              >
+                <Paperclip className="size-3.5 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
+                <span className="text-[12.5px] text-[var(--color-fg)] truncate flex-1 min-w-0">
+                  {att.file.name}
+                </span>
+                <Select
+                  value={att.category}
+                  onChange={(e) =>
+                    setAttachmentCategory(att.id, e.target.value as DocumentCategory)
+                  }
+                  className="w-[200px] h-7 text-[11.5px]"
+                >
+                  {Object.entries(DOCUMENT_CATEGORY_LABELS).map(([k, l]) => (
+                    <option key={k} value={k}>
+                      {l}
+                    </option>
+                  ))}
+                </Select>
+                <button
+                  type="button"
+                  onClick={() => removeAttachment(att.id)}
+                  className="size-7 rounded flex items-center justify-center text-[var(--color-fg-mute)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] shrink-0"
+                  aria-label="Retirer le fichier"
+                >
+                  <Trash2 className="size-3.5" strokeWidth={1.75} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="flex justify-end gap-2 pt-2">
         <Button size="sm" disabled={pending}>
-          {pending ? "Création…" : "Créer le dossier"}
+          {pending
+            ? attachments.length > 0
+              ? "Envoi…"
+              : "Création…"
+            : attachments.length > 0
+              ? `Créer le dossier (${attachments.length} pièce${attachments.length > 1 ? "s" : ""})`
+              : "Créer le dossier"}
         </Button>
       </div>
     </form>

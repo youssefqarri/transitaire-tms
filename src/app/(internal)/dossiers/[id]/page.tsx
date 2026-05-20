@@ -18,6 +18,7 @@ const PACKAGING_LABELS = {
   COLIS: "Colis",
   PALETTES: "Palettes",
   CONTENEURS: "Conteneurs",
+  REMORQUES: "Remorques",
 } as const;
 import { StatusChanger } from "./status-changer";
 import { DocumentsPanel } from "./documents-panel";

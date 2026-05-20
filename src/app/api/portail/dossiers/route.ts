@@ -14,7 +14,7 @@ const createSchema = z.object({
   goodsCurrency: z.string().optional(),
   goodsWeight: z.string().optional(),
   goodsPackages: z.string().optional(),
-  goodsPackagingUnit: z.enum(["COLIS", "PALETTES", "CONTENEURS"]).optional(),
+  goodsPackagingUnit: z.enum(["COLIS", "PALETTES", "CONTENEURS", "REMORQUES"]).optional(),
   goodsDescription: z.string().optional(),
 });
 

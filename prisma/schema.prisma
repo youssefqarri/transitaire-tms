@@ -180,6 +180,7 @@ enum PackagingUnit {
   COLIS
   PALETTES
   CONTENEURS
+  REMORQUES
 }
 
 enum DossierStatus {

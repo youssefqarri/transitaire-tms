@@ -14,7 +14,7 @@ const patchSchema = z.object({
   goodsCurrency: z.string().optional(),
   goodsWeight: z.number().nullable().optional(),
   goodsPackages: z.number().nullable().optional(),
-  goodsPackagingUnit: z.enum(["COLIS", "PALETTES", "CONTENEURS"]).optional(),
+  goodsPackagingUnit: z.enum(["COLIS", "PALETTES", "CONTENEURS", "REMORQUES"]).optional(),
   goodsDescription: z.string().nullable().optional(),
   controlOffice: z.string().nullable().optional(),
   hasVisit: z.boolean().optional(),
