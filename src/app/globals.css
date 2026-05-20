@@ -196,6 +196,18 @@
     box-shadow: inset 2px 0 0 var(--color-accent);
     background: var(--color-surface-2);
   }
+
+  /* Sélection en accent doux */
+  ::selection {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+
+  /* Style des inputs valides */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  textarea {
+    transition: border-color 150ms, box-shadow 150ms;
+  }
 }
 
 @keyframes fade-in {
