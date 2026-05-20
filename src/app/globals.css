@@ -71,6 +71,29 @@
     font-feature-settings: "cv11", "ss01";
   }
 
+  /* Curseur "main" sur tous les éléments interactifs (Tailwind v4 ne le met plus par défaut) */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a,
+  label[for],
+  summary,
+  select:not(:disabled),
+  [type="checkbox"]:not(:disabled),
+  [type="radio"]:not(:disabled),
+  [type="submit"]:not(:disabled),
+  [type="button"]:not(:disabled),
+  [type="reset"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* Curseur "interdit" sur les éléments désactivés */
+  button:disabled,
+  [aria-disabled="true"],
+  [type="submit"]:disabled,
+  [type="button"]:disabled {
+    cursor: not-allowed;
+  }
+
   h1, h2, h3, h4 {
     color: var(--color-fg);
     letter-spacing: -0.012em;

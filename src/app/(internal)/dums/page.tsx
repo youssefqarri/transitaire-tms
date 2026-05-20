@@ -89,7 +89,14 @@ export default async function DUMsPage() {
                           {d.dossier.number}
                         </Link>
                       </td>
-                      <td className="px-5 py-3">{d.dossier.client.name}</td>
+                      <td className="px-5 py-3">
+                        <Link
+                          className="text-[var(--color-primary)] hover:underline"
+                          href={`/clients/${d.dossier.client.id}`}
+                        >
+                          {d.dossier.client.name}
+                        </Link>
+                      </td>
                       <td className="px-5 py-3 text-[var(--color-muted-foreground)]">
                         {d.bureau ?? "—"}
                       </td>
