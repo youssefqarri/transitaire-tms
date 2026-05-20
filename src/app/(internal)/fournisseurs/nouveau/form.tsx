@@ -7,6 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Combobox } from "@/components/ui/combobox";
+import { COUNTRIES } from "@/lib/countries";
+
+const COUNTRY_ITEMS = COUNTRIES.map((c) => ({ id: c.name, label: c.name, sublabel: c.code }));
 
 type FormState = {
   name: string;
@@ -69,7 +73,15 @@ export function SupplierForm({
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="country">Pays</Label>
-          <Input id="country" value={form.country} onChange={(e) => set("country", e.target.value)} />
+          <Combobox
+            id="country"
+            items={COUNTRY_ITEMS}
+            value={form.country}
+            onChange={(v) => set("country", v)}
+            placeholder="Sélectionner un pays…"
+            searchPlaceholder="Rechercher un pays…"
+            clearable
+          />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="email">Email</Label>

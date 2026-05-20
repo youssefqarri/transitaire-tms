@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
 import { DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
 import type { DocumentCategory } from "@/generated/prisma/enums";
 
@@ -279,19 +280,18 @@ export function NewDossierForm() {
                 <span className="text-[12.5px] text-[var(--color-fg)] truncate flex-1 min-w-0">
                   {att.file.name}
                 </span>
-                <Select
-                  value={att.category}
-                  onChange={(e) =>
-                    setAttachmentCategory(att.id, e.target.value as DocumentCategory)
-                  }
-                  className="w-[200px] h-7 text-[11.5px]"
-                >
-                  {Object.entries(DOCUMENT_CATEGORY_LABELS).map(([k, l]) => (
-                    <option key={k} value={k}>
-                      {l}
-                    </option>
-                  ))}
-                </Select>
+                <div className="w-[220px]">
+                  <Combobox
+                    items={Object.entries(DOCUMENT_CATEGORY_LABELS).map(([k, l]) => ({
+                      id: k,
+                      label: l,
+                    }))}
+                    value={att.category}
+                    onChange={(v) => setAttachmentCategory(att.id, v as DocumentCategory)}
+                    placeholder="Type…"
+                    searchPlaceholder="Rechercher…"
+                  />
+                </div>
                 <button
                   type="button"
                   onClick={() => removeAttachment(att.id)}

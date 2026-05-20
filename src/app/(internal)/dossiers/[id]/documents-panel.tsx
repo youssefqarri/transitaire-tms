@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
 import { FileInput } from "@/components/ui/file-input";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
@@ -137,11 +137,17 @@ export function DocumentsPanel({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="category">Catégorie</Label>
-              <Select id="category" value={category} onChange={(e) => setCategory(e.target.value as DocumentCategory)}>
-                {Object.entries(DOCUMENT_CATEGORY_LABELS).map(([k, l]) => (
-                  <option key={k} value={k}>{l}</option>
-                ))}
-              </Select>
+              <Combobox
+                id="category"
+                items={Object.entries(DOCUMENT_CATEGORY_LABELS).map(([k, l]) => ({
+                  id: k,
+                  label: l,
+                }))}
+                value={category}
+                onChange={(v) => setCategory(v as DocumentCategory)}
+                placeholder="Choisir une catégorie…"
+                searchPlaceholder="Rechercher une catégorie…"
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="name">

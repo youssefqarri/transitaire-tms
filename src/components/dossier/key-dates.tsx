@@ -54,7 +54,7 @@ export function KeyDates({
     const color = onlyEffectiveColor || done
       ? "text-[var(--color-success)]"
       : "text-[var(--color-accent)]";
-    const tag = onlyEffectiveColor ? "" : done ? " ✓" : " — à venir";
+    const tag = onlyEffectiveColor ? "" : done ? " ✓" : "";
     return (
       <span className="inline-flex items-center gap-1">
         <Icon className={`${icon} ${color}`} strokeWidth={1.75} />
