@@ -135,11 +135,11 @@ export default async function EmailsPage({
                       ))}
                     </div>
                     <div className="text-[13px] mt-1">{e.subject || "(sans objet)"}</div>
-                    <div className="text-[11.5px] text-[var(--color-fg-mute)] mt-1 truncate">
+                    <div className="text-[11.5px] text-[var(--color-fg-3)] mt-1 truncate">
                       {e.snippet}
                     </div>
                   </div>
-                  <div className="text-[11.5px] text-[var(--color-fg-mute)] whitespace-nowrap">
+                  <div className="text-[11.5px] text-[var(--color-fg-3)] whitespace-nowrap">
                     {formatDateTime(e.receivedAt)}
                   </div>
                 </div>

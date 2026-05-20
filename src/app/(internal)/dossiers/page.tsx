@@ -149,14 +149,14 @@ export default async function DossiersPage({
                 <Link
                   key={d.id}
                   href={`/dossiers/${d.id}`}
-                  className="block px-4 py-3 hover:bg-[var(--color-surface-2)] active:bg-[var(--color-surface-2)] transition-colors"
+                  className="row-link block px-4 py-3 hover:bg-[var(--color-surface-2)] active:bg-[var(--color-surface-2)] transition-colors"
                 >
                   {/* ligne 1 : statut large + numéro */}
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 flex-wrap">
                       <StatusBadge status={d.status} />
                       {d.isNewFromClient && (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--color-danger)] text-white animate-pulse">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--color-danger)] text-white" title="Nouveau dossier créé par le client">
                           NOUVEAU CLIENT
                         </span>
                       )}
@@ -201,7 +201,7 @@ export default async function DossiersPage({
                     )}
                   </div>
                   {/* ligne 3 : infos secondaires en petit gris */}
-                  <div className="flex items-center justify-between mt-1.5 text-[10.5px] text-[var(--color-fg-mute)] tnum">
+                  <div className="flex items-center justify-between mt-1.5 text-[10.5px] text-[var(--color-fg-3)] tnum">
                     <span>
                       {formatCurrency(
                         d.goodsValue ? Number(d.goodsValue) : null,
@@ -228,8 +228,8 @@ export default async function DossiersPage({
                     <th className="text-left px-5 py-2.5">DUM(s)</th>
                     <th className="text-center px-3 py-2.5">Docs</th>
                     <th className="text-left px-3 py-2.5">Visite / Livraison</th>
-                    <th className="text-right px-5 py-2.5 font-normal text-[var(--color-fg-mute)]">Valeur</th>
-                    <th className="text-right px-5 py-2.5 font-normal text-[var(--color-fg-mute)]">Poids</th>
+                    <th className="text-right px-5 py-2.5 font-normal text-[var(--color-fg-3)]">Valeur</th>
+                    <th className="text-right px-5 py-2.5 font-normal text-[var(--color-fg-3)]">Poids</th>
                     <th className="text-right px-5 py-2.5">Maj</th>
                   </tr>
                 </thead>
@@ -243,7 +243,7 @@ export default async function DossiersPage({
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <StatusBadge status={d.status} size="sm" />
                           {d.isNewFromClient && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--color-danger)] text-white animate-pulse">
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--color-danger)] text-white" title="Nouveau dossier créé par le client">
                               NOUVEAU
                             </span>
                           )}
@@ -263,7 +263,7 @@ export default async function DossiersPage({
                       <td className="px-5 py-2.5 truncate max-w-[200px] text-[12.5px] text-[var(--color-fg-3)]">
                         {d.client.name}
                       </td>
-                      <td className="px-5 py-2.5 font-mono text-[11.5px] text-[var(--color-fg-mute)]">
+                      <td className="px-5 py-2.5 font-mono text-[11.5px] text-[var(--color-fg-3)]">
                         {d.dums.length === 0 ? "—" : d.dums.map((dum) => dum.number).join(", ")}
                       </td>
                       <td className="px-3 py-2.5 text-center">
@@ -285,7 +285,7 @@ export default async function DossiersPage({
                               {d.missingCount}
                             </span>
                           ) : d.fromClientCount === 0 ? (
-                            <span className="text-[11px] text-[var(--color-fg-mute)] tnum">
+                            <span className="text-[11px] text-[var(--color-fg-3)] tnum">
                               {d.docCount}
                             </span>
                           ) : null}
@@ -304,16 +304,16 @@ export default async function DossiersPage({
                           <span className="text-[11px] text-[var(--color-fg-mute)]">—</span>
                         )}
                       </td>
-                      <td className="px-5 py-2.5 text-right font-mono tnum text-[11.5px] text-[var(--color-fg-mute)]">
+                      <td className="px-5 py-2.5 text-right font-mono tnum text-[11.5px] text-[var(--color-fg-3)]">
                         {formatCurrency(
                           d.goodsValue ? Number(d.goodsValue) : null,
                           d.goodsCurrency ?? "EUR",
                         )}
                       </td>
-                      <td className="px-5 py-2.5 text-right font-mono tnum text-[11.5px] text-[var(--color-fg-mute)]">
+                      <td className="px-5 py-2.5 text-right font-mono tnum text-[11.5px] text-[var(--color-fg-3)]">
                         {d.goodsWeight ? `${formatNumber(Number(d.goodsWeight))} kg` : "—"}
                       </td>
-                      <td className="px-5 py-2.5 text-right text-[11px] text-[var(--color-fg-mute)] whitespace-nowrap">
+                      <td className="px-5 py-2.5 text-right text-[11px] text-[var(--color-fg-3)] whitespace-nowrap">
                         {formatDate(d.updatedAt)}
                       </td>
                     </tr>

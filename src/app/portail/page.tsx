@@ -63,7 +63,7 @@ export default async function PortalHomePage() {
                       {d.number}
                     </span>
                     {d.reference && (
-                      <span className="text-[12px] text-[var(--color-fg-mute)]">
+                      <span className="text-[12px] text-[var(--color-fg-3)]">
                         · {d.reference}
                       </span>
                     )}

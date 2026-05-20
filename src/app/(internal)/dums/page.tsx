@@ -51,7 +51,7 @@ export default async function DUMsPage() {
                   <div className="text-[12.5px] text-[var(--color-fg-2)]">
                     <span className="font-mono">{d.dossier.number}</span> · {d.dossier.client.name}
                   </div>
-                  <div className="flex items-center justify-between text-[11px] text-[var(--color-fg-mute)] mt-1">
+                  <div className="flex items-center justify-between text-[11px] text-[var(--color-fg-3)] mt-1">
                     <span>{d.bureau ?? "Bureau ?"}</span>
                     <span>{formatDate(d.registeredAt)}</span>
                   </div>

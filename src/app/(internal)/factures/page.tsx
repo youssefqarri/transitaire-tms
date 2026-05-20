@@ -104,7 +104,7 @@ export default async function InvoicesPage() {
                       {inv.client.name}
                     </div>
                     <div className="flex items-center justify-between mt-1.5">
-                      <span className="text-[11px] text-[var(--color-fg-mute)]">
+                      <span className="text-[11px] text-[var(--color-fg-3)]">
                         {formatDate(inv.issuedAt)}
                         {inv.dueAt && ` · Éch. ${formatDate(inv.dueAt)}`}
                       </span>

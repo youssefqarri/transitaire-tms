@@ -80,11 +80,11 @@ export default async function ClientDetailPage({
                   <Folder className="size-4 text-[var(--color-fg-3)]" />
                   <div className="flex-1 min-w-0">
                     <div className="text-[13px] font-medium">{d.number}</div>
-                    <div className="text-[11.5px] text-[var(--color-fg-mute)]">
+                    <div className="text-[11.5px] text-[var(--color-fg-3)]">
                       {d.reference} · {formatDate(d.updatedAt)}
                     </div>
                   </div>
-                  <div className="text-[11.5px] text-[var(--color-fg-mute)] hidden sm:block">
+                  <div className="text-[11.5px] text-[var(--color-fg-3)] hidden sm:block">
                     {formatCurrency(
                       d.goodsValue ? Number(d.goodsValue) : null,
                       d.goodsCurrency ?? "EUR",

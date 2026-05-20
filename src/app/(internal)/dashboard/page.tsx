@@ -165,15 +165,13 @@ export default async function DashboardPage() {
           </CardHeader>
           <div className="divide-y divide-[var(--color-border)]">
             {recentDossiers.length === 0 && (
-              <div className="py-10 text-center text-[13px] text-[var(--color-fg-3)]">
-                Aucun dossier pour l&apos;instant.
-              </div>
+              <EmptyState icon={Folder} title="Aucun dossier pour l'instant" />
             )}
             {recentDossiers.map((d) => (
               <Link
                 key={d.id}
                 href={`/dossiers/${d.id}`}
-                className="grid grid-cols-[minmax(0,1fr)_140px_130px_140px] items-center gap-4 px-5 py-3 hover:bg-[var(--color-surface-2)] transition-colors"
+                className="row-link flex sm:grid sm:grid-cols-[minmax(0,1fr)_120px_130px_120px] items-center gap-3 sm:gap-4 px-5 py-3 hover:bg-[var(--color-surface-2)] transition-colors"
               >
                 {/* Col 1 : N° dossier + référence + client + docs manquants */}
                 <div className="min-w-0">
@@ -182,7 +180,7 @@ export default async function DashboardPage() {
                       {d.number}
                     </span>
                     {d.reference && (
-                      <span className="text-[11.5px] text-[var(--color-fg-mute)]">
+                      <span className="text-[11.5px] text-[var(--color-fg-3)]">
                         · {d.reference}
                       </span>
                     )}
@@ -210,7 +208,7 @@ export default async function DashboardPage() {
                       d.goodsCurrency ?? "EUR",
                     )}
                   </div>
-                  <div className="text-[10.5px] text-[var(--color-fg-mute)] mt-0.5">
+                  <div className="text-[10.5px] text-[var(--color-fg-3)] mt-0.5">
                     {formatDate(d.updatedAt)}
                   </div>
                 </div>
@@ -229,7 +227,7 @@ export default async function DashboardPage() {
                   )}
                 </div>
                 {/* Col 4 : Statut */}
-                <div className="flex justify-end">
+                <div className="flex justify-end shrink-0">
                   <StatusBadge status={d.status} size="sm" />
                 </div>
               </Link>
@@ -327,12 +325,12 @@ export default async function DashboardPage() {
                             {d.number}
                           </span>
                           {d.reference && (
-                            <span className="text-[11.5px] text-[var(--color-fg-mute)]">
+                            <span className="text-[11.5px] text-[var(--color-fg-3)]">
                               · {d.reference}
                             </span>
                           )}
                           {d.dums.length > 0 && (
-                            <span className="font-mono text-[11px] text-[var(--color-fg-mute)]">
+                            <span className="font-mono text-[11px] text-[var(--color-fg-3)]">
                               DUM {d.dums.map((dum) => dum.number).join(", ")}
                             </span>
                           )}

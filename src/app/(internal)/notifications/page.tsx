@@ -67,7 +67,7 @@ export default async function NotificationsPage() {
                     <span className="font-medium text-[13px]">{n.title}</span>
                     <Badge tone="outline">{KIND_LABELS[n.kind] ?? n.kind}</Badge>
                     {n.dossier && (
-                      <span className="text-[11.5px] text-[var(--color-fg-mute)]">
+                      <span className="text-[11.5px] text-[var(--color-fg-3)]">
                         Dossier {n.dossier.number}
                       </span>
                     )}
@@ -78,7 +78,7 @@ export default async function NotificationsPage() {
                     </div>
                   )}
                 </div>
-                <div className="text-[11.5px] text-[var(--color-fg-mute)] whitespace-nowrap">
+                <div className="text-[11.5px] text-[var(--color-fg-3)] whitespace-nowrap">
                   {formatDateTime(n.createdAt)}
                 </div>
               </Link>

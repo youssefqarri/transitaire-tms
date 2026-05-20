@@ -135,7 +135,7 @@ export default async function InvoiceDetailPage({
                       <td className="px-5 py-2.5 text-[var(--color-fg)]">
                         {it.description}
                         {it.dossier && (
-                          <span className="ml-2 font-mono text-[11px] text-[var(--color-fg-mute)]">
+                          <span className="ml-2 font-mono text-[11px] text-[var(--color-fg-3)]">
                             · {it.dossier.number}
                           </span>
                         )}
