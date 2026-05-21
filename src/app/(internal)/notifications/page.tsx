@@ -1,15 +1,13 @@
-import Link from "next/link";
 import { Bell } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
 import { parsePagination } from "@/lib/pagination";
-import { formatDateTime } from "@/lib/utils";
 import { MarkAllRead } from "./mark-all-read";
+import { NotifRow } from "./notif-row";
 
 export const dynamic = "force-dynamic";
 
@@ -67,34 +65,17 @@ export default async function NotificationsPage({
         ) : (
           <div className="divide-y divide-[var(--color-border)]">
             {notifications.map((n) => (
-              <Link
+              <NotifRow
                 key={n.id}
-                href={n.link ?? "#"}
-                className={`flex items-start gap-3 p-4 hover:bg-[var(--color-surface-2)]/50 ${
-                  !n.read ? "bg-[var(--color-accent)]/5" : ""
-                }`}
-              >
-                <div className={`size-2 rounded-full mt-2 shrink-0 ${!n.read ? "bg-[var(--color-accent)]" : "bg-transparent"}`} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-[13px]">{n.title}</span>
-                    <Badge tone="outline">{KIND_LABELS[n.kind] ?? n.kind}</Badge>
-                    {n.dossier && (
-                      <span className="text-[11.5px] text-[var(--color-fg-3)]">
-                        Dossier {n.dossier.number}
-                      </span>
-                    )}
-                  </div>
-                  {n.body && (
-                    <div className="text-[13px] text-[var(--color-fg-3)] mt-1">
-                      {n.body}
-                    </div>
-                  )}
-                </div>
-                <div className="text-[11.5px] text-[var(--color-fg-3)] whitespace-nowrap">
-                  {formatDateTime(n.createdAt)}
-                </div>
-              </Link>
+                id={n.id}
+                title={n.title}
+                body={n.body}
+                kindLabel={KIND_LABELS[n.kind] ?? n.kind}
+                dossierNumber={n.dossier?.number ?? null}
+                link={n.link ?? "#"}
+                read={n.read}
+                createdAt={n.createdAt}
+              />
             ))}
           </div>
         )}
