@@ -7,6 +7,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Pagination } from "@/components/ui/pagination";
+import { parsePagination } from "@/lib/pagination";
 import { formatDate } from "@/lib/utils";
 import { INVOICE_STATUS_LABELS, formatMAD, totals } from "@/lib/invoicing";
 
@@ -21,15 +23,25 @@ const TONE_BY_STATUS = {
   OVERDUE: "danger",
 } as const;
 
-export default async function InvoicesPage() {
+export default async function InvoicesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; size?: string }>;
+}) {
+  const params = await searchParams;
   const session = await auth();
   if (!session) return null;
 
-  const invoices = await prisma.invoice.findMany({
-    orderBy: [{ year: "desc" }, { sequence: "desc" }],
-    take: 200,
-    include: { client: true, items: true },
-  });
+  const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
+  const [total, invoices] = await Promise.all([
+    prisma.invoice.count(),
+    prisma.invoice.findMany({
+      orderBy: [{ year: "desc" }, { sequence: "desc" }],
+      skip,
+      take: size,
+      include: { client: true, items: true },
+    }),
+  ]);
 
   const totalIssued = invoices
     .filter((i) => i.status !== "CANCELLED" && i.status !== "DRAFT")
@@ -52,7 +64,7 @@ export default async function InvoicesPage() {
         title="Factures"
         subtitle={
           <>
-            {invoices.length} facture{invoices.length > 1 ? "s" : ""} · Total facturé{" "}
+            {total} facture{total > 1 ? "s" : ""} · Total facturé{" "}
             <span className="text-[var(--color-fg)] font-medium tnum">
               {formatMAD(totalIssued)}
             </span>
@@ -179,6 +191,12 @@ export default async function InvoicesPage() {
                 </tbody>
               </table>
             </div>
+            <Pagination
+              page={page}
+              pageSize={size}
+              total={total}
+              basePath="/factures"
+            />
           </>
         )}
       </Card>

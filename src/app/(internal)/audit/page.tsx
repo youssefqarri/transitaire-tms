@@ -7,24 +7,36 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Pagination } from "@/components/ui/pagination";
+import { parsePagination } from "@/lib/pagination";
 import { formatDateTime } from "@/lib/utils";
 import { canManageUsers } from "@/lib/roles";
 
 export const dynamic = "force-dynamic";
 
-export default async function AuditPage() {
+export default async function AuditPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; size?: string }>;
+}) {
+  const params = await searchParams;
   const session = await auth();
   if (!session || !canManageUsers(session.user.role)) redirect("/dashboard");
-  const logs = await prisma.auditLog.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 200,
-    include: { user: { select: { name: true } } },
-  });
+  const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
+  const [total, logs] = await Promise.all([
+    prisma.auditLog.count(),
+    prisma.auditLog.findMany({
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: size,
+      include: { user: { select: { name: true } } },
+    }),
+  ]);
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
         title="Journal d'audit"
-        subtitle={`${logs.length} dernières actions`}
+        subtitle={`${total} actions`}
       />
       <Card>
         {logs.length === 0 ? (
@@ -58,6 +70,12 @@ export default async function AuditPage() {
             ))}
           </div>
         )}
+        <Pagination
+          page={page}
+          pageSize={size}
+          total={total}
+          basePath="/audit"
+        />
       </Card>
     </div>
   );

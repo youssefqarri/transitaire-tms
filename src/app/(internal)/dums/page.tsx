@@ -5,25 +5,38 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Pagination } from "@/components/ui/pagination";
+import { parsePagination } from "@/lib/pagination";
 import { DUM_STATUS_LABELS } from "@/lib/statuses";
 import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-export default async function DUMsPage() {
-  const dums = await prisma.dUM.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 200,
-    include: {
-      dossier: { include: { client: true } },
-    },
-  });
+export default async function DUMsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; size?: string }>;
+}) {
+  const params = await searchParams;
+  const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
+
+  const [total, dums] = await Promise.all([
+    prisma.dUM.count(),
+    prisma.dUM.findMany({
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: size,
+      include: {
+        dossier: { include: { client: true } },
+      },
+    }),
+  ]);
 
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
         title="DUMs"
-        subtitle={`${dums.length} déclaration${dums.length > 1 ? "s" : ""}`}
+        subtitle={`${total} déclaration${total > 1 ? "s" : ""}`}
       />
       <Card>
         {dums.length === 0 ? (
@@ -109,6 +122,12 @@ export default async function DUMsPage() {
                 </tbody>
               </table>
             </div>
+            <Pagination
+              page={page}
+              pageSize={size}
+              total={total}
+              basePath="/dums"
+            />
           </>
         )}
       </Card>

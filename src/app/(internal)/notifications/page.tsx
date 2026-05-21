@@ -6,6 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Pagination } from "@/components/ui/pagination";
+import { parsePagination } from "@/lib/pagination";
 import { formatDateTime } from "@/lib/utils";
 import { MarkAllRead } from "./mark-all-read";
 
@@ -26,20 +28,31 @@ const KIND_LABELS: Record<string, string> = {
   AUTRE: "Autre",
 };
 
-export default async function NotificationsPage() {
+export default async function NotificationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; size?: string }>;
+}) {
+  const params = await searchParams;
   const session = await auth();
   if (!session) return null;
 
-  const notifications = await prisma.notification.findMany({
-    where: {
-      OR: [{ userId: session.user.id }, { role: session.user.role }],
-    },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-    include: { dossier: { select: { number: true } } },
-  });
+  const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
+  const where = {
+    OR: [{ userId: session.user.id }, { role: session.user.role }],
+  };
 
-  const unread = notifications.filter((n) => !n.read).length;
+  const [total, notifications, unread] = await Promise.all([
+    prisma.notification.count({ where }),
+    prisma.notification.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: size,
+      include: { dossier: { select: { number: true } } },
+    }),
+    prisma.notification.count({ where: { ...where, read: false } }),
+  ]);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -85,6 +98,12 @@ export default async function NotificationsPage() {
             ))}
           </div>
         )}
+        <Pagination
+          page={page}
+          pageSize={size}
+          total={total}
+          basePath="/notifications"
+        />
       </Card>
     </div>
   );

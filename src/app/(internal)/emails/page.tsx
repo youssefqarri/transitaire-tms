@@ -6,6 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Pagination } from "@/components/ui/pagination";
+import { parsePagination } from "@/lib/pagination";
 import { formatDateTime } from "@/lib/utils";
 import { SyncButton } from "./sync-button";
 
@@ -34,11 +36,12 @@ const SOURCE_TONES: Record<string, "info" | "warn" | "ok" | "outline" | "danger"
 export default async function EmailsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ source?: string }>;
+  searchParams: Promise<{ source?: string; page?: string; size?: string }>;
 }) {
   const params = await searchParams;
   const session = await auth();
   if (!session) return null;
+  const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
 
   // Comptabilité ne voit que ses emails (CLIENT / facture / quittance)
   const isCompta = session.user.role === "COMPTABILITE";
@@ -54,12 +57,16 @@ export default async function EmailsPage({
       ? { source: params.source as never }
       : {};
 
-  const emails = await prisma.emailMessage.findMany({
-    where,
-    orderBy: { receivedAt: "desc" },
-    take: 100,
-    include: { links: { include: { dossier: { select: { number: true, id: true } } } } },
-  });
+  const [total, emails] = await Promise.all([
+    prisma.emailMessage.count({ where }),
+    prisma.emailMessage.findMany({
+      where,
+      orderBy: { receivedAt: "desc" },
+      skip,
+      take: size,
+      include: { links: { include: { dossier: { select: { number: true, id: true } } } } },
+    }),
+  ]);
 
   const account = await prisma.emailAccount.findFirst({ where: { active: true } });
 
@@ -69,7 +76,7 @@ export default async function EmailsPage({
         title="Emails"
         subtitle={
           <>
-            {emails.length} message{emails.length > 1 ? "s" : ""}
+            {total} message{total > 1 ? "s" : ""}
             {account && ` · compte ${account.emailAddress}`}
           </>
         }
@@ -147,6 +154,13 @@ export default async function EmailsPage({
             ))}
           </div>
         )}
+        <Pagination
+          page={page}
+          pageSize={size}
+          total={total}
+          basePath="/emails"
+          extraParams={{ source: params.source }}
+        />
       </Card>
     </div>
   );

@@ -10,23 +10,36 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Pagination } from "@/components/ui/pagination";
+import { parsePagination } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 
-export default async function UsersPage() {
+export default async function UsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; size?: string }>;
+}) {
+  const params = await searchParams;
   const session = await auth();
   if (!session || !canManageUsers(session.user.role)) redirect("/dashboard");
 
-  const users = await prisma.user.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { client: { select: { name: true } } },
-  });
+  const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
+  const [total, users] = await Promise.all([
+    prisma.user.count(),
+    prisma.user.findMany({
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: size,
+      include: { client: { select: { name: true } } },
+    }),
+  ]);
 
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
         title="Utilisateurs"
-        subtitle={`${users.length} compte${users.length > 1 ? "s" : ""}`}
+        subtitle={`${total} compte${total > 1 ? "s" : ""}`}
         actions={
           <Link href="/utilisateurs/nouveau">
             <Button>
@@ -59,6 +72,12 @@ export default async function UsersPage() {
             ))}
           </div>
         )}
+        <Pagination
+          page={page}
+          pageSize={size}
+          total={total}
+          basePath="/utilisateurs"
+        />
       </Card>
     </div>
   );

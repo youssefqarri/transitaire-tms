@@ -13,13 +13,21 @@ import { DossiersFilterBar } from "./filter-bar";
 import { KeyDates } from "@/components/dossier/key-dates";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Pagination } from "@/components/ui/pagination";
+import { parsePagination } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 
 export default async function DossiersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; status?: string; client?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    status?: string;
+    client?: string;
+    page?: string;
+    size?: string;
+  }>;
 }) {
   const params = await searchParams;
   const session = await auth();
@@ -27,31 +35,38 @@ export default async function DossiersPage({
 
   const q = params.q?.trim();
   const statusFilter = params.status as DossierStatus | undefined;
+  const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
 
-  const dossiers = await prisma.dossier.findMany({
-    where: {
-      ...(q && {
-        OR: [
-          { number: { contains: q, mode: "insensitive" } },
-          { reference: { contains: q, mode: "insensitive" } },
-          { client: { name: { contains: q, mode: "insensitive" } } },
-          { dums: { some: { number: { contains: q, mode: "insensitive" } } } },
-        ],
-      }),
-      ...(statusFilter && { status: statusFilter }),
-      ...(params.client && { clientId: params.client }),
-    },
-    include: {
-      client: true,
-      dums: true,
-      createdBy: { select: { role: true } },
-      documents: {
-        select: { category: true, uploadedBy: { select: { role: true } } },
+  const where = {
+    ...(q && {
+      OR: [
+        { number: { contains: q, mode: "insensitive" as const } },
+        { reference: { contains: q, mode: "insensitive" as const } },
+        { client: { name: { contains: q, mode: "insensitive" as const } } },
+        { dums: { some: { number: { contains: q, mode: "insensitive" as const } } } },
+      ],
+    }),
+    ...(statusFilter && { status: statusFilter }),
+    ...(params.client && { clientId: params.client }),
+  };
+
+  const [total, dossiers] = await Promise.all([
+    prisma.dossier.count({ where }),
+    prisma.dossier.findMany({
+      where,
+      include: {
+        client: true,
+        dums: true,
+        createdBy: { select: { role: true } },
+        documents: {
+          select: { category: true, uploadedBy: { select: { role: true } } },
+        },
       },
-    },
-    orderBy: { updatedAt: "desc" },
-    take: 100,
-  });
+      orderBy: { updatedAt: "desc" },
+      skip,
+      take: size,
+    }),
+  ]);
 
   // Calcul des documents manquants par dossier + docs reçus du client
   const enriched = dossiers
@@ -89,7 +104,7 @@ export default async function DossiersPage({
         title="Dossiers"
         subtitle={
           <>
-            {enriched.length} dossier{enriched.length > 1 ? "s" : ""}
+            {total} dossier{total > 1 ? "s" : ""}
             {q && (
               <>
                 {" "}· recherche <span className="text-[var(--color-fg)]">« {q} »</span>
@@ -321,6 +336,13 @@ export default async function DossiersPage({
                 </tbody>
               </table>
             </div>
+            <Pagination
+              page={page}
+              pageSize={size}
+              total={total}
+              basePath="/dossiers"
+              extraParams={{ q, status: params.status, client: params.client }}
+            />
           </>
         )}
       </Card>

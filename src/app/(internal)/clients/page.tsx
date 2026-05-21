@@ -6,20 +6,33 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Avatar } from "@/components/ui/avatar";
+import { Pagination } from "@/components/ui/pagination";
+import { parsePagination } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 
-export default async function ClientsPage() {
-  const clients = await prisma.client.findMany({
-    orderBy: { name: "asc" },
-    include: { _count: { select: { dossiers: true, users: true } } },
-  });
+export default async function ClientsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; size?: string }>;
+}) {
+  const params = await searchParams;
+  const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
+  const [total, clients] = await Promise.all([
+    prisma.client.count(),
+    prisma.client.findMany({
+      orderBy: { name: "asc" },
+      include: { _count: { select: { dossiers: true, users: true } } },
+      skip,
+      take: size,
+    }),
+  ]);
 
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
         title="Clients"
-        subtitle={`${clients.length} client${clients.length > 1 ? "s" : ""}`}
+        subtitle={`${total} client${total > 1 ? "s" : ""}`}
         actions={
           <Link href="/clients/nouveau">
             <Button>
@@ -66,6 +79,12 @@ export default async function ClientsPage() {
             ))}
           </div>
         )}
+        <Pagination
+          page={page}
+          pageSize={size}
+          total={total}
+          basePath="/clients"
+        />
       </Card>
     </div>
   );

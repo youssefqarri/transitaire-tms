@@ -8,6 +8,7 @@ import { STATUS_LABELS } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
@@ -65,17 +66,28 @@ export function StatusChanger({
           <div className="space-y-3">
             <div className="space-y-1.5">
               <Label htmlFor="target">Nouveau statut</Label>
-              <Select
-                id="target"
-                value={target}
-                onChange={(e) => setTarget(e.target.value as DossierStatus)}
-              >
-                {options.map(([k, label]) => (
-                  <option key={k} value={k}>
-                    {label}
-                  </option>
-                ))}
-              </Select>
+              {options.length >= 10 ? (
+                <Combobox
+                  id="target"
+                  items={options.map(([k, label]) => ({ id: k, label }))}
+                  value={target}
+                  onChange={(v) => setTarget(v as DossierStatus)}
+                  placeholder="Sélectionner un statut…"
+                  searchPlaceholder="Rechercher un statut…"
+                />
+              ) : (
+                <Select
+                  id="target"
+                  value={target}
+                  onChange={(e) => setTarget(e.target.value as DossierStatus)}
+                >
+                  {options.map(([k, label]) => (
+                    <option key={k} value={k}>
+                      {label}
+                    </option>
+                  ))}
+                </Select>
+              )}
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="note">Note (optionnel)</Label>

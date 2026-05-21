@@ -5,19 +5,32 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Pagination } from "@/components/ui/pagination";
+import { parsePagination } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 
-export default async function SuppliersPage() {
-  const suppliers = await prisma.supplier.findMany({
-    orderBy: { name: "asc" },
-    include: { _count: { select: { dossiers: true } } },
-  });
+export default async function SuppliersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; size?: string }>;
+}) {
+  const params = await searchParams;
+  const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
+  const [total, suppliers] = await Promise.all([
+    prisma.supplier.count(),
+    prisma.supplier.findMany({
+      orderBy: { name: "asc" },
+      include: { _count: { select: { dossiers: true } } },
+      skip,
+      take: size,
+    }),
+  ]);
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
         title="Fournisseurs"
-        subtitle={`${suppliers.length} fournisseur${suppliers.length > 1 ? "s" : ""}`}
+        subtitle={`${total} fournisseur${total > 1 ? "s" : ""}`}
         actions={
           <Link href="/fournisseurs/nouveau">
             <Button>
@@ -62,6 +75,12 @@ export default async function SuppliersPage() {
             ))}
           </div>
         )}
+        <Pagination
+          page={page}
+          pageSize={size}
+          total={total}
+          basePath="/fournisseurs"
+        />
       </Card>
     </div>
   );

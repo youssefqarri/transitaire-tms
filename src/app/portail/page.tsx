@@ -6,20 +6,34 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Pagination } from "@/components/ui/pagination";
+import { parsePagination } from "@/lib/pagination";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { KeyDates } from "@/components/dossier/key-dates";
 import { formatDate, formatCurrency } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-export default async function PortalHomePage() {
+export default async function PortalHomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; size?: string }>;
+}) {
+  const params = await searchParams;
   const session = await auth();
   if (!session?.user.clientId) return null;
-  const dossiers = await prisma.dossier.findMany({
-    where: { clientId: session.user.clientId },
-    orderBy: { updatedAt: "desc" },
-    include: { dums: true, _count: { select: { documents: true } } },
-  });
+  const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
+  const where = { clientId: session.user.clientId };
+  const [total, dossiers] = await Promise.all([
+    prisma.dossier.count({ where }),
+    prisma.dossier.findMany({
+      where,
+      orderBy: { updatedAt: "desc" },
+      skip,
+      take: size,
+      include: { dums: true, _count: { select: { documents: true } } },
+    }),
+  ]);
 
   return (
     <div className="space-y-5">
@@ -96,6 +110,12 @@ export default async function PortalHomePage() {
             ))}
           </div>
         )}
+        <Pagination
+          page={page}
+          pageSize={size}
+          total={total}
+          basePath="/portail"
+        />
       </Card>
     </div>
   );

@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
 import { STATUS_LABELS } from "@/lib/statuses";
 
 export function DossiersFilterBar({
@@ -75,22 +75,22 @@ export function DossiersFilterBar({
         )}
       </form>
       <div className="min-w-[220px]">
-        <Select
+        <Combobox
+          items={[
+            { id: "", label: "Tous les statuts", pinned: true },
+            ...Object.entries(STATUS_LABELS).map(([k, label]) => ({
+              id: k,
+              label,
+            })),
+          ]}
           value={status}
-          onChange={(e) => {
-            const v = e.target.value;
+          onChange={(v) => {
             setStatus(v);
             apply({ status: v });
           }}
-          aria-label="Filtrer par statut"
-        >
-          <option value="">Tous les statuts</option>
-          {Object.entries(STATUS_LABELS).map(([k, label]) => (
-            <option key={k} value={k}>
-              {label}
-            </option>
-          ))}
-        </Select>
+          placeholder="Tous les statuts"
+          searchPlaceholder="Rechercher un statut…"
+        />
       </div>
       <Button
         variant="secondary"

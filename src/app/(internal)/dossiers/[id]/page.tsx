@@ -295,17 +295,6 @@ export default async function DossierDetailPage({
                   }))}
                   readOnly={readOnly}
                 />
-                <CommentsPanel
-                  dossierId={dossier.id}
-                  comments={dossier.comments.map((c) => ({
-                    id: c.id,
-                    body: c.body,
-                    internal: c.internal,
-                    createdAt: c.createdAt,
-                    authorName: c.author.name,
-                  }))}
-                  readOnly={readOnly}
-                />
               </>
             );
           })()}
@@ -328,12 +317,13 @@ export default async function DossierDetailPage({
           )}
         </div>
 
-        <Card className="self-start">
-          <CardHeader>
-            <CardTitle>Chronologie</CardTitle>
-          </CardHeader>
-          <div className="px-5 py-4">
-            <ol className="relative space-y-3.5 before:absolute before:left-[5px] before:top-1.5 before:bottom-1.5 before:w-px before:bg-[var(--color-border)]">
+        <div className="space-y-5">
+          <Card className="self-start">
+            <CardHeader>
+              <CardTitle>Chronologie</CardTitle>
+            </CardHeader>
+            <div className="px-5 py-4 max-h-[640px] overflow-y-auto scrollbar-thin">
+              <ol className="relative space-y-3.5 before:absolute before:left-[5px] before:top-1.5 before:bottom-1.5 before:w-px before:bg-[var(--color-border)]">
               {(() => {
                 type Evt = {
                   key: string;
@@ -403,9 +393,25 @@ export default async function DossierDetailPage({
                   </li>
                 ));
               })()}
-            </ol>
-          </div>
-        </Card>
+              </ol>
+            </div>
+          </Card>
+
+          {/* Commentaires sous la chronologie pour gagner de l'espace */}
+          {session.user.role !== "COMMIS_DOUANE" && (
+            <CommentsPanel
+              dossierId={dossier.id}
+              comments={dossier.comments.map((c) => ({
+                id: c.id,
+                body: c.body,
+                internal: c.internal,
+                createdAt: c.createdAt,
+                authorName: c.author.name,
+              }))}
+              readOnly={session.user.role === "COMPTABILITE"}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
