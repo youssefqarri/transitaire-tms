@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/generated/prisma/enums";
 import { visibleSections } from "./nav-items";
+import { UnreadBadge } from "./unread-badge";
 
 export function Sidebar({ role, unreadCount = 0 }: { role: UserRole; unreadCount?: number }) {
   const pathname = usePathname();
@@ -80,10 +81,8 @@ export function Sidebar({ role, unreadCount = 0 }: { role: UserRole; unreadCount
                       strokeWidth={1.75}
                     />
                     <span className="flex-1 truncate">{it.label}</span>
-                    {it.href === "/notifications" && unreadCount > 0 && (
-                      <span className="bg-[var(--color-accent)] text-white text-[10px] font-semibold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center tnum">
-                        {unreadCount > 99 ? "99+" : unreadCount}
-                      </span>
+                    {it.href === "/notifications" && (
+                      <UnreadBadge initial={unreadCount} />
                     )}
                   </Link>
                 );

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { formatDateTime } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { emitNotifRead } from "@/components/layout/unread-badge";
 
 type Props = {
   id: string;
@@ -35,11 +36,12 @@ export function NotifRow({
     e.preventDefault();
     if (!localRead) {
       setLocalRead(true);
+      // Décrémente le badge sidebar immédiatement (état optimiste)
+      emitNotifRead({ delta: 1 });
       // mark read en parallèle, sans bloquer la navigation
       fetch(`/api/notifications/${id}`, { method: "PATCH" }).catch(() => {});
     }
     router.push(link);
-    router.refresh(); // recharge le compteur sidebar
   }
 
   return (
