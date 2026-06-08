@@ -53,6 +53,8 @@ export default async function EditDossierPage({
               goodsPackagingUnit: dossier.goodsPackagingUnit,
               goodsDescription: dossier.goodsDescription ?? "",
               controlOffice: dossier.controlOffice ?? "",
+              controlOrganism: dossier.controlOrganism ?? "",
+              regulatoryServices: dossier.regulatoryServices ?? [],
               visitDate: dossier.visitDate
                 ? new Date(dossier.visitDate).toISOString().slice(0, 10)
                 : "",

@@ -72,7 +72,7 @@ export function KeyDates({
   return (
     <div className={`${wrapper} ${text} text-[var(--color-fg-3)] tnum ${className}`}>
       {visitDate && pill(Stamp, visitDate, "Douane")}
-      {conformityVisitDate && pill(BadgeCheck, conformityVisitDate, "MCI")}
+      {conformityVisitDate && pill(BadgeCheck, conformityVisitDate, "Contrôle")}
       {deliveredAt && pill(Truck, deliveredAt, "Livraison", true)}
     </div>
   );

@@ -17,6 +17,8 @@ const schema = z.object({
   goodsWeight: z.number().optional(),
   goodsPackages: z.number().int().optional(),
   goodsDescription: z.string().optional(),
+  controlOrganism: z.string().optional(),
+  regulatoryServices: z.array(z.string()).optional(),
 });
 
 export async function POST(req: Request) {
@@ -48,6 +50,8 @@ export async function POST(req: Request) {
         goodsWeight: data.goodsWeight ?? null,
         goodsPackages: data.goodsPackages ?? null,
         goodsDescription: data.goodsDescription || null,
+        controlOrganism: data.controlOrganism || null,
+        regulatoryServices: data.regulatoryServices ?? [],
         createdById: ctx.userId,
         receivedAt: new Date(),
         status: "RECEPTIONNE",

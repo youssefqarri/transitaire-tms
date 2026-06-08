@@ -8,8 +8,10 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { DUM_STATUS_LABELS } from "@/lib/statuses";
+import { DUM_REGIMES, MAX_DUMS_PER_DOSSIER } from "@/lib/reference";
 import type { DUMStatus } from "@/generated/prisma/enums";
 import { formatDate } from "@/lib/utils";
 
@@ -18,6 +20,7 @@ type DUM = {
   number: string;
   status: DUMStatus;
   bureau: string | null;
+  regime: string | null;
   registeredAt: Date | null;
 };
 
@@ -35,6 +38,10 @@ export function DUMsPanel({
   const [pending, start] = useTransition();
   const [number, setNumber] = useState("");
   const [bureau, setBureau] = useState("");
+  const [regime, setRegime] = useState("");
+  const [registeredAt, setRegisteredAt] = useState("");
+
+  const atMax = dums.length >= MAX_DUMS_PER_DOSSIER;
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,15 +53,18 @@ export function DUMsPanel({
       const res = await fetch(`/api/dossiers/${dossierId}/dums`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ number, bureau }),
+        body: JSON.stringify({ number, bureau, regime, registeredAt: registeredAt || undefined }),
       });
       if (!res.ok) {
-        toast.error("Erreur (numéro déjà utilisé ?)");
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || "Erreur (numéro déjà utilisé ?)");
         return;
       }
       toast.success("DUM créée");
       setNumber("");
       setBureau("");
+      setRegime("");
+      setRegisteredAt("");
       setOpen(false);
       router.refresh();
     });
@@ -69,7 +79,7 @@ export function DUMsPanel({
             {dums.length}
           </span>
         </CardTitle>
-        {canCreate && (
+        {canCreate && !atMax && (
           <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
             <Plus /> Nouvelle DUM
           </Button>
@@ -83,8 +93,28 @@ export function DUMsPanel({
             <Input id="dumnum" value={number} onChange={(e) => setNumber(e.target.value)} />
           </div>
           <div className="space-y-1.5">
+            <Label htmlFor="dumregime">Régime douanier</Label>
+            <Select id="dumregime" value={regime} onChange={(e) => setRegime(e.target.value)}>
+              <option value="">— Sélectionner —</option>
+              {DUM_REGIMES.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="space-y-1.5">
             <Label htmlFor="bureau">Bureau douane</Label>
             <Input id="bureau" value={bureau} onChange={(e) => setBureau(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="dumdate">Date d'enregistrement</Label>
+            <Input
+              id="dumdate"
+              type="date"
+              value={registeredAt}
+              onChange={(e) => setRegisteredAt(e.target.value)}
+            />
           </div>
           <div className="md:col-span-2 flex justify-end gap-2">
             <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
@@ -107,7 +137,10 @@ export function DUMsPanel({
           <div key={d.id} className="px-5 py-3 flex items-center gap-3">
             <FileText className="size-4 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
             <div className="flex-1 min-w-0">
-              <div className="font-mono text-[13px] font-medium text-[var(--color-fg)]">{d.number}</div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[13px] font-medium text-[var(--color-fg)]">{d.number}</span>
+                {d.regime && <Badge tone="neutral">{d.regime}</Badge>}
+              </div>
               <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
                 {d.bureau ?? "Bureau ?"} · enregistré le {formatDate(d.registeredAt)}
               </div>
@@ -115,6 +148,11 @@ export function DUMsPanel({
             <Badge tone="info">{DUM_STATUS_LABELS[d.status]}</Badge>
           </div>
         ))}
+        {canCreate && atMax && (
+          <div className="px-5 py-2.5 text-[11.5px] text-[var(--color-fg-3)] bg-[var(--color-surface-2)]">
+            Maximum {MAX_DUMS_PER_DOSSIER} DUM par dossier atteint (un dossier peut cumuler 2 régimes).
+          </div>
+        )}
       </div>
     </Card>
   );

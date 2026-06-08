@@ -19,6 +19,8 @@ const createSchema = z.object({
   goodsPackages: z.string().optional(),
   goodsPackagingUnit: z.enum(["COLIS", "PALETTES", "CONTENEURS", "REMORQUES"]).optional(),
   goodsDescription: z.string().optional(),
+  controlOrganism: z.string().optional(),
+  regulatoryServices: z.array(z.string()).optional(),
 });
 
 export async function POST(req: Request) {
@@ -56,6 +58,8 @@ export async function POST(req: Request) {
             goodsPackages: data.goodsPackages ? Number(data.goodsPackages) : null,
             goodsPackagingUnit: data.goodsPackagingUnit ?? "COLIS",
             goodsDescription: data.goodsDescription || null,
+            controlOrganism: data.controlOrganism || null,
+            regulatoryServices: data.regulatoryServices ?? [],
             createdById: session.user.id,
             receivedAt: new Date(),
             status: "RECEPTIONNE",

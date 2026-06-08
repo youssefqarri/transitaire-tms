@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { BackLink } from "@/components/ui/back-link";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { canCreateDUM } from "@/lib/roles";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/dossier/status-badge";
@@ -240,6 +241,11 @@ export default async function DossierDetailPage({
                 value={formatNumber(dossier.goodsPackages)}
               />
               <Field label="Bureau" value={dossier.controlOffice ?? "—"} />
+              <Field label="Organisme de contrôle" value={dossier.controlOrganism ?? "—"} />
+              <Field
+                label="Services réglementaires"
+                value={dossier.regulatoryServices.length ? dossier.regulatoryServices.join(", ") : "—"}
+              />
               <Field label="Assigné" value={dossier.assignedTo?.name ?? "—"} />
               <Field label="Type" value={dossier.type} />
               {dossier.goodsDescription && (
@@ -264,7 +270,7 @@ export default async function DossierDetailPage({
                 <DUMsPanel
                   dossierId={dossier.id}
                   dums={dossier.dums}
-                  canCreate={["ADMIN", "DECLARANT"].includes(session.user.role)}
+                  canCreate={canCreateDUM(session.user.role)}
                 />
                 <DocumentsPanel
                   dossierId={dossier.id}
@@ -360,7 +366,9 @@ export default async function DossierDetailPage({
                   events.push({
                     key: "visit-mci",
                     date: dossier.conformityVisitDate,
-                    label: done ? "Visite MCI effectuée" : "Visite MCI à venir",
+                    label: done
+                      ? "Visite des organismes de contrôle effectuée"
+                      : "Visite des organismes de contrôle à venir",
                     dot: done ? "bg-[var(--color-success)]" : "bg-[var(--color-accent)]",
                   });
                 }

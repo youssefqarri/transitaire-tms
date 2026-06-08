@@ -41,7 +41,8 @@ export function canCloseDossier(role: UserRole) {
 }
 
 export function canCreateDUM(role: UserRole) {
-  return ["ADMIN", "DECLARANT"].includes(role);
+  // Exploitation peut saisir les numéros de DUM au même titre que le Déclarant.
+  return ["ADMIN", "EXPLOITATION", "DECLARANT"].includes(role);
 }
 
 export function canViewAccountingEmails(role: UserRole) {

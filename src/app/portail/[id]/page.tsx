@@ -216,7 +216,9 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
                   events.push({
                     key: "visit-mci",
                     date: dossier.conformityVisitDate,
-                    label: done ? "Visite MCI effectuée" : "Visite MCI à venir",
+                    label: done
+                      ? "Visite des organismes de contrôle effectuée"
+                      : "Visite des organismes de contrôle à venir",
                     dot: done ? "bg-[var(--color-success)]" : "bg-[var(--color-accent)]",
                   });
                 }

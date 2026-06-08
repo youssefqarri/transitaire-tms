@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Combobox } from "@/components/ui/combobox";
 import { CURRENCIES } from "@/lib/currencies";
+import { CONTROL_ORGANISMS, REGULATORY_SERVICES } from "@/lib/reference";
 
 type Client = { id: string; name: string; code?: string | null; city?: string | null };
 type Supplier = { id: string; name: string; country?: string | null };
@@ -37,6 +38,8 @@ type FormState = {
   goodsPackagingUnit: PackagingUnit;
   goodsDescription: string;
   controlOffice?: string;
+  controlOrganism?: string;
+  regulatoryServices?: string[];
   visitDate?: string;
   visitEffectiveDate?: string;
   conformityVisitDate?: string;
@@ -80,6 +83,8 @@ export function NewDossierForm({
     goodsPackagingUnit: "COLIS",
     goodsDescription: "",
     controlOffice: "",
+    controlOrganism: "",
+    regulatoryServices: [],
     visitDate: "",
     visitEffectiveDate: "",
     conformityVisitDate: "",
@@ -123,6 +128,8 @@ export function NewDossierForm({
               goodsPackagingUnit: form.goodsPackagingUnit,
               goodsDescription: form.goodsDescription || null,
               controlOffice: form.controlOffice || null,
+              controlOrganism: form.controlOrganism || null,
+              regulatoryServices: form.regulatoryServices ?? [],
               visitDate: form.visitDate || null,
               visitEffectiveDate: form.visitEffectiveDate || null,
               conformityVisitDate: form.conformityVisitDate || null,
@@ -320,7 +327,7 @@ export function NewDossierForm({
       {mode === "edit" && (
         <>
           <div className="border-t border-[var(--color-border)] pt-6">
-            <div className="text-sm font-medium mb-3">Douane & MCI</div>
+            <div className="text-sm font-medium mb-3">Douane & organismes de contrôle</div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="controlOffice">Bureau de contrôle</Label>
@@ -331,7 +338,43 @@ export function NewDossierForm({
                   placeholder="Ex. Casablanca-Port"
                 />
               </div>
-              <div />
+              <div className="space-y-2">
+                <Label htmlFor="controlOrganism">Organisme de contrôle</Label>
+                <Select
+                  id="controlOrganism"
+                  value={form.controlOrganism ?? ""}
+                  onChange={(e) => set("controlOrganism", e.target.value)}
+                >
+                  <option value="">— Aucun —</option>
+                  {CONTROL_ORGANISMS.map((o) => (
+                    <option key={o} value={o}>
+                      {o}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label>Services réglementaires (selon le produit)</Label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {REGULATORY_SERVICES.map((s) => {
+                    const selected = form.regulatoryServices ?? [];
+                    const checked = selected.includes(s);
+                    return (
+                      <FlagCheckbox
+                        key={s}
+                        label={s}
+                        checked={checked}
+                        onChange={(v) =>
+                          set(
+                            "regulatoryServices",
+                            v ? [...selected, s] : selected.filter((x) => x !== s),
+                          )
+                        }
+                      />
+                    );
+                  })}
+                </div>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="visitDate">Date de visite douane</Label>
                 <Input
@@ -345,7 +388,9 @@ export function NewDossierForm({
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="conformityVisitDate">Date de visite MCI</Label>
+                <Label htmlFor="conformityVisitDate">
+                  Date de visite des organismes de contrôle
+                </Label>
                 <Input
                   id="conformityVisitDate"
                   type="date"
@@ -353,7 +398,7 @@ export function NewDossierForm({
                   onChange={(e) => set("conformityVisitDate", e.target.value)}
                 />
                 <p className="text-[11px] text-[var(--color-fg-mute)]">
-                  Date où la visite conformité a eu lieu (effective).
+                  Visite de conformité (phyto, MCA, fraude, etc.) — date effective.
                 </p>
               </div>
               <div className="space-y-2">

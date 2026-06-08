@@ -199,6 +199,7 @@ enum DossierStatus {
   LIQUIDE                         // liquidé
   BON_A_ENLEVER_RESERVE           // bon à enlever sous réserve
   MAIN_LEVEE_RESERVE_CONFORMITE   // main levée sous réserve de conformité
+  MAIN_LEVEE_RESERVE_DOCUMENTS    // main levée sous réserve de production des documents
   VALIDATION_MCA                  // validation MCA
   BON_A_ENLEVER                   // bon à enlever (générique)
   BON_A_ENLEVER_DEFINITIF         // bon à enlever définitif
@@ -245,7 +246,11 @@ model Dossier {
   closedAt                     DateTime?
 
   // contrôle
-  controlOffice   String?      // bureau de contrôle
+  controlOffice   String?      // bureau de contrôle (bureau douanier)
+  // organisme de contrôle de conformité (1 seul) : Bureau Veritas, SGS, Applus (A+), TÜV Rheinland
+  controlOrganism String?
+  // services réglementaires sectoriels selon le produit : ONSSA, ANRT, IMANOR, DMP (0..N)
+  regulatoryServices String[]  @default([])
   hasVisit        Boolean      @default(false)
   hasConformityVisit Boolean    @default(false)
   hasBureauValeur Boolean      @default(false)
@@ -331,6 +336,7 @@ model DUM {
   dossier     Dossier    @relation(fields: [dossierId], references: [id], onDelete: Cascade)
   status      DUMStatus  @default(DRAFT)
   bureau      String?    // bureau douane
+  regime      String?    // régime douanier de la DUM (un dossier peut cumuler 2 régimes via 2 DUM)
   registeredAt DateTime?
   liquidatedAt DateTime?
   notes       String?    @db.Text

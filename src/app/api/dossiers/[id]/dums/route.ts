@@ -4,10 +4,13 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canCreateDUM } from "@/lib/roles";
 import { audit } from "@/lib/audit";
+import { MAX_DUMS_PER_DOSSIER } from "@/lib/reference";
 
 const schema = z.object({
   number: z.string().min(1),
   bureau: z.string().optional(),
+  regime: z.string().optional(),
+  registeredAt: z.string().optional(), // date d'enregistrement (ISO yyyy-mm-dd)
 });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -20,14 +23,23 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: "Invalid" }, { status: 400 });
 
+  // Un dossier peut cumuler plusieurs régimes douaniers, mais au maximum 2 DUM.
+  const existing = await prisma.dUM.count({ where: { dossierId: id } });
+  if (existing >= MAX_DUMS_PER_DOSSIER)
+    return NextResponse.json(
+      { error: `Maximum ${MAX_DUMS_PER_DOSSIER} DUM par dossier` },
+      { status: 409 },
+    );
+
   try {
     const dum = await prisma.dUM.create({
       data: {
         number: parsed.data.number.trim(),
         bureau: parsed.data.bureau?.trim() || null,
+        regime: parsed.data.regime?.trim() || null,
         dossierId: id,
         status: "ENREGISTRE",
-        registeredAt: new Date(),
+        registeredAt: parsed.data.registeredAt ? new Date(parsed.data.registeredAt) : new Date(),
       },
     });
 
