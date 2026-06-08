@@ -8,6 +8,7 @@ export const CONTROL_ORGANISMS = [
   "SGS",
   "Applus (A+)",
   "TÜV Rheinland",
+  "Intertek",
 ] as const;
 
 // Services réglementaires sectoriels — un produit peut relever de plusieurs (0..N).
