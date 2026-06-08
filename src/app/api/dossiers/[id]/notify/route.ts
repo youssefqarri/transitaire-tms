@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import { canNotifyClient } from "@/lib/roles";
 import { notifyClient } from "@/lib/messaging-server";
 import { audit } from "@/lib/audit";
@@ -12,6 +13,11 @@ const schema = z.object({
   lang: z.enum(["FR", "AR", "EN"]).default("FR"),
   customSubject: z.string().optional(),
   customBody: z.string().optional(),
+  // destinataire choisi (sinon contact principal du client)
+  toAddress: z.string().email().optional(),
+  // enregistrer ce destinataire dans le carnet du client
+  saveAsContact: z.boolean().optional(),
+  contactName: z.string().optional(),
 });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -30,10 +36,30 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     userId: session.user.id,
     customSubject: parsed.data.customSubject,
     customBody: parsed.data.customBody,
+    toAddress: parsed.data.toAddress,
   });
 
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 500 });
+  }
+
+  // Email envoyé : mémoriser le destinataire sur le dossier + carnet client si demandé
+  const to = parsed.data.toAddress;
+  if (parsed.data.channel === "EMAIL" && to) {
+    const dossier = await prisma.dossier.findUnique({
+      where: { id },
+      select: { clientId: true },
+    });
+    await prisma.dossier.update({ where: { id }, data: { contactEmail: to } }).catch(() => {});
+    if (parsed.data.saveAsContact && dossier) {
+      await prisma.clientContact
+        .upsert({
+          where: { clientId_email: { clientId: dossier.clientId, email: to } },
+          create: { clientId: dossier.clientId, email: to, name: parsed.data.contactName?.trim() || null },
+          update: { name: parsed.data.contactName?.trim() || undefined },
+        })
+        .catch(() => {});
+    }
   }
 
   await audit({

@@ -46,7 +46,7 @@ export default async function DossierDetailPage({
   const dossier = await prisma.dossier.findUnique({
     where: { id },
     include: {
-      client: true,
+      client: { include: { contacts: { orderBy: { createdAt: "asc" } } } },
       supplier: true,
       createdBy: { select: { id: true, name: true } },
       assignedTo: { select: { id: true, name: true } },
@@ -108,8 +108,11 @@ export default async function DossierDetailPage({
             {session.user.role !== "COMPTABILITE" && (
               <NotifyClientButton
                 dossierId={dossier.id}
+                clientId={dossier.clientId}
                 clientEmail={dossier.client.email}
                 clientPhone={dossier.client.phone}
+                contacts={dossier.client.contacts}
+                dossierContactEmail={dossier.contactEmail}
               />
             )}
             {/* Comptable : pas de modif des champs du dossier */}

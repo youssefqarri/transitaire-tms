@@ -26,14 +26,22 @@ export async function notifyClient(opts: {
   customSubject?: string;
   customBody?: string;
   extraVars?: Record<string, string>;
+  /** Destinataire explicite (sinon : email/téléphone principal du client). */
+  toAddress?: string;
 }): Promise<NotifyResult> {
   const dossier = await prisma.dossier.findUnique({
     where: { id: opts.dossierId },
     include: { client: true, dums: true },
   });
   if (!dossier) return { ok: false, error: "Dossier introuvable" };
-  if (!dossier.client.email && opts.channel === "EMAIL") {
-    return { ok: false, error: "Le client n'a pas d'email enregistré" };
+
+  // Destinataire : adresse choisie explicitement, sinon contact principal du client.
+  const recipient =
+    opts.channel === "EMAIL"
+      ? (opts.toAddress?.trim() || dossier.client.email)
+      : (opts.toAddress?.trim() || dossier.client.phone || "");
+  if (opts.channel === "EMAIL" && !recipient) {
+    return { ok: false, error: "Aucun destinataire : renseigne un email pour ce client." };
   }
 
   const user = await prisma.user.findUnique({
@@ -72,7 +80,7 @@ export async function notifyClient(opts: {
       channel: opts.channel,
       lang: opts.lang ?? "FR",
       templateKey: opts.templateKey,
-      toAddress: opts.channel === "EMAIL" ? dossier.client.email! : dossier.client.phone ?? "",
+      toAddress: recipient ?? "",
       subject,
       body,
       status: "PENDING",
@@ -86,7 +94,7 @@ export async function notifyClient(opts: {
   try {
     if (opts.channel === "EMAIL") {
       const result = await sendMail({
-        to: dossier.client.email!,
+        to: recipient!,
         subject: subject ?? `Dossier ${dossier.number}`,
         text: body,
         html: textToHtml(body),

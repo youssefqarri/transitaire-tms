@@ -9,6 +9,7 @@ import { BackLink } from "@/components/ui/back-link";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { DeleteClientButton } from "./delete-button";
+import { ContactsPanel } from "./contacts-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,7 @@ export default async function ClientDetailPage({
         include: { dums: true },
       },
       users: { select: { id: true, name: true, email: true } },
+      contacts: { orderBy: { createdAt: "asc" } },
     },
   });
   if (!client) notFound();
@@ -165,6 +167,7 @@ export default async function ClientDetailPage({
               </ul>
             )}
           </div>
+          <ContactsPanel clientId={id} contacts={client.contacts} />
         </Card>
       </div>
     </div>

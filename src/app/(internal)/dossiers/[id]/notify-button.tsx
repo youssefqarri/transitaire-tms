@@ -22,25 +22,59 @@ const TEMPLATES: TemplateInfo[] = [
   { key: "dossier_cloture",    label: "Dossier clôturé" },
 ];
 
+type Contact = { id: string; name: string | null; email: string };
+const OTHER = "__OTHER__";
+
 export function NotifyClientButton({
   dossierId,
+  clientId,
   clientEmail,
   clientPhone,
+  contacts,
+  dossierContactEmail,
 }: {
   dossierId: string;
+  clientId: string;
   clientEmail: string | null;
   clientPhone: string | null;
+  contacts: Contact[];
+  dossierContactEmail: string | null;
 }) {
+  void clientId;
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
-  const [channel, setChannel] = useState<"EMAIL" | "WHATSAPP">(
-    clientEmail ? "EMAIL" : "WHATSAPP",
-  );
+  const [channel, setChannel] = useState<"EMAIL" | "WHATSAPP">("EMAIL");
   const [templateKey, setTemplateKey] = useState("docs_manquants");
   const [preview, setPreview] = useState<{ subject: string | null; body: string } | null>(null);
   const [editedSubject, setEditedSubject] = useState("");
   const [editedBody, setEditedBody] = useState("");
+
+  // Destinataire : principal (client.email) + contacts du carnet, ou "Autre".
+  const recipientOptions = useMemo(() => {
+    const opts: { value: string; label: string }[] = [];
+    if (clientEmail) opts.push({ value: clientEmail, label: `Principal · ${clientEmail}` });
+    for (const c of contacts)
+      opts.push({ value: c.email, label: c.name ? `${c.name} · ${c.email}` : c.email });
+    return opts;
+  }, [clientEmail, contacts]);
+
+  // Choix initial : destinataire mémorisé du dossier > principal > 1er contact > "Autre".
+  const known = recipientOptions.map((o) => o.value);
+  const [recipient, setRecipient] = useState(
+    dossierContactEmail && known.includes(dossierContactEmail)
+      ? dossierContactEmail
+      : dossierContactEmail
+      ? OTHER
+      : known[0] ?? OTHER,
+  );
+  const [otherEmail, setOtherEmail] = useState(
+    dossierContactEmail && !known.includes(dossierContactEmail) ? dossierContactEmail : "",
+  );
+  const [otherName, setOtherName] = useState("");
+  const [saveContact, setSaveContact] = useState(false);
+
+  const toAddress = (recipient === OTHER ? otherEmail : recipient).trim();
 
   // Charge l'aperçu chaque fois que template ou canal change
   useEffect(() => {
@@ -71,6 +105,10 @@ export function NotifyClientButton({
   }, [channel, clientPhone, editedBody]);
 
   function sendEmail() {
+    if (!toAddress || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(toAddress)) {
+      toast.error("Destinataire email invalide");
+      return;
+    }
     if (!editedBody.trim()) {
       toast.error("Message vide");
       return;
@@ -85,6 +123,9 @@ export function NotifyClientButton({
           lang: "FR",
           customSubject: editedSubject || undefined,
           customBody: editedBody,
+          toAddress,
+          saveAsContact: recipient === OTHER && saveContact,
+          contactName: otherName || undefined,
         }),
       });
       const data = await res.json();
@@ -157,9 +198,7 @@ export function NotifyClientButton({
                     value={channel}
                     onChange={(e) => setChannel(e.target.value as "EMAIL" | "WHATSAPP")}
                   >
-                    <option value="EMAIL" disabled={!clientEmail}>
-                      Email {clientEmail ? `(${clientEmail})` : "(pas d'email)"}
-                    </option>
+                    <option value="EMAIL">Email</option>
                     <option value="WHATSAPP" disabled={!clientPhone}>
                       WhatsApp {clientPhone ? `(${clientPhone})` : "(pas de téléphone)"}
                     </option>
@@ -180,6 +219,48 @@ export function NotifyClientButton({
                   </Select>
                 </div>
               </div>
+
+              {channel === "EMAIL" && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="recipient">Destinataire</Label>
+                  <Select
+                    id="recipient"
+                    value={recipient}
+                    onChange={(e) => setRecipient(e.target.value)}
+                  >
+                    {recipientOptions.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                    <option value={OTHER}>Autre adresse…</option>
+                  </Select>
+                  {recipient === OTHER && (
+                    <div className="space-y-2 pt-1.5">
+                      <Input
+                        type="email"
+                        value={otherEmail}
+                        onChange={(e) => setOtherEmail(e.target.value)}
+                        placeholder="email@destinataire.ma"
+                      />
+                      <Input
+                        value={otherName}
+                        onChange={(e) => setOtherName(e.target.value)}
+                        placeholder="Nom / libellé (optionnel)"
+                      />
+                      <label className="flex items-center gap-2 text-[12.5px] text-[var(--color-fg-2)] cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={saveContact}
+                          onChange={(e) => setSaveContact(e.target.checked)}
+                          className="accent-[var(--color-accent)] size-4"
+                        />
+                        Enregistrer ce contact pour le client
+                      </label>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {channel === "EMAIL" && (
                 <div className="space-y-1.5">
@@ -218,7 +299,7 @@ export function NotifyClientButton({
                 Annuler
               </Button>
               {channel === "EMAIL" ? (
-                <Button size="sm" onClick={sendEmail} disabled={pending || !clientEmail}>
+                <Button size="sm" onClick={sendEmail} disabled={pending || !toAddress}>
                   {pending ? "Envoi…" : "Envoyer l'email"}
                 </Button>
               ) : (

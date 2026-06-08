@@ -138,11 +138,26 @@ model Client {
   users    User[]   // utilisateurs portail client
   invoices Invoice[]
   outgoingMessages OutgoingMessage[]
+  contacts ClientContact[]   // carnet d'adresses (destinataires des notifications)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([name])
+}
+
+// Carnet d'adresses d'un client : plusieurs destinataires possibles selon le
+// dossier (personne/service différent). `Client.email` reste le contact principal.
+model ClientContact {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name      String?  // nom ou libellé, ex: "Service logistique", "M. Alami"
+  email     String
+  createdAt DateTime @default(now())
+
+  @@unique([clientId, email])
+  @@index([clientId])
 }
 
 model Supplier {
@@ -245,6 +260,8 @@ model Dossier {
   deliveredAt                  DateTime?  // date de livraison
   closedAt                     DateTime?
 
+  // destinataire des notifications pour CE dossier (mémorisé pour pré-sélection)
+  contactEmail    String?
   // contrôle
   controlOffice   String?      // bureau de contrôle (bureau douanier)
   // organisme de contrôle de conformité (1 seul) : Bureau Veritas, SGS, Applus (A+), TÜV Rheinland
