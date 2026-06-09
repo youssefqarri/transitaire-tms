@@ -9,6 +9,7 @@ export type AuthContext = {
   name: string;
   role: UserRole;
   clientId: string | null;
+  orgId: string | null;
   via: "session" | "token";
 };
 
@@ -43,6 +44,7 @@ export async function authenticate(req?: Request): Promise<AuthContext | null> {
             name: cand.user.name,
             role: cand.user.role,
             clientId: cand.user.clientId,
+            orgId: cand.user.orgId,
             via: "token",
           };
         }
@@ -58,6 +60,7 @@ export async function authenticate(req?: Request): Promise<AuthContext | null> {
       name: session.user.name,
       role: session.user.role,
       clientId: session.user.clientId ?? null,
+      orgId: session.user.orgId ?? null,
       via: "session",
     };
   }
@@ -69,7 +72,11 @@ export async function authenticate(req?: Request): Promise<AuthContext | null> {
 // le dossier n'existe pas que si l'accès est refusé (pas d'oracle 404 vs 403).
 export async function resolveDossierForCtx(ctx: AuthContext, idOrNumber: string) {
   const dossier = await prisma.dossier.findFirst({
-    where: { OR: [{ id: idOrNumber }, { number: idOrNumber }] },
+    where: {
+      OR: [{ id: idOrNumber }, { number: idOrNumber }],
+      // isolation tenant (no-op tant que orgId n'est pas backfillé)
+      ...(ctx.orgId ? { orgId: ctx.orgId } : {}),
+    },
   });
   if (!dossier) return null;
   if (ctx.role === "CLIENT" && dossier.clientId !== ctx.clientId) return null;

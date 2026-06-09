@@ -25,6 +25,42 @@ enum UserRole {
   CLIENT
 }
 
+// ============================================================
+// ORGANISATION (tenant SaaS = un cabinet de transit)
+// ============================================================
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique          // sous-domaine
+  // mentions légales (émetteur de facture)
+  ice       String?
+  rc        String?
+  taxId     String?
+  patente   String?
+  cnss      String?
+  address   String?
+  city      String?
+  phone     String?
+  email     String?
+  logoUrl   String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users            User[]
+  clients          Client[]
+  suppliers        Supplier[]
+  dossiers         Dossier[]
+  invoices         Invoice[]
+  templates        MessageTemplate[]
+  emailAccounts    EmailAccount[]
+  notifications    Notification[]
+  auditLogs        AuditLog[]
+  outgoingMessages OutgoingMessage[]
+  settings         AppSetting?
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -35,6 +71,10 @@ model User {
   role          UserRole  @default(EXPLOITATION)
   active        Boolean   @default(true)
   phone         String?
+
+  // tenant SaaS (nullable le temps du backfill, puis NOT NULL)
+  orgId         String?
+  org           Organization? @relation(fields: [orgId], references: [id])
 
   // si role = CLIENT, relié à un Client (le compte porte le portail)
   clientId      String?
@@ -61,6 +101,7 @@ model User {
 
   @@index([role])
   @@index([clientId])
+  @@index([orgId])
 }
 
 model Account {
@@ -121,6 +162,8 @@ model ApiToken {
 
 model Client {
   id           String   @id @default(cuid())
+  orgId        String?
+  org          Organization? @relation(fields: [orgId], references: [id])
   name         String
   code         String?  @unique   // code client interne
   ice          String?  // identifiant commun de l'entreprise (Maroc)
@@ -144,6 +187,7 @@ model Client {
   updatedAt DateTime @updatedAt
 
   @@index([name])
+  @@index([orgId])
 }
 
 // Carnet d'adresses d'un client : plusieurs destinataires possibles selon le
@@ -162,6 +206,8 @@ model ClientContact {
 
 model Supplier {
   id          String   @id @default(cuid())
+  orgId       String?
+  org         Organization? @relation(fields: [orgId], references: [id])
   name        String
   country     String?
   email       String?
@@ -175,6 +221,7 @@ model Supplier {
   updatedAt DateTime @updatedAt
 
   @@index([name])
+  @@index([orgId])
 }
 
 // ============================================================
@@ -227,7 +274,10 @@ enum DossierStatus {
 
 model Dossier {
   id            String        @id @default(cuid())
+  orgId         String?
+  org           Organization? @relation(fields: [orgId], references: [id])
   number        String        @unique          // numéro fourni par WinApp
+  // NB: unicité par tenant (@@unique([orgId, number])) = durcissement Phase 2 (voir docs/MULTI-TENANT.md)
   reference     String?                        // référence fournisseur (objet mail)
   type          DossierType   @default(IMPORT)
   paymentMode   PaymentMode   @default(WITH_PAYMENT)
@@ -304,6 +354,7 @@ model Dossier {
   @@index([clientId])
   @@index([reference])
   @@index([number])
+  @@index([orgId])
 }
 
 model DossierStatusChange {
@@ -475,6 +526,8 @@ enum EmailDirection {
 
 model EmailAccount {
   id            String   @id @default(cuid())
+  orgId         String?
+  org           Organization? @relation(fields: [orgId], references: [id])
   userId        String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   provider      String   @default("gmail")  // gmail, outlook, imap
@@ -491,6 +544,7 @@ model EmailAccount {
   updatedAt DateTime @updatedAt
 
   @@unique([emailAddress])
+  @@index([orgId])
 }
 
 model EmailMessage {
@@ -575,6 +629,8 @@ enum NotificationKind {
 
 model Notification {
   id        String           @id @default(cuid())
+  orgId     String?
+  org       Organization?    @relation(fields: [orgId], references: [id])
   userId    String?
   user      User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
   // ou diffusion à un rôle
@@ -593,6 +649,7 @@ model Notification {
 
   @@index([userId, read])
   @@index([role, read])
+  @@index([orgId, read])
 }
 
 // ============================================================
@@ -629,6 +686,8 @@ enum PaymentMethod {
 
 model Invoice {
   id            String         @id @default(cuid())
+  orgId         String?
+  org           Organization?  @relation(fields: [orgId], references: [id])
   number        String         @unique           // ex: F-2026-0001
   year          Int                              // pour numérotation annuelle
   sequence      Int                              // séquence dans l'année
@@ -659,6 +718,7 @@ model Invoice {
   @@unique([year, sequence])
   @@index([clientId, status])
   @@index([status])
+  @@index([orgId])
 }
 
 model InvoiceItem {
@@ -695,6 +755,8 @@ enum MessageLang {
 
 model MessageTemplate {
   id        String          @id @default(cuid())
+  orgId     String?
+  org       Organization?   @relation(fields: [orgId], references: [id])
   key       String                                // ex: "docs_manquants", "bae_pret", "fiche_liquidation"
   channel   MessageChannel
   lang      MessageLang     @default(FR)
@@ -707,10 +769,13 @@ model MessageTemplate {
   updatedAt DateTime @updatedAt
 
   @@unique([key, channel, lang])
+  @@index([orgId])
 }
 
 model OutgoingMessage {
   id          String         @id @default(cuid())
+  orgId       String?
+  org         Organization?  @relation(fields: [orgId], references: [id])
   channel     MessageChannel
   lang        MessageLang
   templateKey String?
@@ -734,6 +799,7 @@ model OutgoingMessage {
   @@index([dossierId])
   @@index([clientId])
   @@index([channel, status])
+  @@index([orgId])
 }
 
 // ============================================================
@@ -745,6 +811,9 @@ model OutgoingMessage {
 // sans toucher au .env / sans redéploiement.
 model AppSetting {
   id              Int      @id @default(1)
+  // Paramètres par organisation (fin du singleton). orgId null = settings globaux hérités.
+  orgId           String?  @unique
+  org             Organization? @relation(fields: [orgId], references: [id])
 
   // ─── SMTP (emails sortants vers clients) ─────────────────
   smtpHost        String?
@@ -774,6 +843,8 @@ model AppSetting {
 
 model AuditLog {
   id        String   @id @default(cuid())
+  orgId     String?
+  org       Organization? @relation(fields: [orgId], references: [id])
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   action    String   // CREATE_DOSSIER, UPDATE_STATUS, ...
@@ -787,4 +858,5 @@ model AuditLog {
 
   @@index([userId])
   @@index([entity, entityId])
+  @@index([orgId])
 }
