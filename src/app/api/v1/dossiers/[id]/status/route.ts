@@ -3,6 +3,7 @@ import { z } from "zod";
 import { authenticate } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { canModifyDossier } from "@/lib/roles";
+import { statusRequiresDum } from "@/lib/statuses";
 import { audit } from "@/lib/audit";
 
 const DOSSIER_STATUSES = [
@@ -51,6 +52,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     where: { OR: [{ id }, { number: id }] },
   });
   if (!dossier) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  // Précondition métier : pas de liquidation/BAE/mainlevée sans DUM enregistrée
+  if (statusRequiresDum(parsed.data.status)) {
+    const dumCount = await prisma.dUM.count({ where: { dossierId: dossier.id, status: { not: "DRAFT" } } });
+    if (dumCount === 0)
+      return NextResponse.json(
+        { error: "Ce statut requiert au moins une DUM enregistrée sur le dossier." },
+        { status: 422 },
+      );
+  }
 
   const updated = await prisma.dossier.update({
     where: { id: dossier.id },

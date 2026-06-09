@@ -35,6 +35,9 @@ model User {
   role          UserRole  @default(EXPLOITATION)
   active        Boolean   @default(true)
   phone         String?
+  // sécurité : incrémenté à chaque reset/désactivation pour invalider les JWT existants
+  tokenVersion  Int       @default(0)
+  passwordChangedAt DateTime?
 
   // si role = CLIENT, relié à un Client (le compte porte le portail)
   clientId      String?
@@ -45,6 +48,7 @@ model User {
   apiTokens         ApiToken[]
   emailAccounts     EmailAccount[]
   notifications     Notification[]
+  notificationReceipts NotificationReceipt[]
   auditLogs         AuditLog[]
   dossierComments   DossierComment[]
   statusChanges     DossierStatusChange[]
@@ -259,6 +263,7 @@ model Dossier {
   liquidationAt                DateTime?
   deliveredAt                  DateTime?  // date de livraison
   closedAt                     DateTime?
+  deletedAt                    DateTime?  // soft-delete (conservation des pièces)
 
   // destinataire des notifications pour CE dossier (mémorisé pour pré-sélection)
   contactEmail    String?
@@ -589,10 +594,33 @@ model Notification {
   // envoyé au client par mail ?
   emailSent Boolean          @default(false)
 
+  receipts NotificationReceipt[]
+
   createdAt DateTime @default(now())
 
   @@index([userId, read])
   @@index([role, read])
+}
+
+// Accusé de lecture par utilisateur — permet aux notifications de RÔLE d'être
+// "lues" individuellement (sinon le 1er lecteur les masque pour tous).
+model NotificationReceipt {
+  id             String       @id @default(cuid())
+  notificationId String
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  readAt         DateTime     @default(now())
+
+  @@unique([notificationId, userId])
+  @@index([userId])
+}
+
+// Compteur de rate-limiting (login/forgot/reset) — fenêtre glissante simple en DB.
+model RateLimit {
+  key     String   @id          // ex: "login:ip:1.2.3.4" ou "forgot:email@x.ma"
+  count   Int      @default(0)
+  resetAt DateTime
 }
 
 // ============================================================

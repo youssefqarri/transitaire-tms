@@ -27,7 +27,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Mot de passe actuel incorrect" }, { status: 400 });
 
   const hashed = await bcrypt.hash(parsed.data.newPassword, 10);
-  await prisma.user.update({ where: { id: user.id }, data: { password: hashed } });
+  // bump tokenVersion : invalide les autres sessions (et la courante → re-login)
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { password: hashed, tokenVersion: { increment: 1 }, passwordChangedAt: new Date() },
+  });
   await audit({
     userId: user.id,
     action: "CHANGE_PASSWORD",

@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
+import { checkRateLimit, clientIp } from "@/lib/ratelimit";
 
 const schema = z.object({
   token: z.string().min(20),
@@ -11,6 +12,10 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
+  const rl = await checkRateLimit(`reset:${clientIp(req)}`, 10, 15 * 60);
+  if (!rl.ok)
+    return NextResponse.json({ error: "Trop de tentatives. Réessayez dans quelques minutes." }, { status: 429 });
+
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success)
     return NextResponse.json({ error: "Payload invalide" }, { status: 400 });
@@ -32,7 +37,10 @@ export async function POST(req: Request) {
 
   const hashed = await bcrypt.hash(password, 10);
   await prisma.$transaction([
-    prisma.user.update({ where: { id: user.id }, data: { password: hashed } }),
+    prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashed, tokenVersion: { increment: 1 }, passwordChangedAt: new Date() },
+    }),
     prisma.verificationToken.delete({ where: { token: tokenHash } }),
   ]);
 

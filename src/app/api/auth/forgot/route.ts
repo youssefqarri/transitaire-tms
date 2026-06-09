@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import { prisma } from "@/lib/db";
 import { sendMail, textToHtml } from "@/lib/mail";
 import { audit } from "@/lib/audit";
+import { checkRateLimit, clientIp } from "@/lib/ratelimit";
 
 const schema = z.object({
   email: z.string().email(),
@@ -15,6 +16,10 @@ const schema = z.object({
  * Toujours retourne 200 (même si email inconnu) pour éviter d'énumérer les comptes.
  */
 export async function POST(req: Request) {
+  // Anti email-bombing / énumération : on reste silencieux (200) mais on ne traite pas
+  const rl = await checkRateLimit(`forgot:${clientIp(req)}`, 5, 15 * 60);
+  if (!rl.ok) return NextResponse.json({ ok: true });
+
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ ok: true }); // silencieux
 

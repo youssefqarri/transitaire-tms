@@ -15,6 +15,7 @@ declare module "next-auth" {
   interface User {
     role: UserRole;
     clientId?: string | null;
+    tokenVersion?: number;
   }
 }
 

@@ -167,6 +167,23 @@ export function isClientUploadableCategory(cat: DocumentCategory): boolean {
   return CLIENT_UPLOADABLE_CATEGORIES.includes(cat);
 }
 
+// Statuts avancés qui n'ont de sens qu'avec au moins une DUM enregistrée : pas de
+// liquidation / bon à enlever / mainlevée sans déclaration douanière déposée.
+// (Précondition « machine à états » minimale et non bloquante pour le reste.)
+export const STATUSES_REQUIRING_DUM: DossierStatus[] = [
+  "LIQUIDE",
+  "BON_A_ENLEVER_RESERVE",
+  "MAIN_LEVEE_RESERVE_CONFORMITE",
+  "MAIN_LEVEE_RESERVE_DOCUMENTS",
+  "VALIDATION_MCA",
+  "BON_A_ENLEVER",
+  "BON_A_ENLEVER_DEFINITIF",
+];
+
+export function statusRequiresDum(status: DossierStatus): boolean {
+  return STATUSES_REQUIRING_DUM.includes(status);
+}
+
 // documents requis selon mode de paiement
 export function requiredDocuments(paymentMode: "WITH_PAYMENT" | "WITHOUT_PAYMENT"): DocumentCategory[] {
   const base: DocumentCategory[] = [

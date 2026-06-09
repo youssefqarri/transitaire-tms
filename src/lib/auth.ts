@@ -3,6 +3,8 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "./db";
 import { authConfig } from "./auth.config";
+import { checkRateLimit } from "./ratelimit";
+import type { UserRole } from "@/generated/prisma/enums";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -16,6 +18,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const email = String(credentials?.email ?? "").toLowerCase().trim();
         const password = String(credentials?.password ?? "");
         if (!email || !password) return null;
+        // Rate-limit anti brute-force (10 essais / 15 min par email)
+        const rl = await checkRateLimit(`login:${email}`, 10, 15 * 60);
+        if (!rl.ok) return null;
         const user = await prisma.user.findUnique({ where: { email } });
         if (!user || !user.password || !user.active) return null;
         const ok = await bcrypt.compare(password, user.password);
@@ -27,8 +32,44 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           role: user.role,
           clientId: user.clientId,
           image: user.image,
+          tokenVersion: user.tokenVersion,
         };
       },
     }),
   ],
+  // callbacks surchargés ici (config Node) pour REVALIDER le JWT en base à chaque
+  // requête authentifiée : compte désactivé OU tokenVersion incrémenté (reset/changement
+  // de mot de passe) → session invalidée. Le middleware (auth.config, Edge) ne revalide pas,
+  // mais auth() côté serveur le fait sur la 1re page/route.
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        const u = user as { role: UserRole; clientId?: string | null; tokenVersion?: number };
+        (token as Record<string, unknown>).role = u.role;
+        (token as Record<string, unknown>).clientId = u.clientId;
+        (token as Record<string, unknown>).tv = u.tokenVersion ?? 0;
+        return token;
+      }
+      if (token.sub) {
+        const db = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { active: true, role: true, clientId: true, tokenVersion: true },
+        });
+        if (!db || !db.active || db.tokenVersion !== (token as { tv?: number }).tv) {
+          return null; // invalide la session
+        }
+        (token as Record<string, unknown>).role = db.role;
+        (token as Record<string, unknown>).clientId = db.clientId;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user && token.sub) {
+        session.user.id = token.sub;
+        session.user.role = (token as { role: UserRole }).role;
+        session.user.clientId = (token as { clientId?: string | null }).clientId;
+      }
+      return session;
+    },
+  },
 });

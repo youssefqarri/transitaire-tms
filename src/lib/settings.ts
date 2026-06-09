@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "./db";
+import { encryptSecret, decryptSecret } from "./crypto";
 
 export type AppSettings = {
   smtpHost: string | null;
@@ -31,7 +32,7 @@ export async function getSettings(): Promise<AppSettings> {
     smtpHost: row?.smtpHost ?? process.env.SMTP_HOST ?? null,
     smtpPort: row?.smtpPort ?? Number(process.env.SMTP_PORT ?? 587),
     smtpUser: row?.smtpUser ?? process.env.SMTP_USER ?? null,
-    smtpPass: row?.smtpPass ?? process.env.SMTP_PASS ?? null,
+    smtpPass: decryptSecret(row?.smtpPass) ?? process.env.SMTP_PASS ?? null,
     smtpFrom: row?.smtpFrom ?? process.env.SMTP_FROM ?? null,
     smtpSecure: row?.smtpSecure ?? false,
     storageDriver:
@@ -42,7 +43,7 @@ export async function getSettings(): Promise<AppSettings> {
     s3Region: row?.s3Region ?? process.env.S3_REGION ?? null,
     s3Bucket: row?.s3Bucket ?? process.env.S3_BUCKET ?? null,
     s3AccessKeyId: row?.s3AccessKeyId ?? process.env.S3_ACCESS_KEY_ID ?? null,
-    s3SecretKey: row?.s3SecretKey ?? process.env.S3_SECRET_ACCESS_KEY ?? null,
+    s3SecretKey: decryptSecret(row?.s3SecretKey) ?? process.env.S3_SECRET_ACCESS_KEY ?? null,
     s3PublicBaseUrl: row?.s3PublicBaseUrl ?? process.env.S3_PUBLIC_BASE_URL ?? null,
   };
   cache = { value, at: Date.now() };
@@ -53,10 +54,21 @@ export async function updateSettings(
   patch: Partial<AppSettings>,
   userId?: string,
 ): Promise<AppSettings> {
+  // chiffre les secrets au repos (no-op si ENCRYPTION_KEY absente)
+  const enc = {
+    ...patch,
+    updatedById: userId,
+    ...(typeof patch.smtpPass === "string" && patch.smtpPass
+      ? { smtpPass: encryptSecret(patch.smtpPass) }
+      : {}),
+    ...(typeof patch.s3SecretKey === "string" && patch.s3SecretKey
+      ? { s3SecretKey: encryptSecret(patch.s3SecretKey) }
+      : {}),
+  };
   await prisma.appSetting.upsert({
     where: { id: 1 },
-    update: { ...patch, updatedById: userId },
-    create: { id: 1, ...patch, updatedById: userId },
+    update: enc,
+    create: { id: 1, ...enc },
   });
   cache = null; // invalidate
   return getSettings();
