@@ -3,6 +3,9 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { storage } from "@/lib/storage";
+import { validateUpload } from "@/lib/uploads";
+import { isClientUploadableCategory } from "@/lib/statuses";
+import type { DocumentCategory } from "@/generated/prisma/enums";
 
 // Upload d'un document par le client via le portail (limité à ses propres dossiers).
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -27,6 +30,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   if (!file || typeof file !== "object" || !("arrayBuffer" in file)) {
     return NextResponse.json({ error: "Fichier requis" }, { status: 400 });
+  }
+  const check = validateUpload(file);
+  if (!check.ok) return NextResponse.json({ error: check.error }, { status: check.status });
+  // Le client ne peut déposer que des catégories autorisées (pas de documents internes/douane)
+  if (!isClientUploadableCategory(category as DocumentCategory)) {
+    return NextResponse.json({ error: "Catégorie de document non autorisée" }, { status: 400 });
   }
 
   if (!name) {

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { isInternal } from "@/lib/roles";
+import { canManageRegistry } from "@/lib/roles";
 import { audit } from "@/lib/audit";
 
 // DELETE /api/clients/[id]/contacts/[contactId] — retire un contact
@@ -11,11 +11,12 @@ export async function DELETE(
 ) {
   const { id, contactId } = await params;
   const session = await auth();
-  if (!session || !isInternal(session.user.role))
+  if (!session || !canManageRegistry(session.user.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+  // Scoping : le contact doit appartenir au client de l'URL (évite l'IDOR)
   await prisma.clientContact
-    .delete({ where: { id: contactId } })
+    .deleteMany({ where: { id: contactId, clientId: id } })
     .catch(() => {});
   await audit({
     userId: session.user.id,

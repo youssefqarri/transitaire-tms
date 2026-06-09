@@ -64,7 +64,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     where: { id },
     data: {
       status: parsed.data.status,
-      closedAt: isClosing ? new Date() : null,
+      closedAt: isClosing ? new Date() : undefined,
       statusChanges: {
         create: {
           fromStatus: dossier.status,

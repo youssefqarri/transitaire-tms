@@ -10,6 +10,7 @@ import {
   STATUS_ORDER,
   DOCUMENT_CATEGORY_LABELS,
   requiredDocuments,
+  INTERNAL_ONLY_CATEGORIES,
 } from "@/lib/statuses";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { ClientUploadForm } from "./upload-form";
@@ -26,7 +27,11 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
     where: { id, clientId: session.user.clientId },
     include: {
       dums: true,
-      documents: { orderBy: { receivedAt: "desc" } },
+      // le client ne voit pas les documents internes (fiche liquidation, ticket paiement…)
+      documents: {
+        where: { category: { notIn: INTERNAL_ONLY_CATEGORIES } },
+        orderBy: { receivedAt: "desc" },
+      },
       comments: {
         where: { internal: false },
         orderBy: { createdAt: "desc" },

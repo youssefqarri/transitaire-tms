@@ -25,17 +25,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  // Génère un token aléatoire 32 bytes hex
+  // Génère un token aléatoire 32 bytes hex ; on ne stocke que son HASH sha256.
   const token = crypto.randomBytes(32).toString("hex");
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
   const expires = new Date(Date.now() + 60 * 60 * 1000); // 1h
 
-  // Stocke (réutilise VerificationToken de NextAuth)
+  // Purge les anciens tokens de reset de cet email, puis stocke le hash
+  await prisma.verificationToken.deleteMany({ where: { identifier: email } }).catch(() => {});
   await prisma.verificationToken.create({
-    data: { identifier: email, token, expires },
+    data: { identifier: email, token: tokenHash, expires },
   });
 
   const base = process.env.AUTH_URL ?? "http://localhost:3000";
-  const link = `${base}/reset-password/${token}`;
+  const link = `${base}/reset-password/${token}`; // le lien contient le token BRUT
 
   try {
     await sendMail({

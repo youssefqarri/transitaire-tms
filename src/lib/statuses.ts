@@ -121,6 +121,52 @@ export const DOCUMENT_CATEGORY_LABELS: Record<DocumentCategory, string> = {
   AUTRE: "Autre",
 };
 
+// Catégories de documents générées en interne (douane/transitaire) que le CLIENT
+// ne doit PAS voir/télécharger via le portail ou l'API v1 (révèlent montants,
+// références de paiement, échanges administratifs internes).
+export const INTERNAL_ONLY_CATEGORIES: DocumentCategory[] = [
+  "FICHE_LIQUIDATION",
+  "TICKET_PAIEMENT",
+  "MAIN_LEVEE_RESERVE_PAIEMENT",
+  "DEMANDE_SERVICE_MCI",
+  "DEMANDE_SERVICE_PORTNET",
+  "MESSAGE_PORTNET",
+  "MESSAGE_DOUANE",
+  "MESSAGE_CONFORMITE",
+];
+
+export function isClientVisibleCategory(cat: DocumentCategory): boolean {
+  return !INTERNAL_ONLY_CATEGORIES.includes(cat);
+}
+
+// Catégories qu'un CLIENT est autorisé à DÉPOSER (pièces commerciales fournies par
+// l'importateur/exportateur) — exclut les documents générés par la douane/le transitaire.
+export const CLIENT_UPLOADABLE_CATEGORIES: DocumentCategory[] = [
+  "FACTURE_COMMERCIALE",
+  "FACTURE_ORIGINALE",
+  "COLISAGE",
+  "FACTURE_FRET",
+  "CONNAISSEMENT",
+  "LTA_ORIGINALE",
+  "CMR",
+  "DMP",
+  "ENGAGEMENT_IMPORTATION",
+  "CERTIFICAT_ORIGINE",
+  "ASSURANCE",
+  "LICENCE",
+  "CERTIFICAT_SANITAIRE",
+  "CERTIFICAT_PHYTOSANITAIRE",
+  "CERTIFICAT_CONFORMITE",
+  "ATTESTATION_POIDS_MESURE",
+  "ATTESTATION_STOCKAGE",
+  "CATALOGUE",
+  "AUTRE",
+];
+
+export function isClientUploadableCategory(cat: DocumentCategory): boolean {
+  return CLIENT_UPLOADABLE_CATEGORIES.includes(cat);
+}
+
 // documents requis selon mode de paiement
 export function requiredDocuments(paymentMode: "WITH_PAYMENT" | "WITHOUT_PAYMENT"): DocumentCategory[] {
   const base: DocumentCategory[] = [

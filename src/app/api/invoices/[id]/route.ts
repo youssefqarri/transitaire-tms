@@ -3,7 +3,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
-import { isInternal } from "@/lib/roles";
+import { canManageInvoices } from "@/lib/roles";
 
 const patchSchema = z.object({
   status: z
@@ -24,7 +24,7 @@ const patchSchema = z.object({
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
-  if (!session || !isInternal(session.user.role))
+  if (!session || !canManageInvoices(session.user.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const parsed = patchSchema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: "Invalid" }, { status: 400 });

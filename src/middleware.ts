@@ -10,6 +10,9 @@ const PUBLIC_PATHS = [
   "/reset-password",
   "/api/auth",
   "/api/v1",
+  // la route /api/files fait elle-même son auth + contrôle d'accès (ownership clientId) ;
+  // l'exclure du middleware évite la redirection HTML qui cassait le téléchargement portail
+  "/api/files",
 ];
 
 export default auth((req) => {

@@ -28,6 +28,18 @@ export function canManageUsers(role: UserRole) {
   return role === "ADMIN";
 }
 
+// Gestion du référentiel commercial (clients, fournisseurs, contacts) : rôles
+// internes SAUF COMMIS_DOUANE (consultation seule). Utilisé sur tous les écrits API.
+export function canManageRegistry(role: UserRole) {
+  return isInternal(role) && role !== "COMMIS_DOUANE";
+}
+
+// Gestion de la facturation (création/édition/encaissement) : seuls ADMIN et
+// COMPTABILITE (cohérent avec l'accès page /factures).
+export function canManageInvoices(role: UserRole) {
+  return ["ADMIN", "COMPTABILITE"].includes(role);
+}
+
 export function canCreateDossier(role: UserRole) {
   return ["ADMIN", "EXPLOITATION"].includes(role);
 }

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { authenticate } from "@/lib/api-auth";
+import { authenticate, resolveDossierForCtx } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 
 const schema = z.object({
-  body: z.string().min(1),
+  body: z.string().min(1).max(5000),
   internal: z.boolean().default(true),
 });
 
@@ -16,8 +16,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: "Invalid" }, { status: 400 });
 
-  const dossier = await prisma.dossier.findFirst({ where: { OR: [{ id }, { number: id }] } });
+  // Accès objet (CLIENT limité à ses dossiers, sinon 404 sans oracle)
+  const dossier = await resolveDossierForCtx(ctx, id);
   if (!dossier) return NextResponse.json({ error: "Dossier not found" }, { status: 404 });
+
+  // COMMIS_DOUANE = consultation seule
+  if (ctx.role === "COMMIS_DOUANE")
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const comment = await prisma.dossierComment.create({
     data: {

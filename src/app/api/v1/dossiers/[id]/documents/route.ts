@@ -1,32 +1,20 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { authenticate } from "@/lib/api-auth";
+import { authenticate, resolveDossierForCtx } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
+import { canUploadDocument } from "@/lib/roles";
+import { DOCUMENT_CATEGORY_LABELS, isClientUploadableCategory } from "@/lib/statuses";
+import type { DocumentCategory } from "@/generated/prisma/enums";
 
-const DOC_CATEGORIES = [
-  "FACTURE_COMMERCIALE",
-  "COLISAGE",
-  "FACTURE_FRET",
-  "CONNAISSEMENT",
-  "ENGAGEMENT_IMPORTATION",
-  "BON_A_DELIVRER",
-  "CERTIFICAT_ORIGINE",
-  "ASSURANCE",
-  "LICENCE",
-  "CERTIFICAT_SANITAIRE",
-  "CERTIFICAT_CONFORMITE",
-  "FICHE_LIQUIDATION",
-  "TICKET_PAIEMENT",
-  "BON_A_ENLEVER",
-  "AUTRE",
-] as const;
+// Liste exhaustive des catégories (dérivée de l'enum, évite la dérive de l'ancienne sous-liste de 15)
+const ALL_CATEGORIES = Object.keys(DOCUMENT_CATEGORY_LABELS) as [string, ...string[]];
 
 const schema = z.object({
-  name: z.string().min(1),
-  category: z.enum(DOC_CATEGORIES),
-  notes: z.string().optional(),
-  // pas d'upload de fichier via JSON pour Claude — passer par /api/dossiers/[id]/documents (multipart) si besoin
+  name: z.string().min(1).max(200),
+  category: z.enum(ALL_CATEGORIES),
+  notes: z.string().max(2000).optional(),
+  // pas d'upload de fichier via JSON ; passer par /api/dossiers/[id]/documents (multipart) si besoin
 });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -36,12 +24,20 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: "Invalid" }, { status: 400 });
+  const category = parsed.data.category as DocumentCategory;
 
-  const dossier = await prisma.dossier.findFirst({ where: { OR: [{ id }, { number: id }] } });
+  // Accès objet : interne, ou CLIENT propriétaire du dossier (sinon 404 sans oracle)
+  const dossier = await resolveDossierForCtx(ctx, id);
   if (!dossier) return NextResponse.json({ error: "Dossier not found" }, { status: 404 });
 
+  // Droits d'écriture
+  if (ctx.role !== "CLIENT" && !canUploadDocument(ctx.role))
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (ctx.role === "CLIENT" && !isClientUploadableCategory(category))
+    return NextResponse.json({ error: "Catégorie non autorisée pour un client" }, { status: 403 });
+
   const previous = await prisma.document.findFirst({
-    where: { dossierId: dossier.id, category: parsed.data.category, name: parsed.data.name },
+    where: { dossierId: dossier.id, category, name: parsed.data.name },
     orderBy: { version: "desc" },
   });
   const version = previous ? previous.version + 1 : 1;
@@ -50,7 +46,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     data: {
       dossierId: dossier.id,
       name: parsed.data.name,
-      category: parsed.data.category,
+      category,
       notes: parsed.data.notes,
       version,
       replacesId: previous?.id ?? null,

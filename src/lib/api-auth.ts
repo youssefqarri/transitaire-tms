@@ -64,6 +64,18 @@ export async function authenticate(req?: Request): Promise<AuthContext | null> {
   return null;
 }
 
+// Résout un dossier par id OU numéro, en appliquant l'isolation client :
+// un CLIENT ne peut viser que ses propres dossiers. Retourne null aussi bien si
+// le dossier n'existe pas que si l'accès est refusé (pas d'oracle 404 vs 403).
+export async function resolveDossierForCtx(ctx: AuthContext, idOrNumber: string) {
+  const dossier = await prisma.dossier.findFirst({
+    where: { OR: [{ id: idOrNumber }, { number: idOrNumber }] },
+  });
+  if (!dossier) return null;
+  if (ctx.role === "CLIENT" && dossier.clientId !== ctx.clientId) return null;
+  return dossier;
+}
+
 import crypto from "node:crypto";
 
 export function generateApiToken(): { raw: string; prefix: string } {

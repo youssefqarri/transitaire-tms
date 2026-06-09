@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import crypto from "node:crypto";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
 
@@ -15,11 +16,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Payload invalide" }, { status: 400 });
 
   const { token, password } = parsed.data;
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
-  const vt = await prisma.verificationToken.findUnique({ where: { token } });
+  const vt = await prisma.verificationToken.findUnique({ where: { token: tokenHash } });
   if (!vt) return NextResponse.json({ error: "Lien invalide" }, { status: 400 });
   if (vt.expires < new Date()) {
-    await prisma.verificationToken.delete({ where: { token } }).catch(() => {});
+    await prisma.verificationToken.delete({ where: { token: tokenHash } }).catch(() => {});
     return NextResponse.json({ error: "Lien expiré" }, { status: 400 });
   }
 
@@ -31,7 +33,7 @@ export async function POST(req: Request) {
   const hashed = await bcrypt.hash(password, 10);
   await prisma.$transaction([
     prisma.user.update({ where: { id: user.id }, data: { password: hashed } }),
-    prisma.verificationToken.delete({ where: { token } }),
+    prisma.verificationToken.delete({ where: { token: tokenHash } }),
   ]);
 
   await audit({

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { storage } from "@/lib/storage";
 import { canUploadDocument } from "@/lib/roles";
+import { validateUpload } from "@/lib/uploads";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -33,6 +34,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   let mimeType: string | null = null;
 
   if (file && typeof file === "object" && "arrayBuffer" in file) {
+    const check = validateUpload(file);
+    if (!check.ok) return NextResponse.json({ error: check.error }, { status: check.status });
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "_");
     const key = `${id}/${Date.now()}_${safeName}`;
     const buf = Buffer.from(await file.arrayBuffer());

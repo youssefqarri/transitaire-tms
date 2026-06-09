@@ -3,7 +3,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
-import { isInternal } from "@/lib/roles";
+import { canManageInvoices } from "@/lib/roles";
 import { nextInvoiceNumber } from "@/lib/invoicing-server";
 
 const itemSchema = z.object({
@@ -26,7 +26,7 @@ const schema = z.object({
 
 export async function POST(req: Request) {
   const session = await auth();
-  if (!session || !isInternal(session.user.role))
+  if (!session || !canManageInvoices(session.user.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const parsed = schema.safeParse(await req.json());

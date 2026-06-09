@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { isInternal } from "@/lib/roles";
+import { canManageRegistry } from "@/lib/roles";
 import { audit } from "@/lib/audit";
 
 const schema = z.object({
@@ -14,7 +14,7 @@ const schema = z.object({
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
-  if (!session || !isInternal(session.user.role))
+  if (!session || !canManageRegistry(session.user.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const parsed = schema.safeParse(await req.json());
