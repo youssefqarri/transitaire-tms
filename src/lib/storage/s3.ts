@@ -76,9 +76,10 @@ export class S3Driver implements StorageDriver {
   }
 
   async presignGet(key: string, expiresInSec = 300): Promise<string> {
-    if (this.publicBaseUrl) {
-      return `${this.publicBaseUrl.replace(/\/$/, "")}/${sanitize(key)}`;
-    }
+    // Toujours une URL signée à expiration courte : les pièces de transit sont
+    // sensibles et l'accès est déjà contrôlé par /api/files (ACL clientId).
+    // (publicBaseUrl volontairement non utilisé ici — il exposait une URL publique
+    //  non expirante qui contournait l'ACL.)
     return getSignedUrl(
       this.client,
       new GetObjectCommand({ Bucket: this.bucket, Key: sanitize(key) }),

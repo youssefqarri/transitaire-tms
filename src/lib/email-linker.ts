@@ -20,6 +20,7 @@ export async function linkEmailToDossiers(emailId: string) {
   for (const ref of refs) {
     const ds = await prisma.dossier.findMany({
       where: {
+        deletedAt: null,
         OR: [
           { reference: { equals: ref, mode: "insensitive" } },
           { number: { equals: ref, mode: "insensitive" } },

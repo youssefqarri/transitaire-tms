@@ -130,36 +130,20 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
   const dossier = await prisma.dossier.findUnique({
     where: { id },
-    include: { _count: { select: { dums: true, documents: true } } },
+    select: { id: true, number: true, clientId: true, deletedAt: true },
   });
   if (!dossier) return NextResponse.json({ error: "Dossier introuvable" }, { status: 404 });
+  if (dossier.deletedAt) return NextResponse.json({ ok: true }); // déjà supprimé
 
-  // Garde-fou conservation : la suppression cascade détruirait des pièces à valeur
-  // légale (DUM, documents douaniers). On l'interdit dès qu'il y en a — préférer le
-  // statut "Annulé". (Soft-delete complet = Phase 1, voir docs/AUDIT.md.)
-  if (dossier._count.documents > 0 || dossier._count.dums > 0) {
-    return NextResponse.json(
-      {
-        error:
-          "Impossible de supprimer : ce dossier contient des DUM ou des documents (conservation obligatoire). Passez-le plutôt au statut « Annulé ».",
-      },
-      { status: 409 },
-    );
-  }
-
-  try {
-    await prisma.dossier.delete({ where: { id } });
-    await audit({
-      userId: session.user.id,
-      action: "DELETE_DOSSIER",
-      entity: "Dossier",
-      entityId: id,
-      metadata: { number: dossier.number, clientId: dossier.clientId },
-    });
-    return NextResponse.json({ ok: true });
-  } catch (e: unknown) {
-    const err = e as { code?: string; message?: string };
-    if (err.code === "P2025") return NextResponse.json({ error: "Not found" }, { status: 404 });
-    return NextResponse.json({ error: err.message || "Erreur" }, { status: 500 });
-  }
+  // Soft-delete : on conserve les pièces à valeur légale (DUM, documents douaniers) ;
+  // le dossier disparaît des listes mais reste restaurable. (Pas de DELETE cascade.)
+  await prisma.dossier.update({ where: { id }, data: { deletedAt: new Date() } });
+  await audit({
+    userId: session.user.id,
+    action: "SOFT_DELETE_DOSSIER",
+    entity: "Dossier",
+    entityId: id,
+    metadata: { number: dossier.number, clientId: dossier.clientId },
+  });
+  return NextResponse.json({ ok: true });
 }

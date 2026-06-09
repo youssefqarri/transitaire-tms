@@ -18,6 +18,7 @@ export async function GET(req: Request) {
   const skip = Number(url.searchParams.get("skip") ?? 0);
 
   const where = {
+    deletedAt: null,
     ...(q && {
       OR: [
         { number: { contains: q, mode: "insensitive" as const } },

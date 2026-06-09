@@ -37,7 +37,8 @@ export default async function EmailSettingsPage() {
               smtpHost: settings.smtpHost ?? "",
               smtpPort: settings.smtpPort ?? 587,
               smtpUser: settings.smtpUser ?? "",
-              smtpPass: settings.smtpPass ?? "",
+              // secret jamais renvoyé au navigateur (write-only) : laisser vide = conserver
+              smtpPass: "",
               smtpFrom: settings.smtpFrom ?? "",
               smtpSecure: settings.smtpSecure,
             }}

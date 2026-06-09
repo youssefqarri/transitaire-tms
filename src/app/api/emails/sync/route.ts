@@ -6,6 +6,7 @@ import { oauthClient } from "@/lib/gmail";
 import { classifyEmail } from "@/lib/email-classifier";
 import { linkEmailToDossiers } from "@/lib/email-linker";
 import { isInternal } from "@/lib/roles";
+import { decryptSecret } from "@/lib/crypto";
 
 // POST /api/emails/sync — synchro Gmail manuelle. À déclencher périodiquement (cron) en prod.
 export async function POST() {
@@ -23,8 +24,8 @@ export async function POST() {
   for (const acc of accounts) {
     const client = oauthClient();
     client.setCredentials({
-      access_token: acc.accessToken,
-      refresh_token: acc.refreshToken,
+      access_token: decryptSecret(acc.accessToken),
+      refresh_token: decryptSecret(acc.refreshToken),
       expiry_date: acc.tokenExpiresAt?.getTime() ?? undefined,
     });
     const gmail = google.gmail({ version: "v1", auth: client });

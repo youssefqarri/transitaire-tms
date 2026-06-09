@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { auth } from "./auth";
 import { prisma } from "./db";
+import { checkRateLimit, clientIp } from "./ratelimit";
 import type { UserRole } from "@/generated/prisma/enums";
 
 export type AuthContext = {
@@ -19,6 +20,11 @@ export async function authenticate(req?: Request): Promise<AuthContext | null> {
   const header = req?.headers.get("authorization") ?? "";
   const match = header.match(/^Bearer\s+(.+)$/i);
   if (match) {
+    // rate-limit anti brute-force de tokens sur l'API v1 (par IP, généreux)
+    if (req) {
+      const rl = await checkRateLimit(`v1:${clientIp(req)}`, 120, 60);
+      if (!rl.ok) return null;
+    }
     const raw = match[1].trim();
     if (raw.length >= 16) {
       const prefix = raw.slice(0, 8);
@@ -69,7 +75,7 @@ export async function authenticate(req?: Request): Promise<AuthContext | null> {
 // le dossier n'existe pas que si l'accès est refusé (pas d'oracle 404 vs 403).
 export async function resolveDossierForCtx(ctx: AuthContext, idOrNumber: string) {
   const dossier = await prisma.dossier.findFirst({
-    where: { OR: [{ id: idOrNumber }, { number: idOrNumber }] },
+    where: { deletedAt: null, OR: [{ id: idOrNumber }, { number: idOrNumber }] },
   });
   if (!dossier) return null;
   if (ctx.role === "CLIENT" && dossier.clientId !== ctx.clientId) return null;

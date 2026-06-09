@@ -17,7 +17,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   // Vérifie que le dossier appartient bien au client connecté
   const dossier = await prisma.dossier.findFirst({
-    where: { id, clientId: session.user.clientId },
+    where: { deletedAt: null, id, clientId: session.user.clientId },
     select: { id: true, number: true, clientId: true },
   });
   if (!dossier) return NextResponse.json({ error: "Dossier introuvable" }, { status: 404 });

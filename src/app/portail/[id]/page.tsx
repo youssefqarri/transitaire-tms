@@ -24,7 +24,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
   if (!session?.user.clientId) return null;
 
   const dossier = await prisma.dossier.findFirst({
-    where: { id, clientId: session.user.clientId },
+    where: { deletedAt: null, id, clientId: session.user.clientId },
     include: {
       dums: true,
       // le client ne voit pas les documents internes (fiche liquidation, ticket paiement…)

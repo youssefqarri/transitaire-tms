@@ -49,7 +49,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!parsed.success) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
 
   const dossier = await prisma.dossier.findFirst({
-    where: { OR: [{ id }, { number: id }] },
+    where: { deletedAt: null, OR: [{ id }, { number: id }] },
   });
   if (!dossier) return NextResponse.json({ error: "Not found" }, { status: 404 });
 

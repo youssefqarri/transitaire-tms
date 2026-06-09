@@ -23,7 +23,7 @@ export default async function PortalHomePage({
   const session = await auth();
   if (!session?.user.clientId) return null;
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
-  const where = { clientId: session.user.clientId };
+  const where = { deletedAt: null, clientId: session.user.clientId };
   const [total, dossiers] = await Promise.all([
     prisma.dossier.count({ where }),
     prisma.dossier.findMany({

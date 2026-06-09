@@ -38,6 +38,7 @@ export default async function DossiersPage({
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
 
   const where = {
+    deletedAt: null,
     ...(q && {
       OR: [
         { number: { contains: q, mode: "insensitive" as const } },

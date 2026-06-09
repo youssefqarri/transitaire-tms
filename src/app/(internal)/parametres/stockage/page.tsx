@@ -39,7 +39,8 @@ export default async function StorageSettingsPage() {
               s3Region: settings.s3Region ?? "",
               s3Bucket: settings.s3Bucket ?? "",
               s3AccessKeyId: settings.s3AccessKeyId ?? "",
-              s3SecretKey: settings.s3SecretKey ?? "",
+              // secret jamais renvoyé au navigateur (write-only) : laisser vide = conserver
+              s3SecretKey: "",
               s3PublicBaseUrl: settings.s3PublicBaseUrl ?? "",
             }}
           />

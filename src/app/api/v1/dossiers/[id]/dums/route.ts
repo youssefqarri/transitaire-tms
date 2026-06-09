@@ -23,7 +23,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: "Invalid" }, { status: 400 });
 
-  const dossier = await prisma.dossier.findFirst({ where: { OR: [{ id }, { number: id }] } });
+  const dossier = await prisma.dossier.findFirst({ where: { deletedAt: null, OR: [{ id }, { number: id }] } });
   if (!dossier) return NextResponse.json({ error: "Dossier not found" }, { status: 404 });
 
   // Un dossier peut cumuler plusieurs régimes douaniers, mais au maximum 2 DUM.
