@@ -130,17 +130,19 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
   const dossier = await prisma.dossier.findUnique({
     where: { id },
-    include: { _count: { select: { dums: true } } },
+    include: { _count: { select: { dums: true, documents: true } } },
   });
   if (!dossier) return NextResponse.json({ error: "Dossier introuvable" }, { status: 404 });
 
-  // garde-fou: pas de suppression si DUM validée/liquidée/clôturée
-  const validatedDum = await prisma.dUM.count({
-    where: { dossierId: id, status: { in: ["VALIDE", "LIQUIDE", "CLOTURE"] } },
-  });
-  if (validatedDum > 0) {
+  // Garde-fou conservation : la suppression cascade détruirait des pièces à valeur
+  // légale (DUM, documents douaniers). On l'interdit dès qu'il y en a — préférer le
+  // statut "Annulé". (Soft-delete complet = Phase 1, voir docs/AUDIT.md.)
+  if (dossier._count.documents > 0 || dossier._count.dums > 0) {
     return NextResponse.json(
-      { error: "Impossible : ce dossier a une DUM validée. Annulez d'abord la DUM." },
+      {
+        error:
+          "Impossible de supprimer : ce dossier contient des DUM ou des documents (conservation obligatoire). Passez-le plutôt au statut « Annulé ».",
+      },
       { status: 409 },
     );
   }

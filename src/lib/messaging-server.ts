@@ -2,6 +2,7 @@ import "server-only";
 import { prisma } from "./db";
 import { loadTemplate, renderTemplate, type TemplateKey } from "./messaging";
 import { sendMail, textToHtml } from "./mail";
+import { DOCUMENT_CATEGORY_LABELS } from "./statuses";
 import type { MessageChannel, MessageLang } from "@/generated/prisma/enums";
 
 export type NotifyResult = {
@@ -31,7 +32,12 @@ export async function notifyClient(opts: {
 }): Promise<NotifyResult> {
   const dossier = await prisma.dossier.findUnique({
     where: { id: opts.dossierId },
-    include: { client: true, dums: true },
+    include: {
+      client: true,
+      dums: true,
+      // documents attendus non encore reçus → alimente {{missingList}}
+      expectedDocuments: { where: { fulfilledAt: null }, orderBy: { createdAt: "asc" } },
+    },
   });
   if (!dossier) return { ok: false, error: "Dossier introuvable" };
 
@@ -65,6 +71,11 @@ export async function notifyClient(opts: {
     "visitDate": dossier.visitDate
       ? new Intl.DateTimeFormat("fr-FR").format(dossier.visitDate)
       : "",
+    missingList: dossier.expectedDocuments.length
+      ? dossier.expectedDocuments
+          .map((e) => `- ${e.name?.trim() || DOCUMENT_CATEGORY_LABELS[e.category]}`)
+          .join("\n")
+      : "- (à préciser)",
     portalUrl: process.env.AUTH_URL ?? "http://localhost:3000",
     ...opts.extraVars,
   };
@@ -110,12 +121,13 @@ export async function notifyClient(opts: {
       return { ok: true, messageId: result.messageId };
     }
 
-    // WhatsApp : pas encore branché (Cloud API à venir)
+    // WhatsApp : envoi manuel via wa.me côté navigateur — on trace comme envoyé (manuel),
+    // cohérent avec l'UI (le message n'est pas en échec, il est ouvert dans WhatsApp).
     await prisma.outgoingMessage.update({
       where: { id: msg.id },
-      data: { status: "FAILED", error: "WhatsApp Cloud API non configuré" },
+      data: { status: "SENT", sentAt: new Date() },
     });
-    return { ok: false, error: "WhatsApp non disponible (Cloud API requis)" };
+    return { ok: true, messageId: msg.id };
   } catch (e: unknown) {
     const err = (e as Error).message;
     await prisma.outgoingMessage.update({

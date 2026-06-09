@@ -5,6 +5,17 @@ import { storage } from "@/lib/storage";
 import { S3Driver } from "@/lib/storage/s3";
 import { getSettings } from "@/lib/settings";
 
+// Rejette les hôtes privés/loopback/métadonnées cloud (anti-SSRF basique)
+function isPrivateHost(host: string): boolean {
+  const h = host.toLowerCase();
+  if (h === "localhost" || h.endsWith(".localhost") || h === "::1") return true;
+  if (h === "169.254.169.254" || h === "metadata.google.internal") return true;
+  if (/^(127\.|10\.|192\.168\.|169\.254\.|0\.)/.test(h)) return true;
+  if (/^172\.(1[6-9]|2\d|3[01])\./.test(h)) return true;
+  if (h.startsWith("fc") || h.startsWith("fd")) return true;
+  return false;
+}
+
 /**
  * POST /api/settings/test-storage
  * - Si driver=local : test trivial (PUT/GET/DELETE sur un fichier jetable)
@@ -28,6 +39,18 @@ export async function POST() {
       return NextResponse.json({
         ok: false,
         error: "Configuration S3 incomplète",
+      });
+    }
+    let s3Host = "";
+    try {
+      s3Host = new URL(settings.s3Endpoint).hostname;
+    } catch {
+      return NextResponse.json({ ok: false, error: "Endpoint S3 invalide (URL https attendue)" });
+    }
+    if (!settings.s3Endpoint.startsWith("https://") || isPrivateHost(s3Host)) {
+      return NextResponse.json({
+        ok: false,
+        error: "Endpoint S3 refusé : une URL https vers un hôte public est requise.",
       });
     }
     const driver = new S3Driver({

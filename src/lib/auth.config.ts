@@ -21,7 +21,9 @@ declare module "next-auth" {
 // config "Edge-safe" : pas de Prisma, pas de bcrypt.
 // Utilisé par le middleware. La logique d'authentification réelle est dans auth.ts.
 export const authConfig: NextAuthConfig = {
-  session: { strategy: "jwt" },
+  // maxAge réduit (8h) : une désactivation/changement de rôle prend effet rapidement
+  // (au lieu des ~30j par défaut). Revalidation DB complète = Phase 1 à tester runtime.
+  session: { strategy: "jwt", maxAge: 60 * 60 * 8 },
   pages: { signIn: "/login" },
   providers: [],
   callbacks: {

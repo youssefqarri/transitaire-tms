@@ -45,6 +45,25 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         registeredAt: parsed.data.registeredAt ? new Date(parsed.data.registeredAt) : new Date(),
       },
     });
+
+    // Parité avec l'interne : si le dossier était en DECLARATION_EN_COURS → VALIDATION_DOUANE
+    if (dossier.status === "DECLARATION_EN_COURS") {
+      await prisma.dossier.update({
+        where: { id: dossier.id },
+        data: {
+          status: "VALIDATION_DOUANE",
+          statusChanges: {
+            create: {
+              fromStatus: "DECLARATION_EN_COURS",
+              toStatus: "VALIDATION_DOUANE",
+              changedById: ctx.userId,
+              note: `DUM ${dum.number} enregistrée`,
+            },
+          },
+        },
+      });
+    }
+
     await audit({
       userId: ctx.userId,
       action: "CREATE_DUM",
