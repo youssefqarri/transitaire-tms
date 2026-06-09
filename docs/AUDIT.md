@@ -30,19 +30,28 @@ Corrigé (déployable sur l'instance mono-cabinet actuelle, **sans migration DB*
 | bug | DELETE contact scopé au `clientId` (IDOR) | `api/clients/[id]/contacts/[contactId]` |
 | bug | Catégorie de document portail validée (fin du `as never`) | `api/portail/.../documents` |
 
-## Phase 1 — Reste à faire (nécessite migrations / décisions produit / revue)
+## Phase 1 & 2 — FAIT (branches `hardening/phase-1` et `hardening/phase-2`)
+
+`hardening/phase-1` : XSS `mail.ts` (S19), session maxAge 8h, anti-SSRF test-storage (S18),
+parité v1 DUM, `{{missingList}}` peuplé, WhatsApp SENT, garde DELETE dossier.
+
+`hardening/phase-2` : **S5** rate-limiting (login/forgot/reset, `lib/ratelimit.ts`) ·
+**S7/S8** revalidation JWT (`User.tokenVersion` + bump à reset/change-password, `auth.ts`) ·
+**S14/S15** chiffrement AES-GCM des secrets SMTP/S3 (`lib/crypto.ts`, opt-in `ENCRYPTION_KEY`) ·
+**S13** `NotificationReceipt` (lu/non-lu par user) · **machine à états** : précondition DUM
+(pas de LIQUIDE/BAE/mainlevée sans DUM enregistrée, interne + v1).
+
+## Reste à faire (nécessite migrations / décisions produit / revue)
 
 ### Sécurité (suite)
-- **S5 Rate-limiting** login/forgot/reset/v1 (Upstash ou table compteur) — anti brute-force.
-- **S6 Soft-delete Dossier** (`deletedAt`) au lieu de DELETE cascade (conservation légale ADII) + purge fichiers + filtrer `deletedAt: null` dans toutes les requêtes dossier.
-- **S7/S8 Revalidation JWT** : `User.tokenVersion` + `session.maxAge` + bump à reset/désactivation (sinon un compte désactivé garde l'accès ~30 j).
-- **S13 Notifications de rôle** : table `NotificationReceipt` (1 "lu" par user) — sinon le 1er lecteur masque pour tous.
-- **S14/S15/S16** Chiffrer secrets SMTP/S3/OAuth Gmail, ne jamais les renvoyer au navigateur, durcir l'OAuth Gmail.
-- **S17/S18/S24** URL S3 toujours signées, valider endpoint/host (anti-SSRF).
-- **S19** Échappement HTML dans `mail.ts` (`textToHtml`).
+- **S6 Soft-delete Dossier** complet : colonne `deletedAt` prête ; garde anti-suppression active (empêche déjà la perte) ; reste à câbler le filtrage global `deletedAt: null` + purge fichiers.
+- **S16 / Gmail** : chiffrer aussi les tokens OAuth Gmail (`EmailAccount`), durcir l'OAuth (gate `isInternal` sur callback, `state` nonce).
+- **S17** URL S3 toujours signées (interdire `publicBaseUrl` pour contenu sensible).
+- Secrets jamais renvoyés au navigateur (champs write-only sur `/parametres`).
+- Rate-limiting aussi sur `/api/v1` (au-delà de login/forgot/reset).
 
 ### Logique métier transit Maroc
-- **Machine à états** du workflow (interne + v1, IMPORT/EXPORT séparés, préconditions DUM) — bloquant.
+- **Machine à états** complète : graphe de transitions autorisées (interne + v1, IMPORT/EXPORT séparés) — au-delà de la précondition DUM déjà faite.
 - **Liquidation/paiement des droits** (DGI/TGR) : `LIQUIDÉ ≠ PAYÉ`, étape + `paidAt`.
 - **DUM** : montants (valeur en douane, DI, TVA import, quittance), articles (code SH), statut transitable, circuit de sélectivité (vert/orange/rouge).
 - **Régimes suspensifs** (AT/ATPA/entrepôt/transit) : cautionnement + apurement.
