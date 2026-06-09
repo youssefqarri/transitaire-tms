@@ -60,6 +60,7 @@ export default async function DossiersPage({
         dums: true,
         createdBy: { select: { role: true } },
         documents: {
+          where: { deletedAt: null },
           select: { category: true, uploadedBy: { select: { role: true } } },
         },
       },

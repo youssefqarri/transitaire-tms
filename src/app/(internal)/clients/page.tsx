@@ -19,8 +19,9 @@ export default async function ClientsPage({
   const params = await searchParams;
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
   const [total, clients] = await Promise.all([
-    prisma.client.count(),
+    prisma.client.count({ where: { deletedAt: null } }),
     prisma.client.findMany({
+      where: { deletedAt: null },
       orderBy: { name: "asc" },
       include: { _count: { select: { dossiers: true, users: true } } },
       skip,

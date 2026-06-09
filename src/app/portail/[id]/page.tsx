@@ -29,7 +29,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
       dums: true,
       // le client ne voit pas les documents internes (fiche liquidation, ticket paiement…)
       documents: {
-        where: { category: { notIn: INTERNAL_ONLY_CATEGORIES } },
+        where: { deletedAt: null, category: { notIn: INTERNAL_ONLY_CATEGORIES } },
         orderBy: { receivedAt: "desc" },
       },
       comments: {

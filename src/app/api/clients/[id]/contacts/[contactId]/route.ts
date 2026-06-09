@@ -14,9 +14,9 @@ export async function DELETE(
   if (!session || !canManageRegistry(session.user.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  // Scoping : le contact doit appartenir au client de l'URL (évite l'IDOR)
+  // Scoping (anti-IDOR) + soft-delete : on masque le contact, on ne l'efface pas
   await prisma.clientContact
-    .deleteMany({ where: { id: contactId, clientId: id } })
+    .updateMany({ where: { id: contactId, clientId: id, deletedAt: null }, data: { deletedAt: new Date() } })
     .catch(() => {});
   await audit({
     userId: session.user.id,

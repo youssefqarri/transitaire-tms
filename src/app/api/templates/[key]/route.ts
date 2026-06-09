@@ -32,6 +32,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ key: st
       subject: data.subject ?? null,
       body: data.body,
       active: data.active,
+      deletedAt: null, // recréer un template "supprimé" le restaure
     },
     create: {
       key,
@@ -67,18 +68,16 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ key: 
   if (lang !== "FR" && lang !== "AR" && lang !== "EN")
     return NextResponse.json({ error: "Invalid lang" }, { status: 400 });
 
-  try {
-    await prisma.messageTemplate.delete({
-      where: { key_channel_lang: { key, channel, lang } },
-    });
-    await audit({
-      userId: session.user.id,
-      action: "DELETE_TEMPLATE",
-      entity: "MessageTemplate",
-      metadata: { key, channel, lang },
-    });
-  } catch {
-    /* déjà absent — pas grave */
-  }
+  // soft-delete (l'app retombera sur le template par défaut)
+  await prisma.messageTemplate.updateMany({
+    where: { key, channel, lang, deletedAt: null },
+    data: { deletedAt: new Date() },
+  });
+  await audit({
+    userId: session.user.id,
+    action: "SOFT_DELETE_TEMPLATE",
+    entity: "MessageTemplate",
+    metadata: { key, channel, lang },
+  });
   return NextResponse.json({ ok: true });
 }

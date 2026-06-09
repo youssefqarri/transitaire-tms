@@ -28,7 +28,7 @@ export default async function ClientDetailPage({
         include: { dums: true },
       },
       users: { select: { id: true, name: true, email: true } },
-      contacts: { orderBy: { createdAt: "asc" } },
+      contacts: { where: { deletedAt: null }, orderBy: { createdAt: "asc" } },
     },
   });
   if (!client) notFound();

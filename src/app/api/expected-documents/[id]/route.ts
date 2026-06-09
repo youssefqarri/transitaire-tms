@@ -42,10 +42,10 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   const session = await auth();
   if (!session || !isInternal(session.user.role) || session.user.role === "COMMIS_DOUANE")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  await prisma.expectedDocument.delete({ where: { id } });
+  await prisma.expectedDocument.update({ where: { id }, data: { deletedAt: new Date() } });
   await audit({
     userId: session.user.id,
-    action: "DELETE_EXPECTED_DOC",
+    action: "SOFT_DELETE_EXPECTED_DOC",
     entity: "ExpectedDocument",
     entityId: id,
   });

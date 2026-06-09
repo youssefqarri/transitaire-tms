@@ -20,7 +20,7 @@ export default async function EditDossierPage({
 
   const [dossier, clients, suppliers] = await Promise.all([
     prisma.dossier.findUnique({ where: { id } }),
-    prisma.client.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
+    prisma.client.findMany({ where: { deletedAt: null, active: true }, orderBy: { name: "asc" } }),
     prisma.supplier.findMany({ orderBy: { name: "asc" } }),
   ]);
   if (!dossier) notFound();

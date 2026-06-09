@@ -46,7 +46,7 @@ export async function loadTemplate(
   const t = await prisma.messageTemplate.findUnique({
     where: { key_channel_lang: { key, channel, lang } },
   });
-  if (t && t.active) {
+  if (t && t.active && !t.deletedAt) {
     return { subject: t.subject, body: t.body };
   }
   return DEFAULT_TEMPLATES[lang]?.[key]?.[channel] ?? DEFAULT_TEMPLATES.FR[key][channel];

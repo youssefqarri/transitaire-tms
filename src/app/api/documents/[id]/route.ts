@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
-import { storage } from "@/lib/storage";
 import { canUploadDocument } from "@/lib/roles";
 
 export async function DELETE(
@@ -17,29 +16,14 @@ export async function DELETE(
 
   const doc = await prisma.document.findUnique({ where: { id } });
   if (!doc) return NextResponse.json({ error: "Document introuvable" }, { status: 404 });
+  if (doc.deletedAt) return NextResponse.json({ ok: true });
 
-  // tente de supprimer le fichier physique si présent
-  if (doc.fileUrl) {
-    try {
-      // convention : url = `/api/files/<key>`
-      const key = doc.fileUrl.startsWith("/api/files/")
-        ? doc.fileUrl.slice("/api/files/".length)
-        : null;
-      if (key) {
-        const driver = await storage();
-        await driver.delete(key);
-      }
-    } catch (e) {
-      // on ignore l'erreur de stockage pour ne pas bloquer la suppression DB
-      console.warn("Erreur suppression fichier", e);
-    }
-  }
-
-  await prisma.document.delete({ where: { id } });
+  // Soft-delete : on CONSERVE la pièce et son fichier (valeur légale), on la masque.
+  await prisma.document.update({ where: { id }, data: { deletedAt: new Date() } });
 
   await audit({
     userId: session.user.id,
-    action: "DELETE_DOCUMENT",
+    action: "SOFT_DELETE_DOCUMENT",
     entity: "Document",
     entityId: id,
     metadata: { name: doc.name, category: doc.category, dossierId: doc.dossierId },

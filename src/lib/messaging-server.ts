@@ -36,7 +36,7 @@ export async function notifyClient(opts: {
       client: true,
       dums: true,
       // documents attendus non encore reçus → alimente {{missingList}}
-      expectedDocuments: { where: { fulfilledAt: null }, orderBy: { createdAt: "asc" } },
+      expectedDocuments: { where: { deletedAt: null, fulfilledAt: null }, orderBy: { createdAt: "asc" } },
     },
   });
   if (!dossier) return { ok: false, error: "Dossier introuvable" };

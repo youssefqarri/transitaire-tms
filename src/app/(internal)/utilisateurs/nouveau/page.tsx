@@ -10,7 +10,7 @@ import { UserForm } from "./form";
 export default async function NewUserPage() {
   const session = await auth();
   if (!session || !canManageUsers(session.user.role)) redirect("/dashboard");
-  const clients = await prisma.client.findMany({ orderBy: { name: "asc" } });
+  const clients = await prisma.client.findMany({ where: { deletedAt: null }, orderBy: { name: "asc" } });
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">

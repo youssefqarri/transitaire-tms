@@ -46,16 +46,18 @@ export default async function DossierDetailPage({
   const dossier = await prisma.dossier.findUnique({
     where: { id },
     include: {
-      client: { include: { contacts: { orderBy: { createdAt: "asc" } } } },
+      client: { include: { contacts: { where: { deletedAt: null }, orderBy: { createdAt: "asc" } } } },
       supplier: true,
       createdBy: { select: { id: true, name: true } },
       assignedTo: { select: { id: true, name: true } },
       dums: { orderBy: { createdAt: "desc" } },
       documents: {
+        where: { deletedAt: null },
         orderBy: { receivedAt: "desc" },
         include: { uploadedBy: { select: { name: true, role: true } } },
       },
       expectedDocuments: {
+        where: { deletedAt: null },
         orderBy: { createdAt: "asc" },
         include: { requestedBy: { select: { name: true } } },
       },

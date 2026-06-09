@@ -64,32 +64,28 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
   const client = await prisma.client.findUnique({
     where: { id },
-    include: { _count: { select: { dossiers: true } } },
+    include: { _count: { select: { dossiers: { where: { deletedAt: null } } } } },
   });
   if (!client) return NextResponse.json({ error: "Client introuvable" }, { status: 404 });
+  if (client.deletedAt) return NextResponse.json({ ok: true });
 
   if (client._count.dossiers > 0) {
     return NextResponse.json(
       {
-        error: `Impossible de supprimer : ce client a ${client._count.dossiers} dossier(s). Supprimez ou réaffectez d'abord les dossiers.`,
+        error: `Impossible de supprimer : ce client a ${client._count.dossiers} dossier(s) actif(s). Supprimez ou réaffectez d'abord les dossiers.`,
       },
       { status: 409 },
     );
   }
 
-  try {
-    await prisma.client.delete({ where: { id } });
-    await audit({
-      userId: session.user.id,
-      action: "DELETE_CLIENT",
-      entity: "Client",
-      entityId: id,
-      metadata: { name: client.name },
-    });
-    return NextResponse.json({ ok: true });
-  } catch (e: unknown) {
-    const err = e as { code?: string };
-    if (err.code === "P2025") return NextResponse.json({ error: "Not found" }, { status: 404 });
-    return NextResponse.json({ error: "Erreur" }, { status: 500 });
-  }
+  // soft-delete : le client est masqué mais conservé (historique, audit)
+  await prisma.client.update({ where: { id }, data: { deletedAt: new Date() } });
+  await audit({
+    userId: session.user.id,
+    action: "SOFT_DELETE_CLIENT",
+    entity: "Client",
+    entityId: id,
+    metadata: { name: client.name },
+  });
+  return NextResponse.json({ ok: true });
 }

@@ -13,13 +13,14 @@ export async function GET(req: Request) {
   const clients = await prisma.client.findMany({
     where: q
       ? {
+          deletedAt: null,
           OR: [
             { name: { contains: q, mode: "insensitive" } },
             { code: { contains: q, mode: "insensitive" } },
             { ice: { contains: q, mode: "insensitive" } },
           ],
         }
-      : undefined,
+      : { deletedAt: null },
     orderBy: { name: "asc" },
     include: { _count: { select: { dossiers: true } } },
     take: 200,

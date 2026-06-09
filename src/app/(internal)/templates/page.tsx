@@ -25,6 +25,7 @@ export default async function TemplatesPage() {
   if (!session || !canManageUsers(session.user.role)) redirect("/dashboard");
 
   const templates = await prisma.messageTemplate.findMany({
+    where: { deletedAt: null },
     orderBy: [{ key: "asc" }, { channel: "asc" }, { lang: "asc" }],
   });
 

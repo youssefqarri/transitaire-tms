@@ -12,7 +12,7 @@ export default async function NewDossierPage() {
   if (!session || !canCreateDossier(session.user.role)) redirect("/dossiers");
 
   const [clients, suppliers] = await Promise.all([
-    prisma.client.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
+    prisma.client.findMany({ where: { deletedAt: null, active: true }, orderBy: { name: "asc" } }),
     prisma.supplier.findMany({ orderBy: { name: "asc" } }),
   ]);
 

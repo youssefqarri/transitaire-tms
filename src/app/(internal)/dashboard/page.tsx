@@ -56,7 +56,7 @@ export default async function DashboardPage() {
       include: {
         client: true,
         dums: true,
-        documents: { select: { category: true } },
+        documents: { where: { deletedAt: null }, select: { category: true } },
       },
     }),
     prisma.dossier.groupBy({
@@ -71,7 +71,7 @@ export default async function DashboardPage() {
       include: {
         client: true,
         dums: true,
-        documents: { select: { category: true } },
+        documents: { where: { deletedAt: null }, select: { category: true } },
       },
     }),
   ]);

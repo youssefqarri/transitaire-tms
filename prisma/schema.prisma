@@ -146,8 +146,10 @@ model Client {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?   // soft-delete
 
   @@index([name])
+  @@index([deletedAt])
 }
 
 // Carnet d'adresses d'un client : plusieurs destinataires possibles selon le
@@ -159,9 +161,11 @@ model ClientContact {
   name      String?  // nom ou libellé, ex: "Service logistique", "M. Alami"
   email     String
   createdAt DateTime @default(now())
+  deletedAt DateTime?   // soft-delete
 
   @@unique([clientId, email])
   @@index([clientId])
+  @@index([deletedAt])
 }
 
 model Supplier {
@@ -426,8 +430,10 @@ model ExpectedDocument {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?   // soft-delete
 
   @@index([dossierId])
+  @@index([deletedAt])
 }
 
 model Document {
@@ -455,8 +461,10 @@ model Document {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?   // soft-delete
 
   @@index([dossierId, category])
+  @@index([deletedAt])
 }
 
 // ============================================================
@@ -733,8 +741,10 @@ model MessageTemplate {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?   // soft-delete
 
   @@unique([key, channel, lang])
+  @@index([deletedAt])
 }
 
 model OutgoingMessage {

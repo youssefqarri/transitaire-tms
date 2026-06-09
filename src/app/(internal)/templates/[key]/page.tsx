@@ -39,7 +39,7 @@ export default async function TemplateEditPage({
   const [emailEffective, whatsappEffective, dbRows] = await Promise.all([
     loadTemplate(key as TemplateKey, "EMAIL", "FR"),
     loadTemplate(key as TemplateKey, "WHATSAPP", "FR"),
-    prisma.messageTemplate.findMany({ where: { key } }),
+    prisma.messageTemplate.findMany({ where: { deletedAt: null, key } }),
   ]);
 
   const emailDb = dbRows.find((r) => r.channel === "EMAIL" && r.lang === "FR");

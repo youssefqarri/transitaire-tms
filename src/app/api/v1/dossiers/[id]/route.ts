@@ -27,6 +27,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       assignedTo: { select: isClient ? { id: true, name: true } : { id: true, name: true, email: true } },
       dums: true,
       documents: {
+        where: { deletedAt: null },
         orderBy: { receivedAt: "desc" },
         include: { uploadedBy: { select: { name: true } } },
       },
