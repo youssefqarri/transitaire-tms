@@ -11,6 +11,7 @@ import {
   ScrollText,
   Receipt,
   MessageSquare,
+  Trash2,
 } from "lucide-react";
 import type { UserRole } from "@/generated/prisma/enums";
 
@@ -67,6 +68,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: "/utilisateurs", label: "Utilisateurs", icon: Users, roles: ["ADMIN"] },
       { href: "/templates", label: "Templates", icon: MessageSquare, roles: ["ADMIN"] },
       { href: "/audit", label: "Audit", icon: ScrollText, roles: ["ADMIN"] },
+      { href: "/corbeille", label: "Corbeille", icon: Trash2, roles: ["ADMIN"] },
       { href: "/parametres", label: "Paramètres", icon: Settings, roles: ["ADMIN"] },
     ],
   },

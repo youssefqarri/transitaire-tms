@@ -13,6 +13,8 @@ const PUBLIC_PATHS = [
   // la route /api/files fait elle-même son auth + contrôle d'accès (ownership clientId) ;
   // l'exclure du middleware évite la redirection HTML qui cassait le téléchargement portail
   "/api/files",
+  // sonde de monitoring publique
+  "/api/health",
 ];
 
 export default auth((req) => {

@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { prisma } from "./db";
 
 export async function audit(opts: {
@@ -7,6 +8,16 @@ export async function audit(opts: {
   entityId?: string;
   metadata?: Record<string, unknown>;
 }) {
+  // Capture IP + User-Agent depuis la requête courante (best-effort, sans changer les appelants)
+  let ip: string | undefined;
+  let userAgent: string | undefined;
+  try {
+    const h = await headers();
+    ip = h.get("x-forwarded-for")?.split(",")[0].trim() || h.get("x-real-ip") || undefined;
+    userAgent = h.get("user-agent") || undefined;
+  } catch {
+    // hors contexte requête : on ignore
+  }
   try {
     await prisma.auditLog.create({
       data: {
@@ -15,6 +26,8 @@ export async function audit(opts: {
         entity: opts.entity,
         entityId: opts.entityId,
         metadata: opts.metadata as never,
+        ip,
+        userAgent,
       },
     });
   } catch {
