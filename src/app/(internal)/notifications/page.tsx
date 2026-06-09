@@ -47,9 +47,14 @@ export default async function NotificationsPage({
       orderBy: { createdAt: "desc" },
       skip,
       take: size,
-      include: { dossier: { select: { number: true } } },
+      include: {
+        dossier: { select: { number: true } },
+        receipts: { where: { userId: session.user.id }, select: { id: true } },
+      },
     }),
-    prisma.notification.count({ where: { ...where, read: false } }),
+    prisma.notification.count({
+      where: { ...where, read: false, receipts: { none: { userId: session.user.id } } },
+    }),
   ]);
 
   return (
@@ -73,7 +78,7 @@ export default async function NotificationsPage({
                 kindLabel={KIND_LABELS[n.kind] ?? n.kind}
                 dossierNumber={n.dossier?.number ?? null}
                 link={n.link ?? "#"}
-                read={n.read}
+                read={n.read || n.receipts.length > 0}
                 createdAt={n.createdAt}
               />
             ))}

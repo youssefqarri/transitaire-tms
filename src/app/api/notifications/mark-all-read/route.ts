@@ -5,12 +5,20 @@ import { prisma } from "@/lib/db";
 export async function POST() {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  await prisma.notification.updateMany({
+  // Pose un accusé de lecture pour CET utilisateur sur ses notifications non lues
+  const notifs = await prisma.notification.findMany({
     where: {
       read: false,
       OR: [{ userId: session.user.id }, { role: session.user.role }],
+      receipts: { none: { userId: session.user.id } },
     },
-    data: { read: true },
+    select: { id: true },
   });
+  if (notifs.length) {
+    await prisma.notificationReceipt.createMany({
+      data: notifs.map((n) => ({ notificationId: n.id, userId: session.user.id })),
+      skipDuplicates: true,
+    });
+  }
   return NextResponse.json({ ok: true });
 }

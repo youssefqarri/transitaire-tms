@@ -14,6 +14,11 @@ export async function PATCH(_req: Request, { params }: { params: Promise<{ id: s
   const allowed = n.userId === session.user.id || n.role === session.user.role;
   if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  await prisma.notification.update({ where: { id }, data: { read: true } });
+  // Accusé de lecture par utilisateur (ne masque plus la notif pour les autres)
+  await prisma.notificationReceipt.upsert({
+    where: { notificationId_userId: { notificationId: id, userId: session.user.id } },
+    create: { notificationId: id, userId: session.user.id },
+    update: {},
+  });
   return NextResponse.json({ ok: true });
 }
