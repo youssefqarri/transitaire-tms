@@ -55,9 +55,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { id: token.sub },
           select: { active: true, role: true, clientId: true, tokenVersion: true },
         });
-        if (!db || !db.active || db.tokenVersion !== (token as { tv?: number }).tv) {
-          return null; // invalide la session
-        }
+        if (!db || !db.active) return null; // compte supprimé/désactivé
+        // tokenVersion : n'invalide que les jetons qui en portent un (évite la
+        // déconnexion de masse des sessions émises avant ce déploiement)
+        const tv = (token as { tv?: number }).tv;
+        if (typeof tv === "number" && db.tokenVersion !== tv) return null;
         (token as Record<string, unknown>).role = db.role;
         (token as Record<string, unknown>).clientId = db.clientId;
       }
