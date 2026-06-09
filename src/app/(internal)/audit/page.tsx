@@ -61,6 +61,9 @@ export default async function AuditPage({
                     {l.entityId && (
                       <span className="text-[11.5px] text-[var(--color-fg-mute)]"> · {l.entityId.slice(0, 8)}</span>
                     )}
+                    {l.ip && (
+                      <span className="text-[11.5px] text-[var(--color-fg-mute)] tnum"> · {l.ip}</span>
+                    )}
                   </div>
                 </div>
                 <div className="text-[11.5px] text-[var(--color-fg-mute)] whitespace-nowrap">
