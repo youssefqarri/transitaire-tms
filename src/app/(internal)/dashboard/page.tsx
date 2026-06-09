@@ -19,6 +19,7 @@ import type { DossierStatus } from "@/generated/prisma/enums";
 import { KeyDates } from "@/components/dossier/key-dates";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
+import { orgScope } from "@/lib/tenant";
 
 export const dynamic = "force-dynamic";
 
@@ -36,19 +37,21 @@ export default async function DashboardPage() {
     statusGroups,
     activeDossiers,
   ] = await Promise.all([
-    prisma.dossier.count(),
-    prisma.dossier.count({ where: { status: { notIn: ["CLOTURE", "ANNULE"] } } }),
+    prisma.dossier.count({ where: { ...orgScope(session.user.orgId) } }),
+    prisma.dossier.count({ where: { ...orgScope(session.user.orgId), status: { notIn: ["CLOTURE", "ANNULE"] } } }),
     prisma.dossier.count({
-      where: { status: { in: ["DOCUMENTS_MANQUANTS", "DEMANDE_DOCUMENTS", "BUREAU_VALEUR"] } },
+      where: { ...orgScope(session.user.orgId), status: { in: ["DOCUMENTS_MANQUANTS", "DEMANDE_DOCUMENTS", "BUREAU_VALEUR"] } },
     }),
     prisma.dossier.count({
       where: {
+        ...orgScope(session.user.orgId),
         status: "CLOTURE",
         closedAt: { gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) },
       },
     }),
     prisma.emailMessage.count({ where: { isRead: false } }),
     prisma.dossier.findMany({
+      where: { ...orgScope(session.user.orgId) },
       take: 8,
       orderBy: { updatedAt: "desc" },
       include: {
@@ -60,11 +63,11 @@ export default async function DashboardPage() {
     prisma.dossier.groupBy({
       by: ["status"],
       _count: { _all: true },
-      where: { status: { notIn: ["CLOTURE", "ANNULE"] } },
+      where: { ...orgScope(session.user.orgId), status: { notIn: ["CLOTURE", "ANNULE"] } },
     }),
     // Vue groupée par client : tous les dossiers actifs (tri côté JS)
     prisma.dossier.findMany({
-      where: { status: { notIn: ["CLOTURE", "ANNULE"] } },
+      where: { ...orgScope(session.user.orgId), status: { notIn: ["CLOTURE", "ANNULE"] } },
       orderBy: { updatedAt: "desc" },
       include: {
         client: true,

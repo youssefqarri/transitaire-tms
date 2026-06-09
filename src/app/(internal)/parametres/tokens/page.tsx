@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canManageUsers, ROLE_LABELS } from "@/lib/roles";
+import { orgScope } from "@/lib/tenant";
 import { Card } from "@/components/ui/card";
 import { TokensClient } from "./tokens-client";
 
@@ -19,7 +20,7 @@ export default async function TokensPage() {
       include: { user: { select: { id: true, name: true, email: true, role: true } } },
     }),
     prisma.user.findMany({
-      where: { active: true, role: { not: "CLIENT" } },
+      where: { ...orgScope(session.user.orgId), active: true, role: { not: "CLIENT" } },
       orderBy: { name: "asc" },
       select: { id: true, name: true, email: true, role: true },
     }),

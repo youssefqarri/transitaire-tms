@@ -6,6 +6,7 @@ import { oauthClient } from "@/lib/gmail";
 import { classifyEmail } from "@/lib/email-classifier";
 import { linkEmailToDossiers } from "@/lib/email-linker";
 import { isInternal } from "@/lib/roles";
+import { orgScope } from "@/lib/tenant";
 
 // POST /api/emails/sync — synchro Gmail manuelle. À déclencher périodiquement (cron) en prod.
 export async function POST() {
@@ -13,7 +14,7 @@ export async function POST() {
   if (!session || !isInternal(session.user.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const accounts = await prisma.emailAccount.findMany({ where: { active: true } });
+  const accounts = await prisma.emailAccount.findMany({ where: { ...orgScope(session.user.orgId), active: true } });
   if (accounts.length === 0)
     return NextResponse.json({ error: "Aucun compte Gmail connecté" }, { status: 400 });
 

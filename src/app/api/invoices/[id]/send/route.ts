@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { sendMail, textToHtml } from "@/lib/mail";
 import { audit } from "@/lib/audit";
 import { formatMAD, totals, ISSUER } from "@/lib/invoicing";
+import { orgData } from "@/lib/tenant";
 
 const schema = z.object({
   to: z.string().email().optional(),
@@ -95,6 +96,7 @@ ${ISSUER.name}`;
     if (firstDossierId) {
       await prisma.outgoingMessage.create({
         data: {
+          ...orgData(session.user.orgId),
           dossierId: firstDossierId,
           channel: "EMAIL",
           lang: "FR",

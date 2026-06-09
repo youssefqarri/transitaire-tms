@@ -4,6 +4,7 @@ import { authenticate } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { isInternal } from "@/lib/roles";
 import { audit } from "@/lib/audit";
+import { orgData } from "@/lib/tenant";
 
 const schema = z.object({
   name: z.string().min(1),
@@ -28,6 +29,7 @@ export async function POST(req: Request) {
   try {
     const client = await prisma.client.create({
       data: {
+        ...orgData(ctx.orgId),
         name: parsed.data.name.trim(),
         code: parsed.data.code?.trim() || null,
         ice: parsed.data.ice?.trim() || null,

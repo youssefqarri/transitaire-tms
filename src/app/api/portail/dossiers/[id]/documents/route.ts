@@ -5,6 +5,7 @@ import { audit } from "@/lib/audit";
 import { storage } from "@/lib/storage";
 import { validateUpload } from "@/lib/uploads";
 import { isClientUploadableCategory } from "@/lib/statuses";
+import { orgScope } from "@/lib/tenant";
 import type { DocumentCategory } from "@/generated/prisma/enums";
 
 // Upload d'un document par le client via le portail (limité à ses propres dossiers).
@@ -17,7 +18,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   // Vérifie que le dossier appartient bien au client connecté
   const dossier = await prisma.dossier.findFirst({
-    where: { id, clientId: session.user.clientId },
+    where: { ...orgScope(session.user.orgId), id, clientId: session.user.clientId },
     select: { id: true, number: true, clientId: true },
   });
   if (!dossier) return NextResponse.json({ error: "Dossier introuvable" }, { status: 404 });
@@ -77,6 +78,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const body = `Le client a déposé : ${name}`;
   await prisma.notification.createMany({
     data: (["ADMIN", "EXPLOITATION", "DECLARANT", "BUREAU"] as const).map((role) => ({
+      orgId: session.user.orgId,
       role,
       dossierId: id,
       kind: "CLIENT_DOC_UPLOAD",

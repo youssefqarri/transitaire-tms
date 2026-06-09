@@ -10,6 +10,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { formatDateTime } from "@/lib/utils";
 import { SyncButton } from "./sync-button";
+import { orgScope } from "@/lib/tenant";
 
 export const dynamic = "force-dynamic";
 
@@ -68,7 +69,7 @@ export default async function EmailsPage({
     }),
   ]);
 
-  const account = await prisma.emailAccount.findFirst({ where: { active: true } });
+  const account = await prisma.emailAccount.findFirst({ where: { ...orgScope(session.user.orgId), active: true } });
 
   return (
     <div className="space-y-6 animate-fade-in">

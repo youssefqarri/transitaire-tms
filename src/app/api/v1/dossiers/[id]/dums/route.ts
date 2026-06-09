@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { canCreateDUM } from "@/lib/roles";
 import { audit } from "@/lib/audit";
 import { MAX_DUMS_PER_DOSSIER } from "@/lib/reference";
+import { orgScope } from "@/lib/tenant";
 
 const schema = z.object({
   number: z.string().min(1),
@@ -23,7 +24,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: "Invalid" }, { status: 400 });
 
-  const dossier = await prisma.dossier.findFirst({ where: { OR: [{ id }, { number: id }] } });
+  const dossier = await prisma.dossier.findFirst({
+    where: { ...orgScope(ctx.orgId), OR: [{ id }, { number: id }] },
+  });
   if (!dossier) return NextResponse.json({ error: "Dossier not found" }, { status: 404 });
 
   // Un dossier peut cumuler plusieurs régimes douaniers, mais au maximum 2 DUM.

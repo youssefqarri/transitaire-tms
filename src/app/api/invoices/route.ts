@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { canManageInvoices } from "@/lib/roles";
 import { nextInvoiceNumber } from "@/lib/invoicing-server";
+import { orgData } from "@/lib/tenant";
 
 const itemSchema = z.object({
   kind: z.enum(["HONORAIRE", "DEBOURS", "AUTRE"]),
@@ -46,6 +47,7 @@ export async function POST(req: Request) {
     try {
       const created = await prisma.invoice.create({
         data: {
+          ...orgData(session.user.orgId),
           number: next.number,
           year: next.year,
           sequence: next.sequence,

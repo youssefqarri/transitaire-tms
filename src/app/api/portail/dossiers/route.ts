@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { nextProvisionalDossierNumber } from "@/lib/dossier-numbering";
+import { orgScope, orgData } from "@/lib/tenant";
 
 const createSchema = z.object({
   reference: z.string().optional(),
@@ -36,11 +37,11 @@ export async function POST(req: Request) {
   let supplierId: string | null = null;
   if (data.supplierName?.trim()) {
     const name = data.supplierName.trim();
-    const existing = await prisma.supplier.findFirst({ where: { name } });
+    const existing = await prisma.supplier.findFirst({ where: { ...orgScope(session.user.orgId), name } });
     if (existing) {
       supplierId = existing.id;
     } else {
-      const created = await prisma.supplier.create({ data: { name } });
+      const created = await prisma.supplier.create({ data: { ...orgData(session.user.orgId), name } });
       supplierId = created.id;
     }
   }
@@ -51,6 +52,7 @@ export async function POST(req: Request) {
     try {
       const dossier = await prisma.dossier.create({
         data: {
+          ...orgData(session.user.orgId),
           number,
           reference: data.reference?.trim() || null,
           type: data.type,
@@ -84,6 +86,7 @@ export async function POST(req: Request) {
       const body = `${client?.name ?? "Le client"} vient d'ouvrir le dossier ${dossier.number}${data.reference ? ` (réf. ${data.reference})` : ""}.`;
       await prisma.notification.createMany({
         data: (["ADMIN", "EXPLOITATION", "DECLARANT", "BUREAU"] as const).map((role) => ({
+          orgId: session.user.orgId,
           role,
           dossierId: dossier.id,
           kind: "CLIENT_NEW_DOSSIER",

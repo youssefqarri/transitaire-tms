@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { prisma } from "@/lib/db";
+import { orgScope } from "@/lib/tenant";
 
 export default async function InternalLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -11,6 +12,7 @@ export default async function InternalLayout({ children }: { children: React.Rea
 
   const unreadCount = await prisma.notification.count({
     where: {
+      ...orgScope(session.user.orgId),
       read: false,
       OR: [{ userId: session.user.id }, { role: session.user.role }],
     },

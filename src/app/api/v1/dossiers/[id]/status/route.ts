@@ -4,6 +4,7 @@ import { authenticate } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { canModifyDossier } from "@/lib/roles";
 import { audit } from "@/lib/audit";
+import { orgScope, orgData } from "@/lib/tenant";
 
 const DOSSIER_STATUSES = [
   "OUVERTURE",
@@ -48,7 +49,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!parsed.success) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
 
   const dossier = await prisma.dossier.findFirst({
-    where: { OR: [{ id }, { number: id }] },
+    where: { ...orgScope(ctx.orgId), OR: [{ id }, { number: id }] },
   });
   if (!dossier) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
@@ -70,6 +71,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   await prisma.notification.create({
     data: {
+      ...orgData(ctx.orgId),
       role: "EXPLOITATION",
       dossierId: dossier.id,
       kind: "STATUS_CHANGE",

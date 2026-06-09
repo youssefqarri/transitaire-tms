@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canManageRegistry } from "@/lib/roles";
 import { audit } from "@/lib/audit";
+import { orgData } from "@/lib/tenant";
 
 const schema = z.object({
   name: z.string().min(1),
@@ -29,7 +30,9 @@ export async function POST(req: Request) {
   for (const [k, v] of Object.entries(parsed.data)) data[k] = (v ?? "").trim() || null;
   data.name = parsed.data.name.trim();
   try {
-    const client = await prisma.client.create({ data: data as never });
+    const client = await prisma.client.create({
+      data: { ...orgData(session.user.orgId), ...data } as never,
+    });
     await audit({
       userId: session.user.id,
       action: "CREATE_CLIENT",

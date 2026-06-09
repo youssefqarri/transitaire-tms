@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canCreateDossier } from "@/lib/roles";
+import { orgScope } from "@/lib/tenant";
 import { Card } from "@/components/ui/card";
 import { BackLink } from "@/components/ui/back-link";
 import { PageHeader } from "@/components/ui/page-header";
@@ -12,8 +13,8 @@ export default async function NewDossierPage() {
   if (!session || !canCreateDossier(session.user.role)) redirect("/dossiers");
 
   const [clients, suppliers] = await Promise.all([
-    prisma.client.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
-    prisma.supplier.findMany({ orderBy: { name: "asc" } }),
+    prisma.client.findMany({ where: { ...orgScope(session.user.orgId), active: true }, orderBy: { name: "asc" } }),
+    prisma.supplier.findMany({ where: { ...orgScope(session.user.orgId) }, orderBy: { name: "asc" } }),
   ]);
 
   return (

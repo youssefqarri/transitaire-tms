@@ -4,6 +4,7 @@ import { authenticate } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { canCreateDossier } from "@/lib/roles";
 import { audit } from "@/lib/audit";
+import { orgData } from "@/lib/tenant";
 
 const schema = z.object({
   number: z.string().min(1),
@@ -39,6 +40,7 @@ export async function POST(req: Request) {
   try {
     const dossier = await prisma.dossier.create({
       data: {
+        ...orgData(ctx.orgId),
         number: data.number.trim(),
         reference: data.reference?.trim() || null,
         type: data.type,

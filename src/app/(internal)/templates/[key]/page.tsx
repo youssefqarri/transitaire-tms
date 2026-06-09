@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canManageUsers } from "@/lib/roles";
+import { orgScope } from "@/lib/tenant";
 import { loadTemplate, TEMPLATE_KEYS, type TemplateKey } from "@/lib/messaging";
 import { Card } from "@/components/ui/card";
 import { TemplateEditor } from "./editor";
@@ -39,7 +40,7 @@ export default async function TemplateEditPage({
   const [emailEffective, whatsappEffective, dbRows] = await Promise.all([
     loadTemplate(key as TemplateKey, "EMAIL", "FR"),
     loadTemplate(key as TemplateKey, "WHATSAPP", "FR"),
-    prisma.messageTemplate.findMany({ where: { key } }),
+    prisma.messageTemplate.findMany({ where: { ...orgScope(session.user.orgId), key } }),
   ]);
 
   const emailDb = dbRows.find((r) => r.channel === "EMAIL" && r.lang === "FR");

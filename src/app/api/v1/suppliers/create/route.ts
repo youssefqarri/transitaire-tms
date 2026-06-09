@@ -3,6 +3,7 @@ import { z } from "zod";
 import { authenticate } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { isInternal } from "@/lib/roles";
+import { orgData } from "@/lib/tenant";
 
 const schema = z.object({
   name: z.string().min(1),
@@ -20,6 +21,7 @@ export async function POST(req: Request) {
   if (!parsed.success) return NextResponse.json({ error: "Invalid" }, { status: 400 });
   const s = await prisma.supplier.create({
     data: {
+      ...orgData(ctx.orgId),
       name: parsed.data.name.trim(),
       country: parsed.data.country?.trim() || null,
       email: parsed.data.email?.trim() || null,

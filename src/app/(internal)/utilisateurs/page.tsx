@@ -4,6 +4,7 @@ import { Plus, Users } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canManageUsers, ROLE_LABELS } from "@/lib/roles";
+import { orgScope } from "@/lib/tenant";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,8 +27,9 @@ export default async function UsersPage({
 
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
   const [total, users] = await Promise.all([
-    prisma.user.count(),
+    prisma.user.count({ where: { ...orgScope(session.user.orgId) } }),
     prisma.user.findMany({
+      where: { ...orgScope(session.user.orgId) },
       orderBy: { createdAt: "desc" },
       skip,
       take: size,

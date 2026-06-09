@@ -15,6 +15,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
 import { parsePagination } from "@/lib/pagination";
+import { orgScope } from "@/lib/tenant";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,7 @@ export default async function DossiersPage({
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
 
   const where = {
+    ...orgScope(session.user.orgId),
     ...(q && {
       OR: [
         { number: { contains: q, mode: "insensitive" as const } },

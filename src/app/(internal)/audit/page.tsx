@@ -11,6 +11,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { formatDateTime } from "@/lib/utils";
 import { canManageUsers } from "@/lib/roles";
+import { orgScope } from "@/lib/tenant";
 
 export const dynamic = "force-dynamic";
 
@@ -24,8 +25,9 @@ export default async function AuditPage({
   if (!session || !canManageUsers(session.user.role)) redirect("/dashboard");
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
   const [total, logs] = await Promise.all([
-    prisma.auditLog.count(),
+    prisma.auditLog.count({ where: { ...orgScope(session.user.orgId) } }),
     prisma.auditLog.findMany({
+      where: { ...orgScope(session.user.orgId) },
       orderBy: { createdAt: "desc" },
       skip,
       take: size,

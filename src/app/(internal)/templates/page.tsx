@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canManageUsers } from "@/lib/roles";
+import { orgScope } from "@/lib/tenant";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CHANNEL_LABELS, LANG_LABELS, TEMPLATE_KEYS } from "@/lib/messaging";
@@ -25,6 +26,7 @@ export default async function TemplatesPage() {
   if (!session || !canManageUsers(session.user.role)) redirect("/dashboard");
 
   const templates = await prisma.messageTemplate.findMany({
+    where: { ...orgScope(session.user.orgId) },
     orderBy: [{ key: "asc" }, { channel: "asc" }, { lang: "asc" }],
   });
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, FileText, AlertCircle, Download } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { orgScope } from "@/lib/tenant";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import {
@@ -24,7 +25,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
   if (!session?.user.clientId) return null;
 
   const dossier = await prisma.dossier.findFirst({
-    where: { id, clientId: session.user.clientId },
+    where: { ...orgScope(session.user.orgId), id, clientId: session.user.clientId },
     include: {
       dums: true,
       // le client ne voit pas les documents internes (fiche liquidation, ticket paiement…)

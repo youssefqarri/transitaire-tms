@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Plus, Receipt } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { orgScope } from "@/lib/tenant";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,8 +35,9 @@ export default async function InvoicesPage({
 
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
   const [total, invoices] = await Promise.all([
-    prisma.invoice.count(),
+    prisma.invoice.count({ where: { ...orgScope(session.user.orgId) } }),
     prisma.invoice.findMany({
+      where: { ...orgScope(session.user.orgId) },
       orderBy: [{ year: "desc" }, { sequence: "desc" }],
       skip,
       take: size,

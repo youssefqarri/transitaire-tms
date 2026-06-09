@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canModifyDossier } from "@/lib/roles";
 import { audit } from "@/lib/audit";
+import { orgData } from "@/lib/tenant";
 
 const schema = z.object({
   status: z.enum([
@@ -79,6 +80,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   // notification interne
   await prisma.notification.create({
     data: {
+      ...orgData(session.user.orgId),
       role: "EXPLOITATION",
       dossierId: id,
       kind: "STATUS_CHANGE",

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { orgScope } from "@/lib/tenant";
 import { BackLink } from "@/components/ui/back-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
@@ -14,7 +15,7 @@ export default async function NewInvoicePage() {
 
   const [clients, next] = await Promise.all([
     prisma.client.findMany({
-      where: { active: true },
+      where: { ...orgScope(session.user.orgId), active: true },
       orderBy: { name: "asc" },
       select: { id: true, name: true, code: true, city: true, ice: true },
     }),

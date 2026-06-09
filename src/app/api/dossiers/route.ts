@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { canCreateDossier } from "@/lib/roles";
 import { audit } from "@/lib/audit";
 import { nextProvisionalDossierNumber } from "@/lib/dossier-numbering";
+import { orgData } from "@/lib/tenant";
 
 const createSchema = z.object({
   number: z.string().optional(),
@@ -46,6 +47,7 @@ export async function POST(req: Request) {
       try {
         const dossier = await prisma.dossier.create({
           data: {
+            ...orgData(session.user.orgId),
             number,
             reference: data.reference?.trim() || null,
             type: data.type,

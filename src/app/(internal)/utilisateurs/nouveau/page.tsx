@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canManageUsers } from "@/lib/roles";
+import { orgScope } from "@/lib/tenant";
 import { BackLink } from "@/components/ui/back-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
@@ -10,7 +11,7 @@ import { UserForm } from "./form";
 export default async function NewUserPage() {
   const session = await auth();
   if (!session || !canManageUsers(session.user.role)) redirect("/dashboard");
-  const clients = await prisma.client.findMany({ orderBy: { name: "asc" } });
+  const clients = await prisma.client.findMany({ where: { ...orgScope(session.user.orgId) }, orderBy: { name: "asc" } });
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">

@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
 import { parsePagination } from "@/lib/pagination";
+import { orgScope } from "@/lib/tenant";
 import { MarkAllRead } from "./mark-all-read";
 import { NotifRow } from "./notif-row";
 
@@ -37,6 +38,7 @@ export default async function NotificationsPage({
 
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
   const where = {
+    ...orgScope(session.user.orgId),
     OR: [{ userId: session.user.id }, { role: session.user.role }],
   };
 

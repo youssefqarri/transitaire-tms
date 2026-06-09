@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { isInternal } from "@/lib/roles";
+import { orgScope } from "@/lib/tenant";
 
 export async function GET(req: Request) {
   const ctx = await authenticate(req);
@@ -11,7 +12,10 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const q = url.searchParams.get("q")?.trim();
   const suppliers = await prisma.supplier.findMany({
-    where: q ? { name: { contains: q, mode: "insensitive" } } : undefined,
+    where: {
+      ...orgScope(ctx.orgId),
+      ...(q ? { name: { contains: q, mode: "insensitive" } } : {}),
+    },
     orderBy: { name: "asc" },
     take: 200,
   });
