@@ -704,6 +704,7 @@ model Invoice {
   paymentRef    String?
 
   items         InvoiceItem[]
+  creditNotes   CreditNote[]
 
   createdById   String?
   createdBy     User?          @relation("InvoicesCreated", fields: [createdById], references: [id], onDelete: SetNull)
@@ -731,6 +732,33 @@ model InvoiceItem {
 
   @@index([invoiceId])
   @@index([dossierId])
+}
+
+enum CreditNoteStatus {
+  ISSUED    // émis
+  APPLIED   // imputé / utilisé
+  CANCELLED // annulé
+}
+
+// Avoir (note de crédit) rattaché à une facture. Numérotation propre AV{AA}{NNNN}.
+model CreditNote {
+  id          String           @id @default(cuid())
+  number      String           @unique // ex: AV260001
+  year        Int
+  sequence    Int
+  invoiceId   String
+  invoice     Invoice          @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount      Decimal          @db.Decimal(12, 2)
+  reason      String?          @db.Text
+  status      CreditNoteStatus @default(ISSUED)
+  createdById String?          // auteur (id brut, sans relation, pour limiter le couplage)
+  issuedAt    DateTime?        @default(now())
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+
+  @@unique([year, sequence])
+  @@index([invoiceId])
 }
 
 // ============================================================

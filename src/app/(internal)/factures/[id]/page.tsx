@@ -10,6 +10,7 @@ import { BackLink } from "@/components/ui/back-link";
 import {
   INVOICE_STATUS_LABELS,
   INVOICE_ITEM_KIND_LABELS,
+  CREDIT_NOTE_STATUS_LABELS,
   PAYMENT_METHOD_LABELS,
   formatMAD,
   totals,
@@ -18,6 +19,7 @@ import {
 import { formatDate } from "@/lib/utils";
 import { InvoiceActions } from "./actions";
 import { SendInvoiceButton } from "./send-button";
+import { CreditNoteButton } from "./credit-note-button";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +46,7 @@ export default async function InvoiceDetailPage({
     include: {
       client: true,
       items: { orderBy: { order: "asc" }, include: { dossier: { select: { number: true } } } },
+      creditNotes: { where: { deletedAt: null }, orderBy: { createdAt: "desc" } },
       createdBy: { select: { name: true } },
     },
   });
@@ -58,6 +61,11 @@ export default async function InvoiceDetailPage({
       vatRate: Number(it.vatRate),
     })),
   );
+
+  // Avoirs (hors annulés) → réduisent le net à payer.
+  const activeCredits = invoice.creditNotes.filter((c) => c.status !== "CANCELLED");
+  const totalCredits = activeCredits.reduce((s, c) => s + Number(c.amount), 0);
+  const netDue = Math.max(0, computed.totalTTC - Number(invoice.paidAmount) - totalCredits);
 
   return (
     <div className="space-y-5 max-w-4xl animate-fade-in">
@@ -92,6 +100,10 @@ export default async function InvoiceDetailPage({
               clientEmail={invoice.client.email}
             />
           )}
+          {["ADMIN", "COMPTABILITE"].includes(session.user.role) &&
+            invoice.status !== "CANCELLED" && (
+              <CreditNoteButton invoiceId={invoice.id} suggestedAmount={netDue} />
+            )}
           <InvoiceActions
             id={invoice.id}
             currentStatus={invoice.status}
@@ -178,6 +190,16 @@ export default async function InvoiceDetailPage({
               </span>
             </div>
           </div>
+          {totalCredits > 0 && (
+            <div className="px-5 py-3 space-y-2 text-[13px] border-b border-[var(--color-border)]">
+              <Row
+                label="Avoirs"
+                value={`− ${formatMAD(totalCredits)}`}
+                className="text-[var(--color-success)]"
+              />
+              <Row label="Net à payer" value={formatMAD(netDue)} bold />
+            </div>
+          )}
           {Number(invoice.paidAmount) > 0 && (
             <div className="px-5 py-3 space-y-2 text-[13px] border-b border-[var(--color-border)]">
               <Row
@@ -221,6 +243,35 @@ export default async function InvoiceDetailPage({
           )}
         </Card>
       </div>
+
+      {invoice.creditNotes.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Avoirs</CardTitle>
+          </CardHeader>
+          <div className="divide-y divide-[var(--color-border)]">
+            {invoice.creditNotes.map((cn) => (
+              <div
+                key={cn.id}
+                className="px-5 py-3 flex items-center justify-between gap-3 text-[13px]"
+              >
+                <div className="min-w-0">
+                  <span className="font-mono font-medium text-[var(--color-fg)]">{cn.number}</span>
+                  {cn.reason && (
+                    <span className="ml-2 text-[var(--color-fg-3)]">{cn.reason}</span>
+                  )}
+                  <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+                    {formatDate(cn.issuedAt)} · {CREDIT_NOTE_STATUS_LABELS[cn.status]}
+                  </div>
+                </div>
+                <span className="font-mono tnum text-[var(--color-fg)]">
+                  {formatMAD(Number(cn.amount))}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       {invoice.notes && (
         <Card>

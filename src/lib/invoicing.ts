@@ -2,6 +2,7 @@ import type {
   InvoiceItemKind,
   InvoiceStatus,
   PaymentMethod,
+  CreditNoteStatus,
 } from "@/generated/prisma/enums";
 
 // Émetteur de la facture — coordonnées légales réelles du transitaire.
@@ -36,6 +37,12 @@ export const INVOICE_ITEM_KIND_LABELS: Record<InvoiceItemKind, string> = {
   HONORAIRE: "Honoraires",
   DEBOURS: "Débours",
   AUTRE: "Autre",
+};
+
+export const CREDIT_NOTE_STATUS_LABELS: Record<CreditNoteStatus, string> = {
+  ISSUED: "Émis",
+  APPLIED: "Imputé",
+  CANCELLED: "Annulé",
 };
 
 export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
