@@ -27,21 +27,26 @@ type ClientOpt = {
   separateDebours: boolean;
 };
 
+type DossierOpt = { id: string; number: string; reference: string | null };
+
 // Barème proposé : 0 % (débours refacturé à l'identique), 3 % (taxe régionale
 // conteneurs au port), 10 % (transport refacturé), 14 %, 20 % (honoraires & frais).
 const VAT_RATES = [0, 3, 10, 14, 20] as const;
 
 export function NewInvoiceForm({
   clients,
+  dossiers,
   suggestedNumber,
 }: {
   clients: ClientOpt[];
+  dossiers: DossierOpt[];
   suggestedNumber: string;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [number, setNumber] = useState(suggestedNumber);
   const [clientId, setClientId] = useState("");
+  const [dossierId, setDossierId] = useState("");
   const [issuedAt, setIssuedAt] = useState(new Date().toISOString().slice(0, 10));
   const [dueAt, setDueAt] = useState(
     new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
@@ -49,7 +54,7 @@ export function NewInvoiceForm({
   const [termsOfPayment, setTermsOfPayment] = useState("Paiement à 30 jours");
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<LineItem[]>([
-    { kind: "HONORAIRE", description: "Honoraires de transit", quantity: 1, unitPrice: 0, vatRate: 20 },
+    { kind: "HONORAIRE", code: "", description: "Honoraires de transit", quantity: 1, unitPrice: 0, vatRate: 20 },
   ]);
 
   const computed = useMemo(() => totals(items), [items]);
@@ -63,6 +68,7 @@ export function NewInvoiceForm({
       ...arr,
       {
         kind,
+        code: "",
         description: kind === "DEBOURS" ? "Débours douane" : "",
         quantity: 1,
         unitPrice: 0,
@@ -95,6 +101,7 @@ export function NewInvoiceForm({
         body: JSON.stringify({
           number,
           clientId,
+          dossierId: dossierId || undefined,
           issuedAt,
           dueAt,
           termsOfPayment,
@@ -160,6 +167,22 @@ export function NewInvoiceForm({
         )}
       </div>
 
+      <div className="space-y-1.5">
+        <Label htmlFor="dossierId">Dossier de référence (optionnel)</Label>
+        <Combobox
+          id="dossierId"
+          items={dossiers.map((d) => ({
+            id: d.id,
+            label: d.number,
+            sublabel: d.reference || undefined,
+          }))}
+          value={dossierId}
+          onChange={setDossierId}
+          placeholder="Aucun / sélectionner un dossier…"
+          searchPlaceholder="Rechercher…"
+        />
+      </div>
+
       {/* Lignes */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
@@ -174,7 +197,8 @@ export function NewInvoiceForm({
           </div>
         </div>
         <div className="border border-[var(--color-border)] rounded-[var(--radius)] divide-y divide-[var(--color-border)] overflow-x-auto">
-          <div className="grid grid-cols-[140px_minmax(180px,1fr)_80px_120px_96px_120px_36px] gap-3 px-3 py-2 text-[11px] font-medium text-[var(--color-fg-3)] uppercase tracking-wide bg-[var(--color-surface-2)] min-w-[760px]">
+          <div className="grid grid-cols-[84px_128px_minmax(150px,1fr)_70px_104px_84px_104px_36px] gap-3 px-3 py-2 text-[11px] font-medium text-[var(--color-fg-3)] uppercase tracking-wide bg-[var(--color-surface-2)] min-w-[860px]">
+            <div>Code</div>
             <div>Type</div>
             <div>Description</div>
             <div className="text-right">Qté</div>
@@ -188,8 +212,14 @@ export function NewInvoiceForm({
             return (
               <div
                 key={i}
-                className="grid grid-cols-[140px_minmax(180px,1fr)_80px_120px_96px_120px_36px] gap-3 items-center px-3 py-2 min-w-[760px]"
+                className="grid grid-cols-[84px_128px_minmax(150px,1fr)_70px_104px_84px_104px_36px] gap-3 items-center px-3 py-2 min-w-[860px]"
               >
+                <Input
+                  value={it.code ?? ""}
+                  onChange={(e) => updateItem(i, "code", e.target.value)}
+                  placeholder="Code"
+                  className="font-mono"
+                />
                 <Select
                   value={it.kind}
                   onChange={(e) => {

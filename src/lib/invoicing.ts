@@ -24,6 +24,23 @@ export const ISSUER = {
   swift: "CIHMMAMC",
 } as const;
 
+export type Issuer = {
+  name: string;
+  legalForm: string;
+  address: string;
+  ice: string;
+  rc: string;
+  taxId: string;
+  patente: string;
+  cnss: string;
+  agrement: string;
+  phone: string;
+  email: string;
+  bank: string;
+  rib: string;
+  swift: string;
+};
+
 export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
   DRAFT: "Brouillon",
   SENT: "Envoyée",
@@ -56,6 +73,7 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
 
 export type LineItem = {
   kind: InvoiceItemKind;
+  code?: string;
   description: string;
   quantity: number;
   unitPrice: number;

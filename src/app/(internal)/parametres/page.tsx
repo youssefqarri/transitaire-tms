@@ -5,7 +5,7 @@ import { getSettings } from "@/lib/settings";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
-import { Mail, Cloud, Key, ChevronRight, MessageSquare, FileText, Hash } from "lucide-react";
+import { Mail, Cloud, Key, ChevronRight, MessageSquare, FileText, Hash, Building2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +46,12 @@ export default async function SettingsPage() {
         ) : (
           <Badge tone="neutral">Local actif</Badge>
         ),
+    },
+    {
+      href: "/parametres/entreprise",
+      icon: Building2,
+      title: "Coordonnées de l'entreprise",
+      description: "Émetteur des factures (raison sociale, ICE, RC, IF, RIB…)",
     },
     {
       href: "/parametres/facturation",

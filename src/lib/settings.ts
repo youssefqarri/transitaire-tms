@@ -18,6 +18,20 @@ export type AppSettings = {
   s3PublicBaseUrl: string | null;
   invoiceSeqYear: number | null;
   invoiceSeqFloor: number | null;
+  issuerName: string | null;
+  issuerLegalForm: string | null;
+  issuerAddress: string | null;
+  issuerIce: string | null;
+  issuerRc: string | null;
+  issuerTaxId: string | null;
+  issuerPatente: string | null;
+  issuerCnss: string | null;
+  issuerAgrement: string | null;
+  issuerPhone: string | null;
+  issuerEmail: string | null;
+  issuerBank: string | null;
+  issuerRib: string | null;
+  issuerSwift: string | null;
 };
 
 /**
@@ -49,6 +63,20 @@ export async function getSettings(): Promise<AppSettings> {
     s3PublicBaseUrl: row?.s3PublicBaseUrl ?? process.env.S3_PUBLIC_BASE_URL ?? null,
     invoiceSeqYear: row?.invoiceSeqYear ?? null,
     invoiceSeqFloor: row?.invoiceSeqFloor ?? null,
+    issuerName: row?.issuerName ?? null,
+    issuerLegalForm: row?.issuerLegalForm ?? null,
+    issuerAddress: row?.issuerAddress ?? null,
+    issuerIce: row?.issuerIce ?? null,
+    issuerRc: row?.issuerRc ?? null,
+    issuerTaxId: row?.issuerTaxId ?? null,
+    issuerPatente: row?.issuerPatente ?? null,
+    issuerCnss: row?.issuerCnss ?? null,
+    issuerAgrement: row?.issuerAgrement ?? null,
+    issuerPhone: row?.issuerPhone ?? null,
+    issuerEmail: row?.issuerEmail ?? null,
+    issuerBank: row?.issuerBank ?? null,
+    issuerRib: row?.issuerRib ?? null,
+    issuerSwift: row?.issuerSwift ?? null,
   };
   cache = { value, at: Date.now() };
   return value;

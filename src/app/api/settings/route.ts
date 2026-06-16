@@ -24,6 +24,21 @@ const schema = z.object({
   // Facturation : reprise de la série FA
   invoiceSeqYear: z.number().int().min(2000).max(9999).nullable().optional(),
   invoiceSeqFloor: z.number().int().min(1).nullable().optional(),
+  // Émetteur de facture
+  issuerName: z.string().nullable().optional(),
+  issuerLegalForm: z.string().nullable().optional(),
+  issuerAddress: z.string().nullable().optional(),
+  issuerIce: z.string().nullable().optional(),
+  issuerRc: z.string().nullable().optional(),
+  issuerTaxId: z.string().nullable().optional(),
+  issuerPatente: z.string().nullable().optional(),
+  issuerCnss: z.string().nullable().optional(),
+  issuerAgrement: z.string().nullable().optional(),
+  issuerPhone: z.string().nullable().optional(),
+  issuerEmail: z.string().nullable().optional(),
+  issuerBank: z.string().nullable().optional(),
+  issuerRib: z.string().nullable().optional(),
+  issuerSwift: z.string().nullable().optional(),
 });
 
 export async function PATCH(req: Request) {

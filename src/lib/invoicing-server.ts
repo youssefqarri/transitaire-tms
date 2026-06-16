@@ -1,6 +1,32 @@
 import "server-only";
 import { prisma } from "./db";
 import { getSettings } from "./settings";
+import { ISSUER, type Issuer } from "./invoicing";
+
+/**
+ * Émetteur effectif de la facture : valeurs saisies en base (AppSetting) si
+ * présentes, sinon valeurs par défaut codées (constante ISSUER). Permet de
+ * modifier les coordonnées légales sans redéploiement.
+ */
+export async function getIssuer(): Promise<Issuer> {
+  const s = await getSettings();
+  return {
+    name: s.issuerName ?? ISSUER.name,
+    legalForm: s.issuerLegalForm ?? ISSUER.legalForm,
+    address: s.issuerAddress ?? ISSUER.address,
+    ice: s.issuerIce ?? ISSUER.ice,
+    rc: s.issuerRc ?? ISSUER.rc,
+    taxId: s.issuerTaxId ?? ISSUER.taxId,
+    patente: s.issuerPatente ?? ISSUER.patente,
+    cnss: s.issuerCnss ?? ISSUER.cnss,
+    agrement: s.issuerAgrement ?? ISSUER.agrement,
+    phone: s.issuerPhone ?? ISSUER.phone,
+    email: s.issuerEmail ?? ISSUER.email,
+    bank: s.issuerBank ?? ISSUER.bank,
+    rib: s.issuerRib ?? ISSUER.rib,
+    swift: s.issuerSwift ?? ISSUER.swift,
+  };
+}
 
 /**
  * Génère le prochain numéro de facture pour l'année donnée.

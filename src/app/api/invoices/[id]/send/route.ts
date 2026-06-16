@@ -4,7 +4,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { sendMail, textToHtml } from "@/lib/mail";
 import { audit } from "@/lib/audit";
-import { formatMAD, totals, ISSUER } from "@/lib/invoicing";
+import { formatMAD, totals } from "@/lib/invoicing";
+import { getIssuer } from "@/lib/invoicing-server";
 
 const schema = z.object({
   to: z.string().email().optional(),
@@ -50,13 +51,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     })),
   );
 
+  const issuer = await getIssuer();
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "https://transit.evead.com";
   const printUrl = `${baseUrl}/factures/${invoice.id}/imprimer`;
 
   const subject =
     parsed.data.subject?.trim() ||
-    `Facture ${invoice.number} — ${ISSUER.name}`;
+    `Facture ${invoice.number} — ${issuer.name}`;
 
   const defaultBody = `Bonjour,
 
@@ -70,7 +72,7 @@ ${printUrl}
 N'hésitez pas à nous contacter pour toute question.
 
 Cordialement,
-${ISSUER.name}`;
+${issuer.name}`;
 
   const body = parsed.data.body?.trim() || defaultBody;
 

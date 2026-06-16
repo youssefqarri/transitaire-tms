@@ -12,11 +12,17 @@ export default async function NewInvoicePage() {
   const session = await auth();
   if (!session) return null;
 
-  const [clients, next] = await Promise.all([
+  const [clients, dossiers, next] = await Promise.all([
     prisma.client.findMany({
       where: { deletedAt: null, active: true },
       orderBy: { name: "asc" },
       select: { id: true, name: true, code: true, city: true, ice: true, separateDebours: true },
+    }),
+    prisma.dossier.findMany({
+      where: { deletedAt: null },
+      orderBy: { createdAt: "desc" },
+      take: 300,
+      select: { id: true, number: true, reference: true },
     }),
     nextInvoiceNumber(),
   ]);
@@ -45,6 +51,7 @@ export default async function NewInvoicePage() {
               city: c.city,
               separateDebours: c.separateDebours,
             }))}
+            dossiers={dossiers}
             suggestedNumber={next.number}
           />
         </div>

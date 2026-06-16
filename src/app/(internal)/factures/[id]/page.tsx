@@ -14,7 +14,6 @@ import {
   PAYMENT_METHOD_LABELS,
   formatMAD,
   totals,
-  ISSUER,
 } from "@/lib/invoicing";
 import { formatDate } from "@/lib/utils";
 import { InvoiceActions } from "./actions";

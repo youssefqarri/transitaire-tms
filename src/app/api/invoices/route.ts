@@ -8,6 +8,7 @@ import { nextInvoiceNumber } from "@/lib/invoicing-server";
 
 const itemSchema = z.object({
   kind: z.enum(["HONORAIRE", "DEBOURS", "AUTRE"]),
+  code: z.string().optional(),
   description: z.string().min(1),
   quantity: z.number().positive(),
   unitPrice: z.number().min(0),
@@ -18,6 +19,7 @@ const itemSchema = z.object({
 const schema = z.object({
   number: z.string().optional(), // repris de WinApp ; si vide → numéro auto FA…
   clientId: z.string().min(1),
+  dossierId: z.string().optional(),
   issuedAt: z.string().optional(),
   dueAt: z.string().optional(),
   termsOfPayment: z.string().optional(),
@@ -64,6 +66,7 @@ export async function POST(req: Request) {
           year: next.year,
           sequence: next.sequence,
           clientId: data.clientId,
+          dossierId: data.dossierId || null,
           status: "DRAFT",
           issuedAt: data.issuedAt ? new Date(data.issuedAt) : null,
           dueAt: data.dueAt ? new Date(data.dueAt) : null,
@@ -73,6 +76,7 @@ export async function POST(req: Request) {
           items: {
             create: data.items.map((it, i) => ({
               kind: it.kind,
+              code: it.code || null,
               description: it.description,
               quantity: it.quantity,
               unitPrice: it.unitPrice,

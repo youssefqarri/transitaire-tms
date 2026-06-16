@@ -2,12 +2,12 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import {
-  ISSUER,
   PAYMENT_METHOD_LABELS,
   formatMAD,
   totals,
   montantEnLettres,
 } from "@/lib/invoicing";
+import { getIssuer } from "@/lib/invoicing-server";
 import { formatDate } from "@/lib/utils";
 import { PrintTrigger } from "./print-trigger";
 
@@ -24,9 +24,15 @@ export default async function InvoicePrintPage({
 
   const invoice = await prisma.invoice.findUnique({
     where: { id },
-    include: { client: true, items: { orderBy: { order: "asc" } } },
+    include: {
+      client: true,
+      items: { orderBy: { order: "asc" } },
+      dossier: { include: { dums: { orderBy: { createdAt: "desc" }, take: 1 } } },
+    },
   });
   if (!invoice) notFound();
+
+  const issuer = await getIssuer();
 
   const computed = totals(
     invoice.items.map((it) => ({
@@ -73,15 +79,15 @@ export default async function InvoicePrintPage({
         {/* En-tête */}
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 28 }}>
           <div>
-            <h1>{ISSUER.name} {ISSUER.legalForm}</h1>
+            <h1>{issuer.name} {issuer.legalForm}</h1>
             <div style={{ fontSize: 11.5, color: "#555", marginTop: 6, lineHeight: 1.6 }}>
-              {ISSUER.address}
+              {issuer.address}
               <br />
-              Agrément {ISSUER.agrement} · ICE {ISSUER.ice} · IF {ISSUER.taxId}
+              Agrément {issuer.agrement} · ICE {issuer.ice} · IF {issuer.taxId}
               <br />
-              RC {ISSUER.rc} · Patente {ISSUER.patente} · CNSS {ISSUER.cnss}
+              RC {issuer.rc} · Patente {issuer.patente} · CNSS {issuer.cnss}
               <br />
-              {ISSUER.phone} · {ISSUER.email}
+              {issuer.phone} · {issuer.email}
             </div>
           </div>
           <div style={{ textAlign: "right" }}>
@@ -142,10 +148,49 @@ export default async function InvoicePrintPage({
           </div>
         </div>
 
+        {/* Bloc référence dossier */}
+        {invoice.dossier && (
+          <div
+            style={{
+              border: "1px solid #e6e6e6",
+              borderRadius: 4,
+              padding: 14,
+              marginBottom: 24,
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr",
+              gap: "8px 16px",
+            }}
+          >
+            <RefField label="Dossier N°" value={invoice.dossier.number} />
+            {invoice.dossier.reference && (
+              <RefField label="Référence" value={invoice.dossier.reference} />
+            )}
+            {invoice.dossier.dums[0]?.number && (
+              <RefField label="Déclaration N°" value={invoice.dossier.dums[0].number} />
+            )}
+            {invoice.dossier.goodsDescription && (
+              <RefField label="Marchandise" value={invoice.dossier.goodsDescription} />
+            )}
+            {invoice.dossier.goodsPackages != null && (
+              <RefField label="Colis" value={String(invoice.dossier.goodsPackages)} />
+            )}
+            {invoice.dossier.goodsWeight != null && (
+              <RefField label="Poids brut" value={`${Number(invoice.dossier.goodsWeight)} kg`} />
+            )}
+            {invoice.dossier.goodsValue != null && (
+              <RefField
+                label="Valeur déclarée"
+                value={`${Number(invoice.dossier.goodsValue)} ${invoice.dossier.goodsCurrency ?? ""}`.trim()}
+              />
+            )}
+          </div>
+        )}
+
         {/* Lignes — présentation Montant Taxable / Montant Non Taxable */}
         <table>
           <thead>
             <tr>
+              <th>Code</th>
               <th>Désignation</th>
               <th style={{ textAlign: "right" }}>TVA %</th>
               <th style={{ textAlign: "right" }}>Montant Taxable</th>
@@ -159,6 +204,7 @@ export default async function InvoicePrintPage({
               const taxable = rate > 0;
               return (
                 <tr key={it.id}>
+                  <td className="tnum" style={{ whiteSpace: "nowrap" }}>{it.code ?? ""}</td>
                   <td>
                     {it.description}
                     {Number(it.quantity) !== 1 && (
@@ -263,7 +309,7 @@ export default async function InvoicePrintPage({
               <div style={{ marginTop: 6, whiteSpace: "pre-wrap" }}>{invoice.notes}</div>
             )}
             <div style={{ marginTop: 6 }}>
-              <strong>Virement :</strong> {ISSUER.bank} · RIB {ISSUER.rib} · SWIFT {ISSUER.swift}
+              <strong>Virement :</strong> {issuer.bank} · RIB {issuer.rib} · SWIFT {issuer.swift}
             </div>
           </div>
         )}
@@ -278,11 +324,29 @@ export default async function InvoicePrintPage({
           }}
         >
           <span>
-            {ISSUER.name} {ISSUER.legalForm} · Agrément {ISSUER.agrement} · ICE {ISSUER.ice}
+            {issuer.name} {issuer.legalForm} · Agrément {issuer.agrement} · ICE {issuer.ice}
           </span>
           <span>Page 1 / 1</span>
         </div>
       </div>
     </>
+  );
+}
+
+function RefField({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ minWidth: 0 }}>
+      <div
+        style={{
+          fontSize: 8.5,
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          color: "#888",
+        }}
+      >
+        {label}
+      </div>
+      <div style={{ fontSize: 11, color: "#1a1a1a", marginTop: 1 }}>{value}</div>
+    </div>
   );
 }
