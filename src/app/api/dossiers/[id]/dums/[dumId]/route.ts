@@ -23,7 +23,7 @@ const patchSchema = z.object({
 const dateField = (v: string | null | undefined) =>
   v === undefined ? undefined : v ? new Date(v) : null;
 const strField = (v: string | null | undefined) =>
-  v === undefined ? undefined : v.trim() || null;
+  v === undefined ? undefined : v?.trim() || null;
 
 export async function PATCH(
   req: Request,
