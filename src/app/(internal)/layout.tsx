@@ -18,15 +18,20 @@ export default async function InternalLayout({ children }: { children: React.Rea
 
   return (
     <div className="flex min-h-screen bg-[var(--color-bg)]">
-      <Sidebar role={session.user.role} unreadCount={unreadCount} />
+      {/* contents = aucun impact à l'écran ; print:hidden = masqué à l'impression/PDF */}
+      <div className="contents print:hidden">
+        <Sidebar role={session.user.role} unreadCount={unreadCount} />
+      </div>
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar
-          name={session.user.name}
-          email={session.user.email}
-          role={session.user.role}
-          unreadCount={unreadCount}
-        />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+        <div className="contents print:hidden">
+          <Topbar
+            name={session.user.name}
+            email={session.user.email}
+            role={session.user.role}
+            unreadCount={unreadCount}
+          />
+        </div>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 print:p-0">{children}</main>
       </div>
     </div>
   );
