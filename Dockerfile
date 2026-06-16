@@ -28,6 +28,11 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
+# Chromium pour la génération PDF serveur (puppeteer-core) — voir /api/invoices/[id]/pdf
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      chromium fonts-liberation \
+  && rm -rf /var/lib/apt/lists/*
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 RUN addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 nextjs \
   && mkdir -p /app/uploads && chown -R nextjs:nodejs /app/uploads

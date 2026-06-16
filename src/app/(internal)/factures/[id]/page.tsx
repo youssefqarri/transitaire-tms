@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Printer } from "lucide-react";
+import { Printer, Download } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
@@ -90,7 +90,12 @@ export default async function InvoiceDetailPage({
         <div className="flex items-center gap-2">
           <Link href={`/factures/${invoice.id}/imprimer`} target="_blank">
             <Button variant="outline" size="sm">
-              <Printer /> Imprimer / PDF
+              <Printer /> Imprimer
+            </Button>
+          </Link>
+          <Link href={`/api/invoices/${invoice.id}/pdf`} target="_blank">
+            <Button variant="outline" size="sm">
+              <Download /> PDF
             </Button>
           </Link>
           {["ADMIN", "COMPTABILITE"].includes(session.user.role) && (
