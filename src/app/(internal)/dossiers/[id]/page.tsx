@@ -78,7 +78,7 @@ export default async function DossierDetailPage({
   });
   if (!dossier) notFound();
 
-  const required = requiredDocuments(dossier.paymentMode);
+  const required = requiredDocuments(dossier.paymentMode, dossier.transport);
   const presentCategories = new Set(dossier.documents.map((d) => d.category));
   const missing = required.filter((c) => !presentCategories.has(c));
 

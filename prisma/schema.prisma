@@ -233,12 +233,20 @@ enum DossierStatus {
   ANNULE                          // annulé (via WinApp externe)
 }
 
+enum TransportMode {
+  MARITIME // connaissement (BL)
+  AERIEN   // LTA
+  ROUTIER  // CMR
+}
+
 model Dossier {
   id            String        @id @default(cuid())
   number        String        @unique          // numéro fourni par WinApp
   reference     String?                        // référence fournisseur (objet mail)
   type          DossierType   @default(IMPORT)
   paymentMode   PaymentMode   @default(WITH_PAYMENT)
+  // mode de transport → détermine le titre de transport requis (BL / LTA / CMR)
+  transport     TransportMode?
   status        DossierStatus @default(OUVERTURE)
 
   clientId      String

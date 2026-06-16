@@ -81,9 +81,10 @@ export default async function DashboardPage() {
   // Calcule le nombre de docs manquants pour un dossier donné
   function countMissing(d: {
     paymentMode: "WITH_PAYMENT" | "WITHOUT_PAYMENT";
+    transport: "MARITIME" | "AERIEN" | "ROUTIER" | null;
     documents: { category: string }[];
   }): number {
-    const required = requiredDocuments(d.paymentMode);
+    const required = requiredDocuments(d.paymentMode, d.transport);
     const present = new Set(d.documents.map((doc) => doc.category));
     return required.filter((c) => !present.has(c)).length;
   }

@@ -29,6 +29,7 @@ type FormState = {
   reference: string;
   type: "IMPORT" | "EXPORT";
   paymentMode: "WITH_PAYMENT" | "WITHOUT_PAYMENT";
+  transport: "" | "MARITIME" | "AERIEN" | "ROUTIER";
   clientId: string;
   supplierId: string;
   goodsValue: string;
@@ -74,6 +75,7 @@ export function NewDossierForm({
     reference: "",
     type: "IMPORT",
     paymentMode: "WITH_PAYMENT",
+    transport: "",
     clientId: clients[0]?.id ?? "",
     supplierId: "",
     goodsValue: "",
@@ -121,6 +123,7 @@ export function NewDossierForm({
               reference: form.reference || null,
               clientId: form.clientId,
               supplierId: form.supplierId || null,
+              transport: form.transport || null,
               goodsValue: form.goodsValue ? Number(form.goodsValue) : null,
               goodsCurrency: form.goodsCurrency,
               goodsWeight: form.goodsWeight ? Number(form.goodsWeight) : null,
@@ -212,6 +215,19 @@ export function NewDossierForm({
           >
             <option value="WITH_PAYMENT">Avec paiement (engagement requis)</option>
             <option value="WITHOUT_PAYMENT">Sans paiement</option>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="transport">Mode de transport</Label>
+          <Select
+            id="transport"
+            value={form.transport}
+            onChange={(e) => set("transport", e.target.value as FormState["transport"])}
+          >
+            <option value="">— À préciser —</option>
+            <option value="MARITIME">Maritime (connaissement / BL)</option>
+            <option value="AERIEN">Aérien (LTA)</option>
+            <option value="ROUTIER">Routier (CMR)</option>
           </Select>
         </div>
         <div className="space-y-2">

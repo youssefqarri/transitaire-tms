@@ -44,6 +44,7 @@ export default async function EditDossierPage({
               reference: dossier.reference ?? "",
               type: dossier.type,
               paymentMode: dossier.paymentMode,
+              transport: dossier.transport ?? "",
               clientId: dossier.clientId,
               supplierId: dossier.supplierId ?? "",
               goodsValue: dossier.goodsValue ? String(dossier.goodsValue) : "",

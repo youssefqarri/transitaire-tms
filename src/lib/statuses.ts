@@ -1,4 +1,4 @@
-import { DossierStatus, DUMStatus, DocumentCategory } from "@/generated/prisma/enums";
+import { DossierStatus, DUMStatus, DocumentCategory, TransportMode } from "@/generated/prisma/enums";
 
 export const STATUS_LABELS: Record<DossierStatus, string> = {
   OUVERTURE: "Ouverture",
@@ -184,16 +184,27 @@ export function statusRequiresDum(status: DossierStatus): boolean {
   return STATUSES_REQUIRING_DUM.includes(status);
 }
 
-// documents requis selon mode de paiement
+// Titre de transport requis selon le mode : maritime → connaissement (BL),
+// aérien → LTA, routier → CMR. Par défaut (transport inconnu) : connaissement.
+export function transportDocument(transport?: TransportMode | null): DocumentCategory {
+  if (transport === "AERIEN") return "LTA_ORIGINALE";
+  if (transport === "ROUTIER") return "CMR";
+  return "CONNAISSEMENT";
+}
+
+// documents requis selon mode de paiement + mode de transport
 // (base « toujours obligatoire » selon la cliente : facture commerciale, colisage,
-//  facture de fret, connaissement, bon à délivrer, attestation de stockage ;
+//  facture de fret, titre de transport, bon à délivrer, attestation de stockage ;
 //  + engagement d'importation uniquement si le dossier est avec paiement)
-export function requiredDocuments(paymentMode: "WITH_PAYMENT" | "WITHOUT_PAYMENT"): DocumentCategory[] {
+export function requiredDocuments(
+  paymentMode: "WITH_PAYMENT" | "WITHOUT_PAYMENT",
+  transport?: TransportMode | null,
+): DocumentCategory[] {
   const base: DocumentCategory[] = [
     "FACTURE_COMMERCIALE",
     "COLISAGE",
     "FACTURE_FRET",
-    "CONNAISSEMENT",
+    transportDocument(transport),
     "BON_A_DELIVRER",
     "ATTESTATION_STOCKAGE",
   ];

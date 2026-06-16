@@ -42,7 +42,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
   });
   if (!dossier) notFound();
 
-  const required = requiredDocuments(dossier.paymentMode);
+  const required = requiredDocuments(dossier.paymentMode, dossier.transport);
   const presentCats = new Set(dossier.documents.map((d) => d.category));
   const missing = required.filter((c) => !presentCats.has(c));
   const progressIndex = STATUS_ORDER.indexOf(dossier.status);

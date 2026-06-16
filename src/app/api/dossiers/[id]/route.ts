@@ -10,6 +10,7 @@ const patchSchema = z.object({
   reference: z.string().nullable().optional(),
   clientId: z.string().optional(),
   supplierId: z.string().nullable().optional(),
+  transport: z.enum(["MARITIME", "AERIEN", "ROUTIER"]).nullable().optional(),
   goodsValue: z.number().nullable().optional(),
   goodsCurrency: z.string().optional(),
   goodsWeight: z.number().nullable().optional(),

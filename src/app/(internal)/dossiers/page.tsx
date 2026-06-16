@@ -73,7 +73,7 @@ export default async function DossiersPage({
   // Calcul des documents manquants par dossier + docs reçus du client
   const enriched = dossiers
     .map((d) => {
-      const required = requiredDocuments(d.paymentMode);
+      const required = requiredDocuments(d.paymentMode, d.transport);
       const present = new Set(d.documents.map((doc) => doc.category));
       const missing = required.filter((c) => !present.has(c));
       const fromClientCount = d.documents.filter(
