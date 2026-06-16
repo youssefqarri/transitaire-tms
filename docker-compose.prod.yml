@@ -1,0 +1,56 @@
+# Stack de production auto-hébergée : Postgres + migrations + application.
+# Usage : cp .env.example .env (et renseigner), puis `docker compose -f docker-compose.prod.yml up -d --build`.
+# Voir docs/SELF-HOSTING.md.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tms
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Définir POSTGRES_PASSWORD dans .env}
+      POSTGRES_DB: transitaire_tms
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tms -d transitaire_tms"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Applique les migrations Prisma puis se termine (stage builder = a prisma + tsx + dotenv).
+  migrate:
+    build:
+      context: .
+      target: builder
+    command: pnpm prisma migrate deploy
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Définir DATABASE_URL dans .env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      AUTH_SECRET: ${AUTH_SECRET:?Définir AUTH_SECRET dans .env}
+      AUTH_URL: ${AUTH_URL}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      STORAGE_DRIVER: ${STORAGE_DRIVER:-local}
+      UPLOAD_DIR: /app/uploads
+      # SMTP / S3 / Gmail : configurables ici OU via l'écran /parametres (stockés en base).
+    volumes:
+      - uploads:/app/uploads
+    ports:
+      - "3000:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  pgdata:
+  uploads:
