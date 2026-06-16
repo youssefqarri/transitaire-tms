@@ -109,9 +109,17 @@ docker compose -f docker-compose.prod.yml exec postgres pg_dump -U tms transitai
 
 ---
 
-## 7. (Optionnel) PDF serveur — à activer à la bascule
+## 7. PDF serveur — ✅ implémenté
 
-Aujourd'hui l'impression de facture se fait **côté navigateur** (page `/factures/[id]/imprimer` → Imprimer → PDF), ce qui marche partout sans dépendance. Une fois auto-hébergés, vous pouvez activer un **vrai PDF serveur** (archivage, pièce jointe email) via Chrome headless :
+Le PDF serveur est **intégré et fonctionnel** : route `GET /api/invoices/[id]/pdf` (puppeteer-core), Chromium installé dans l'image Docker (stage runner), bouton « PDF » sur la facture. Rien à activer.
+
+Points clés (déjà en place dans le repo) :
+- `puppeteer-core` en dépendance + `chromium` installé via apt dans le Dockerfile (`PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium`).
+- **`ENV HOME=/home/nextjs`** + dossier chown dans le Dockerfile — sinon Chromium/crashpad plante (le user `nextjs` avait `HOME=/nonexistent`).
+- Flags de lancement : `--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage --disable-gpu --disable-breakpad`.
+- La route rend la page d'impression interne en transmettant le cookie de session de l'appelant.
+
+L'impression **navigateur** (page `/factures/[id]/imprimer` → Imprimer) reste disponible en parallèle. Le squelette d'origine est conservé ci-dessous pour référence :
 
 ```bash
 pnpm add puppeteer            # télécharge un Chromium ; base Debian (Dockerfile) compatible
