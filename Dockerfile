@@ -33,9 +33,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       chromium fonts-liberation \
   && rm -rf /var/lib/apt/lists/*
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+# HOME inscriptible requis par Chromium/crashpad (sinon crash au lancement en conteneur)
+ENV HOME=/home/nextjs
 RUN addgroup --system --gid 1001 nodejs \
-  && adduser --system --uid 1001 nextjs \
-  && mkdir -p /app/uploads && chown -R nextjs:nodejs /app/uploads
+  && adduser --system --uid 1001 --home /home/nextjs nextjs \
+  && mkdir -p /app/uploads /home/nextjs \
+  && chown -R nextjs:nodejs /app/uploads /home/nextjs
 
 # Sortie standalone : serveur minimal + node_modules strictement nécessaires
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./

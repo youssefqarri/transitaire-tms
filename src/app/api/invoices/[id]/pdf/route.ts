@@ -27,7 +27,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     browser = await puppeteer.launch({
       executablePath,
       headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--disable-breakpad",
+      ],
     });
     const page = await browser.newPage();
     // Transmet la session de l'appelant pour que la page d'impression s'authentifie.
