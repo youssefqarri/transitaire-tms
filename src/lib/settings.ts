@@ -16,6 +16,8 @@ export type AppSettings = {
   s3AccessKeyId: string | null;
   s3SecretKey: string | null;
   s3PublicBaseUrl: string | null;
+  invoiceSeqYear: number | null;
+  invoiceSeqFloor: number | null;
 };
 
 /**
@@ -45,6 +47,8 @@ export async function getSettings(): Promise<AppSettings> {
     s3AccessKeyId: row?.s3AccessKeyId ?? process.env.S3_ACCESS_KEY_ID ?? null,
     s3SecretKey: decryptSecret(row?.s3SecretKey) ?? process.env.S3_SECRET_ACCESS_KEY ?? null,
     s3PublicBaseUrl: row?.s3PublicBaseUrl ?? process.env.S3_PUBLIC_BASE_URL ?? null,
+    invoiceSeqYear: row?.invoiceSeqYear ?? null,
+    invoiceSeqFloor: row?.invoiceSeqFloor ?? null,
   };
   cache = { value, at: Date.now() };
   return value;

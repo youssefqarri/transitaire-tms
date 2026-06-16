@@ -5,7 +5,7 @@ import { getSettings } from "@/lib/settings";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
-import { Mail, Cloud, Key, ChevronRight, MessageSquare, FileText } from "lucide-react";
+import { Mail, Cloud, Key, ChevronRight, MessageSquare, FileText, Hash } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +45,18 @@ export default async function SettingsPage() {
           )
         ) : (
           <Badge tone="neutral">Local actif</Badge>
+        ),
+    },
+    {
+      href: "/parametres/facturation",
+      icon: Hash,
+      title: "Numérotation des factures",
+      description: "Reprise de la série FA au moment de la bascule WinApp → outil",
+      status:
+        settings.invoiceSeqYear && settings.invoiceSeqFloor ? (
+          <Badge tone="ok">{`FA${String(settings.invoiceSeqYear).slice(-2)}${String(settings.invoiceSeqFloor).padStart(4, "0")}`}</Badge>
+        ) : (
+          <Badge tone="neutral">Auto</Badge>
         ),
     },
     {

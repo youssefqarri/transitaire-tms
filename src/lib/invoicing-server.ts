@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "./db";
+import { getSettings } from "./settings";
 
 /**
  * Génère le prochain numéro de facture pour l'année donnée.
@@ -21,7 +22,11 @@ export async function nextInvoiceNumber(year = new Date().getFullYear()): Promis
     orderBy: { sequence: "desc" },
     select: { sequence: true },
   });
-  const sequence = (last?.sequence ?? 0) + 1;
+  // Plancher de reprise (bascule WinApp → outil) : si l'admin a fixé un « prochain
+  // numéro » pour cette année, on ne descend jamais en dessous.
+  const settings = await getSettings();
+  const floor = settings.invoiceSeqYear === year ? settings.invoiceSeqFloor ?? 0 : 0;
+  const sequence = Math.max((last?.sequence ?? 0) + 1, floor);
   const yy = String(year).slice(-2);
   return { year, sequence, number: `FA${yy}${String(sequence).padStart(4, "0")}` };
 }

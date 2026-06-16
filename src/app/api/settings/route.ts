@@ -21,6 +21,9 @@ const schema = z.object({
   s3AccessKeyId: z.string().nullable().optional(),
   s3SecretKey: z.string().nullable().optional(),
   s3PublicBaseUrl: z.string().nullable().optional(),
+  // Facturation : reprise de la série FA
+  invoiceSeqYear: z.number().int().min(2000).max(9999).nullable().optional(),
+  invoiceSeqFloor: z.number().int().min(1).nullable().optional(),
 });
 
 export async function PATCH(req: Request) {

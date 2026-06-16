@@ -851,6 +851,11 @@ model AppSetting {
   s3SecretKey     String?      // ⚠ stocké en clair
   s3PublicBaseUrl String?
 
+  // ─── Facturation ─────────────────────────────────────────
+  // Numéro de reprise de la série FA (bascule WinApp → outil).
+  invoiceSeqYear  Int?         // année concernée (ex. 2026)
+  invoiceSeqFloor Int?         // prochaine séquence à utiliser (ex. 1242)
+
   updatedAt       DateTime @updatedAt
   updatedById     String?
   updatedBy       User?    @relation(fields: [updatedById], references: [id], onDelete: SetNull)
