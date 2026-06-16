@@ -6,7 +6,7 @@
 # ---- deps : dépendances de build (avec devDeps) ----
 FROM node:22-bookworm-slim AS deps
 WORKDIR /app
-RUN corepack enable
+RUN corepack enable && corepack prepare pnpm@10.28.0 --activate
 COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma
 RUN pnpm install --frozen-lockfile
@@ -14,7 +14,7 @@ RUN pnpm install --frozen-lockfile
 # ---- builder : build Next (génère .next/standalone) ----
 FROM node:22-bookworm-slim AS builder
 WORKDIR /app
-RUN corepack enable
+RUN corepack enable && corepack prepare pnpm@10.28.0 --activate
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
