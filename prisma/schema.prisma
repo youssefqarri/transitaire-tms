@@ -137,6 +137,8 @@ model Client {
   contactName  String?
   notes        String?  @db.Text
   active       Boolean  @default(true)
+  // ce client veut ses débours facturés à part (décidé à la saisie, cf. cliente)
+  separateDebours Boolean @default(false)
 
   dossiers Dossier[]
   users    User[]   // utilisateurs portail client

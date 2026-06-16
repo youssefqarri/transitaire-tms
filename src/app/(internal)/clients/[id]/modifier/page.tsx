@@ -43,6 +43,7 @@ export default async function EditClientPage({
               address: client.address ?? "",
               contactName: client.contactName ?? "",
               notes: client.notes ?? "",
+              separateDebours: client.separateDebours,
             }}
           />
         </div>

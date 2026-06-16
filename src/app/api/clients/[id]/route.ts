@@ -18,6 +18,7 @@ const patchSchema = z.object({
   contactName: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
   active: z.boolean().optional(),
+  separateDebours: z.boolean().optional(),
 });
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {

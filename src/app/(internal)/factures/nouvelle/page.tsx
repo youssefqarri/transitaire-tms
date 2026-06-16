@@ -16,7 +16,7 @@ export default async function NewInvoicePage() {
     prisma.client.findMany({
       where: { deletedAt: null, active: true },
       orderBy: { name: "asc" },
-      select: { id: true, name: true, code: true, city: true, ice: true },
+      select: { id: true, name: true, code: true, city: true, ice: true, separateDebours: true },
     }),
     nextInvoiceNumber(),
   ]);
@@ -43,6 +43,7 @@ export default async function NewInvoicePage() {
               name: c.name,
               code: c.code,
               city: c.city,
+              separateDebours: c.separateDebours,
             }))}
             suggestedNumber={next.number}
           />

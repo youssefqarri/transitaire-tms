@@ -19,7 +19,13 @@ import {
 } from "@/lib/invoicing";
 import type { InvoiceItemKind } from "@/generated/prisma/enums";
 
-type ClientOpt = { id: string; name: string; code: string | null; city: string | null };
+type ClientOpt = {
+  id: string;
+  name: string;
+  code: string | null;
+  city: string | null;
+  separateDebours: boolean;
+};
 
 // Barème proposé : 0 % (débours refacturé à l'identique), 3 % (taxe régionale
 // conteneurs au port), 10 % (transport refacturé), 14 %, 20 % (honoraires & frais).
@@ -47,6 +53,7 @@ export function NewInvoiceForm({
   ]);
 
   const computed = useMemo(() => totals(items), [items]);
+  const selectedClient = clients.find((c) => c.id === clientId);
 
   function updateItem<K extends keyof LineItem>(i: number, k: K, v: LineItem[K]) {
     setItems((arr) => arr.map((it, idx) => (idx === i ? { ...it, [k]: v } : it)));
@@ -142,6 +149,15 @@ export function NewInvoiceForm({
           placeholder="Sélectionner un client…"
           searchPlaceholder="Rechercher…"
         />
+        {selectedClient?.separateDebours && (
+          <p className="text-[11.5px] text-[var(--color-warning)] flex items-start gap-1.5">
+            <span>⚠️</span>
+            <span>
+              Ce client facture ses débours séparément — pensez à établir une facture de
+              débours distincte.
+            </span>
+          </p>
+        )}
       </div>
 
       {/* Lignes */}

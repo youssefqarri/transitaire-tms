@@ -17,6 +17,7 @@ const schema = z.object({
   address: z.string().optional(),
   contactName: z.string().optional(),
   notes: z.string().optional(),
+  separateDebours: z.boolean().optional(),
 });
 
 export async function POST(req: Request) {
@@ -25,8 +26,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: "Invalid" }, { status: 400 });
-  const data: Record<string, string | null> = {};
-  for (const [k, v] of Object.entries(parsed.data)) data[k] = (v ?? "").trim() || null;
+  const data: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(parsed.data)) {
+    data[k] = typeof v === "string" ? (v.trim() || null) : v;
+  }
   data.name = parsed.data.name.trim();
   try {
     const client = await prisma.client.create({ data: data as never });

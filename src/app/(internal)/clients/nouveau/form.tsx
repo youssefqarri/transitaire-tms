@@ -20,6 +20,7 @@ type FormState = {
   address: string;
   contactName: string;
   notes: string;
+  separateDebours: boolean;
 };
 
 const EMPTY: FormState = {
@@ -34,6 +35,7 @@ const EMPTY: FormState = {
   address: "",
   contactName: "",
   notes: "",
+  separateDebours: false,
 };
 
 export function ClientForm({
@@ -129,6 +131,15 @@ export function ClientForm({
           <Label htmlFor="notes">Notes</Label>
           <Textarea id="notes" value={form.notes} onChange={(e) => set("notes", e.target.value)} />
         </div>
+        <label className="md:col-span-2 flex items-center gap-2.5 cursor-pointer text-[13px] text-[var(--color-fg-2)]">
+          <input
+            type="checkbox"
+            checked={form.separateDebours}
+            onChange={(e) => set("separateDebours", e.target.checked)}
+            className="size-4 accent-[var(--color-accent)]"
+          />
+          Facturer les débours séparément (facture de débours distincte pour ce client)
+        </label>
       </div>
       <div className="flex justify-end gap-2 pt-1">
         <Button type="button" variant="outline" onClick={() => router.back()}>
