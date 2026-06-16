@@ -74,11 +74,13 @@ export default async function InvoicePrintPage({
         {/* En-tête */}
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 28 }}>
           <div>
-            <h1>{ISSUER.name}</h1>
+            <h1>{ISSUER.name} {ISSUER.legalForm}</h1>
             <div style={{ fontSize: 11.5, color: "#555", marginTop: 6, lineHeight: 1.6 }}>
               {ISSUER.address}
               <br />
-              ICE {ISSUER.ice} · RC {ISSUER.rc} · IF {ISSUER.taxId} · CNSS {ISSUER.cnss}
+              Agrément {ISSUER.agrement} · ICE {ISSUER.ice} · IF {ISSUER.taxId}
+              <br />
+              RC {ISSUER.rc} · Patente {ISSUER.patente} · CNSS {ISSUER.cnss}
               <br />
               {ISSUER.phone} · {ISSUER.email}
             </div>
@@ -250,7 +252,7 @@ export default async function InvoicePrintPage({
               <div style={{ marginTop: 6, whiteSpace: "pre-wrap" }}>{invoice.notes}</div>
             )}
             <div style={{ marginTop: 6 }}>
-              <strong>Virement :</strong> {ISSUER.bank} · IBAN {ISSUER.iban}
+              <strong>Virement :</strong> {ISSUER.bank} · RIB {ISSUER.rib} · SWIFT {ISSUER.swift}
             </div>
           </div>
         )}
@@ -265,7 +267,7 @@ export default async function InvoicePrintPage({
           }}
         >
           <span>
-            {ISSUER.name} · ICE {ISSUER.ice}
+            {ISSUER.name} {ISSUER.legalForm} · Agrément {ISSUER.agrement} · ICE {ISSUER.ice}
           </span>
           <span>Page 1 / 1</span>
         </div>

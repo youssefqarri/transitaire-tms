@@ -185,6 +185,9 @@ export function statusRequiresDum(status: DossierStatus): boolean {
 }
 
 // documents requis selon mode de paiement
+// (base « toujours obligatoire » selon la cliente : facture commerciale, colisage,
+//  facture de fret, connaissement, bon à délivrer, attestation de stockage ;
+//  + engagement d'importation uniquement si le dossier est avec paiement)
 export function requiredDocuments(paymentMode: "WITH_PAYMENT" | "WITHOUT_PAYMENT"): DocumentCategory[] {
   const base: DocumentCategory[] = [
     "FACTURE_COMMERCIALE",
@@ -192,6 +195,7 @@ export function requiredDocuments(paymentMode: "WITH_PAYMENT" | "WITHOUT_PAYMENT
     "FACTURE_FRET",
     "CONNAISSEMENT",
     "BON_A_DELIVRER",
+    "ATTESTATION_STOCKAGE",
   ];
   if (paymentMode === "WITH_PAYMENT") base.splice(4, 0, "ENGAGEMENT_IMPORTATION");
   return base;

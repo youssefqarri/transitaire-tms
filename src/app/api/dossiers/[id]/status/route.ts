@@ -71,11 +71,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   const isClosing = parsed.data.status === "CLOTURE";
+  const isLiquidating = parsed.data.status === "LIQUIDE";
   const updated = await prisma.dossier.update({
     where: { id },
     data: {
       status: parsed.data.status,
       closedAt: isClosing ? new Date() : undefined,
+      // horodate la liquidation des droits et taxes (première fois seulement)
+      liquidationAt: isLiquidating && !dossier.liquidationAt ? new Date() : undefined,
       statusChanges: {
         create: {
           fromStatus: dossier.status,
@@ -98,6 +101,21 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       link: `/dossiers/${id}`,
     },
   });
+
+  // Alerte dédiée à la liquidation : la cliente veut être avertie dès que la
+  // douane a liquidé les droits et taxes (pour saisir la valeur en douane / quittance).
+  if (isLiquidating) {
+    await prisma.notification.create({
+      data: {
+        role: "EXPLOITATION",
+        dossierId: id,
+        kind: "SUIVI_LIQUIDATION",
+        title: `Liquidation des droits — dossier ${dossier.number}`,
+        body: "Les droits et taxes ont été liquidés. Renseignez la valeur en douane et la quittance, puis informez le client.",
+        link: `/dossiers/${id}`,
+      },
+    });
+  }
 
   await audit({
     userId: session.user.id,

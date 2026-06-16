@@ -19,14 +19,12 @@ export const REGULATORY_SERVICES = [
   "DMP", // Direction du Médicament et de la Pharmacie
 ] as const;
 
-// Régimes douaniers d'une DUM. Un dossier peut cumuler 2 régimes via 2 DUM.
+// Régimes douaniers d'une DUM. La cliente traite uniquement la mise à la
+// consommation (régime 10) à l'import et l'exportation — pas de régimes
+// suspensifs/économiques. Liste volontairement restreinte (extensible au besoin).
 export const DUM_REGIMES = [
   "Mise à la consommation",
-  "Admission temporaire",
-  "Entrepôt",
-  "Régime suspensif/économique",
   "Exportation",
-  "Transit",
 ] as const;
 
 // Nombre maximum de DUM par dossier (régimes multiples : ex. une partie en mise à

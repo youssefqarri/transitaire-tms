@@ -4,18 +4,23 @@ import type {
   PaymentMethod,
 } from "@/generated/prisma/enums";
 
-// Émetteur de la facture — pour l'instant en dur, plus tard configurable par tenant
+// Émetteur de la facture — coordonnées légales réelles du transitaire.
+// En dur pour l'instant ; à rendre configurable (AppSetting / multi-tenant) ensuite.
 export const ISSUER = {
-  name: "Maison de Transit SARL",
-  address: "Casablanca, Maroc",
-  ice: "001234567000023",
-  rc: "123456",
-  taxId: "12345678",
-  cnss: "1234567",
-  phone: "+212 522 000 000",
-  email: "facturation@maison-transit.ma",
-  iban: "MA000000000000000000000000",
-  bank: "Banque Populaire",
+  name: "TRANSIT MULTISERVICES",
+  legalForm: "SARL",
+  address: "1, Place Al Istiqlal (ex Mirabeau), Casablanca",
+  ice: "000027502000078",
+  rc: "101747",
+  taxId: "1068374", // Identifiant Fiscal
+  patente: "32101053",
+  cnss: "1006700",
+  agrement: "1223", // agrément transitaire en douane
+  phone: "0522 30 75 73 / 0522 30 06 99",
+  email: "tms@transitmultiservices.com",
+  bank: "CIH Bank",
+  rib: "230 780 5185605221010700 68",
+  swift: "CIHMMAMC",
 } as const;
 
 export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
