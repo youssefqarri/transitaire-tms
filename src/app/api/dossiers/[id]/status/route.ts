@@ -27,6 +27,8 @@ const schema = z.object({
     "VALIDATION_MCA",
     "BON_A_ENLEVER",
     "BON_A_ENLEVER_DEFINITIF",
+    "EMBARQUEMENT",
+    "SORTIE_MARCHANDISE",
     "LIVRAISON",
     "FACTURATION",
     "FACTURE",

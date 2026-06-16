@@ -14,6 +14,7 @@ import {
   STATUS_LABELS,
   DOCUMENT_CATEGORY_LABELS,
   requiredDocuments,
+  statusesForType,
 } from "@/lib/statuses";
 
 const PACKAGING_LABELS = {
@@ -132,7 +133,9 @@ export default async function DossierDetailPage({
               dossierId={dossier.id}
               currentStatus={dossier.status}
               allowedStatuses={
-                session.user.role === "COMPTABILITE" ? ["FACTURE", "CLOTURE"] : undefined
+                session.user.role === "COMPTABILITE"
+                  ? ["FACTURE", "CLOTURE"]
+                  : statusesForType(dossier.type)
               }
             />
           </div>

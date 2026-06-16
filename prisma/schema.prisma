@@ -226,6 +226,8 @@ enum DossierStatus {
   VALIDATION_MCA                  // validation MCA
   BON_A_ENLEVER                   // bon à enlever (générique)
   BON_A_ENLEVER_DEFINITIF         // bon à enlever définitif
+  EMBARQUEMENT                    // (export) marchandise au port, embarquement programmé
+  SORTIE_MARCHANDISE              // (export) marchandise sortie / embarquée
   LIVRAISON                       // livraison en cours
   FACTURATION                     // facturation en cours
   FACTURE                         // facturé (émis au client)

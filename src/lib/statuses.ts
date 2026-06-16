@@ -1,4 +1,4 @@
-import { DossierStatus, DUMStatus, DocumentCategory, TransportMode } from "@/generated/prisma/enums";
+import { DossierStatus, DossierType, DUMStatus, DocumentCategory, TransportMode } from "@/generated/prisma/enums";
 
 export const STATUS_LABELS: Record<DossierStatus, string> = {
   OUVERTURE: "Ouverture",
@@ -20,6 +20,8 @@ export const STATUS_LABELS: Record<DossierStatus, string> = {
   VALIDATION_MCA: "Validation MCA",
   BON_A_ENLEVER: "Bon à enlever",
   BON_A_ENLEVER_DEFINITIF: "BAE définitif",
+  EMBARQUEMENT: "Embarquement",
+  SORTIE_MARCHANDISE: "Sortie marchandise",
   LIVRAISON: "Livraison",
   FACTURATION: "Facturation",
   FACTURE: "Facturé",
@@ -48,11 +50,35 @@ export const STATUS_ORDER: DossierStatus[] = [
   "VALIDATION_MCA",
   "BON_A_ENLEVER",
   "BON_A_ENLEVER_DEFINITIF",
+  "EMBARQUEMENT",
+  "SORTIE_MARCHANDISE",
   "LIVRAISON",
   "FACTURATION",
   "FACTURE",
   "CLOTURE",
 ];
+
+// Statuts propres au dédouanement à l'import (liquidation, bon à enlever, mainlevée…)
+const IMPORT_ONLY_STATUSES: DossierStatus[] = [
+  "BON_A_DELIVRER_RECU",
+  "INSTANCE_FICHE_LIQUIDATION",
+  "LIQUIDE",
+  "BON_A_ENLEVER_RESERVE",
+  "MAIN_LEVEE_RESERVE_CONFORMITE",
+  "MAIN_LEVEE_RESERVE_DOCUMENTS",
+  "VALIDATION_MCA",
+  "BON_A_ENLEVER",
+  "BON_A_ENLEVER_DEFINITIF",
+];
+// Statuts propres à l'export (embarquement, sortie de la marchandise)
+const EXPORT_ONLY_STATUSES: DossierStatus[] = ["EMBARQUEMENT", "SORTIE_MARCHANDISE"];
+
+// Liste ordonnée des statuts pertinents selon le sens du dossier (import vs export).
+// Sert à proposer les bons statuts dans l'UI (l'API reste permissive). ANNULE toujours possible.
+export function statusesForType(type: DossierType): DossierStatus[] {
+  const exclude = type === "EXPORT" ? IMPORT_ONLY_STATUSES : EXPORT_ONLY_STATUSES;
+  return [...STATUS_ORDER.filter((s) => !exclude.includes(s)), "ANNULE"];
+}
 
 export const STATUS_TONE: Record<DossierStatus, "neutral" | "warn" | "info" | "ok" | "danger"> = {
   OUVERTURE: "neutral",
@@ -74,6 +100,8 @@ export const STATUS_TONE: Record<DossierStatus, "neutral" | "warn" | "info" | "o
   VALIDATION_MCA: "info",
   BON_A_ENLEVER: "info",
   BON_A_ENLEVER_DEFINITIF: "ok",
+  EMBARQUEMENT: "info",
+  SORTIE_MARCHANDISE: "ok",
   LIVRAISON: "info",
   FACTURATION: "info",
   FACTURE: "ok",
