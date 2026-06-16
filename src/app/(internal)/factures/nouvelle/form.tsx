@@ -34,6 +34,7 @@ export function NewInvoiceForm({
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
+  const [number, setNumber] = useState(suggestedNumber);
   const [clientId, setClientId] = useState("");
   const [issuedAt, setIssuedAt] = useState(new Date().toISOString().slice(0, 10));
   const [dueAt, setDueAt] = useState(
@@ -85,6 +86,7 @@ export function NewInvoiceForm({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          number,
           clientId,
           issuedAt,
           dueAt,
@@ -108,8 +110,13 @@ export function NewInvoiceForm({
     <form onSubmit={submit} className="space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-1.5">
-          <Label>Numéro</Label>
-          <Input value={suggestedNumber} disabled className="font-mono" />
+          <Label htmlFor="invnum">Numéro (repris de WinApp)</Label>
+          <Input
+            id="invnum"
+            value={number}
+            onChange={(e) => setNumber(e.target.value)}
+            className="font-mono"
+          />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="issuedAt">Date d&apos;émission</Label>

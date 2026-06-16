@@ -16,6 +16,7 @@ const itemSchema = z.object({
 });
 
 const schema = z.object({
+  number: z.string().optional(), // repris de WinApp ; si vide → numéro auto FA…
   clientId: z.string().min(1),
   issuedAt: z.string().optional(),
   dueAt: z.string().optional(),
@@ -38,11 +39,24 @@ export async function POST(req: Request) {
   }
   const data = parsed.data;
 
-  // Numérotation séquentielle annuelle — retry en cas de collision @@unique(year, sequence)
+  // Numéro : repris de WinApp si fourni (format FA{AA}{série}), sinon auto-généré.
+  const provided = data.number?.trim();
+  const providedIsFA = !!provided && /^FA\d{2}\d+$/i.test(provided);
+  async function resolveNumbering() {
+    if (provided) {
+      const m = /^FA(\d{2})(\d+)$/i.exec(provided);
+      if (m) return { number: provided, year: 2000 + parseInt(m[1], 10), sequence: parseInt(m[2], 10) };
+      // numéro libre (hors format FA) : année courante + séquence auto (unicité year/sequence)
+      const auto = await nextInvoiceNumber();
+      return { number: provided, year: auto.year, sequence: auto.sequence };
+    }
+    return nextInvoiceNumber();
+  }
+
   let invoiceId: string | null = null;
   let lastNumber: string | null = null;
   for (let attempt = 0; attempt < 5 && !invoiceId; attempt++) {
-    const next = await nextInvoiceNumber();
+    const next = await resolveNumbering();
     try {
       const created = await prisma.invoice.create({
         data: {
@@ -75,7 +89,12 @@ export async function POST(req: Request) {
       lastNumber = created.number;
     } catch (e: unknown) {
       const err = e as { code?: string };
-      if (err.code === "P2002") continue; // conflit numérotation, on retry
+      // numéro WinApp explicite déjà pris → vrai doublon ; sinon collision auto → retry
+      if (err.code === "P2002") {
+        if (providedIsFA)
+          return NextResponse.json({ error: "Ce numéro de facture existe déjà" }, { status: 409 });
+        continue;
+      }
       return NextResponse.json({ error: "Erreur création" }, { status: 500 });
     }
   }
