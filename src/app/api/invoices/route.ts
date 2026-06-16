@@ -62,7 +62,9 @@ export async function POST(req: Request) {
               description: it.description,
               quantity: it.quantity,
               unitPrice: it.unitPrice,
-              vatRate: it.kind === "DEBOURS" ? 0 : it.vatRate,
+              // Le taux est porté par la ligne : 0 % pour un débours refacturé à
+              // l'identique, mais p.ex. 10 % pour du transport débours.
+              vatRate: it.vatRate,
               dossierId: it.dossierId,
               order: i,
             })),

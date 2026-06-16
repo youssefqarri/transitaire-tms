@@ -3,7 +3,6 @@ import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import {
   ISSUER,
-  INVOICE_ITEM_KIND_LABELS,
   PAYMENT_METHOD_LABELS,
   formatMAD,
   totals,
@@ -143,36 +142,40 @@ export default async function InvoicePrintPage({
           </div>
         </div>
 
-        {/* Lignes */}
+        {/* Lignes — présentation Montant Taxable / Montant Non Taxable */}
         <table>
           <thead>
             <tr>
-              <th>Type</th>
               <th>Désignation</th>
-              <th style={{ textAlign: "right" }}>Qté</th>
-              <th style={{ textAlign: "right" }}>PU HT</th>
-              <th style={{ textAlign: "right" }}>TVA</th>
-              <th style={{ textAlign: "right" }}>Total HT</th>
+              <th style={{ textAlign: "right" }}>TVA %</th>
+              <th style={{ textAlign: "right" }}>Montant Taxable</th>
+              <th style={{ textAlign: "right" }}>Montant Non Taxable</th>
             </tr>
           </thead>
           <tbody>
             {invoice.items.map((it) => {
               const lineHT = Number(it.quantity) * Number(it.unitPrice);
+              const rate = Number(it.vatRate);
+              const taxable = rate > 0;
               return (
                 <tr key={it.id}>
-                  <td>{INVOICE_ITEM_KIND_LABELS[it.kind]}</td>
-                  <td>{it.description}</td>
-                  <td className="tnum" style={{ textAlign: "right" }}>
-                    {Number(it.quantity)}
+                  <td>
+                    {it.description}
+                    {Number(it.quantity) !== 1 && (
+                      <span style={{ color: "#888" }}>
+                        {" "}
+                        ({Number(it.quantity)} × {formatMAD(Number(it.unitPrice))})
+                      </span>
+                    )}
                   </td>
                   <td className="tnum" style={{ textAlign: "right" }}>
-                    {formatMAD(Number(it.unitPrice))}
+                    {taxable ? `${rate}%` : "—"}
                   </td>
                   <td className="tnum" style={{ textAlign: "right" }}>
-                    {Number(it.vatRate)}%
+                    {taxable ? formatMAD(lineHT) : ""}
                   </td>
                   <td className="tnum" style={{ textAlign: "right" }}>
-                    {formatMAD(lineHT)}
+                    {taxable ? "" : formatMAD(lineHT)}
                   </td>
                 </tr>
               );
@@ -182,23 +185,31 @@ export default async function InvoicePrintPage({
 
         {/* Totaux */}
         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 18 }}>
-          <table style={{ width: 280 }}>
+          <table style={{ width: 300 }}>
             <tbody>
               <tr>
-                <td style={{ color: "#555" }}>Total HT</td>
+                <td style={{ color: "#555" }}>Total Non Taxable</td>
                 <td className="tnum" style={{ textAlign: "right" }}>
-                  {formatMAD(computed.totalHT)}
+                  {formatMAD(computed.totalNonTaxable)}
                 </td>
               </tr>
               <tr>
-                <td style={{ color: "#555" }}>TVA</td>
+                <td style={{ color: "#555" }}>Total Taxable</td>
                 <td className="tnum" style={{ textAlign: "right" }}>
-                  {formatMAD(computed.totalVAT)}
+                  {formatMAD(computed.totalTaxable)}
                 </td>
               </tr>
+              {computed.vatByRate.map((v) => (
+                <tr key={v.rate}>
+                  <td style={{ color: "#555" }}>T.V.A {v.rate} %</td>
+                  <td className="tnum" style={{ textAlign: "right" }}>
+                    {formatMAD(v.amount)}
+                  </td>
+                </tr>
+              ))}
               <tr>
                 <td style={{ fontWeight: 700, fontSize: 13, borderTop: "2px solid #111" }}>
-                  Total TTC
+                  Montant T.T.C
                 </td>
                 <td
                   className="tnum"

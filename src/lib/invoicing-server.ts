@@ -3,8 +3,13 @@ import { prisma } from "./db";
 
 /**
  * Génère le prochain numéro de facture pour l'année donnée.
- * Format : F-YYYY-NNNN (séquence incrémentale par année, paddée à 4 chiffres).
- * Atomique grâce à la contrainte @@unique([year, sequence]) en DB.
+ * Format : FA{AA}{NNNN} (ex. FA260001 = année 2026, séquence 1), conforme à la
+ * série réelle du transitaire (ex. FA261194). Séquence incrémentale par année,
+ * paddée à 4 chiffres. Atomique grâce à @@unique([year, sequence]) en DB.
+ *
+ * NB go-live : pour reprendre la série existante (ex. à partir de 1195), créer une
+ * première facture avec la séquence voulue ou ajuster la séquence de départ en base ;
+ * la comptable doit confirmer le numéro de reprise.
  */
 export async function nextInvoiceNumber(year = new Date().getFullYear()): Promise<{
   year: number;
@@ -17,5 +22,6 @@ export async function nextInvoiceNumber(year = new Date().getFullYear()): Promis
     select: { sequence: true },
   });
   const sequence = (last?.sequence ?? 0) + 1;
-  return { year, sequence, number: `F-${year}-${String(sequence).padStart(4, "0")}` };
+  const yy = String(year).slice(-2);
+  return { year, sequence, number: `FA${yy}${String(sequence).padStart(4, "0")}` };
 }

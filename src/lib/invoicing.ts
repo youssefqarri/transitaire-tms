@@ -55,23 +55,53 @@ export type LineItem = {
   vatRate: number;
 };
 
-/** Calcule HT, TVA, TTC à partir des lignes. */
-export function totals(items: LineItem[]) {
-  let totalHT = 0;
-  let totalVAT = 0;
+export type VatLine = { rate: number; base: number; amount: number };
+
+export type InvoiceTotals = {
+  totalTaxable: number; // somme des lignes à TVA > 0 (« Montant Taxable »)
+  totalNonTaxable: number; // somme des lignes à TVA = 0 (« Montant Non Taxable » : débours, etc.)
+  vatByRate: VatLine[]; // détail de la TVA par taux (20 %, 10 %, …)
+  totalHT: number; // taxable + non taxable
+  totalVAT: number;
+  totalTTC: number;
+};
+
+/**
+ * Calcule les totaux d'une facture transitaire à la marocaine.
+ * Le taux de TVA est porté par chaque ligne : une ligne à 0 % va en « non taxable »
+ * (débours refacturés à l'identique), une ligne > 0 % va en « taxable » et accumule
+ * la TVA par taux (20 % honoraires, 10 % transport refacturé, etc.). Reproduit la
+ * présentation Montant Taxable / Montant Non Taxable des factures réelles.
+ */
+export function totals(items: LineItem[]): InvoiceTotals {
+  let totalTaxable = 0;
+  let totalNonTaxable = 0;
+  const byRate = new Map<number, { base: number; amount: number }>();
   for (const it of items) {
     const lineHT = round2(it.quantity * it.unitPrice);
-    // Débours sans TVA — même si vatRate > 0
-    const rate = it.kind === "DEBOURS" ? 0 : Number(it.vatRate);
-    const lineVAT = round2((lineHT * rate) / 100);
-    totalHT += lineHT;
-    totalVAT += lineVAT;
+    const rate = Number(it.vatRate) || 0;
+    if (rate > 0) {
+      totalTaxable += lineHT;
+      const cur = byRate.get(rate) ?? { base: 0, amount: 0 };
+      cur.base = round2(cur.base + lineHT);
+      cur.amount = round2(cur.amount + (lineHT * rate) / 100);
+      byRate.set(rate, cur);
+    } else {
+      totalNonTaxable += lineHT;
+    }
   }
-  const totalTTC = round2(totalHT + totalVAT);
+  const vatByRate: VatLine[] = [...byRate.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([rate, v]) => ({ rate, base: v.base, amount: v.amount }));
+  const totalVAT = round2(vatByRate.reduce((s, v) => s + v.amount, 0));
+  const totalHT = round2(totalTaxable + totalNonTaxable);
   return {
-    totalHT: round2(totalHT),
-    totalVAT: round2(totalVAT),
-    totalTTC,
+    totalTaxable: round2(totalTaxable),
+    totalNonTaxable: round2(totalNonTaxable),
+    vatByRate,
+    totalHT,
+    totalVAT,
+    totalTTC: round2(totalHT + totalVAT),
   };
 }
 

@@ -21,6 +21,10 @@ import type { InvoiceItemKind } from "@/generated/prisma/enums";
 
 type ClientOpt = { id: string; name: string; code: string | null; city: string | null };
 
+// Barème proposé : 0 % (débours refacturé à l'identique), 3 % (taxe régionale
+// conteneurs au port), 10 % (transport refacturé), 14 %, 20 % (honoraires & frais).
+const VAT_RATES = [0, 3, 10, 14, 20] as const;
+
 export function NewInvoiceForm({
   clients,
   suggestedNumber,
@@ -147,7 +151,7 @@ export function NewInvoiceForm({
           </div>
         </div>
         <div className="border border-[var(--color-border)] rounded-[var(--radius)] divide-y divide-[var(--color-border)] overflow-x-auto">
-          <div className="grid grid-cols-[140px_minmax(180px,1fr)_80px_120px_70px_120px_36px] gap-3 px-3 py-2 text-[11px] font-medium text-[var(--color-fg-3)] uppercase tracking-wide bg-[var(--color-surface-2)] min-w-[760px]">
+          <div className="grid grid-cols-[140px_minmax(180px,1fr)_80px_120px_96px_120px_36px] gap-3 px-3 py-2 text-[11px] font-medium text-[var(--color-fg-3)] uppercase tracking-wide bg-[var(--color-surface-2)] min-w-[760px]">
             <div>Type</div>
             <div>Description</div>
             <div className="text-right">Qté</div>
@@ -161,7 +165,7 @@ export function NewInvoiceForm({
             return (
               <div
                 key={i}
-                className="grid grid-cols-[140px_minmax(180px,1fr)_80px_120px_70px_120px_36px] gap-3 items-center px-3 py-2 min-w-[760px]"
+                className="grid grid-cols-[140px_minmax(180px,1fr)_80px_120px_96px_120px_36px] gap-3 items-center px-3 py-2 min-w-[760px]"
               >
                 <Select
                   value={it.kind}
@@ -197,16 +201,20 @@ export function NewInvoiceForm({
                   onChange={(e) => updateItem(i, "unitPrice", Number(e.target.value))}
                   className="text-right font-mono"
                 />
-                <Input
-                  type="number"
-                  step="0.5"
-                  min="0"
-                  max="30"
-                  value={it.vatRate}
+                <Select
+                  value={String(it.vatRate)}
                   onChange={(e) => updateItem(i, "vatRate", Number(e.target.value))}
-                  disabled={it.kind === "DEBOURS"}
                   className="text-right font-mono"
-                />
+                >
+                  {(VAT_RATES.includes(it.vatRate as (typeof VAT_RATES)[number])
+                    ? VAT_RATES
+                    : [it.vatRate, ...VAT_RATES]
+                  ).map((r) => (
+                    <option key={r} value={r}>
+                      {r}%
+                    </option>
+                  ))}
+                </Select>
                 <div className="text-right font-mono tnum text-[13px] text-[var(--color-fg)]">
                   {formatMAD(lineHT)}
                 </div>
@@ -225,7 +233,8 @@ export function NewInvoiceForm({
         </div>
         <p className="text-[11.5px] text-[var(--color-fg-3)]">
           <Badge tone="outline">Note</Badge>{" "}
-          Les débours ne sont pas soumis à TVA (avances pour le compte du client).
+          Débours = refacturés à l&apos;identique, en principe à 0 % (sauf transport refacturé,
+          à 10 %). Les lignes à 0 % vont en « Montant Non Taxable », les autres en « Montant Taxable ».
         </p>
       </div>
 
@@ -251,8 +260,11 @@ export function NewInvoiceForm({
           </div>
         </div>
         <div className="space-y-2 border border-[var(--color-border)] rounded-[var(--radius)] p-4 bg-[var(--color-surface-2)] self-start">
-          <Row label="Total HT" value={formatMAD(computed.totalHT)} />
-          <Row label="TVA" value={formatMAD(computed.totalVAT)} />
+          <Row label="Total Non Taxable" value={formatMAD(computed.totalNonTaxable)} />
+          <Row label="Total Taxable" value={formatMAD(computed.totalTaxable)} />
+          {computed.vatByRate.map((v) => (
+            <Row key={v.rate} label={`TVA ${v.rate} %`} value={formatMAD(v.amount)} />
+          ))}
           <div className="border-t border-[var(--color-border)] my-2" />
           <Row label="Total TTC" value={formatMAD(computed.totalTTC)} bold />
         </div>
