@@ -2,7 +2,7 @@
 
 L'application est un **Next.js 16 standard** (sortie `standalone`) avec **PostgreSQL** (Prisma 7, adapter `pg`). Elle ne dépend d'aucun service propriétaire Vercel : elle tourne sur n'importe quel serveur Linux, en Docker ou en Node nu.
 
-> ⚠️ Ces fichiers (Dockerfile, compose, ce guide) sont fournis **prêts à l'emploi mais à valider sur votre infrastructure** : ils n'ont pas pu être testés depuis l'environnement de dev (pas de Docker/Node local).
+> ✅ **Validé** : ce setup a été déployé et testé de bout en bout sur **Ubuntu 22.04** (Docker 29 + compose v2) — build de l'image, migrations sur base neuve, app en ligne, `/api/health` `{"status":"ok","db":"up"}`, accès externe OK. Procédure de démarrage rapide en bas (§8).
 
 ---
 
@@ -36,6 +36,17 @@ pnpm prisma migrate deploy
 À lancer **une fois** sur une base neuve, puis **à chaque mise à jour** apportant de nouvelles migrations. (En Docker, le service `migrate` du compose le fait automatiquement — voir §3.)
 
 > La base actuelle (Supabase) est déjà à jour ; pour une **nouvelle** base auto-hébergée, `migrate deploy` recrée tout le schéma.
+
+**Données de démarrage (optionnel)** — crée des comptes de démo (`admin@transitaire.ma` / `password123`) + quelques clients/dossiers :
+
+```bash
+# en Docker
+docker compose -f docker-compose.prod.yml run --rm --no-deps migrate pnpm db:seed
+# ou en Node nu
+pnpm db:seed
+```
+
+⚠️ En production réelle, **ne pas** seeder de comptes de démo (ou changer immédiatement leurs mots de passe).
 
 ---
 
@@ -145,3 +156,34 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 ```
 
 > Le point à finaliser ensemble : **l'authentification du rendu** (transmettre proprement la session à Chromium) et, si besoin, l'archivage du PDF + l'envoi en pièce jointe. À faire au moment de la bascule, sur votre serveur (où `pnpm add puppeteer` met à jour le lockfile). On ne peut pas l'intégrer tant qu'on déploie sur Vercel (lockfile gelé + Chromium incompatible serverless).
+
+---
+
+## 8. Démarrage rapide (procédure validée)
+
+Sur un serveur Ubuntu 22.04 avec Docker installé :
+
+```bash
+# 1. Plugin compose v2 (si absent)
+apt-get update && apt-get install -y docker-compose-v2
+
+# 2. Récupérer le code
+git clone https://github.com/youssefqarri/transitaire-tms.git /opt/transitaire-tms
+cd /opt/transitaire-tms
+
+# 3. Configurer
+cp .env.example .env
+#   puis renseigner POSTGRES_PASSWORD, DATABASE_URL (host = "postgres"),
+#   AUTH_SECRET (openssl rand -base64 32), AUTH_URL, NEXT_PUBLIC_APP_URL
+
+# 4. Build + démarrage (postgres → migrations → app)
+docker compose -f docker-compose.prod.yml up -d --build
+
+# 5. (optionnel) données de démo
+docker compose -f docker-compose.prod.yml run --rm --no-deps migrate pnpm db:seed
+
+# 6. Vérifier
+curl http://localhost:3000/api/health     # → {"status":"ok","db":"up"}
+```
+
+Mise à jour ultérieure : `git pull && docker compose -f docker-compose.prod.yml up -d --build`.
