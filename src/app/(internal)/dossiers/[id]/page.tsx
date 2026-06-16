@@ -274,7 +274,20 @@ export default async function DossierDetailPage({
               <>
                 <DUMsPanel
                   dossierId={dossier.id}
-                  dums={dossier.dums}
+                  dums={dossier.dums.map((d) => ({
+                    id: d.id,
+                    number: d.number,
+                    status: d.status,
+                    bureau: d.bureau,
+                    regime: d.regime,
+                    registeredAt: d.registeredAt,
+                    liquidatedAt: d.liquidatedAt,
+                    customsValue: d.customsValue ? Number(d.customsValue) : null,
+                    estimatedDuties: d.estimatedDuties ? Number(d.estimatedDuties) : null,
+                    liquidatedDuties: d.liquidatedDuties ? Number(d.liquidatedDuties) : null,
+                    receiptNumber: d.receiptNumber,
+                    paidAt: d.paidAt,
+                  }))}
                   canCreate={canCreateDUM(session.user.role)}
                 />
                 <DocumentsPanel

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Plus, FileText } from "lucide-react";
+import { Plus, FileText, Pencil } from "lucide-react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { DUM_STATUS_LABELS } from "@/lib/statuses";
 import { DUM_REGIMES, MAX_DUMS_PER_DOSSIER } from "@/lib/reference";
+import { formatMAD } from "@/lib/invoicing";
 import type { DUMStatus } from "@/generated/prisma/enums";
 import { formatDate } from "@/lib/utils";
 
@@ -22,7 +23,17 @@ type DUM = {
   bureau: string | null;
   regime: string | null;
   registeredAt: Date | null;
+  liquidatedAt: Date | null;
+  customsValue: number | null;
+  estimatedDuties: number | null;
+  liquidatedDuties: number | null;
+  receiptNumber: string | null;
+  paidAt: Date | null;
 };
+
+const fmt = (n: number | null) => (n == null ? "—" : formatMAD(n));
+const toDateInput = (d: Date | null) =>
+  d ? new Date(d).toISOString().slice(0, 10) : "";
 
 export function DUMsPanel({
   dossierId,
@@ -40,8 +51,12 @@ export function DUMsPanel({
   const [bureau, setBureau] = useState("");
   const [regime, setRegime] = useState("");
   const [registeredAt, setRegisteredAt] = useState("");
+  const [customsValue, setCustomsValue] = useState("");
+  const [estimatedDuties, setEstimatedDuties] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const atMax = dums.length >= MAX_DUMS_PER_DOSSIER;
+  const numOrUndef = (s: string) => (s.trim() === "" ? undefined : Number(s));
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -53,7 +68,14 @@ export function DUMsPanel({
       const res = await fetch(`/api/dossiers/${dossierId}/dums`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ number, bureau, regime, registeredAt: registeredAt || undefined }),
+        body: JSON.stringify({
+          number,
+          bureau,
+          regime,
+          registeredAt: registeredAt || undefined,
+          customsValue: numOrUndef(customsValue),
+          estimatedDuties: numOrUndef(estimatedDuties),
+        }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -65,6 +87,8 @@ export function DUMsPanel({
       setBureau("");
       setRegime("");
       setRegisteredAt("");
+      setCustomsValue("");
+      setEstimatedDuties("");
       setOpen(false);
       router.refresh();
     });
@@ -108,12 +132,37 @@ export function DUMsPanel({
             <Input id="bureau" value={bureau} onChange={(e) => setBureau(e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="dumdate">Date d'enregistrement</Label>
+            <Label htmlFor="dumdate">Date d&apos;enregistrement</Label>
             <Input
               id="dumdate"
               type="date"
               value={registeredAt}
               onChange={(e) => setRegisteredAt(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="dumcv">Valeur en douane (MAD)</Label>
+            <Input
+              id="dumcv"
+              type="number"
+              step="0.01"
+              min="0"
+              value={customsValue}
+              onChange={(e) => setCustomsValue(e.target.value)}
+              className="font-mono"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="dumed">Droits &amp; taxes estimés (MAD)</Label>
+            <Input
+              id="dumed"
+              type="number"
+              step="0.01"
+              min="0"
+              value={estimatedDuties}
+              onChange={(e) => setEstimatedDuties(e.target.value)}
+              className="font-mono"
+              placeholder="Estimation avant BADR"
             />
           </div>
           <div className="md:col-span-2 flex justify-end gap-2">
@@ -133,21 +182,59 @@ export function DUMsPanel({
             Aucune DUM enregistrée. Elle sera créée après dépôt sur BADR.
           </div>
         )}
-        {dums.map((d) => (
-          <div key={d.id} className="px-5 py-3 flex items-center gap-3">
-            <FileText className="size-4 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-[13px] font-medium text-[var(--color-fg)]">{d.number}</span>
-                {d.regime && <Badge tone="neutral">{d.regime}</Badge>}
+        {dums.map((d) =>
+          editingId === d.id ? (
+            <LiquidationForm
+              key={d.id}
+              dossierId={dossierId}
+              dum={d}
+              onDone={() => {
+                setEditingId(null);
+                router.refresh();
+              }}
+              onCancel={() => setEditingId(null)}
+            />
+          ) : (
+            <div key={d.id} className="px-5 py-3">
+              <div className="flex items-center gap-3">
+                <FileText className="size-4 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-mono text-[13px] font-medium text-[var(--color-fg)]">{d.number}</span>
+                    {d.regime && <Badge tone="neutral">{d.regime}</Badge>}
+                  </div>
+                  <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+                    {d.bureau ?? "Bureau ?"} · enregistré le {formatDate(d.registeredAt)}
+                  </div>
+                </div>
+                <Badge tone="info">{DUM_STATUS_LABELS[d.status]}</Badge>
+                {canCreate && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => setEditingId(d.id)}
+                    aria-label="Saisir la liquidation"
+                  >
+                    <Pencil className="text-[var(--color-fg-mute)]" />
+                  </Button>
+                )}
               </div>
-              <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
-                {d.bureau ?? "Bureau ?"} · enregistré le {formatDate(d.registeredAt)}
-              </div>
+              {(d.customsValue != null ||
+                d.estimatedDuties != null ||
+                d.liquidatedDuties != null ||
+                d.receiptNumber ||
+                d.paidAt) && (
+                <dl className="mt-2.5 ml-7 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1.5 text-[11.5px]">
+                  <Field label="Valeur en douane" value={fmt(d.customsValue)} />
+                  <Field label="Droits estimés" value={fmt(d.estimatedDuties)} />
+                  <Field label="Droits liquidés" value={fmt(d.liquidatedDuties)} strong />
+                  <Field label="N° quittance" value={d.receiptNumber || "—"} />
+                  <Field label="Payé le" value={d.paidAt ? formatDate(d.paidAt) : "—"} />
+                </dl>
+              )}
             </div>
-            <Badge tone="info">{DUM_STATUS_LABELS[d.status]}</Badge>
-          </div>
-        ))}
+          ),
+        )}
         {canCreate && atMax && (
           <div className="px-5 py-2.5 text-[11.5px] text-[var(--color-fg-3)] bg-[var(--color-surface-2)]">
             Maximum {MAX_DUMS_PER_DOSSIER} DUM par dossier atteint (un dossier peut cumuler 2 régimes).
@@ -155,5 +242,112 @@ export function DUMsPanel({
         )}
       </div>
     </Card>
+  );
+}
+
+function Field({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-[var(--color-fg-3)]">{label}</dt>
+      <dd className={`font-mono tnum ${strong ? "text-[var(--color-fg)] font-medium" : "text-[var(--color-fg-2)]"}`}>
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+function LiquidationForm({
+  dossierId,
+  dum,
+  onDone,
+  onCancel,
+}: {
+  dossierId: string;
+  dum: DUM;
+  onDone: () => void;
+  onCancel: () => void;
+}) {
+  const [pending, start] = useTransition();
+  const [status, setStatus] = useState<DUMStatus>(dum.status);
+  const [customsValue, setCustomsValue] = useState(dum.customsValue?.toString() ?? "");
+  const [estimatedDuties, setEstimatedDuties] = useState(dum.estimatedDuties?.toString() ?? "");
+  const [liquidatedDuties, setLiquidatedDuties] = useState(dum.liquidatedDuties?.toString() ?? "");
+  const [receiptNumber, setReceiptNumber] = useState(dum.receiptNumber ?? "");
+  const [paidAt, setPaidAt] = useState(toDateInput(dum.paidAt));
+
+  const numOrNull = (s: string) => (s.trim() === "" ? null : Number(s));
+
+  function save() {
+    start(async () => {
+      const res = await fetch(`/api/dossiers/${dossierId}/dums/${dum.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status,
+          customsValue: numOrNull(customsValue),
+          estimatedDuties: numOrNull(estimatedDuties),
+          liquidatedDuties: numOrNull(liquidatedDuties),
+          receiptNumber: receiptNumber.trim() || null,
+          paidAt: paidAt || null,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || "Erreur");
+        return;
+      }
+      toast.success("Liquidation enregistrée");
+      onDone();
+    });
+  }
+
+  return (
+    <div className="px-5 py-4 bg-[var(--color-surface-2)] animate-fade-in">
+      <div className="flex items-center gap-2 mb-3">
+        <FileText className="size-4 text-[var(--color-fg-mute)]" strokeWidth={1.75} />
+        <span className="font-mono text-[13px] font-medium text-[var(--color-fg)]">{dum.number}</span>
+        <span className="text-[11.5px] text-[var(--color-fg-3)]">— liquidation des droits &amp; taxes</span>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label>Statut DUM</Label>
+          <Select value={status} onChange={(e) => setStatus(e.target.value as DUMStatus)}>
+            {(Object.keys(DUM_STATUS_LABELS) as DUMStatus[]).map((s) => (
+              <option key={s} value={s}>
+                {DUM_STATUS_LABELS[s]}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Valeur en douane (MAD)</Label>
+          <Input type="number" step="0.01" min="0" value={customsValue} onChange={(e) => setCustomsValue(e.target.value)} className="font-mono" />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Droits &amp; taxes estimés (MAD)</Label>
+          <Input type="number" step="0.01" min="0" value={estimatedDuties} onChange={(e) => setEstimatedDuties(e.target.value)} className="font-mono" />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Droits &amp; taxes liquidés (MAD)</Label>
+          <Input type="number" step="0.01" min="0" value={liquidatedDuties} onChange={(e) => setLiquidatedDuties(e.target.value)} className="font-mono" />
+        </div>
+        <div className="space-y-1.5">
+          <Label>N° de quittance</Label>
+          <Input value={receiptNumber} onChange={(e) => setReceiptNumber(e.target.value)} />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Date de paiement</Label>
+          <Input type="date" value={paidAt} onChange={(e) => setPaidAt(e.target.value)} />
+        </div>
+      </div>
+      <div className="flex justify-end gap-2 mt-3">
+        <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+          Annuler
+        </Button>
+        <Button type="button" size="sm" disabled={pending} onClick={save}>
+          {pending ? "Enregistrement…" : "Enregistrer"}
+        </Button>
+      </div>
+    </div>
   );
 }

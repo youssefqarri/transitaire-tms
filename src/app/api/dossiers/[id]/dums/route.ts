@@ -11,6 +11,8 @@ const schema = z.object({
   bureau: z.string().optional(),
   regime: z.string().optional(),
   registeredAt: z.string().optional(), // date d'enregistrement (ISO yyyy-mm-dd)
+  customsValue: z.number().nonnegative().nullable().optional(), // valeur en douane
+  estimatedDuties: z.number().nonnegative().nullable().optional(), // droits estimés avant BADR
 });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -40,6 +42,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         dossierId: id,
         status: "ENREGISTRE",
         registeredAt: parsed.data.registeredAt ? new Date(parsed.data.registeredAt) : new Date(),
+        customsValue: parsed.data.customsValue ?? null,
+        estimatedDuties: parsed.data.estimatedDuties ?? null,
       },
     });
 
