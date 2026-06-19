@@ -53,7 +53,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   const issuer = await getIssuer();
   const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "https://transit.evead.com";
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "https://app.escale.ma";
   const printUrl = `${baseUrl}/factures/${invoice.id}/imprimer`;
 
   const subject =
