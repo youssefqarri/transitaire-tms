@@ -80,6 +80,44 @@ export function NewInvoiceForm({
     setItems((arr) => arr.filter((_, idx) => idx !== i));
   }
 
+  // À la sélection d'un client, pré-remplit les lignes depuis sa fiche tarifaire
+  // récurrente (point 6 cliente). Les débours, variables, restent à ajouter ensuite.
+  async function onClientChange(id: string) {
+    setClientId(id);
+    if (!id) return;
+    try {
+      const res = await fetch(`/api/clients/${id}/tariffs`);
+      if (!res.ok) return;
+      const data = (await res.json()) as {
+        items?: Array<{
+          kind: InvoiceItemKind;
+          code: string | null;
+          description: string;
+          unitPrice: number;
+          vatRate: number;
+        }>;
+      };
+      const tariffs = data.items ?? [];
+      if (tariffs.length === 0) return;
+      setItems(
+        tariffs.map((t) => ({
+          kind: t.kind,
+          code: t.code ?? "",
+          description: t.description,
+          quantity: 1,
+          unitPrice: t.unitPrice,
+          vatRate: t.vatRate,
+        })),
+      );
+      const name = clients.find((c) => c.id === id)?.name ?? "ce client";
+      toast.success(
+        `Fiche tarifaire de ${name} appliquée (${tariffs.length} ligne${tariffs.length > 1 ? "s" : ""}) — ajoutez les débours`,
+      );
+    } catch {
+      // silencieux : si la fiche n'est pas récupérable, on garde les lignes en cours
+    }
+  }
+
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!clientId) {
@@ -152,7 +190,7 @@ export function NewInvoiceForm({
             sublabel: [c.code, c.city].filter(Boolean).join(" · ") || undefined,
           }))}
           value={clientId}
-          onChange={setClientId}
+          onChange={onClientChange}
           placeholder="Sélectionner un client…"
           searchPlaceholder="Rechercher…"
         />

@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Folder, Pencil } from "lucide-react";
+import { Folder, Pencil, Receipt } from "lucide-react";
 import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
+import { canManageInvoices } from "@/lib/roles";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
@@ -10,6 +12,7 @@ import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { DeleteClientButton } from "./delete-button";
 import { ContactsPanel } from "./contacts-panel";
+import { ClientTariffEditor } from "./tariff-editor";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +22,7 @@ export default async function ClientDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await auth();
   const client = await prisma.client.findUnique({
     where: { id },
     include: {
@@ -29,9 +33,12 @@ export default async function ClientDetailPage({
       },
       users: { select: { id: true, name: true, email: true } },
       contacts: { where: { deletedAt: null }, orderBy: { createdAt: "asc" } },
+      tariffs: { orderBy: { order: "asc" } },
     },
   });
   if (!client) notFound();
+
+  const showTariffs = !!session && canManageInvoices(session.user.role);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -170,6 +177,27 @@ export default async function ClientDetailPage({
           <ContactsPanel clientId={id} contacts={client.contacts} />
         </Card>
       </div>
+
+      {showTariffs && (
+        <Card>
+          <div className="px-5 py-3.5 border-b border-[var(--color-border)] flex items-center gap-2">
+            <Receipt className="size-4 text-[var(--color-fg-mute)]" strokeWidth={1.75} />
+            <h3 className="text-[14px] font-semibold tracking-tight text-[var(--color-fg)]">
+              Fiche tarifaire
+            </h3>
+          </div>
+          <ClientTariffEditor
+            clientId={id}
+            initial={client.tariffs.map((t) => ({
+              kind: t.kind,
+              code: t.code,
+              description: t.description,
+              unitPrice: Number(t.unitPrice),
+              vatRate: Number(t.vatRate),
+            }))}
+          />
+        </Card>
+      )}
     </div>
   );
 }
