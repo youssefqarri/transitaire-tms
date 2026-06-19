@@ -33,6 +33,7 @@ type DossierOpt = {
   number: string;
   reference: string | null;
   customsValue: number | null;
+  articleCount: number | null;
 };
 
 // Barème proposé : 0 % (débours refacturé à l'identique), 3 % (taxe régionale
@@ -248,6 +249,7 @@ export function NewInvoiceForm({
 
       <SyndicalCalculator
         customsValue={selectedDossier?.customsValue ?? null}
+        articleCount={selectedDossier?.articleCount ?? null}
         onApply={applyHonoraire}
       />
 

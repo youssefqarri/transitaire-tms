@@ -290,6 +290,7 @@ export default async function DossierDetailPage({
                     liquidatedDuties: d.liquidatedDuties ? Number(d.liquidatedDuties) : null,
                     receiptNumber: d.receiptNumber,
                     paidAt: d.paidAt,
+                    articleCount: d.articleCount ?? null,
                   }))}
                   canCreate={canCreateDUM(session.user.role)}
                 />

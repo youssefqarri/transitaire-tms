@@ -12,14 +12,18 @@ const REDUCTIONS = [0, 15, 20, 30, 40] as const;
 
 export function SyndicalCalculator({
   customsValue,
+  articleCount,
   onApply,
 }: {
   customsValue: number | null;
+  articleCount: number | null;
   onApply: (amount: number, description: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState<number>(customsValue ?? 0);
-  const [articles, setArticles] = useState<number>(1);
+  const [articles, setArticles] = useState<number>(
+    articleCount && articleCount > 0 ? articleCount : 1,
+  );
   const [reduction, setReduction] = useState<number>(0);
 
   // Pré-remplit la valeur en douane quand un dossier est sélectionné.
@@ -29,6 +33,11 @@ export function SyndicalCalculator({
       setOpen(true);
     }
   }, [customsValue]);
+
+  // Pré-remplit le nombre d'articles depuis la DUM du dossier sélectionné.
+  useEffect(() => {
+    if (articleCount != null && articleCount > 0) setArticles(articleCount);
+  }, [articleCount]);
 
   const r = computeSyndicalHonoraire({
     customsValue: value,

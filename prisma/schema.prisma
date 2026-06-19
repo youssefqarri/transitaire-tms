@@ -408,6 +408,7 @@ model DUM {
   liquidatedDuties Decimal?  @db.Decimal(12, 2) // droits & taxes liquidés par la douane
   receiptNumber    String?   // n° de quittance / ticket de paiement douane
   paidAt           DateTime? // date de paiement des droits & taxes
+  articleCount     Int?      // nombre d'articles de la déclaration (supplément feuillet du tarif syndical)
 
   notes       String?    @db.Text
 

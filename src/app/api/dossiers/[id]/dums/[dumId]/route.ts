@@ -16,6 +16,7 @@ const patchSchema = z.object({
   liquidatedDuties: z.number().nonnegative().nullable().optional(),
   receiptNumber: z.string().nullable().optional(),
   paidAt: z.string().nullable().optional(),
+  articleCount: z.number().int().nonnegative().nullable().optional(),
   notes: z.string().nullable().optional(),
 });
 
@@ -62,6 +63,7 @@ export async function PATCH(
       liquidatedDuties: d.liquidatedDuties === undefined ? undefined : d.liquidatedDuties,
       receiptNumber: strField(d.receiptNumber),
       paidAt: dateField(d.paidAt),
+      articleCount: d.articleCount === undefined ? undefined : d.articleCount,
       notes: strField(d.notes),
     },
   });

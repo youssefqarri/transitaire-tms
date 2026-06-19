@@ -29,6 +29,7 @@ type DUM = {
   liquidatedDuties: number | null;
   receiptNumber: string | null;
   paidAt: Date | null;
+  articleCount: number | null;
 };
 
 const fmt = (n: number | null) => (n == null ? "—" : formatMAD(n));
@@ -53,10 +54,13 @@ export function DUMsPanel({
   const [registeredAt, setRegisteredAt] = useState("");
   const [customsValue, setCustomsValue] = useState("");
   const [estimatedDuties, setEstimatedDuties] = useState("");
+  const [articleCount, setArticleCount] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const atMax = dums.length >= MAX_DUMS_PER_DOSSIER;
   const numOrUndef = (s: string) => (s.trim() === "" ? undefined : Number(s));
+  const intOrUndef = (s: string) =>
+    s.trim() === "" ? undefined : Math.max(0, Math.floor(Number(s)));
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -75,6 +79,7 @@ export function DUMsPanel({
           registeredAt: registeredAt || undefined,
           customsValue: numOrUndef(customsValue),
           estimatedDuties: numOrUndef(estimatedDuties),
+          articleCount: intOrUndef(articleCount),
         }),
       });
       if (!res.ok) {
@@ -89,6 +94,7 @@ export function DUMsPanel({
       setRegisteredAt("");
       setCustomsValue("");
       setEstimatedDuties("");
+      setArticleCount("");
       setOpen(false);
       router.refresh();
     });
@@ -165,6 +171,19 @@ export function DUMsPanel({
               placeholder="Estimation avant BADR"
             />
           </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="dumart">Nombre d&apos;articles</Label>
+            <Input
+              id="dumart"
+              type="number"
+              min="0"
+              step="1"
+              value={articleCount}
+              onChange={(e) => setArticleCount(e.target.value)}
+              className="font-mono"
+              placeholder="ex. 6 — pour le tarif syndical"
+            />
+          </div>
           <div className="md:col-span-2 flex justify-end gap-2">
             <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
               Annuler
@@ -223,9 +242,11 @@ export function DUMsPanel({
                 d.estimatedDuties != null ||
                 d.liquidatedDuties != null ||
                 d.receiptNumber ||
-                d.paidAt) && (
+                d.paidAt ||
+                d.articleCount != null) && (
                 <dl className="mt-2.5 ml-7 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1.5 text-[11.5px]">
                   <Field label="Valeur en douane" value={fmt(d.customsValue)} />
+                  <Field label="Nombre d'articles" value={d.articleCount != null ? String(d.articleCount) : "—"} />
                   <Field label="Droits estimés" value={fmt(d.estimatedDuties)} />
                   <Field label="Droits liquidés" value={fmt(d.liquidatedDuties)} strong />
                   <Field label="N° quittance" value={d.receiptNumber || "—"} />
@@ -274,6 +295,7 @@ function LiquidationForm({
   const [liquidatedDuties, setLiquidatedDuties] = useState(dum.liquidatedDuties?.toString() ?? "");
   const [receiptNumber, setReceiptNumber] = useState(dum.receiptNumber ?? "");
   const [paidAt, setPaidAt] = useState(toDateInput(dum.paidAt));
+  const [articleCount, setArticleCount] = useState(dum.articleCount?.toString() ?? "");
 
   const numOrNull = (s: string) => (s.trim() === "" ? null : Number(s));
 
@@ -289,6 +311,8 @@ function LiquidationForm({
           liquidatedDuties: numOrNull(liquidatedDuties),
           receiptNumber: receiptNumber.trim() || null,
           paidAt: paidAt || null,
+          articleCount:
+            articleCount.trim() === "" ? null : Math.max(0, Math.floor(Number(articleCount))),
         }),
       });
       if (!res.ok) {
@@ -338,6 +362,17 @@ function LiquidationForm({
         <div className="space-y-1.5">
           <Label>Date de paiement</Label>
           <Input type="date" value={paidAt} onChange={(e) => setPaidAt(e.target.value)} />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Nombre d&apos;articles</Label>
+          <Input
+            type="number"
+            min="0"
+            step="1"
+            value={articleCount}
+            onChange={(e) => setArticleCount(e.target.value)}
+            className="font-mono"
+          />
         </div>
       </div>
       <div className="flex justify-end gap-2 mt-3">

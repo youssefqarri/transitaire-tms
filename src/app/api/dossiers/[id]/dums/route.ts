@@ -13,6 +13,7 @@ const schema = z.object({
   registeredAt: z.string().optional(), // date d'enregistrement (ISO yyyy-mm-dd)
   customsValue: z.number().nonnegative().nullable().optional(), // valeur en douane
   estimatedDuties: z.number().nonnegative().nullable().optional(), // droits estimés avant BADR
+  articleCount: z.number().int().nonnegative().nullable().optional(), // nb d'articles de la DUM
 });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -44,6 +45,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         registeredAt: parsed.data.registeredAt ? new Date(parsed.data.registeredAt) : new Date(),
         customsValue: parsed.data.customsValue ?? null,
         estimatedDuties: parsed.data.estimatedDuties ?? null,
+        articleCount: parsed.data.articleCount ?? null,
       },
     });
 
