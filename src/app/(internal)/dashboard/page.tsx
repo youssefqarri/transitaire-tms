@@ -14,7 +14,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatDate, formatCurrency } from "@/lib/utils";
-import { STATUS_LABELS, requiredDocuments } from "@/lib/statuses";
+import { STATUS_LABELS, requiredDocuments, DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
 import { KeyDates } from "@/components/dossier/key-dates";
 import { PageHeader } from "@/components/ui/page-header";
@@ -87,6 +87,16 @@ export default async function DashboardPage() {
     const required = requiredDocuments(d.paymentMode, d.transport);
     const present = new Set(d.documents.map((doc) => doc.category));
     return required.filter((c) => !present.has(c)).length;
+  }
+  function missingDocsOf(d: {
+    paymentMode: "WITH_PAYMENT" | "WITHOUT_PAYMENT";
+    transport: "MARITIME" | "AERIEN" | "ROUTIER" | null;
+    documents: { category: string }[];
+  }): string {
+    const required = requiredDocuments(d.paymentMode, d.transport);
+    const present = new Set(d.documents.map((doc) => doc.category));
+    const labels = required.filter((c) => !present.has(c)).map((c) => DOCUMENT_CATEGORY_LABELS[c]);
+    return labels.length ? `Documents manquants :\n• ${labels.join("\n• ")}` : "";
   }
 
   // Grouper par client
@@ -196,7 +206,7 @@ export default async function DashboardPage() {
                       </span>
                     )}
                     {countMissing(d) > 0 && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)]">
+                      <span title={missingDocsOf(d)} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] cursor-default">
                         <AlertTriangle className="size-2.5" strokeWidth={2.25} />
                         {countMissing(d)} doc{countMissing(d) > 1 ? "s" : ""}
                       </span>
@@ -338,7 +348,7 @@ export default async function DashboardPage() {
                             </span>
                           )}
                           {countMissing(d) > 0 && (
-                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)]">
+                            <span title={missingDocsOf(d)} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] cursor-default">
                               <AlertTriangle className="size-2.5" strokeWidth={2.25} />
                               {countMissing(d)} doc{countMissing(d) > 1 ? "s" : ""}
                             </span>

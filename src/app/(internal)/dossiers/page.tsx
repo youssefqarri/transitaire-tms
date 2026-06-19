@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatDate, formatCurrency, formatNumber } from "@/lib/utils";
 import { canCreateDossier } from "@/lib/roles";
-import { requiredDocuments } from "@/lib/statuses";
+import { requiredDocuments, DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
 import { DossiersFilterBar } from "./filter-bar";
 import { KeyDates } from "@/components/dossier/key-dates";
@@ -84,6 +84,7 @@ export default async function DossiersPage({
       return {
         ...d,
         missingCount: missing.length,
+        missingDocs: missing.map((c) => DOCUMENT_CATEGORY_LABELS[c]),
         docCount: d.documents.length,
         fromClientCount,
         isNewFromClient,
@@ -198,7 +199,7 @@ export default async function DossiersPage({
                     <div className="flex items-center gap-1 shrink-0">
                       {d.fromClientCount > 0 && (
                         <span
-                          className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10.5px] font-semibold bg-[var(--color-danger)] text-white"
+                          className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10.5px] font-semibold bg-[var(--color-danger)] text-white cursor-default"
                           title={`${d.fromClientCount} document(s) déposé(s) par le client, à vérifier`}
                         >
                           ● {d.fromClientCount} doc client
@@ -206,8 +207,8 @@ export default async function DossiersPage({
                       )}
                       {d.missingCount > 0 && (
                         <span
-                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10.5px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)]"
-                          title={`${d.missingCount} document(s) obligatoire(s) manquant(s)`}
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10.5px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] cursor-default"
+                          title={`Documents manquants :\n• ${d.missingDocs.join("\n• ")}`}
                         >
                           <AlertTriangle className="size-2.5" strokeWidth={2.25} />
                           {d.missingCount} doc{d.missingCount > 1 ? "s" : ""}
@@ -293,7 +294,7 @@ export default async function DossiersPage({
                         <div className="inline-flex items-center gap-1 flex-wrap justify-center">
                           {d.fromClientCount > 0 && (
                             <span
-                              className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10.5px] font-semibold bg-[var(--color-danger)] text-white"
+                              className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10.5px] font-semibold bg-[var(--color-danger)] text-white cursor-default"
                               title={`${d.fromClientCount} document(s) reçu(s) du client`}
                             >
                               ● {d.fromClientCount}
@@ -301,8 +302,8 @@ export default async function DossiersPage({
                           )}
                           {d.missingCount > 0 ? (
                             <span
-                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10.5px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)]"
-                              title={`${d.missingCount} document(s) manquant(s)`}
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10.5px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] cursor-default"
+                              title={`Documents manquants :\n• ${d.missingDocs.join("\n• ")}`}
                             >
                               <AlertTriangle className="size-2.5" strokeWidth={2.25} />
                               {d.missingCount}
