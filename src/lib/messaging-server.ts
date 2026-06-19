@@ -2,6 +2,7 @@ import "server-only";
 import { prisma } from "./db";
 import { loadTemplate, renderTemplate, type TemplateKey } from "./messaging";
 import { sendMail, textToHtml } from "./mail";
+import { sendWhatsApp, isWhatsAppConfigured } from "./whatsapp";
 import { DOCUMENT_CATEGORY_LABELS } from "./statuses";
 import type { MessageChannel, MessageLang } from "@/generated/prisma/enums";
 
@@ -121,8 +122,23 @@ export async function notifyClient(opts: {
       return { ok: true, messageId: result.messageId };
     }
 
-    // WhatsApp : envoi manuel via wa.me côté navigateur — on trace comme envoyé (manuel),
-    // cohérent avec l'UI (le message n'est pas en échec, il est ouvert dans WhatsApp).
+    // WhatsApp : envoi réel via l'API OpenWA/WAHA si configurée, sinon repli manuel (wa.me).
+    if (await isWhatsAppConfigured()) {
+      if (!recipient) {
+        await prisma.outgoingMessage.update({
+          where: { id: msg.id },
+          data: { status: "FAILED", error: "Aucun numéro WhatsApp" },
+        });
+        return { ok: false, error: "Aucun numéro : renseigne un téléphone pour ce client." };
+      }
+      const result = await sendWhatsApp({ to: recipient, text: body });
+      await prisma.outgoingMessage.update({
+        where: { id: msg.id },
+        data: { status: "SENT", sentAt: new Date(), externalId: result.messageId },
+      });
+      return { ok: true, messageId: result.messageId };
+    }
+    // Repli : envoi manuel via wa.me côté navigateur — on trace comme envoyé (manuel).
     await prisma.outgoingMessage.update({
       where: { id: msg.id },
       data: { status: "SENT", sentAt: new Date() },

@@ -9,6 +9,9 @@ export type AppSettings = {
   smtpPass: string | null;
   smtpFrom: string | null;
   smtpSecure: boolean;
+  waApiUrl: string | null;
+  waApiKey: string | null;
+  waSession: string | null;
   storageDriver: "local" | "s3";
   s3Endpoint: string | null;
   s3Region: string | null;
@@ -51,6 +54,9 @@ export async function getSettings(): Promise<AppSettings> {
     smtpPass: decryptSecret(row?.smtpPass) ?? process.env.SMTP_PASS ?? null,
     smtpFrom: row?.smtpFrom ?? process.env.SMTP_FROM ?? null,
     smtpSecure: row?.smtpSecure ?? false,
+    waApiUrl: row?.waApiUrl ?? process.env.WA_API_URL ?? null,
+    waApiKey: decryptSecret(row?.waApiKey) ?? process.env.WA_API_KEY ?? null,
+    waSession: row?.waSession ?? process.env.WA_SESSION ?? "default",
     storageDriver:
       (row?.storageDriver as "local" | "s3" | undefined) ??
       (process.env.STORAGE_DRIVER as "local" | "s3" | undefined) ??
@@ -95,6 +101,9 @@ export async function updateSettings(
       : {}),
     ...(typeof patch.s3SecretKey === "string" && patch.s3SecretKey
       ? { s3SecretKey: encryptSecret(patch.s3SecretKey) }
+      : {}),
+    ...(typeof patch.waApiKey === "string" && patch.waApiKey
+      ? { waApiKey: encryptSecret(patch.waApiKey) }
       : {}),
   };
   await prisma.appSetting.upsert({

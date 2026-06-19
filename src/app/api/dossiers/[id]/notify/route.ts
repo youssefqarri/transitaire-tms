@@ -13,8 +13,8 @@ const schema = z.object({
   lang: z.enum(["FR", "AR", "EN"]).default("FR"),
   customSubject: z.string().optional(),
   customBody: z.string().optional(),
-  // destinataire choisi (sinon contact principal du client)
-  toAddress: z.string().email().optional(),
+  // destinataire choisi (email pour EMAIL, téléphone pour WHATSAPP ; sinon contact principal)
+  toAddress: z.string().optional(),
   // enregistrer ce destinataire dans le carnet du client
   saveAsContact: z.boolean().optional(),
   contactName: z.string().optional(),

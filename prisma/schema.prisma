@@ -871,6 +871,11 @@ model AppSetting {
   smtpFrom        String?
   smtpSecure      Boolean      @default(false)
 
+  // ─── WhatsApp (OpenWA / WAHA — notifications sortantes) ───
+  waApiUrl        String?      // base de l'API, ex. http://host:2785
+  waApiKey        String?      // clé X-API-Key (chiffrée via encryptSecret)
+  waSession       String?  @default("default") // nom de session WhatsApp
+
   // ─── Stockage fichiers ───────────────────────────────────
   storageDriver   String   @default("local")     // "local" | "s3"
   s3Endpoint      String?

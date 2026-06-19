@@ -5,7 +5,7 @@ import { getSettings } from "@/lib/settings";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
-import { Mail, Cloud, Key, ChevronRight, MessageSquare, FileText, Hash, Building2 } from "lucide-react";
+import { Mail, Cloud, Key, ChevronRight, MessageSquare, MessageCircle, FileText, Hash, Building2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +18,7 @@ export default async function SettingsPage() {
   const s3Configured =
     settings.storageDriver === "s3" &&
     !!(settings.s3Endpoint && settings.s3Bucket && settings.s3AccessKeyId && settings.s3SecretKey);
+  const waConfigured = !!(settings.waApiUrl && settings.waApiKey);
 
   const sections = [
     {
@@ -29,6 +30,17 @@ export default async function SettingsPage() {
         <Badge tone="ok">Configuré · {settings.smtpHost}</Badge>
       ) : (
         <Badge tone="warn">Non configuré</Badge>
+      ),
+    },
+    {
+      href: "/parametres/whatsapp",
+      icon: MessageCircle,
+      title: "WhatsApp (OpenWA)",
+      description: "Notifications clients par WhatsApp via OpenWA / WAHA",
+      status: waConfigured ? (
+        <Badge tone="ok">Configuré</Badge>
+      ) : (
+        <Badge tone="neutral">Optionnel</Badge>
       ),
     },
     {

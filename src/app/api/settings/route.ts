@@ -13,6 +13,10 @@ const schema = z.object({
   smtpPass: z.string().nullable().optional(),
   smtpFrom: z.string().nullable().optional(),
   smtpSecure: z.boolean().optional(),
+  // WhatsApp (OpenWA / WAHA)
+  waApiUrl: z.string().nullable().optional(),
+  waApiKey: z.string().nullable().optional(),
+  waSession: z.string().nullable().optional(),
   // Stockage
   storageDriver: z.enum(["local", "s3"]).optional(),
   s3Endpoint: z.string().nullable().optional(),

@@ -32,6 +32,7 @@ export function NotifyClientButton({
   clientPhone,
   contacts,
   dossierContactEmail,
+  waConfigured,
 }: {
   dossierId: string;
   clientId: string;
@@ -39,6 +40,7 @@ export function NotifyClientButton({
   clientPhone: string | null;
   contacts: Contact[];
   dossierContactEmail: string | null;
+  waConfigured: boolean;
 }) {
   void clientId;
   const router = useRouter();
@@ -139,6 +141,35 @@ export function NotifyClientButton({
     });
   }
 
+  // Envoi WhatsApp réel via l'API OpenWA (serveur) — quand configuré.
+  function sendWhatsAppApi() {
+    if (!editedBody.trim()) {
+      toast.error("Message vide");
+      return;
+    }
+    start(async () => {
+      const res = await fetch(`/api/dossiers/${dossierId}/notify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          templateKey,
+          channel: "WHATSAPP",
+          lang: "FR",
+          customBody: editedBody,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Échec de l'envoi WhatsApp");
+        return;
+      }
+      toast.success("WhatsApp envoyé au client");
+      setOpen(false);
+      router.refresh();
+    });
+  }
+
+  // Repli manuel (wa.me) — quand l'API n'est pas configurée.
   function openWhatsApp() {
     if (!waLink) return;
     window.open(waLink, "_blank");
@@ -288,8 +319,18 @@ export function NotifyClientButton({
 
               {channel === "WHATSAPP" && (
                 <div className="rounded-[var(--radius)] bg-[var(--color-info-soft)] border border-[var(--color-info)]/30 p-3 text-[12px] text-[var(--color-fg-2)]">
-                  WhatsApp ouvrira avec le message pré-rempli. Tu cliques <strong>Envoyer</strong>{" "}
-                  dans WhatsApp. L&apos;app enregistrera la notification dans l&apos;historique.
+                  {waConfigured ? (
+                    <>
+                      Le message sera <strong>envoyé directement</strong> via WhatsApp
+                      {clientPhone ? ` au ${clientPhone}` : ""} depuis l&apos;outil.
+                    </>
+                  ) : (
+                    <>
+                      WhatsApp ouvrira avec le message pré-rempli. Tu cliques{" "}
+                      <strong>Envoyer</strong> dans WhatsApp. L&apos;app enregistrera la
+                      notification dans l&apos;historique.
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -301,6 +342,10 @@ export function NotifyClientButton({
               {channel === "EMAIL" ? (
                 <Button size="sm" onClick={sendEmail} disabled={pending || !toAddress}>
                   {pending ? "Envoi…" : "Envoyer l'email"}
+                </Button>
+              ) : waConfigured ? (
+                <Button size="sm" onClick={sendWhatsAppApi} disabled={pending || !clientPhone}>
+                  {pending ? "Envoi…" : "Envoyer le WhatsApp"}
                 </Button>
               ) : (
                 <Button size="sm" onClick={openWhatsApp} disabled={!waLink}>

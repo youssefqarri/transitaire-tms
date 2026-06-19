@@ -28,6 +28,7 @@ import { DocumentsPanel } from "./documents-panel";
 import { DUMsPanel } from "./dums-panel";
 import { CommentsPanel } from "./comments-panel";
 import { NotifyClientButton } from "./notify-button";
+import { isWhatsAppConfigured } from "@/lib/whatsapp";
 import { OutgoingMessagesPanel } from "./outgoing-messages-panel";
 import { ExpectedDocumentsPanel } from "./expected-documents-panel";
 import { DeleteDossierButton } from "./delete-button";
@@ -79,6 +80,7 @@ export default async function DossierDetailPage({
   });
   if (!dossier) notFound();
 
+  const waConfigured = await isWhatsAppConfigured();
   const required = requiredDocuments(dossier.paymentMode, dossier.transport);
   const presentCategories = new Set(dossier.documents.map((d) => d.category));
   const missing = required.filter((c) => !presentCategories.has(c));
@@ -116,6 +118,7 @@ export default async function DossierDetailPage({
                 clientPhone={dossier.client.phone}
                 contacts={dossier.client.contacts}
                 dossierContactEmail={dossier.contactEmail}
+                waConfigured={waConfigured}
               />
             )}
             {/* Comptable : pas de modif des champs du dossier */}
