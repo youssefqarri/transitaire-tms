@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useTransition, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Send, X } from "lucide-react";
+import { Send, X, Mail, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -44,15 +45,21 @@ export function NotifyClientButton({
 }) {
   void clientId;
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
-  const [channel, setChannel] = useState<"EMAIL" | "WHATSAPP">("EMAIL");
+  // Multi-canal : email et/ou WhatsApp
+  const [emailOn, setEmailOn] = useState(true);
+  const [waOn, setWaOn] = useState(false);
   const [templateKey, setTemplateKey] = useState("docs_manquants");
-  const [preview, setPreview] = useState<{ subject: string | null; body: string } | null>(null);
   const [editedSubject, setEditedSubject] = useState("");
   const [editedBody, setEditedBody] = useState("");
 
-  // Destinataire : principal (client.email) + contacts du carnet, ou "Autre".
+  useEffect(() => setMounted(true), []);
+
+  // Canal « principal » pour charger le bon modèle d'aperçu (email prioritaire).
+  const primaryChannel: "EMAIL" | "WHATSAPP" = emailOn ? "EMAIL" : "WHATSAPP";
+
   const recipientOptions = useMemo(() => {
     const opts: { value: string; label: string }[] = [];
     if (clientEmail) opts.push({ value: clientEmail, label: `Principal · ${clientEmail}` });
@@ -61,7 +68,6 @@ export function NotifyClientButton({
     return opts;
   }, [clientEmail, contacts]);
 
-  // Choix initial : destinataire mémorisé du dossier > principal > 1er contact > "Autre".
   const known = recipientOptions.map((o) => o.value);
   const [recipient, setRecipient] = useState(
     dossierContactEmail && known.includes(dossierContactEmail)
@@ -78,284 +84,274 @@ export function NotifyClientButton({
 
   const toAddress = (recipient === OTHER ? otherEmail : recipient).trim();
 
-  // Charge l'aperçu chaque fois que template ou canal change
+  // Aperçu : recharge quand le modèle ou le canal principal change.
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
     (async () => {
-      const params = new URLSearchParams({ templateKey, channel });
-      const res = await fetch(
-        `/api/dossiers/${dossierId}/notify/preview?${params}`,
-      );
+      const params = new URLSearchParams({ templateKey, channel: primaryChannel });
+      const res = await fetch(`/api/dossiers/${dossierId}/notify/preview?${params}`);
       if (!res.ok || cancelled) return;
       const data = await res.json();
-      setPreview(data);
       setEditedSubject(data.subject ?? "");
       setEditedBody(data.body ?? "");
     })();
     return () => {
       cancelled = true;
     };
-  }, [open, templateKey, channel, dossierId]);
+  }, [open, templateKey, primaryChannel, dossierId]);
 
-  // wa.me link pour fallback WhatsApp
   const waLink = useMemo(() => {
-    if (channel !== "WHATSAPP" || !clientPhone) return null;
+    if (!clientPhone) return null;
     const phone = clientPhone.replace(/\D/g, "");
-    const text = encodeURIComponent(editedBody);
-    return `https://wa.me/${phone}?text=${text}`;
-  }, [channel, clientPhone, editedBody]);
+    return `https://wa.me/${phone}?text=${encodeURIComponent(editedBody)}`;
+  }, [clientPhone, editedBody]);
 
-  function sendEmail() {
-    if (!toAddress || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(toAddress)) {
+  async function postNotify(
+    channel: "EMAIL" | "WHATSAPP",
+    extra: Record<string, unknown>,
+  ): Promise<{ ok: boolean; error?: string }> {
+    const res = await fetch(`/api/dossiers/${dossierId}/notify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ templateKey, channel, lang: "FR", customBody: editedBody, ...extra }),
+    });
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok, error: (data as { error?: string }).error };
+  }
+
+  function send() {
+    if (!emailOn && !waOn) {
+      toast.error("Choisis au moins un canal");
+      return;
+    }
+    if (!editedBody.trim()) {
+      toast.error("Message vide");
+      return;
+    }
+    if (emailOn && (!toAddress || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(toAddress))) {
       toast.error("Destinataire email invalide");
       return;
     }
-    if (!editedBody.trim()) {
-      toast.error("Message vide");
-      return;
-    }
+    // wa.me (repli non configuré) doit s'ouvrir dans le geste utilisateur, avant tout await.
+    if (waOn && !waConfigured && waLink) window.open(waLink, "_blank");
+
     start(async () => {
-      const res = await fetch(`/api/dossiers/${dossierId}/notify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          templateKey,
-          channel: "EMAIL",
-          lang: "FR",
+      const results: { label: string; ok: boolean; error?: string }[] = [];
+      if (emailOn) {
+        const r = await postNotify("EMAIL", {
           customSubject: editedSubject || undefined,
-          customBody: editedBody,
           toAddress,
           saveAsContact: recipient === OTHER && saveContact,
           contactName: otherName || undefined,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error(data.error || "Erreur envoi");
-        return;
+        });
+        results.push({ label: "Email", ...r });
       }
-      toast.success("Email envoyé au client");
-      setOpen(false);
+      if (waOn) {
+        const r = await postNotify("WHATSAPP", {});
+        results.push({ label: "WhatsApp", ...r });
+      }
+      const failed = results.filter((r) => !r.ok);
+      if (failed.length === 0) {
+        toast.success(
+          results.length > 1 ? "Envoyé par email + WhatsApp" : `${results[0].label} envoyé au client`,
+        );
+        setOpen(false);
+      } else {
+        failed.forEach((f) => toast.error(`${f.label} : ${f.error || "échec"}`));
+      }
       router.refresh();
     });
   }
 
-  // Envoi WhatsApp réel via l'API OpenWA (serveur) — quand configuré.
-  function sendWhatsAppApi() {
-    if (!editedBody.trim()) {
-      toast.error("Message vide");
-      return;
-    }
-    start(async () => {
-      const res = await fetch(`/api/dossiers/${dossierId}/notify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          templateKey,
-          channel: "WHATSAPP",
-          lang: "FR",
-          customBody: editedBody,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error(data.error || "Échec de l'envoi WhatsApp");
-        return;
-      }
-      toast.success("WhatsApp envoyé au client");
-      setOpen(false);
-      router.refresh();
-    });
-  }
+  const sendDisabled = pending || (!emailOn && !waOn) || (emailOn && !toAddress);
 
-  // Repli manuel (wa.me) — quand l'API n'est pas configurée.
-  function openWhatsApp() {
-    if (!waLink) return;
-    window.open(waLink, "_blank");
-    // Enregistre dans l'historique (statut SENT côté semi-auto)
-    fetch(`/api/dossiers/${dossierId}/notify`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        templateKey,
-        channel: "WHATSAPP",
-        lang: "FR",
-        customBody: editedBody,
-      }),
-    });
-    toast.info("WhatsApp ouvert — cliquez Envoyer dans WhatsApp");
-    setOpen(false);
-    router.refresh();
-  }
+  const modal = (
+    <div
+      className="fixed inset-0 bg-black/40 z-[100] flex items-center justify-center p-4 sm:p-6"
+      onClick={() => setOpen(false)}
+    >
+      <div
+        className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] border border-[var(--color-border)] shadow-[0_24px_64px_-16px_rgba(0,0,0,0.25)] w-full max-w-2xl max-h-[90vh] flex flex-col animate-fade-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
+          <div>
+            <div className="text-[15px] font-semibold">Notifier le client</div>
+            <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
+              Aperçu et personnalisation du message avant envoi
+            </div>
+          </div>
+          <button
+            onClick={() => setOpen(false)}
+            className="size-7 rounded-[var(--radius-sm)] flex items-center justify-center hover:bg-[var(--color-surface-2)] text-[var(--color-fg-mute)]"
+            aria-label="Fermer"
+          >
+            <X className="size-4" strokeWidth={2} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>Canal d&apos;envoi</Label>
+              <div className="flex gap-2">
+                <ChannelToggle
+                  active={emailOn}
+                  onClick={() => setEmailOn((v) => !v)}
+                  icon={Mail}
+                  label="Email"
+                />
+                <ChannelToggle
+                  active={waOn}
+                  disabled={!clientPhone}
+                  onClick={() => setWaOn((v) => !v)}
+                  icon={MessageCircle}
+                  label="WhatsApp"
+                  title={clientPhone ? clientPhone : "Pas de téléphone client"}
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="template">Template</Label>
+              <Select id="template" value={templateKey} onChange={(e) => setTemplateKey(e.target.value)}>
+                {TEMPLATES.map((t) => (
+                  <option key={t.key} value={t.key}>
+                    {t.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </div>
+
+          {emailOn && (
+            <div className="space-y-1.5">
+              <Label htmlFor="recipient">Destinataire (email)</Label>
+              <Select id="recipient" value={recipient} onChange={(e) => setRecipient(e.target.value)}>
+                {recipientOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+                <option value={OTHER}>Autre adresse…</option>
+              </Select>
+              {recipient === OTHER && (
+                <div className="space-y-2 pt-1.5">
+                  <Input
+                    type="email"
+                    value={otherEmail}
+                    onChange={(e) => setOtherEmail(e.target.value)}
+                    placeholder="email@destinataire.ma"
+                  />
+                  <Input
+                    value={otherName}
+                    onChange={(e) => setOtherName(e.target.value)}
+                    placeholder="Nom / libellé (optionnel)"
+                  />
+                  <label className="flex items-center gap-2 text-[12.5px] text-[var(--color-fg-2)] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={saveContact}
+                      onChange={(e) => setSaveContact(e.target.checked)}
+                      className="accent-[var(--color-accent)] size-4"
+                    />
+                    Enregistrer ce contact pour le client
+                  </label>
+                </div>
+              )}
+            </div>
+          )}
+
+          {emailOn && (
+            <div className="space-y-1.5">
+              <Label htmlFor="subj">Sujet (email)</Label>
+              <Input id="subj" value={editedSubject} onChange={(e) => setEditedSubject(e.target.value)} />
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <Label htmlFor="body">Message</Label>
+            <Textarea
+              id="body"
+              value={editedBody}
+              onChange={(e) => setEditedBody(e.target.value)}
+              className="min-h-[200px] font-mono text-[12.5px]"
+            />
+            <p className="text-[11px] text-[var(--color-fg-mute)]">
+              Variables remplacées automatiquement depuis le dossier. Le même message part sur les
+              canaux sélectionnés.
+            </p>
+          </div>
+
+          {waOn && (
+            <div className="rounded-[var(--radius)] bg-[var(--color-info-soft)] border border-[var(--color-info)]/30 p-3 text-[12px] text-[var(--color-fg-2)]">
+              {waConfigured ? (
+                <>
+                  WhatsApp sera <strong>envoyé directement</strong>
+                  {clientPhone ? ` au ${clientPhone}` : ""} depuis l&apos;outil.
+                </>
+              ) : (
+                <>
+                  WhatsApp s&apos;ouvrira avec le message pré-rempli (clique{" "}
+                  <strong>Envoyer</strong> dans WhatsApp). L&apos;envoi est aussi tracé dans
+                  l&apos;historique.
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-[var(--color-border)]">
+          <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
+            Annuler
+          </Button>
+          <Button size="sm" onClick={send} disabled={sendDisabled}>
+            <Send /> {pending ? "Envoi…" : "Envoyer"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
       <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
         <Send /> Notifier le client
       </Button>
-
-      {open && (
-        <div
-          className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-6 animate-fade-in"
-          onClick={() => setOpen(false)}
-        >
-          <div
-            className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] border border-[var(--color-border)] shadow-[0_24px_64px_-16px_rgba(0,0,0,0.2)] w-full max-w-2xl max-h-[90vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
-              <div>
-                <div className="text-[15px] font-semibold">Notifier le client</div>
-                <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
-                  Aperçu et personnalisation du message avant envoi
-                </div>
-              </div>
-              <button
-                onClick={() => setOpen(false)}
-                className="size-7 rounded-[var(--radius-sm)] flex items-center justify-center hover:bg-[var(--color-surface-2)] text-[var(--color-fg-mute)]"
-                aria-label="Fermer"
-              >
-                <X className="size-4" strokeWidth={2} />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="channel">Canal</Label>
-                  <Select
-                    id="channel"
-                    value={channel}
-                    onChange={(e) => setChannel(e.target.value as "EMAIL" | "WHATSAPP")}
-                  >
-                    <option value="EMAIL">Email</option>
-                    <option value="WHATSAPP" disabled={!clientPhone}>
-                      WhatsApp {clientPhone ? `(${clientPhone})` : "(pas de téléphone)"}
-                    </option>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="template">Template</Label>
-                  <Select
-                    id="template"
-                    value={templateKey}
-                    onChange={(e) => setTemplateKey(e.target.value)}
-                  >
-                    {TEMPLATES.map((t) => (
-                      <option key={t.key} value={t.key}>
-                        {t.label}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-              </div>
-
-              {channel === "EMAIL" && (
-                <div className="space-y-1.5">
-                  <Label htmlFor="recipient">Destinataire</Label>
-                  <Select
-                    id="recipient"
-                    value={recipient}
-                    onChange={(e) => setRecipient(e.target.value)}
-                  >
-                    {recipientOptions.map((o) => (
-                      <option key={o.value} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
-                    <option value={OTHER}>Autre adresse…</option>
-                  </Select>
-                  {recipient === OTHER && (
-                    <div className="space-y-2 pt-1.5">
-                      <Input
-                        type="email"
-                        value={otherEmail}
-                        onChange={(e) => setOtherEmail(e.target.value)}
-                        placeholder="email@destinataire.ma"
-                      />
-                      <Input
-                        value={otherName}
-                        onChange={(e) => setOtherName(e.target.value)}
-                        placeholder="Nom / libellé (optionnel)"
-                      />
-                      <label className="flex items-center gap-2 text-[12.5px] text-[var(--color-fg-2)] cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={saveContact}
-                          onChange={(e) => setSaveContact(e.target.checked)}
-                          className="accent-[var(--color-accent)] size-4"
-                        />
-                        Enregistrer ce contact pour le client
-                      </label>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {channel === "EMAIL" && (
-                <div className="space-y-1.5">
-                  <Label htmlFor="subj">Sujet</Label>
-                  <Input
-                    id="subj"
-                    value={editedSubject}
-                    onChange={(e) => setEditedSubject(e.target.value)}
-                  />
-                </div>
-              )}
-
-              <div className="space-y-1.5">
-                <Label htmlFor="body">Message</Label>
-                <Textarea
-                  id="body"
-                  value={editedBody}
-                  onChange={(e) => setEditedBody(e.target.value)}
-                  className="min-h-[200px] font-mono text-[12.5px]"
-                />
-                <p className="text-[11px] text-[var(--color-fg-mute)]">
-                  Variables remplacées automatiquement depuis le dossier. Tu peux éditer librement.
-                </p>
-              </div>
-
-              {channel === "WHATSAPP" && (
-                <div className="rounded-[var(--radius)] bg-[var(--color-info-soft)] border border-[var(--color-info)]/30 p-3 text-[12px] text-[var(--color-fg-2)]">
-                  {waConfigured ? (
-                    <>
-                      Le message sera <strong>envoyé directement</strong> via WhatsApp
-                      {clientPhone ? ` au ${clientPhone}` : ""} depuis l&apos;outil.
-                    </>
-                  ) : (
-                    <>
-                      WhatsApp ouvrira avec le message pré-rempli. Tu cliques{" "}
-                      <strong>Envoyer</strong> dans WhatsApp. L&apos;app enregistrera la
-                      notification dans l&apos;historique.
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-[var(--color-border)]">
-              <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
-                Annuler
-              </Button>
-              {channel === "EMAIL" ? (
-                <Button size="sm" onClick={sendEmail} disabled={pending || !toAddress}>
-                  {pending ? "Envoi…" : "Envoyer l'email"}
-                </Button>
-              ) : waConfigured ? (
-                <Button size="sm" onClick={sendWhatsAppApi} disabled={pending || !clientPhone}>
-                  {pending ? "Envoi…" : "Envoyer le WhatsApp"}
-                </Button>
-              ) : (
-                <Button size="sm" onClick={openWhatsApp} disabled={!waLink}>
-                  Ouvrir WhatsApp
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {mounted && open && createPortal(modal, document.body)}
     </>
+  );
+}
+
+function ChannelToggle({
+  active,
+  disabled,
+  onClick,
+  icon: Icon,
+  label,
+  title,
+}: {
+  active: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+  icon: typeof Mail;
+  label: string;
+  title?: string;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      title={title}
+      aria-pressed={active}
+      className={`flex-1 flex items-center justify-center gap-2 h-9 rounded-[var(--radius)] border text-[13px] transition-colors ${
+        active
+          ? "border-[var(--color-accent)] bg-[var(--color-accent-soft)] text-[var(--color-accent)] font-medium"
+          : "border-[var(--color-border-2)] text-[var(--color-fg-3)] hover:bg-[var(--color-surface-2)]"
+      } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
+    >
+      <Icon className="size-4" strokeWidth={1.75} /> {label}
+    </button>
   );
 }
