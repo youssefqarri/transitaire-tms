@@ -279,7 +279,7 @@ export default async function DossiersPage({
                       <td className="px-5 py-2.5">
                         <Link
                           href={`/dossiers/${d.id}`}
-                          className="font-mono font-semibold text-[13.5px] text-[var(--color-fg)] hover:text-[var(--color-accent)]"
+                          className="font-mono font-semibold text-[13px] text-[var(--color-fg)] hover:text-[var(--color-accent)]"
                         >
                           {d.number}
                         </Link>
@@ -287,10 +287,10 @@ export default async function DossiersPage({
                       <td className="px-5 py-2.5 font-mono text-[13px] text-[var(--color-fg-2)]">
                         {d.reference ?? <span className="text-[var(--color-fg-mute)] italic">—</span>}
                       </td>
-                      <td className="px-5 py-2.5 truncate max-w-[200px] text-[12.5px] text-[var(--color-fg-3)]">
+                      <td className="px-5 py-2.5 truncate max-w-[200px] text-[13px] text-[var(--color-fg-3)]">
                         {d.client.name}
                       </td>
-                      <td className="px-5 py-2.5 font-mono text-[11.5px] text-[var(--color-fg-3)]">
+                      <td className="px-5 py-2.5 font-mono text-[13px] text-[var(--color-fg-3)]">
                         {d.dums.length === 0 ? "—" : d.dums.map((dum) => dum.number).join(", ")}
                       </td>
                       <td className="px-3 py-2.5 text-center">
@@ -312,7 +312,7 @@ export default async function DossiersPage({
                               {d.missingCount}
                             </span>
                           ) : d.fromClientCount === 0 ? (
-                            <span className="text-[11px] text-[var(--color-fg-3)] tnum">
+                            <span className="text-[13px] text-[var(--color-fg-3)] tnum">
                               {d.docCount}
                             </span>
                           ) : null}
@@ -328,19 +328,19 @@ export default async function DossiersPage({
                             deliveredAt={d.deliveredAt}
                           />
                         ) : (
-                          <span className="text-[11px] text-[var(--color-fg-mute)]">—</span>
+                          <span className="text-[12px] text-[var(--color-fg-mute)]">—</span>
                         )}
                       </td>
-                      <td className="px-5 py-2.5 text-right font-mono tnum text-[11.5px] text-[var(--color-fg-3)]">
+                      <td className="px-5 py-2.5 text-right font-mono tnum text-[13px] text-[var(--color-fg-3)]">
                         {formatCurrency(
                           d.goodsValue ? Number(d.goodsValue) : null,
                           d.goodsCurrency ?? "EUR",
                         )}
                       </td>
-                      <td className="px-5 py-2.5 text-right font-mono tnum text-[11.5px] text-[var(--color-fg-3)]">
+                      <td className="px-5 py-2.5 text-right font-mono tnum text-[13px] text-[var(--color-fg-3)]">
                         {d.goodsWeight ? `${formatNumber(Number(d.goodsWeight))} kg` : "—"}
                       </td>
-                      <td className="px-5 py-2.5 text-right text-[11px] text-[var(--color-fg-3)] whitespace-nowrap">
+                      <td className="px-5 py-2.5 text-right text-[13px] text-[var(--color-fg-3)] whitespace-nowrap">
                         {formatDate(d.updatedAt)}
                       </td>
                     </tr>
