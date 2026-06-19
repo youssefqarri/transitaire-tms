@@ -25,7 +25,12 @@ export default async function NewInvoicePage() {
       where: { deletedAt: null },
       orderBy: { createdAt: "desc" },
       take: 300,
-      select: { id: true, number: true, reference: true },
+      select: {
+        id: true,
+        number: true,
+        reference: true,
+        dums: { orderBy: { createdAt: "desc" }, take: 1, select: { customsValue: true } },
+      },
     }),
     nextInvoiceNumber(),
   ]);
@@ -54,7 +59,12 @@ export default async function NewInvoicePage() {
               city: c.city,
               separateDebours: c.separateDebours,
             }))}
-            dossiers={dossiers}
+            dossiers={dossiers.map((d) => ({
+              id: d.id,
+              number: d.number,
+              reference: d.reference,
+              customsValue: d.dums[0]?.customsValue != null ? Number(d.dums[0].customsValue) : null,
+            }))}
             suggestedNumber={next.number}
           />
         </div>

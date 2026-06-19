@@ -18,6 +18,7 @@ import {
   type LineItem,
 } from "@/lib/invoicing";
 import type { InvoiceItemKind } from "@/generated/prisma/enums";
+import { SyndicalCalculator } from "./syndical-calculator";
 
 type ClientOpt = {
   id: string;
@@ -27,7 +28,12 @@ type ClientOpt = {
   separateDebours: boolean;
 };
 
-type DossierOpt = { id: string; number: string; reference: string | null };
+type DossierOpt = {
+  id: string;
+  number: string;
+  reference: string | null;
+  customsValue: number | null;
+};
 
 // Barème proposé : 0 % (débours refacturé à l'identique), 3 % (taxe régionale
 // conteneurs au port), 10 % (transport refacturé), 14 %, 20 % (honoraires & frais).
@@ -59,6 +65,25 @@ export function NewInvoiceForm({
 
   const computed = useMemo(() => totals(items), [items]);
   const selectedClient = clients.find((c) => c.id === clientId);
+  const selectedDossier = dossiers.find((d) => d.id === dossierId);
+
+  function applyHonoraire(amount: number, description: string) {
+    setItems((arr) => {
+      const idx = arr.findIndex((it) => it.kind === "HONORAIRE");
+      if (idx >= 0) {
+        return arr.map((it, i) =>
+          i === idx
+            ? { ...it, description, unitPrice: amount, vatRate: it.vatRate || 20, code: it.code || "HON" }
+            : it,
+        );
+      }
+      return [
+        ...arr,
+        { kind: "HONORAIRE", code: "HON", description, quantity: 1, unitPrice: amount, vatRate: 20 },
+      ];
+    });
+    toast.success(`Honoraires : ${formatMAD(amount)}`);
+  }
 
   function updateItem<K extends keyof LineItem>(i: number, k: K, v: LineItem[K]) {
     setItems((arr) => arr.map((it, idx) => (idx === i ? { ...it, [k]: v } : it)));
@@ -220,6 +245,11 @@ export function NewInvoiceForm({
           searchPlaceholder="Rechercher…"
         />
       </div>
+
+      <SyndicalCalculator
+        customsValue={selectedDossier?.customsValue ?? null}
+        onApply={applyHonoraire}
+      />
 
       {/* Lignes */}
       <div className="space-y-2">
