@@ -76,9 +76,11 @@ export default async function DossiersPage({
       const required = requiredDocuments(d.paymentMode, d.transport);
       const present = new Set(d.documents.map((doc) => doc.category));
       const missing = required.filter((c) => !present.has(c));
-      const fromClientCount = d.documents.filter(
-        (doc) => doc.uploadedBy?.role === "CLIENT",
-      ).length;
+      const clientDocs = d.documents.filter((doc) => doc.uploadedBy?.role === "CLIENT");
+      const fromClientCount = clientDocs.length;
+      const fromClientDocs = [
+        ...new Set(clientDocs.map((doc) => DOCUMENT_CATEGORY_LABELS[doc.category])),
+      ];
       const isNewFromClient =
         d.createdBy?.role === "CLIENT" && d.status === "OUVERTURE";
       return {
@@ -87,6 +89,7 @@ export default async function DossiersPage({
         missingDocs: missing.map((c) => DOCUMENT_CATEGORY_LABELS[c]),
         docCount: d.documents.length,
         fromClientCount,
+        fromClientDocs,
         isNewFromClient,
       };
     })
@@ -200,7 +203,7 @@ export default async function DossiersPage({
                       {d.fromClientCount > 0 && (
                         <span
                           className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10.5px] font-semibold bg-[var(--color-danger)] text-white cursor-default"
-                          title={`${d.fromClientCount} document(s) déposé(s) par le client, à vérifier`}
+                          title={`Reçus du client :\n• ${d.fromClientDocs.join("\n• ")}`}
                         >
                           ● {d.fromClientCount} doc client
                         </span>
@@ -295,7 +298,7 @@ export default async function DossiersPage({
                           {d.fromClientCount > 0 && (
                             <span
                               className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10.5px] font-semibold bg-[var(--color-danger)] text-white cursor-default"
-                              title={`${d.fromClientCount} document(s) reçu(s) du client`}
+                              title={`Reçus du client :\n• ${d.fromClientDocs.join("\n• ")}`}
                             >
                               ● {d.fromClientCount}
                             </span>
