@@ -114,7 +114,7 @@ export default async function DUMsPage({
                       <td className="px-5 py-2.5">
                         <Badge tone="info">{DUM_STATUS_LABELS[d.status]}</Badge>
                       </td>
-                      <td className="px-5 py-2.5 text-right text-[11.5px] text-[var(--color-fg-3)]">
+                      <td className="px-5 py-2.5 text-right text-[13px] text-[var(--color-fg-3)]">
                         {formatDate(d.registeredAt)}
                       </td>
                     </tr>
