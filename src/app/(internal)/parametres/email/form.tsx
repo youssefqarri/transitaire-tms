@@ -34,6 +34,13 @@ const PRESETS = [
     help: "Authentification de base à activer dans l'admin Microsoft 365",
   },
   {
+    name: "AWS (Simple Email Service)",
+    host: "email-smtp.us-east-1.amazonaws.com",
+    port: 587,
+    secure: false,
+    help: "Adapter la région si besoin (us-east-1 par défaut). User / pass = identifiants SMTP générés dans SES (≠ clés console AWS). Expéditeur = adresse ou domaine vérifié dans SES.",
+  },
+  {
     name: "Brevo (Sendinblue)",
     host: "smtp-relay.brevo.com",
     port: 587,
