@@ -15,7 +15,7 @@ export async function GET() {
   try {
     return NextResponse.json({ sessions: await waListSessions() });
   } catch (e: unknown) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 502 });
+    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
 }
 
@@ -28,6 +28,6 @@ export async function POST(req: Request) {
   try {
     return NextResponse.json({ session: await waCreateSession(parsed.data.name.trim()) });
   } catch (e: unknown) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 502 });
+    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
 }

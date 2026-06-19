@@ -20,7 +20,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     await waSessionAction(id, parsed.data.action);
     return NextResponse.json({ ok: true });
   } catch (e: unknown) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 502 });
+    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
 }
 
@@ -31,6 +31,6 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     await waDeleteSession(id);
     return NextResponse.json({ ok: true });
   } catch (e: unknown) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 502 });
+    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
 }

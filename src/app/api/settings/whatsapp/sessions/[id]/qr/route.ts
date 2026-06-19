@@ -11,6 +11,6 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   try {
     return NextResponse.json(await waGetQr(id));
   } catch (e: unknown) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 502 });
+    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
 }

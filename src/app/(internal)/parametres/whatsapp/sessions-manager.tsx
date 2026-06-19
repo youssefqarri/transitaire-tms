@@ -33,15 +33,20 @@ export function WhatsAppSessionsManager({ configured }: { configured: boolean })
   const [qrFor, setQrFor] = useState<Session | null>(null);
 
   const refresh = useCallback(async () => {
-    const res = await fetch("/api/settings/whatsapp/sessions");
-    const data = await res.json();
-    if (!res.ok) {
-      setLoadError(data.error || "Erreur");
+    try {
+      const res = await fetch("/api/settings/whatsapp/sessions");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setLoadError(data.error || `Erreur (${res.status})`);
+        setSessions([]);
+        return;
+      }
+      setLoadError(null);
+      setSessions(data.sessions ?? []);
+    } catch {
+      setLoadError("Impossible de joindre le serveur");
       setSessions([]);
-      return;
     }
-    setLoadError(null);
-    setSessions(data.sessions ?? []);
   }, []);
 
   useEffect(() => {
