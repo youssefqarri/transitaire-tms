@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { prisma } from "@/lib/db";
+import { TooltipProvider } from "@/components/ui/tooltip-provider";
 
 export default async function InternalLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -33,6 +34,7 @@ export default async function InternalLayout({ children }: { children: React.Rea
         </div>
         <main className="flex-1 p-4 sm:p-6 lg:p-8 print:p-0">{children}</main>
       </div>
+      <TooltipProvider />
     </div>
   );
 }
