@@ -110,6 +110,7 @@ export function FileInput({
             type="button"
             onClick={() => handle(null)}
             aria-label="Retirer le fichier"
+            title="Retirer le fichier"
             className="size-7 rounded-[var(--radius-sm)] flex items-center justify-center text-[var(--color-fg-mute)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] transition-colors"
           >
             <X className="size-3.5" strokeWidth={2} />

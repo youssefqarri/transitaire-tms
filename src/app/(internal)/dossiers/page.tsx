@@ -197,12 +197,18 @@ export default async function DossiersPage({
                     </span>
                     <div className="flex items-center gap-1 shrink-0">
                       {d.fromClientCount > 0 && (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10.5px] font-semibold bg-[var(--color-danger)] text-white">
+                        <span
+                          className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10.5px] font-semibold bg-[var(--color-danger)] text-white"
+                          title={`${d.fromClientCount} document(s) déposé(s) par le client, à vérifier`}
+                        >
                           ● {d.fromClientCount} doc client
                         </span>
                       )}
                       {d.missingCount > 0 && (
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10.5px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)]">
+                        <span
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10.5px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)]"
+                          title={`${d.missingCount} document(s) obligatoire(s) manquant(s)`}
+                        >
                           <AlertTriangle className="size-2.5" strokeWidth={2.25} />
                           {d.missingCount} doc{d.missingCount > 1 ? "s" : ""}
                         </span>

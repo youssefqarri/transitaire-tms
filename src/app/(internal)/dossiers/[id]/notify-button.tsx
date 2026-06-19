@@ -186,6 +186,7 @@ export function NotifyClientButton({
             onClick={() => setOpen(false)}
             className="size-7 rounded-[var(--radius-sm)] flex items-center justify-center hover:bg-[var(--color-surface-2)] text-[var(--color-fg-mute)]"
             aria-label="Fermer"
+            title="Fermer"
           >
             <X className="size-4" strokeWidth={2} />
           </button>

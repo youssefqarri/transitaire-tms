@@ -69,6 +69,7 @@ export function DossiersFilterBar({
             }}
             className="absolute right-2 top-1/2 -translate-y-1/2 size-5 rounded flex items-center justify-center text-[var(--color-fg-mute)] hover:text-[var(--color-fg)] hover:bg-[var(--color-surface-2)]"
             aria-label="Effacer la recherche"
+            title="Effacer la recherche"
           >
             <X className="size-3" strokeWidth={2} />
           </button>

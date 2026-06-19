@@ -117,6 +117,7 @@ export function Pagination({
               href={prevUrl}
               className="size-8 inline-flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-fg-2)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-fg)]"
               aria-label="Page précédente"
+              title="Page précédente"
             >
               <ChevronLeft className="size-3.5" strokeWidth={2} />
             </Link>
@@ -161,6 +162,7 @@ export function Pagination({
               href={nextUrl}
               className="size-8 inline-flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-fg-2)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-fg)]"
               aria-label="Page suivante"
+              title="Page suivante"
             >
               <ChevronRight className="size-3.5" strokeWidth={2} />
             </Link>

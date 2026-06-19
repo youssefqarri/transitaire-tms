@@ -158,6 +158,7 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
           <span
             role="button"
             aria-label="Effacer la sélection"
+            title="Effacer la sélection"
             onClick={(e) => {
               e.stopPropagation();
               onChange("");

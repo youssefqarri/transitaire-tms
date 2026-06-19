@@ -49,12 +49,19 @@ export interface ButtonProps
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, loading, disabled, children, ...props }, ref) => (
+  (
+    { className, variant, size, loading, disabled, children, title, "aria-label": ariaLabel, ...props },
+    ref,
+  ) => (
     <button
       ref={ref}
       className={cn(buttonVariants({ variant, size }), className)}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
+      aria-label={ariaLabel}
+      // Tooltip natif au survol : reprend le aria-label si aucun title explicite
+      // (couvre tous les boutons-icônes de l'app).
+      title={title ?? ariaLabel}
       {...props}
     >
       {loading && <Loader2 className="animate-spin" />}
