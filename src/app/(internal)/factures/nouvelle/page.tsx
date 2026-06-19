@@ -1,5 +1,7 @@
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { canManageInvoices } from "@/lib/roles";
 import { BackLink } from "@/components/ui/back-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
@@ -11,6 +13,7 @@ export const dynamic = "force-dynamic";
 export default async function NewInvoicePage() {
   const session = await auth();
   if (!session) return null;
+  if (!canManageInvoices(session.user.role)) redirect("/dashboard");
 
   const [clients, dossiers, next] = await Promise.all([
     prisma.client.findMany({

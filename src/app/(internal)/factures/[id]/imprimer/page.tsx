@@ -1,6 +1,7 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { canViewInvoices } from "@/lib/roles";
 import {
   PAYMENT_METHOD_LABELS,
   formatMAD,
@@ -21,13 +22,19 @@ export default async function InvoicePrintPage({
   const { id } = await params;
   const session = await auth();
   if (!session) return null;
+  if (!canViewInvoices(session.user.role)) redirect("/dashboard");
 
   const invoice = await prisma.invoice.findUnique({
     where: { id },
     include: {
       client: true,
       items: { orderBy: { order: "asc" } },
-      dossier: { include: { dums: { orderBy: { createdAt: "desc" }, take: 1 } } },
+      dossier: {
+        include: {
+          supplier: true,
+          dums: { orderBy: { createdAt: "desc" }, take: 1 },
+        },
+      },
     },
   });
   if (!invoice) notFound();
@@ -168,6 +175,16 @@ export default async function InvoicePrintPage({
             {invoice.dossier.dums[0]?.number && (
               <RefField label="Déclaration N°" value={invoice.dossier.dums[0].number} />
             )}
+            {invoice.dossier.declarationAt && (
+              <RefField
+                label="Déclaration le"
+                value={formatDate(invoice.dossier.declarationAt) || "—"}
+              />
+            )}
+            {invoice.dossier.supplier?.name && (
+              <RefField label="Expéditeur" value={invoice.dossier.supplier.name} />
+            )}
+            <RefField label="Destinataire" value={invoice.client.name} />
             {invoice.dossier.goodsDescription && (
               <RefField label="Marchandise" value={invoice.dossier.goodsDescription} />
             )}
@@ -181,6 +198,18 @@ export default async function InvoicePrintPage({
               <RefField
                 label="Valeur déclarée"
                 value={`${Number(invoice.dossier.goodsValue)} ${invoice.dossier.goodsCurrency ?? ""}`.trim()}
+              />
+            )}
+            {(invoice.dossier.dums[0]?.liquidatedDuties != null ||
+              invoice.dossier.dums[0]?.estimatedDuties != null) && (
+              <RefField
+                label="Droits & taxes"
+                value={formatMAD(
+                  Number(
+                    invoice.dossier.dums[0]?.liquidatedDuties ??
+                      invoice.dossier.dums[0]?.estimatedDuties,
+                  ),
+                )}
               />
             )}
           </div>

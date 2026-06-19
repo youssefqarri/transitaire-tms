@@ -1,8 +1,9 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { Printer, Download } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { canViewInvoices } from "@/lib/roles";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ export default async function InvoiceDetailPage({
   const { id } = await params;
   const session = await auth();
   if (!session) return null;
+  if (!canViewInvoices(session.user.role)) redirect("/dashboard");
 
   const invoice = await prisma.invoice.findUnique({
     where: { id },

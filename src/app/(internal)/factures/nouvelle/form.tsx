@@ -186,13 +186,13 @@ export function NewInvoiceForm({
       {/* Lignes */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label>Lignes</Label>
+          <Label>Lignes de facturation</Label>
           <div className="flex gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={() => addItem("HONORAIRE")}>
-              <Plus /> Honoraires
+            <Button type="button" size="sm" onClick={() => addItem("HONORAIRE")}>
+              <Plus /> Ajouter une ligne
             </Button>
             <Button type="button" variant="outline" size="sm" onClick={() => addItem("DEBOURS")}>
-              <Plus /> Débours
+              <Plus /> Débours (0 %)
             </Button>
           </div>
         </div>
@@ -283,6 +283,13 @@ export function NewInvoiceForm({
               </div>
             );
           })}
+          <button
+            type="button"
+            onClick={() => addItem("HONORAIRE")}
+            className="w-full px-3 py-2.5 text-[12.5px] font-medium text-[var(--color-accent)] hover:bg-[var(--color-surface-2)] flex items-center justify-center gap-1.5 min-w-[860px]"
+          >
+            <Plus className="size-4" /> Ajouter une ligne
+          </button>
         </div>
         <p className="text-[11.5px] text-[var(--color-fg-3)]">
           <Badge tone="outline">Note</Badge>{" "}

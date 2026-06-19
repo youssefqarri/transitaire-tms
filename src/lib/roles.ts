@@ -80,8 +80,12 @@ export function canViewSuppliers(role: UserRole) {
   return isInternal(role) && role !== "COMMIS_DOUANE";
 }
 
+// Facturation = Comptabilité + Administrateur UNIQUEMENT — ni saisie ni
+// consultation pour Exploitation, Déclarant, Commis en douane, Bureau, Client
+// (exigence cliente Transit Multiservices, 19/06/2026). Cohérent avec
+// canManageInvoices et FACTURATION_ACCESS (nav).
 export function canViewInvoices(role: UserRole) {
-  return ["ADMIN", "EXPLOITATION", "DECLARANT", "BUREAU", "COMPTABILITE"].includes(role);
+  return ["ADMIN", "COMPTABILITE"].includes(role);
 }
 
 export function canViewEmails(role: UserRole) {
