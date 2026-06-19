@@ -92,3 +92,63 @@ export async function verifyWhatsApp(): Promise<{
     return { ok: false, error: (e as Error).message };
   }
 }
+
+// ─── Gestion des sessions (création, QR, start/stop) ─────────────
+export type WaSession = {
+  id: string;
+  name: string;
+  status: string;
+  phone?: string | null;
+  pushName?: string | null;
+  lastError?: string | null;
+};
+
+async function waRequest(path: string, init?: RequestInit): Promise<Response> {
+  const cfg = await getWaConfig();
+  if (!cfg) throw new Error("WhatsApp non configuré (URL + clé requises)");
+  return fetch(`${cfg.url}${path}`, {
+    ...init,
+    headers: { "Content-Type": "application/json", "X-API-Key": cfg.key, ...(init?.headers ?? {}) },
+    signal: AbortSignal.timeout(15_000),
+  });
+}
+
+async function waThrow(res: Response): Promise<never> {
+  const detail = await res.text().catch(() => "");
+  throw new Error(`API ${res.status} — ${detail.slice(0, 180)}`);
+}
+
+export async function waListSessions(): Promise<WaSession[]> {
+  const res = await waRequest("/api/sessions");
+  if (!res.ok) return waThrow(res);
+  const data = (await res.json().catch(() => [])) as WaSession[];
+  return Array.isArray(data) ? data : [];
+}
+
+export async function waCreateSession(name: string): Promise<WaSession> {
+  const res = await waRequest("/api/sessions", {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+  if (!res.ok) return waThrow(res);
+  return (await res.json()) as WaSession;
+}
+
+export async function waSessionAction(id: string, action: "start" | "stop"): Promise<void> {
+  const res = await waRequest(`/api/sessions/${encodeURIComponent(id)}/${action}`, {
+    method: "POST",
+  });
+  if (!res.ok) return waThrow(res);
+}
+
+export async function waDeleteSession(id: string): Promise<void> {
+  const res = await waRequest(`/api/sessions/${encodeURIComponent(id)}`, { method: "DELETE" });
+  if (!res.ok && res.status !== 404) return waThrow(res);
+}
+
+export async function waGetQr(id: string): Promise<{ qrCode: string | null; status: string }> {
+  const res = await waRequest(`/api/sessions/${encodeURIComponent(id)}/qr`);
+  if (!res.ok) return waThrow(res);
+  const d = (await res.json().catch(() => ({}))) as { qrCode?: string; status?: string };
+  return { qrCode: d.qrCode ?? null, status: d.status ?? "?" };
+}

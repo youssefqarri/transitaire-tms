@@ -81,7 +81,7 @@ export function WhatsAppSettingsForm({
             id="waApiUrl"
             value={form.waApiUrl}
             onChange={(e) => set("waApiUrl", e.target.value)}
-            placeholder="http://46.224.69.125:2785"
+            placeholder="http://votre-serveur:2785"
             autoComplete="off"
             className="font-mono"
           />

@@ -6,6 +6,7 @@ import { canManageUsers } from "@/lib/roles";
 import { getSettings } from "@/lib/settings";
 import { Card } from "@/components/ui/card";
 import { WhatsAppSettingsForm } from "./form";
+import { WhatsAppSessionsManager } from "./sessions-manager";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +45,12 @@ export default async function WhatsAppSettingsPage() {
             configured={configured}
             adminPhone=""
           />
+        </div>
+      </Card>
+
+      <Card>
+        <div className="p-5">
+          <WhatsAppSessionsManager configured={configured} />
         </div>
       </Card>
     </div>
