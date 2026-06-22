@@ -337,9 +337,11 @@ export function NewDossierForm({
             <div className="flex gap-2">
               <Input
                 id="goodsPackages"
-                type="number"
+                type="text"
+                inputMode="numeric"
+                placeholder="Nombre"
                 value={form.goodsPackages}
-                onChange={(e) => set("goodsPackages", e.target.value)}
+                onChange={(e) => set("goodsPackages", e.target.value.replace(/\D/g, ""))}
                 className="flex-1"
               />
               <Select
