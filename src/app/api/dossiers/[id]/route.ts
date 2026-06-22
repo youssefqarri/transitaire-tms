@@ -8,6 +8,8 @@ import { audit } from "@/lib/audit";
 const patchSchema = z.object({
   number: z.string().nullable().optional(),
   reference: z.string().nullable().optional(),
+  clientReference: z.string().nullable().optional(),
+  transportRegistration: z.string().nullable().optional(),
   clientId: z.string().optional(),
   supplierId: z.string().nullable().optional(),
   transport: z.enum(["MARITIME", "AERIEN", "ROUTIER"]).nullable().optional(),

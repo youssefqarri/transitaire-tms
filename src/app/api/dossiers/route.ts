@@ -9,6 +9,8 @@ import { nextProvisionalDossierNumber } from "@/lib/dossier-numbering";
 const createSchema = z.object({
   number: z.string().optional(),
   reference: z.string().optional(),
+  clientReference: z.string().optional(),
+  transportRegistration: z.string().optional(),
   type: z.enum(["IMPORT", "EXPORT"]),
   paymentMode: z.enum(["WITH_PAYMENT", "WITHOUT_PAYMENT"]),
   transport: z.enum(["MARITIME", "AERIEN", "ROUTIER"]).or(z.literal("")).optional(),
@@ -49,6 +51,8 @@ export async function POST(req: Request) {
           data: {
             number,
             reference: data.reference?.trim() || null,
+            clientReference: data.clientReference?.trim() || null,
+            transportRegistration: data.transportRegistration?.trim() || null,
             type: data.type,
             paymentMode: data.paymentMode,
             transport: data.transport || null,

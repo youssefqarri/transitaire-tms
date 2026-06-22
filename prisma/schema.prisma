@@ -269,6 +269,8 @@ model Dossier {
   id            String        @id @default(cuid())
   number        String        @unique          // numéro fourni par WinApp
   reference     String?                        // référence fournisseur (objet mail)
+  clientReference String?                      // V/Réf : référence / PO du client (reportée sur la facture)
+  transportRegistration String?                // immatriculation camion / n° conteneur (reporté sur la facture)
   type          DossierType   @default(IMPORT)
   paymentMode   PaymentMode   @default(WITH_PAYMENT)
   // mode de transport → détermine le titre de transport requis (BL / LTA / CMR)

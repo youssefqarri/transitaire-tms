@@ -42,6 +42,8 @@ export default async function EditDossierPage({
             initial={{
               number: dossier.number,
               reference: dossier.reference ?? "",
+              clientReference: dossier.clientReference ?? "",
+              transportRegistration: dossier.transportRegistration ?? "",
               type: dossier.type,
               paymentMode: dossier.paymentMode,
               transport: dossier.transport ?? "",

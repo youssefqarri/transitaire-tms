@@ -172,6 +172,12 @@ export default async function InvoicePrintPage({
             {invoice.dossier.reference && (
               <RefField label="Référence" value={invoice.dossier.reference} />
             )}
+            {invoice.dossier.clientReference && (
+              <RefField label="V/Réf" value={invoice.dossier.clientReference} />
+            )}
+            {invoice.dossier.transportRegistration && (
+              <RefField label="Immatriculation" value={invoice.dossier.transportRegistration} />
+            )}
             {invoice.dossier.dums[0]?.number && (
               <RefField label="Déclaration N°" value={invoice.dossier.dums[0].number} />
             )}

@@ -27,6 +27,8 @@ const PACKAGING_LABELS: Record<PackagingUnit, string> = {
 type FormState = {
   number: string;
   reference: string;
+  clientReference: string;
+  transportRegistration: string;
   type: "IMPORT" | "EXPORT";
   paymentMode: "WITH_PAYMENT" | "WITHOUT_PAYMENT";
   transport: "" | "MARITIME" | "AERIEN" | "ROUTIER";
@@ -73,6 +75,8 @@ export function NewDossierForm({
   const [form, setForm] = useState<FormState>({
     number: "",
     reference: "",
+    clientReference: "",
+    transportRegistration: "",
     type: "IMPORT",
     paymentMode: "WITH_PAYMENT",
     transport: "",
@@ -121,6 +125,8 @@ export function NewDossierForm({
           ? {
               number: form.number?.trim() || undefined,
               reference: form.reference || null,
+              clientReference: form.clientReference || null,
+              transportRegistration: form.transportRegistration || null,
               clientId: form.clientId,
               supplierId: form.supplierId || null,
               transport: form.transport || null,
@@ -189,6 +195,24 @@ export function NewDossierForm({
             value={form.reference}
             onChange={(e) => set("reference", e.target.value)}
             placeholder="Objet du mail / réf. expéditeur (optionnel)"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="clientReference">V/Réf (référence client)</Label>
+          <Input
+            id="clientReference"
+            value={form.clientReference}
+            onChange={(e) => set("clientReference", e.target.value)}
+            placeholder="Référence / N° de commande du client (reportée sur la facture)"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="transportRegistration">Immatriculation / N° conteneur</Label>
+          <Input
+            id="transportRegistration"
+            value={form.transportRegistration}
+            onChange={(e) => set("transportRegistration", e.target.value)}
+            placeholder="Plaque du camion (routier) ou n° de conteneur (maritime)"
           />
         </div>
         <div className="space-y-2">
