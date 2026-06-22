@@ -159,22 +159,22 @@ function numberToFrenchWords(n: number): string {
   if (n === 0) return "zéro";
   const units = ["", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf"];
   const teens = ["dix", "onze", "douze", "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf"];
-  const tens = ["", "", "vingt", "trente", "quarante", "cinquante", "soixante", "soixante", "quatre-vingt", "quatre-vingt"];
+  const tens = ["", "", "vingt", "trente", "quarante", "cinquante", "soixante", "", "quatre-vingt", ""];
 
   function lessThan100(num: number): string {
-    if (num < 10) return units[num];
-    if (num < 20) return teens[num - 10];
-    if (num < 60 || (num >= 80 && num < 100)) {
-      const ten = Math.floor(num / 10);
-      const unit = num % 10;
-      if (num === 80) return "quatre-vingts";
-      if (unit === 0) return tens[ten];
-      if (unit === 1 && ten < 8) return `${tens[ten]} et un`;
-      return `${tens[ten]}-${units[unit]}`;
+    if (num < 20) return num < 10 ? units[num] : teens[num - 10];
+    const ten = Math.floor(num / 10);
+    const unit = num % 10;
+    // 70-79 = soixante + 10..19 ; 90-99 = quatre-vingt + 10..19 (pas de récursion)
+    if (ten === 7 || ten === 9) {
+      const tenWord = ten === 7 ? "soixante" : "quatre-vingt";
+      if (unit === 1 && ten === 7) return "soixante et onze";
+      return `${tenWord}-${teens[unit]}`;
     }
-    // 60-79
-    const base = num < 80 ? 60 : 80;
-    return lessThan100(base) + "-" + (num - base < 20 ? teens[num - base - 10] || lessThan100(num - base) : lessThan100(num - base));
+    if (num === 80) return "quatre-vingts";
+    if (unit === 0) return tens[ten];
+    if (unit === 1 && ten !== 8) return `${tens[ten]} et un`;
+    return `${tens[ten]}-${units[unit]}`;
   }
 
   function lessThan1000(num: number): string {
