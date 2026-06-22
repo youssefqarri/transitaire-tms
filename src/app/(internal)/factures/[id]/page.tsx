@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { Printer, Download } from "lucide-react";
+import { Printer, Download, Pencil } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { canViewInvoices } from "@/lib/roles";
@@ -89,6 +89,13 @@ export default async function InvoiceDetailPage({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {(invoice.status === "DRAFT" || session.user.role === "ADMIN") && (
+            <Link href={`/factures/${invoice.id}/modifier`}>
+              <Button variant="outline" size="sm">
+                <Pencil /> Modifier
+              </Button>
+            </Link>
+          )}
           <Link href={`/factures/${invoice.id}/imprimer`} target="_blank">
             <Button variant="outline" size="sm">
               <Printer /> Imprimer

@@ -41,29 +41,49 @@ type DossierOpt = {
 // conteneurs au port), 10 % (transport refacturé), 14 %, 20 % (honoraires & frais).
 const VAT_RATES = [0, 3, 10, 14, 20] as const;
 
+export type InvoiceEditInit = {
+  id: string;
+  number: string;
+  clientId: string;
+  dossierId: string;
+  issuedAt: string;
+  dueAt: string;
+  termsOfPayment: string;
+  notes: string;
+  items: LineItem[];
+};
+
 export function NewInvoiceForm({
   clients,
   dossiers,
   suggestedNumber,
+  edit,
 }: {
   clients: ClientOpt[];
   dossiers: DossierOpt[];
   suggestedNumber: string;
+  edit?: InvoiceEditInit;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
-  const [number, setNumber] = useState(suggestedNumber);
-  const [clientId, setClientId] = useState("");
-  const [dossierId, setDossierId] = useState("");
-  const [issuedAt, setIssuedAt] = useState(new Date().toISOString().slice(0, 10));
-  const [dueAt, setDueAt] = useState(
-    new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+  const [number, setNumber] = useState(edit?.number ?? suggestedNumber);
+  const [clientId, setClientId] = useState(edit?.clientId ?? "");
+  const [dossierId, setDossierId] = useState(edit?.dossierId ?? "");
+  const [issuedAt, setIssuedAt] = useState(
+    edit?.issuedAt ?? new Date().toISOString().slice(0, 10),
   );
-  const [termsOfPayment, setTermsOfPayment] = useState("Paiement à 30 jours");
-  const [notes, setNotes] = useState("");
-  const [items, setItems] = useState<LineItem[]>([
-    { kind: "HONORAIRE", code: "", description: "Honoraires de transit", quantity: 1, unitPrice: 0, vatRate: 20 },
-  ]);
+  const [dueAt, setDueAt] = useState(
+    edit?.dueAt ?? new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+  );
+  const [termsOfPayment, setTermsOfPayment] = useState(
+    edit?.termsOfPayment ?? "Paiement à 30 jours",
+  );
+  const [notes, setNotes] = useState(edit?.notes ?? "");
+  const [items, setItems] = useState<LineItem[]>(
+    edit?.items ?? [
+      { kind: "HONORAIRE", code: "", description: "Honoraires de transit", quantity: 1, unitPrice: 0, vatRate: 20 },
+    ],
+  );
 
   const computed = useMemo(() => totals(items), [items]);
   const selectedClient = clients.find((c) => c.id === clientId);
@@ -112,6 +132,7 @@ export function NewInvoiceForm({
   async function onClientChange(id: string) {
     setClientId(id);
     if (!id) return;
+    if (edit) return; // édition : ne pas écraser les lignes existantes
     try {
       const res = await fetch(`/api/clients/${id}/tariffs`);
       if (!res.ok) return;
@@ -160,13 +181,13 @@ export function NewInvoiceForm({
       return;
     }
     start(async () => {
-      const res = await fetch("/api/invoices", {
-        method: "POST",
+      const res = await fetch(edit ? `/api/invoices/${edit.id}` : "/api/invoices", {
+        method: edit ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          number,
+          ...(edit ? {} : { number }),
           clientId,
-          dossierId: dossierId || undefined,
+          dossierId: dossierId ? dossierId : edit ? null : undefined,
           issuedAt,
           dueAt,
           termsOfPayment,
@@ -179,8 +200,13 @@ export function NewInvoiceForm({
         toast.error(data.error || "Erreur");
         return;
       }
-      toast.success(`Facture ${data.number} créée`);
-      router.push(`/factures/${data.id}`);
+      if (edit) {
+        toast.success("Facture modifiée");
+        router.push(`/factures/${edit.id}`);
+      } else {
+        toast.success(`Facture ${data.number} créée`);
+        router.push(`/factures/${data.id}`);
+      }
       router.refresh();
     });
   }
@@ -195,6 +221,7 @@ export function NewInvoiceForm({
             value={number}
             onChange={(e) => setNumber(e.target.value)}
             className="font-mono"
+            disabled={!!edit}
           />
         </div>
         <div className="space-y-1.5">
@@ -406,7 +433,15 @@ export function NewInvoiceForm({
         <Button type="button" variant="outline" onClick={() => router.back()}>
           Annuler
         </Button>
-        <Button disabled={pending}>{pending ? "Création…" : "Créer la facture"}</Button>
+        <Button disabled={pending}>
+          {pending
+            ? edit
+              ? "Enregistrement…"
+              : "Création…"
+            : edit
+            ? "Enregistrer les modifications"
+            : "Créer la facture"}
+        </Button>
       </div>
     </form>
   );
