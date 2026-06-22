@@ -195,6 +195,9 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
                   date: Date;
                   label: string;
                   dot: string;
+                  // « Visite planifiée » : pas d'horodatage (se confond avec la date
+                  // de visite, affichée à part sur « Visite douane à venir »).
+                  hideDate?: boolean;
                 };
                 const events: Evt[] = [];
                 for (const sc of dossier.statusChanges) {
@@ -203,6 +206,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
                     date: sc.createdAt,
                     label: STATUS_LABELS[sc.toStatus],
                     dot: "bg-[var(--color-fg)]",
+                    hideDate: sc.toStatus === "VISITE",
                   });
                 }
                 const todayMs = new Date().setHours(0, 0, 0, 0);
@@ -242,9 +246,11 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
                       className={`absolute left-0 top-1.5 size-2.5 rounded-full ring-4 ring-[var(--color-surface)] ${e.dot}`}
                     />
                     <div className="text-[13px] font-medium">{e.label}</div>
-                    <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
-                      {formatDate(e.date)}
-                    </div>
+                    {!e.hideDate && (
+                      <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+                        {formatDate(e.date)}
+                      </div>
+                    )}
                   </li>
                 ));
               })()}

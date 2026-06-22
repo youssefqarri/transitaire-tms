@@ -363,6 +363,11 @@ export default async function DossierDetailPage({
                   meta?: string;
                   note?: string;
                   dot: string;
+                  // Statut « Visite planifiée » : on n'affiche pas l'horodatage du
+                  // changement, qui se confond avec la date de visite (saisie à part,
+                  // parfois connue 24h plus tard). Le jour de visite reste sur sa
+                  // propre ligne « Visite douane à venir ». Horodatage gardé en infobulle.
+                  hideDate?: boolean;
                 };
                 const events: Evt[] = [];
                 for (const sc of dossier.statusChanges) {
@@ -373,6 +378,7 @@ export default async function DossierDetailPage({
                     meta: sc.changedBy?.name,
                     note: sc.note ?? undefined,
                     dot: "bg-[var(--color-fg)]",
+                    hideDate: sc.toStatus === "VISITE",
                   });
                 }
                 const todayMs = new Date().setHours(0, 0, 0, 0);
@@ -414,9 +420,18 @@ export default async function DossierDetailPage({
                     <div className="text-[13px] font-medium text-[var(--color-fg)]">
                       {e.label}
                     </div>
-                    <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
-                      {formatDateTime(e.date)}
-                      {e.meta && ` · ${e.meta}`}
+                    <div
+                      className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5"
+                      title={e.hideDate ? `Statut modifié le ${formatDateTime(e.date)}` : undefined}
+                    >
+                      {e.hideDate ? (
+                        e.meta
+                      ) : (
+                        <>
+                          {formatDateTime(e.date)}
+                          {e.meta && ` · ${e.meta}`}
+                        </>
+                      )}
                     </div>
                     {e.note && (
                       <div className="text-[12px] text-[var(--color-fg-3)] mt-1 italic">
