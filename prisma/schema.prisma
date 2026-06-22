@@ -256,7 +256,7 @@ enum DossierStatus {
   FACTURATION                     // facturation en cours
   FACTURE                         // facturé (émis au client)
   CLOTURE                         // dossier clôturé
-  ANNULE                          // annulé (via WinApp externe)
+  ANNULE                          // annulé (hors outil / système externe)
 }
 
 enum TransportMode {
@@ -267,7 +267,7 @@ enum TransportMode {
 
 model Dossier {
   id            String        @id @default(cuid())
-  number        String        @unique          // numéro fourni par WinApp
+  number        String        @unique          // numéro de dossier (saisi ou repris du système de déclaration)
   reference     String?                        // référence fournisseur (objet mail)
   clientReference String?                      // V/Réf : référence / PO du client (reportée sur la facture)
   transportRegistration String?                // immatriculation camion / n° conteneur (reporté sur la facture)
@@ -888,7 +888,7 @@ model AppSetting {
   s3PublicBaseUrl String?
 
   // ─── Facturation ─────────────────────────────────────────
-  // Numéro de reprise de la série FA (bascule WinApp → outil).
+  // Numéro de reprise de la série FA (démarrage de l'outil).
   invoiceSeqYear  Int?         // année concernée (ex. 2026)
   invoiceSeqFloor Int?         // prochaine séquence à utiliser (ex. 1242)
 

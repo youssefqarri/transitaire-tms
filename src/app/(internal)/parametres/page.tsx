@@ -69,7 +69,7 @@ export default async function SettingsPage() {
       href: "/parametres/facturation",
       icon: Hash,
       title: "Numérotation des factures",
-      description: "Reprise de la série FA au moment de la bascule WinApp → outil",
+      description: "Reprise de la série FA au démarrage de l'outil",
       status:
         settings.invoiceSeqYear && settings.invoiceSeqFloor ? (
           <Badge tone="ok">{`FA${String(settings.invoiceSeqYear).slice(-2)}${String(settings.invoiceSeqFloor).padStart(4, "0")}`}</Badge>

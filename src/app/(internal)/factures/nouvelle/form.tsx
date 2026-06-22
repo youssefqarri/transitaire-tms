@@ -215,7 +215,7 @@ export function NewInvoiceForm({
     <form onSubmit={submit} className="space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-1.5">
-          <Label htmlFor="invnum">Numéro (repris de WinApp)</Label>
+          <Label htmlFor="invnum">Numéro (optionnel)</Label>
           <Input
             id="invnum"
             value={number}

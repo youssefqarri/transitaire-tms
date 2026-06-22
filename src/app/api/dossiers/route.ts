@@ -16,6 +16,7 @@ const createSchema = z.object({
   transport: z.enum(["MARITIME", "AERIEN", "ROUTIER"]).or(z.literal("")).optional(),
   clientId: z.string().min(1),
   supplierId: z.string().optional(),
+  supplierName: z.string().optional(),
   goodsValue: z.string().optional(),
   goodsCurrency: z.string().optional(),
   goodsWeight: z.string().optional(),
@@ -39,6 +40,17 @@ export async function POST(req: Request) {
   }
   const data = parsed.data;
 
+  // Fournisseur : si un nom est saisi sans id (nouveau fournisseur), on le retrouve
+  // (insensible à la casse) ou on le crée, puis on rattache le dossier.
+  let supplierId = data.supplierId?.trim() || null;
+  if (!supplierId && data.supplierName?.trim()) {
+    const name = data.supplierName.trim();
+    const existing = await prisma.supplier.findFirst({
+      where: { name: { equals: name, mode: "insensitive" } },
+    });
+    supplierId = existing ? existing.id : (await prisma.supplier.create({ data: { name } })).id;
+  }
+
   // Numéro : utiliser celui fourni OU générer un provisoire PROV-YYYY-NNNN
   const providedNumber = data.number?.trim();
   let number = providedNumber || (await nextProvisionalDossierNumber());
@@ -57,7 +69,7 @@ export async function POST(req: Request) {
             paymentMode: data.paymentMode,
             transport: data.transport || null,
             clientId: data.clientId,
-            supplierId: data.supplierId || null,
+            supplierId,
             goodsValue: data.goodsValue ? Number(data.goodsValue) : null,
             goodsCurrency: data.goodsCurrency || "EUR",
             goodsWeight: data.goodsWeight ? Number(data.goodsWeight) : null,

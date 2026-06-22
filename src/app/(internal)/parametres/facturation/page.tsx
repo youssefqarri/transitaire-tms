@@ -29,7 +29,7 @@ export default async function InvoiceSettingsPage() {
       <div>
         <h1 className="text-[22px] font-semibold tracking-tight">Numérotation des factures</h1>
         <p className="text-[13px] text-[var(--color-fg-3)] mt-0.5">
-          Au moment de la bascule depuis WinApp, fixez le prochain numéro de la série FA.
+          Lors de la reprise de votre numérotation, fixez le prochain numéro de la série FA.
           L&apos;outil continuera ensuite automatiquement (le numéro suivant, puis +1 à chaque
           facture).
         </p>

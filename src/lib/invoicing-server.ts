@@ -48,7 +48,7 @@ export async function nextInvoiceNumber(year = new Date().getFullYear()): Promis
     orderBy: { sequence: "desc" },
     select: { sequence: true },
   });
-  // Plancher de reprise (bascule WinApp → outil) : si l'admin a fixé un « prochain
+  // Plancher de reprise (démarrage de l'outil) : si l'admin a fixé un « prochain
   // numéro » pour cette année, on ne descend jamais en dessous.
   const settings = await getSettings();
   const floor = settings.invoiceSeqYear === year ? settings.invoiceSeqFloor ?? 0 : 0;

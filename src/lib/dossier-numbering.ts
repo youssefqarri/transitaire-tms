@@ -3,7 +3,7 @@ import { prisma } from "./db";
 
 /**
  * Génère un numéro de dossier provisoire au format PROV-YYYY-NNNN.
- * Utilisé quand WinApp n'a pas encore attribué de numéro.
+ * Utilisé quand le numéro de dossier définitif n'est pas encore disponible.
  * L'utilisateur pourra modifier ce numéro plus tard via l'édition.
  *
  * Tente jusqu'à 10 fois pour gérer les collisions concurrentes.

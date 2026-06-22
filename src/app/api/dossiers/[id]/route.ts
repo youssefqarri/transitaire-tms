@@ -12,6 +12,7 @@ const patchSchema = z.object({
   transportRegistration: z.string().nullable().optional(),
   clientId: z.string().optional(),
   supplierId: z.string().nullable().optional(),
+  supplierName: z.string().optional(),
   transport: z.enum(["MARITIME", "AERIEN", "ROUTIER"]).nullable().optional(),
   goodsValue: z.number().nullable().optional(),
   goodsCurrency: z.string().optional(),
@@ -67,11 +68,24 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
   }
 
+  // Fournisseur saisi à la volée : retrouver (insensible à la casse) ou créer ;
+  // supplierName ne doit pas être passé tel quel à Prisma (champ inexistant).
+  const { supplierName, ...patch } = parsed.data;
+  let supplierIdResolved = patch.supplierId;
+  if (supplierName?.trim() && !patch.supplierId) {
+    const name = supplierName.trim();
+    const existing = await prisma.supplier.findFirst({
+      where: { name: { equals: name, mode: "insensitive" } },
+    });
+    supplierIdResolved = existing ? existing.id : (await prisma.supplier.create({ data: { name } })).id;
+  }
+
   try {
     const updated = await prisma.dossier.update({
       where: { id },
       data: {
-        ...parsed.data,
+        ...patch,
+        supplierId: supplierIdResolved,
         number: parsed.data.number?.trim() || undefined,
         visitDate:
           parsed.data.visitDate === undefined

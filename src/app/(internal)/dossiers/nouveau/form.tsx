@@ -35,6 +35,8 @@ type FormState = {
   transport: "" | "MARITIME" | "AERIEN" | "ROUTIER";
   clientId: string;
   supplierId: string;
+  /** Nom d'un nouveau fournisseur saisi à la volée (créé à l'enregistrement si supplierId vide). */
+  supplierName: string;
   goodsValue: string;
   goodsCurrency: string;
   goodsWeight: string;
@@ -57,6 +59,9 @@ type FormState = {
   awaitingConformityValidation?: boolean;
   customNote?: string;
 };
+
+// Identifiant sentinelle pour afficher un fournisseur saisi à la volée (pas encore en base).
+const NEW_SUPPLIER = "__new_supplier__";
 
 export function NewDossierForm({
   clients,
@@ -83,6 +88,7 @@ export function NewDossierForm({
     transport: "",
     clientId: clients[0]?.id ?? "",
     supplierId: "",
+    supplierName: "",
     goodsValue: "",
     goodsCurrency: "EUR",
     goodsWeight: "",
@@ -130,6 +136,7 @@ export function NewDossierForm({
               transportRegistration: form.transportRegistration || null,
               clientId: form.clientId,
               supplierId: form.supplierId || null,
+              supplierName: form.supplierName || undefined,
               transport: form.transport || null,
               goodsValue: form.goodsValue ? Number(form.goodsValue) : null,
               goodsCurrency: form.goodsCurrency,
@@ -176,7 +183,7 @@ export function NewDossierForm({
     <form onSubmit={submit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="number">Numéro de dossier (WinApp)</Label>
+          <Label htmlFor="number">Numéro de dossier</Label>
           <Input
             id="number"
             value={form.number}
@@ -185,8 +192,8 @@ export function NewDossierForm({
           />
           <p className="text-[11px] text-[var(--color-fg-mute)]">
             {mode === "create"
-              ? "Optionnel : un numéro PROV-AAAA-NNNN sera attribué si vide, à remplacer par le numéro WinApp réel quand disponible."
-              : "Modifiable — pour remplacer un numéro provisoire par le vrai numéro WinApp."}
+              ? "Optionnel : un numéro provisoire PROV-AAAA-NNNN sera attribué si vide, à remplacer par le numéro de dossier définitif quand il sera disponible."
+              : "Modifiable — pour remplacer un numéro provisoire par le numéro de dossier définitif."}
           </p>
         </div>
         <div className="space-y-2">
@@ -277,18 +284,31 @@ export function NewDossierForm({
           <Label htmlFor="supplierId">Fournisseur</Label>
           <Combobox
             id="supplierId"
-            items={suppliers.map((s) => ({
-              id: s.id,
-              label: s.name,
-              sublabel: s.country || undefined,
-            }))}
-            value={form.supplierId}
-            onChange={(id) => set("supplierId", id)}
+            items={[
+              ...suppliers.map((s) => ({
+                id: s.id,
+                label: s.name,
+                sublabel: s.country || undefined,
+              })),
+              ...(form.supplierName
+                ? [{ id: NEW_SUPPLIER, label: form.supplierName, sublabel: "Nouveau fournisseur" }]
+                : []),
+            ]}
+            value={form.supplierName ? NEW_SUPPLIER : form.supplierId}
+            onChange={(id) => {
+              if (id === NEW_SUPPLIER) return;
+              setForm((f) => ({ ...f, supplierId: id, supplierName: "" }));
+            }}
+            onCreate={(name) => setForm((f) => ({ ...f, supplierName: name, supplierId: "" }))}
             placeholder="Aucun fournisseur"
-            searchPlaceholder="Rechercher un fournisseur…"
+            searchPlaceholder="Rechercher ou saisir un nouveau fournisseur…"
             emptyText="Aucun fournisseur trouvé"
             clearable
           />
+          <p className="text-[11px] text-[var(--color-fg-mute)]">
+            Tapez un nom absent de la liste puis « Ajouter » : il sera créé et ajouté
+            aux fournisseurs à l&apos;enregistrement.
+          </p>
         </div>
       </div>
 

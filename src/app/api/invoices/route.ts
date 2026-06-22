@@ -17,7 +17,7 @@ const itemSchema = z.object({
 });
 
 const schema = z.object({
-  number: z.string().optional(), // repris de WinApp ; si vide → numéro auto FA…
+  number: z.string().optional(), // repris de l'ancien système ; si vide → numéro auto FA…
   clientId: z.string().min(1),
   dossierId: z.string().optional(),
   issuedAt: z.string().optional(),
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
   }
   const data = parsed.data;
 
-  // Numéro : repris de WinApp si fourni (format FA{AA}{série}), sinon auto-généré.
+  // Numéro : repris de l'ancien système si fourni (format FA{AA}{série}), sinon auto-généré.
   const provided = data.number?.trim();
   const providedIsFA = !!provided && /^FA\d{2}\d+$/i.test(provided);
   async function resolveNumbering() {
@@ -93,7 +93,7 @@ export async function POST(req: Request) {
       lastNumber = created.number;
     } catch (e: unknown) {
       const err = e as { code?: string };
-      // numéro WinApp explicite déjà pris → vrai doublon ; sinon collision auto → retry
+      // numéro explicite déjà pris → vrai doublon ; sinon collision auto → retry
       if (err.code === "P2002") {
         if (providedIsFA)
           return NextResponse.json({ error: "Ce numéro de facture existe déjà" }, { status: 409 });

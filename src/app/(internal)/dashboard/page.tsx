@@ -50,7 +50,8 @@ export default async function DashboardPage() {
     }),
     prisma.emailMessage.count({ where: { isRead: false } }),
     prisma.dossier.findMany({
-      where: { deletedAt: null },
+      // Tableau de bord : on ne montre que les dossiers actifs (pas les clôturés/annulés).
+      where: { deletedAt: null, status: { notIn: ["CLOTURE", "ANNULE"] } },
       take: 8,
       orderBy: { updatedAt: "desc" },
       include: {

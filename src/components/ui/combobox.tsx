@@ -8,7 +8,7 @@ import {
   useCallback,
   forwardRef,
 } from "react";
-import { ChevronDown, Check, Search, X } from "lucide-react";
+import { ChevronDown, Check, Search, X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type ComboboxItem = {
@@ -30,6 +30,8 @@ type Props = {
   clearable?: boolean;
   className?: string;
   id?: string;
+  /** Opt-in : si fourni, propose « Ajouter « <saisie> » » quand la saisie ne correspond à aucune entrée. */
+  onCreate?: (label: string) => void;
 };
 
 export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
@@ -44,6 +46,7 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
     clearable = false,
     className,
     id,
+    onCreate,
   },
   ref,
 ) {
@@ -65,6 +68,14 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
         (it.sublabel ? it.sublabel.toLowerCase().includes(q) : false),
     );
   }, [items, query]);
+
+  // Création opt-in : on propose d'ajouter la saisie si elle ne matche aucune entrée existante.
+  const trimmedQuery = query.trim();
+  const hasExact = useMemo(
+    () => items.some((it) => it.label.toLowerCase() === trimmedQuery.toLowerCase()),
+    [items, trimmedQuery],
+  );
+  const showCreate = !!onCreate && trimmedQuery.length > 0 && !hasExact;
 
   // close on click outside
   useEffect(() => {
@@ -108,13 +119,16 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
         if (item) {
           onChange(item.id);
           setOpen(false);
+        } else if (showCreate && onCreate) {
+          onCreate(trimmedQuery);
+          setOpen(false);
         }
       } else if (e.key === "Escape") {
         e.preventDefault();
         setOpen(false);
       }
     },
-    [filtered, activeIdx, onChange],
+    [filtered, activeIdx, onChange, showCreate, onCreate, trimmedQuery],
   );
 
   return (
@@ -205,12 +219,12 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
             role="listbox"
             className="max-h-[260px] overflow-y-auto scrollbar-thin py-1"
           >
-            {filtered.length === 0 ? (
+            {filtered.length === 0 && !showCreate && (
               <div className="px-3 py-6 text-center text-[12.5px] text-[var(--color-fg-3)]">
                 {emptyText}
               </div>
-            ) : (
-              filtered.map((it, idx) => {
+            )}
+            {filtered.map((it, idx) => {
                 const isActive = idx === activeIdx;
                 const isSelected = it.id === value;
                 const prev = idx > 0 ? filtered[idx - 1] : null;
@@ -252,7 +266,21 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
                     </button>
                   </div>
                 );
-              })
+              })}
+            {showCreate && (
+              <button
+                type="button"
+                role="option"
+                aria-selected={false}
+                onClick={() => {
+                  onCreate?.(trimmedQuery);
+                  setOpen(false);
+                }}
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-[13px] text-left transition-colors text-[var(--color-accent)] hover:bg-[var(--color-surface-2)] border-t border-[var(--color-border)]"
+              >
+                <Plus className="size-3.5 shrink-0" strokeWidth={2} />
+                <span className="truncate">Ajouter «&nbsp;{trimmedQuery}&nbsp;»</span>
+              </button>
             )}
           </div>
         </div>
