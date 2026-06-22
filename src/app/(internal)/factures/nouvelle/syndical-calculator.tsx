@@ -176,7 +176,8 @@ export function SyndicalCalculator({
           </div>
           <p className="text-[10.5px] text-[var(--color-fg-mute)]">
             Base de calcul = valeur en douane + droits de douane (Art. 2). Barème ARTICLE 3
-            (import), minimum 75 DH ; supplément feuillet au-delà de 4 / 8 / 12 articles.
+            (même barème à l&apos;import et à l&apos;export), minimum 75 DH ; supplément feuillet
+            au-delà de 4 / 8 / 12 articles.
           </p>
         </div>
       )}
