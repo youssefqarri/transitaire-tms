@@ -238,12 +238,15 @@ enum DossierStatus {
   BON_A_DELIVRER_RECU             // réception bon à délivrer
   DECLARATION_EN_COURS            // déclaration en cours
   VALIDATION_DOUANE               // validation en douane
+  INSTANCE_DATE_VISITE            // en instance de date de visite (créneau pas encore fixé par la douane)
   VISITE                          // date de visite
   CONFORME                        // conforme (sans visite)
   BUREAU_VALEUR                   // soumis au bureau de valeur
+  DEMANDE_ACCEPTATION_VALEUR      // demande d'acceptation de la nouvelle valeur en douane
   DEMANDE_DOCUMENTS               // demande de documents douane / MCI
   INSTANCE_FICHE_LIQUIDATION      // en instance de fiche de liquidation
   LIQUIDE                         // liquidé
+  DEMANDE_PESAGE                  // demande de pesage (avant mainlevée)
   BON_A_ENLEVER_RESERVE           // bon à enlever sous réserve
   MAIN_LEVEE_RESERVE_CONFORMITE   // main levée sous réserve de conformité
   MAIN_LEVEE_RESERVE_DOCUMENTS    // main levée sous réserve de production des documents

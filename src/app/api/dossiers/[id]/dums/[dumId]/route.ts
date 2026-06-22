@@ -6,6 +6,7 @@ import { canCreateDUM } from "@/lib/roles";
 import { audit } from "@/lib/audit";
 
 const patchSchema = z.object({
+  number: z.string().optional(),
   bureau: z.string().nullable().optional(),
   regime: z.string().nullable().optional(),
   status: z.enum(["DRAFT", "ENREGISTRE", "VALIDE", "LIQUIDE", "CLOTURE"]).optional(),
@@ -43,6 +44,17 @@ export async function PATCH(
   const dum = await prisma.dUM.findFirst({ where: { id: dumId, dossierId: id } });
   if (!dum) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  // Numéro de DUM : modifiable uniquement en cas d'erreur, et seulement par
+  // l'exploitation ou l'administrateur (pas le déclarant).
+  const newNumber = d.number?.trim();
+  const wantsNumberChange = !!newNumber && newNumber !== dum.number;
+  if (wantsNumberChange && !["ADMIN", "EXPLOITATION"].includes(session.user.role)) {
+    return NextResponse.json(
+      { error: "Seuls l'exploitation et l'administrateur peuvent modifier le numéro de DUM." },
+      { status: 403 },
+    );
+  }
+
   // Marque automatiquement la date de liquidation si on passe en LIQUIDE (ou si on
   // saisit le montant liquidé) sans l'avoir renseignée.
   let liquidatedAt = dateField(d.liquidatedAt);
@@ -50,9 +62,12 @@ export async function PATCH(
     (d.status === "LIQUIDE" || d.liquidatedDuties != null) && !dum.liquidatedAt;
   if (liquidatedAt === undefined && becomesLiquidated) liquidatedAt = new Date();
 
-  const updated = await prisma.dUM.update({
+  let updated;
+  try {
+    updated = await prisma.dUM.update({
     where: { id: dumId },
     data: {
+      number: wantsNumberChange ? newNumber : undefined,
       bureau: strField(d.bureau),
       regime: strField(d.regime),
       status: d.status,
@@ -66,7 +81,12 @@ export async function PATCH(
       articleCount: d.articleCount === undefined ? undefined : d.articleCount,
       notes: strField(d.notes),
     },
-  });
+    });
+  } catch (e: unknown) {
+    if ((e as { code?: string }).code === "P2002")
+      return NextResponse.json({ error: "Ce numéro de DUM existe déjà." }, { status: 409 });
+    throw e;
+  }
 
   await audit({
     userId: session.user.id,

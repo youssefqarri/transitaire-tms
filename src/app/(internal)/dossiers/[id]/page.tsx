@@ -296,6 +296,7 @@ export default async function DossierDetailPage({
                     articleCount: d.articleCount ?? null,
                   }))}
                   canCreate={canCreateDUM(session.user.role)}
+                  canEditNumber={["ADMIN", "EXPLOITATION"].includes(session.user.role)}
                 />
                 <DocumentsPanel
                   dossierId={dossier.id}
@@ -410,6 +411,17 @@ export default async function DossierDetailPage({
                     label: "Livraison",
                     dot: "bg-[var(--color-success)]",
                   });
+                }
+                // Date d'enregistrement BADR de chaque DUM
+                for (const dum of dossier.dums) {
+                  if (dum.registeredAt) {
+                    events.push({
+                      key: `dum-${dum.id}`,
+                      date: dum.registeredAt,
+                      label: `DUM ${dum.number} enregistrée`,
+                      dot: "bg-[var(--color-success)]",
+                    });
+                  }
                 }
                 events.sort((a, b) => b.date.getTime() - a.date.getTime());
                 return events.map((e) => (

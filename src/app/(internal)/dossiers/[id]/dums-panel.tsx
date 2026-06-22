@@ -40,10 +40,13 @@ export function DUMsPanel({
   dossierId,
   dums,
   canCreate,
+  canEditNumber,
 }: {
   dossierId: string;
   dums: DUM[];
   canCreate: boolean;
+  /** Modifier le n° de DUM (correction d'erreur) — réservé exploitation + admin. */
+  canEditNumber: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -207,6 +210,7 @@ export function DUMsPanel({
               key={d.id}
               dossierId={dossierId}
               dum={d}
+              canEditNumber={canEditNumber}
               onDone={() => {
                 setEditingId(null);
                 router.refresh();
@@ -280,15 +284,18 @@ function Field({ label, value, strong }: { label: string; value: string; strong?
 function LiquidationForm({
   dossierId,
   dum,
+  canEditNumber,
   onDone,
   onCancel,
 }: {
   dossierId: string;
   dum: DUM;
+  canEditNumber: boolean;
   onDone: () => void;
   onCancel: () => void;
 }) {
   const [pending, start] = useTransition();
+  const [number, setNumber] = useState(dum.number);
   const [status, setStatus] = useState<DUMStatus>(dum.status);
   const [customsValue, setCustomsValue] = useState(dum.customsValue?.toString() ?? "");
   const [estimatedDuties, setEstimatedDuties] = useState(dum.estimatedDuties?.toString() ?? "");
@@ -305,6 +312,7 @@ function LiquidationForm({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          number: canEditNumber && number.trim() && number.trim() !== dum.number ? number.trim() : undefined,
           status,
           customsValue: numOrNull(customsValue),
           estimatedDuties: numOrNull(estimatedDuties),
@@ -333,6 +341,16 @@ function LiquidationForm({
         <span className="text-[11.5px] text-[var(--color-fg-3)]">— liquidation des droits &amp; taxes</span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {canEditNumber && (
+          <div className="space-y-1.5 md:col-span-2">
+            <Label>Numéro DUM (correction)</Label>
+            <Input
+              value={number}
+              onChange={(e) => setNumber(e.target.value)}
+              className="font-mono"
+            />
+          </div>
+        )}
         <div className="space-y-1.5">
           <Label>Statut DUM</Label>
           <Select value={status} onChange={(e) => setStatus(e.target.value as DUMStatus)}>

@@ -32,11 +32,16 @@ export function StatusChanger({
       : currentStatus;
   const [target, setTarget] = useState<DossierStatus>(initial);
 
-  const options = allowedStatuses
-    ? (Object.entries(STATUS_LABELS) as [DossierStatus, string][]).filter(([k]) =>
-        allowedStatuses.includes(k),
-      )
-    : (Object.entries(STATUS_LABELS) as [DossierStatus, string][]);
+  // « Annulé » est retiré du menu déroulant : l'annulation se fait via une action
+  // dédiée et confirmée (évite d'annuler un dossier par mégarde en cherchant à
+  // juste ajouter une note ou changer d'étape).
+  const options = (
+    allowedStatuses
+      ? (Object.entries(STATUS_LABELS) as [DossierStatus, string][]).filter(([k]) =>
+          allowedStatuses.includes(k),
+        )
+      : (Object.entries(STATUS_LABELS) as [DossierStatus, string][])
+  ).filter(([k]) => k !== "ANNULE");
 
   function submit() {
     start(async () => {
@@ -50,6 +55,26 @@ export function StatusChanger({
         return;
       }
       toast.success("Statut mis à jour");
+      setOpen(false);
+      setNote("");
+      router.refresh();
+    });
+  }
+
+  // Annulation du dossier : action dédiée et confirmée (ANNULE n'est plus dans le menu).
+  function cancelDossier() {
+    if (!confirm("Annuler ce dossier ? Il passera au statut « Annulé ».")) return;
+    start(async () => {
+      const res = await fetch(`/api/dossiers/${dossierId}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "ANNULE", note: note.trim() || undefined }),
+      });
+      if (!res.ok) {
+        toast.error("Erreur lors de l'annulation");
+        return;
+      }
+      toast.success("Dossier annulé");
       setOpen(false);
       setNote("");
       router.refresh();
@@ -98,13 +123,27 @@ export function StatusChanger({
                 placeholder="Contexte du changement…"
               />
             </div>
-            <div className="flex justify-end gap-2 pt-1">
-              <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
-                Annuler
-              </Button>
-              <Button size="sm" onClick={submit} disabled={pending || target === currentStatus}>
-                {pending ? "Mise à jour…" : "Confirmer"}
-              </Button>
+            <div className="flex items-center justify-between gap-2 pt-1">
+              {currentStatus !== "ANNULE" && (!allowedStatuses || allowedStatuses.includes("ANNULE")) ? (
+                <button
+                  type="button"
+                  onClick={cancelDossier}
+                  disabled={pending}
+                  className="text-[12px] text-[var(--color-danger)] hover:underline disabled:opacity-50"
+                >
+                  Annuler le dossier
+                </button>
+              ) : (
+                <span />
+              )}
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
+                  Fermer
+                </Button>
+                <Button size="sm" onClick={submit} disabled={pending || target === currentStatus}>
+                  {pending ? "Mise à jour…" : "Confirmer"}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
