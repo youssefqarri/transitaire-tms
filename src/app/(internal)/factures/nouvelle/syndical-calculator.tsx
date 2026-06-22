@@ -12,35 +12,43 @@ const REDUCTIONS = [0, 15, 20, 30, 40] as const;
 
 export function SyndicalCalculator({
   customsValue,
+  customsDuties,
   articleCount,
   onApply,
 }: {
   customsValue: number | null;
+  customsDuties: number | null;
   articleCount: number | null;
   onApply: (amount: number, description: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState<number>(customsValue ?? 0);
+  const [droits, setDroits] = useState<number>(customsDuties ?? 0);
   const [articles, setArticles] = useState<number>(
     articleCount && articleCount > 0 ? articleCount : 1,
   );
   const [reduction, setReduction] = useState<number>(0);
 
-  // Pré-remplit la valeur en douane quand un dossier est sélectionné.
+  // Pré-remplit valeur en douane + droits de douane depuis la DUM du dossier.
   useEffect(() => {
     if (customsValue != null && customsValue > 0) {
       setValue(customsValue);
       setOpen(true);
     }
   }, [customsValue]);
+  useEffect(() => {
+    if (customsDuties != null && customsDuties > 0) setDroits(customsDuties);
+  }, [customsDuties]);
 
   // Pré-remplit le nombre d'articles depuis la DUM du dossier sélectionné.
   useEffect(() => {
     if (articleCount != null && articleCount > 0) setArticles(articleCount);
   }, [articleCount]);
 
+  // Base de calcul (Art. 2) = valeur en douane + droits de douane.
+  const base = (value || 0) + (droits || 0);
   const r = computeSyndicalHonoraire({
-    customsValue: value,
+    customsValue: base,
     articleCount: articles,
     reductionPct: reduction,
   });
@@ -71,7 +79,7 @@ export function SyndicalCalculator({
 
       {open && (
         <div className="px-3.5 pb-3.5 pt-1 space-y-3 border-t border-[var(--color-border)]">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div className="space-y-1">
               <Label htmlFor="syn-val" className="text-[11.5px]">
                 Valeur en douane (DH)
@@ -83,6 +91,20 @@ export function SyndicalCalculator({
                 step="0.01"
                 value={value}
                 onChange={(e) => setValue(Number(e.target.value))}
+                className="text-right font-mono"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="syn-droits" className="text-[11.5px]">
+                Droits de douane (DH)
+              </Label>
+              <Input
+                id="syn-droits"
+                type="number"
+                min="0"
+                step="0.01"
+                value={droits}
+                onChange={(e) => setDroits(Number(e.target.value))}
                 className="text-right font-mono"
               />
             </div>
@@ -140,7 +162,7 @@ export function SyndicalCalculator({
 
           <div className="flex items-end justify-between gap-3 flex-wrap bg-[var(--color-surface-2)] rounded-[var(--radius)] px-3 py-2.5">
             <div className="text-[11.5px] text-[var(--color-fg-3)] leading-relaxed font-mono">
-              Base {formatMAD(r.base)}
+              Assiette {formatMAD(base)} (valeur + droits) → tarif {formatMAD(r.base)}
               {r.multiplier !== 1 && <> × {r.multiplier} (feuillet)</>}
               {r.reductionPct > 0 && <> − {r.reductionPct} %</>}
               <span className="text-[var(--color-fg)]"> = </span>
@@ -153,8 +175,8 @@ export function SyndicalCalculator({
             </Button>
           </div>
           <p className="text-[10.5px] text-[var(--color-fg-mute)]">
-            Barème ARTICLE 3 (importations) — minimum de perception 75 DH. Le supplément feuillet
-            s&apos;applique au-delà de 4 / 8 / 12 articles.
+            Base de calcul = valeur en douane + droits de douane (Art. 2). Barème ARTICLE 3
+            (import), minimum 75 DH ; supplément feuillet au-delà de 4 / 8 / 12 articles.
           </p>
         </div>
       )}

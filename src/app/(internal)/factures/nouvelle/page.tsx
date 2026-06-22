@@ -32,7 +32,12 @@ export default async function NewInvoicePage() {
         dums: {
           orderBy: { createdAt: "desc" },
           take: 1,
-          select: { customsValue: true, articleCount: true },
+          select: {
+            customsValue: true,
+            articleCount: true,
+            estimatedDuties: true,
+            liquidatedDuties: true,
+          },
         },
       },
     }),
@@ -68,6 +73,12 @@ export default async function NewInvoicePage() {
               number: d.number,
               reference: d.reference,
               customsValue: d.dums[0]?.customsValue != null ? Number(d.dums[0].customsValue) : null,
+              customsDuties:
+                d.dums[0]?.liquidatedDuties != null
+                  ? Number(d.dums[0].liquidatedDuties)
+                  : d.dums[0]?.estimatedDuties != null
+                  ? Number(d.dums[0].estimatedDuties)
+                  : null,
               articleCount: d.dums[0]?.articleCount ?? null,
             }))}
             suggestedNumber={next.number}

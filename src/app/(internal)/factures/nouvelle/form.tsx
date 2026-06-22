@@ -33,6 +33,7 @@ type DossierOpt = {
   number: string;
   reference: string | null;
   customsValue: number | null;
+  customsDuties: number | null;
   articleCount: number | null;
 };
 
@@ -249,6 +250,7 @@ export function NewInvoiceForm({
 
       <SyndicalCalculator
         customsValue={selectedDossier?.customsValue ?? null}
+        customsDuties={selectedDossier?.customsDuties ?? null}
         articleCount={selectedDossier?.articleCount ?? null}
         onApply={applyHonoraire}
       />
