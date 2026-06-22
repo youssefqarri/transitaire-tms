@@ -144,6 +144,9 @@ export function formatMAD(n: number): string {
 
 /** Texte « x cent vingt-trois dirhams et quarante-cinq centimes » pour la facture. */
 export function montantEnLettres(amount: number): string {
+  // Garde-fou : un montant non fini (NaN/Infinity) ou négatif ferait boucler
+  // numberToFrenchWords à l'infini (récursion → crash SSR de la facture).
+  if (!Number.isFinite(amount) || amount < 0) return "—";
   const entier = Math.floor(amount);
   const cents = Math.round((amount - entier) * 100);
   const partEntiere = numberToFrenchWords(entier);
@@ -152,6 +155,7 @@ export function montantEnLettres(amount: number): string {
 }
 
 function numberToFrenchWords(n: number): string {
+  if (!Number.isFinite(n) || n < 0) return "";
   if (n === 0) return "zéro";
   const units = ["", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf"];
   const teens = ["dix", "onze", "douze", "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf"];
