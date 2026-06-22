@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Combobox } from "@/components/ui/combobox";
 import { CURRENCIES } from "@/lib/currencies";
 import { CONTROL_ORGANISMS, REGULATORY_SERVICES } from "@/lib/reference";
+import { transportDocLabel } from "@/lib/statuses";
 
 type Client = { id: string; name: string; code?: string | null; city?: string | null };
 type Supplier = { id: string; name: string; country?: string | null };
@@ -207,12 +208,14 @@ export function NewDossierForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="transportRegistration">Immatriculation / N° conteneur</Label>
+          <Label htmlFor="transportRegistration">
+            {transportDocLabel(form.transport || null)} — titre de transport (optionnel)
+          </Label>
           <Input
             id="transportRegistration"
             value={form.transportRegistration}
             onChange={(e) => set("transportRegistration", e.target.value)}
-            placeholder="Plaque du camion (routier) ou n° de conteneur (maritime)"
+            placeholder="N° du connaissement / LTA / CMR selon le mode (optionnel)"
           />
         </div>
         <div className="space-y-2">

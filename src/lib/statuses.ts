@@ -222,6 +222,15 @@ export function transportDocument(transport?: TransportMode | null): DocumentCat
   return "CONNAISSEMENT";
 }
 
+// Libellé court du n° de titre de transport selon le mode (en-tête facture, etc.) :
+// maritime → BL, aérien → LTA, routier → CMR ; inconnu → générique.
+export function transportDocLabel(transport?: TransportMode | null): string {
+  if (transport === "MARITIME") return "N° BL";
+  if (transport === "AERIEN") return "N° LTA";
+  if (transport === "ROUTIER") return "N° CMR";
+  return "N° BL / LTA / CMR";
+}
+
 // documents requis selon mode de paiement + mode de transport
 // (base « toujours obligatoire » selon la cliente : facture commerciale, colisage,
 //  facture de fret, titre de transport, bon à délivrer, attestation de stockage ;

@@ -10,9 +10,17 @@ import {
 } from "@/lib/invoicing";
 import { getIssuer } from "@/lib/invoicing-server";
 import { formatDate } from "@/lib/utils";
+import { transportDocLabel } from "@/lib/statuses";
 import { PrintTrigger } from "./print-trigger";
 
 export const dynamic = "force-dynamic";
+
+const PACKAGING_LABELS: Record<string, string> = {
+  COLIS: "Colis",
+  PALETTES: "Palettes",
+  CONTENEURS: "Conteneurs",
+  REMORQUES: "Remorques",
+};
 
 export default async function InvoicePrintPage({
   params,
@@ -176,7 +184,10 @@ export default async function InvoicePrintPage({
               <RefField label="V/Réf" value={invoice.dossier.clientReference} />
             )}
             {invoice.dossier.transportRegistration && (
-              <RefField label="Immatriculation" value={invoice.dossier.transportRegistration} />
+              <RefField
+                label={transportDocLabel(invoice.dossier.transport)}
+                value={invoice.dossier.transportRegistration}
+              />
             )}
             {invoice.dossier.dums[0]?.number && (
               <RefField label="Déclaration N°" value={invoice.dossier.dums[0].number} />
@@ -195,7 +206,10 @@ export default async function InvoicePrintPage({
               <RefField label="Marchandise" value={invoice.dossier.goodsDescription} />
             )}
             {invoice.dossier.goodsPackages != null && (
-              <RefField label="Colis" value={String(invoice.dossier.goodsPackages)} />
+              <RefField
+                label={PACKAGING_LABELS[invoice.dossier.goodsPackagingUnit] ?? "Colis"}
+                value={String(invoice.dossier.goodsPackages)}
+              />
             )}
             {invoice.dossier.goodsWeight != null && (
               <RefField label="Poids brut" value={`${Number(invoice.dossier.goodsWeight)} kg`} />
