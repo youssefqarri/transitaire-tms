@@ -279,6 +279,9 @@ model Dossier {
   // mode de transport → détermine le titre de transport requis (BL / LTA / CMR)
   transport     TransportMode?
   status        DossierStatus @default(OUVERTURE)
+  // 2ᵉ statut parallèle « organismes de contrôle », en plus du statut douane
+  // (un dossier peut être à une étape côté douane et une autre côté organismes).
+  secondaryStatus DossierStatus?
 
   clientId      String
   client        Client        @relation(fields: [clientId], references: [id])
@@ -361,6 +364,8 @@ model DossierStatusChange {
   dossier     Dossier       @relation(fields: [dossierId], references: [id], onDelete: Cascade)
   fromStatus  DossierStatus?
   toStatus    DossierStatus
+  // voie concernée : "DOUANE" (défaut) ou "CONTROLE" (organismes de contrôle)
+  track       String        @default("DOUANE")
   note        String?       @db.Text
   changedById String?
   changedBy   User?         @relation(fields: [changedById], references: [id], onDelete: SetNull)

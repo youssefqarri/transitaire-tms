@@ -11,14 +11,18 @@ import { Select } from "@/components/ui/select";
 import { Combobox } from "@/components/ui/combobox";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export function StatusChanger({
   dossierId,
   currentStatus,
+  currentSecondaryStatus,
   allowedStatuses,
 }: {
   dossierId: string;
   currentStatus: DossierStatus;
+  /** 2ᵉ statut « organismes de contrôle » courant (en parallèle de la douane). */
+  currentSecondaryStatus?: DossierStatus | null;
   /** Si fourni, restreint la liste des statuts proposés (ex. comptable). */
   allowedStatuses?: DossierStatus[];
 }) {
@@ -26,15 +30,10 @@ export function StatusChanger({
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
   const [note, setNote] = useState("");
-  const initial =
-    allowedStatuses && !allowedStatuses.includes(currentStatus)
-      ? allowedStatuses[0]
-      : currentStatus;
-  const [target, setTarget] = useState<DossierStatus>(initial);
+  const [track, setTrack] = useState<"DOUANE" | "CONTROLE">("DOUANE");
 
-  // « Annulé » est retiré du menu déroulant : l'annulation se fait via une action
-  // dédiée et confirmée (évite d'annuler un dossier par mégarde en cherchant à
-  // juste ajouter une note ou changer d'étape).
+  // « Annulé » retiré du menu : l'annulation passe par une action dédiée confirmée
+  // (évite d'annuler un dossier par mégarde en cherchant juste à changer d'étape).
   const options = (
     allowedStatuses
       ? (Object.entries(STATUS_LABELS) as [DossierStatus, string][]).filter(([k]) =>
@@ -43,12 +42,31 @@ export function StatusChanger({
       : (Object.entries(STATUS_LABELS) as [DossierStatus, string][])
   ).filter(([k]) => k !== "ANNULE");
 
+  // Voie « organismes de contrôle » : réservée aux rôles qui gèrent le dossier
+  // (pas la comptabilité, dont la liste restreinte ne contient pas ANNULE).
+  const canControl = !allowedStatuses || allowedStatuses.includes("ANNULE");
+
+  const initial =
+    allowedStatuses && !allowedStatuses.includes(currentStatus)
+      ? allowedStatuses[0]
+      : currentStatus;
+  const [target, setTarget] = useState<DossierStatus>(initial);
+
+  const activeCurrent: DossierStatus | null =
+    track === "DOUANE" ? currentStatus : currentSecondaryStatus ?? null;
+
+  function switchTrack(t: "DOUANE" | "CONTROLE") {
+    setTrack(t);
+    const cur = t === "DOUANE" ? currentStatus : currentSecondaryStatus ?? null;
+    setTarget(cur && options.some(([k]) => k === cur) ? cur : options[0]?.[0] ?? currentStatus);
+  }
+
   function submit() {
     start(async () => {
       const res = await fetch(`/api/dossiers/${dossierId}/status`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: target, note: note.trim() || undefined }),
+        body: JSON.stringify({ status: target, note: note.trim() || undefined, track }),
       });
       if (!res.ok) {
         toast.error("Erreur lors du changement de statut");
@@ -89,8 +107,29 @@ export function StatusChanger({
       {open && (
         <div className="absolute right-0 top-full mt-1.5 w-[320px] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-[0_12px_32px_-12px_rgba(0,0,0,0.15)] p-4 z-30 animate-fade-in">
           <div className="space-y-3">
+            {canControl && (
+              <div className="grid grid-cols-2 gap-1 p-0.5 bg-[var(--color-surface-2)] rounded-[var(--radius)]">
+                {(["DOUANE", "CONTROLE"] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => switchTrack(t)}
+                    className={cn(
+                      "text-[12px] py-1.5 rounded-[var(--radius-sm)] transition-colors",
+                      track === t
+                        ? "bg-[var(--color-surface)] text-[var(--color-fg)] shadow-sm font-medium"
+                        : "text-[var(--color-fg-3)] hover:text-[var(--color-fg)]",
+                    )}
+                  >
+                    {t === "DOUANE" ? "Douane" : "Organismes"}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="space-y-1.5">
-              <Label htmlFor="target">Nouveau statut</Label>
+              <Label htmlFor="target">
+                {track === "CONTROLE" ? "Statut organismes de contrôle" : "Nouveau statut"}
+              </Label>
               {options.length >= 10 ? (
                 <Combobox
                   id="target"
@@ -113,6 +152,11 @@ export function StatusChanger({
                   ))}
                 </Select>
               )}
+              {track === "CONTROLE" && (
+                <p className="text-[11px] text-[var(--color-fg-mute)]">
+                  En parallèle de la douane — n&apos;écrase pas le statut douane.
+                </p>
+              )}
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="note">Note (optionnel)</Label>
@@ -124,7 +168,7 @@ export function StatusChanger({
               />
             </div>
             <div className="flex items-center justify-between gap-2 pt-1">
-              {currentStatus !== "ANNULE" && (!allowedStatuses || allowedStatuses.includes("ANNULE")) ? (
+              {track === "DOUANE" && currentStatus !== "ANNULE" && canControl ? (
                 <button
                   type="button"
                   onClick={cancelDossier}
@@ -140,7 +184,7 @@ export function StatusChanger({
                 <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
                   Fermer
                 </Button>
-                <Button size="sm" onClick={submit} disabled={pending || target === currentStatus}>
+                <Button size="sm" onClick={submit} disabled={pending || target === activeCurrent}>
                   {pending ? "Mise à jour…" : "Confirmer"}
                 </Button>
               </div>

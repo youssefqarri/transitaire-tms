@@ -96,6 +96,12 @@ export default async function DossierDetailPage({
               {dossier.number}
             </h1>
             <StatusBadge status={dossier.status} />
+            {dossier.secondaryStatus && (
+              <span className="inline-flex items-center gap-1.5" title="Statut organismes de contrôle (en parallèle de la douane)">
+                <span className="text-[10.5px] text-[var(--color-fg-3)]">Organismes&nbsp;:</span>
+                <StatusBadge status={dossier.secondaryStatus} size="sm" />
+              </span>
+            )}
             <Badge tone={dossier.type === "IMPORT" ? "info" : "ok"}>{dossier.type}</Badge>
             {dossier.paymentMode === "WITH_PAYMENT" && (
               <Badge tone="outline">Avec paiement</Badge>
@@ -135,6 +141,7 @@ export default async function DossierDetailPage({
             <StatusChanger
               dossierId={dossier.id}
               currentStatus={dossier.status}
+              currentSecondaryStatus={dossier.secondaryStatus}
               allowedStatuses={
                 session.user.role === "COMPTABILITE"
                   ? ["FACTURE", "CLOTURE"]
@@ -372,14 +379,15 @@ export default async function DossierDetailPage({
                 };
                 const events: Evt[] = [];
                 for (const sc of dossier.statusChanges) {
+                  const isControl = sc.track === "CONTROLE";
                   events.push({
                     key: `sc-${sc.id}`,
                     date: sc.createdAt,
-                    label: STATUS_LABELS[sc.toStatus],
+                    label: STATUS_LABELS[sc.toStatus] + (isControl ? " — organismes" : ""),
                     meta: sc.changedBy?.name,
                     note: sc.note ?? undefined,
-                    dot: "bg-[var(--color-fg)]",
-                    hideDate: sc.toStatus === "VISITE",
+                    dot: isControl ? "bg-[var(--color-accent)]" : "bg-[var(--color-fg)]",
+                    hideDate: !isControl && sc.toStatus === "VISITE",
                   });
                 }
                 const todayMs = new Date().setHours(0, 0, 0, 0);

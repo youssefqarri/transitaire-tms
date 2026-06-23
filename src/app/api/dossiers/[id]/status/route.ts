@@ -36,6 +36,8 @@ const schema = z.object({
     "ANNULE",
   ]),
   note: z.string().optional(),
+  // voie concernée : douane (défaut) ou organismes de contrôle (statut parallèle)
+  track: z.enum(["DOUANE", "CONTROLE"]).optional(),
 });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -62,6 +64,49 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const dossier = await prisma.dossier.findUnique({ where: { id } });
   if (!dossier) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  // ───── Voie « organismes de contrôle » : 2ᵉ statut parallèle, indépendant de la
+  // douane (pas de précondition DUM, hors comptabilité). ─────
+  if ((parsed.data.track ?? "DOUANE") === "CONTROLE") {
+    if (isComptable)
+      return NextResponse.json(
+        { error: "La comptabilité ne gère pas la voie organismes de contrôle." },
+        { status: 403 },
+      );
+    const updated = await prisma.dossier.update({
+      where: { id },
+      data: {
+        secondaryStatus: parsed.data.status,
+        statusChanges: {
+          create: {
+            fromStatus: dossier.secondaryStatus,
+            toStatus: parsed.data.status,
+            note: parsed.data.note,
+            changedById: session.user.id,
+            track: "CONTROLE",
+          },
+        },
+      },
+    });
+    await prisma.notification.create({
+      data: {
+        role: "EXPLOITATION",
+        dossierId: id,
+        kind: "STATUS_CHANGE",
+        title: `Dossier ${dossier.number} (organismes) → ${parsed.data.status}`,
+        body: parsed.data.note,
+        link: `/dossiers/${id}`,
+      },
+    });
+    await audit({
+      userId: session.user.id,
+      action: "UPDATE_STATUS",
+      entity: "Dossier",
+      entityId: id,
+      metadata: { track: "CONTROLE", to: parsed.data.status, note: parsed.data.note },
+    });
+    return NextResponse.json(updated);
+  }
+
   // Précondition métier : pas de liquidation/BAE/mainlevée sans DUM enregistrée
   if (statusRequiresDum(parsed.data.status)) {
     const dumCount = await prisma.dUM.count({ where: { dossierId: id, status: { not: "DRAFT" } } });
@@ -87,6 +132,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           toStatus: parsed.data.status,
           note: parsed.data.note,
           changedById: session.user.id,
+          track: "DOUANE",
         },
       },
     },
