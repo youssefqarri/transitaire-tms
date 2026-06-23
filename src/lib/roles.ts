@@ -40,8 +40,11 @@ export function canManageInvoices(role: UserRole) {
   return ["ADMIN", "COMPTABILITE"].includes(role);
 }
 
+// Création de dossiers : Exploitation, Admin et Déclarant — le Déclarant a les mêmes
+// droits que l'Exploitation, sauf la facturation (réservée Admin + Comptabilité).
+// Demande cliente 2026-06-23.
 export function canCreateDossier(role: UserRole) {
-  return ["ADMIN", "EXPLOITATION"].includes(role);
+  return ["ADMIN", "EXPLOITATION", "DECLARANT"].includes(role);
 }
 
 // Saisie / modification des dossiers : réservée à Exploitation, Admin et Déclarant ;
