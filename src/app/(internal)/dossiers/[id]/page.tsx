@@ -392,20 +392,26 @@ export default async function DossierDetailPage({
                 }
                 const todayMs = new Date().setHours(0, 0, 0, 0);
                 const isDone = (d: Date) => new Date(d).getTime() <= todayMs + 86_400_000 - 1;
-                if (dossier.visitDate) {
-                  const done = isDone(dossier.visitDate);
+                // Visite douane : date réelle (effective) si renseignée, sinon date prévue.
+                if (dossier.visitEffectiveDate || dossier.visitDate) {
+                  const eff = dossier.visitEffectiveDate;
+                  const d = eff ?? dossier.visitDate!;
+                  const done = eff ? true : isDone(d);
                   events.push({
                     key: "visit-douane",
-                    date: dossier.visitDate,
+                    date: d,
                     label: done ? "Visite douane effectuée" : "Visite douane à venir",
                     dot: done ? "bg-[var(--color-success)]" : "bg-[var(--color-accent)]",
                   });
                 }
-                if (dossier.conformityVisitDate) {
-                  const done = isDone(dossier.conformityVisitDate);
+                // Visite organismes de contrôle : idem (date effective si renseignée).
+                if (dossier.conformityVisitEffectiveDate || dossier.conformityVisitDate) {
+                  const eff = dossier.conformityVisitEffectiveDate;
+                  const d = eff ?? dossier.conformityVisitDate!;
+                  const done = eff ? true : isDone(d);
                   events.push({
                     key: "visit-mci",
-                    date: dossier.conformityVisitDate,
+                    date: d,
                     label: done
                       ? "Visite des organismes de contrôle effectuée"
                       : "Visite des organismes de contrôle à venir",

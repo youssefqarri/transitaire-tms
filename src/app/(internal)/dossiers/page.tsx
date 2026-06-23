@@ -37,6 +37,17 @@ export default async function DossiersPage({
   const statusFilter = params.status as DossierStatus | undefined;
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
 
+  // Le commis en douane ne voit jamais les dossiers clôturés / annulés.
+  const hideClosed = session.user.role === "COMMIS_DOUANE";
+  const statusWhere =
+    statusFilter && hideClosed
+      ? { equals: statusFilter, notIn: ["CLOTURE", "ANNULE"] as DossierStatus[] }
+      : statusFilter
+        ? statusFilter
+        : hideClosed
+          ? { notIn: ["CLOTURE", "ANNULE"] as DossierStatus[] }
+          : undefined;
+
   const where = {
     deletedAt: null,
     ...(q && {
@@ -47,7 +58,7 @@ export default async function DossiersPage({
         { dums: { some: { number: { contains: q, mode: "insensitive" as const } } } },
       ],
     }),
-    ...(statusFilter && { status: statusFilter }),
+    ...(statusWhere && { status: statusWhere }),
     ...(params.client && { clientId: params.client }),
   };
 
