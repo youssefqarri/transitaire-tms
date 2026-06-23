@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Bell } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
@@ -29,21 +30,26 @@ const KIND_LABELS: Record<string, string> = {
 export default async function NotificationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; size?: string }>;
+  searchParams: Promise<{ page?: string; size?: string; unread?: string }>;
 }) {
   const params = await searchParams;
   const session = await auth();
   if (!session) return null;
 
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
-  const where = {
+  const onlyUnread = params.unread === "1";
+  const baseWhere = {
     OR: [{ userId: session.user.id }, { role: session.user.role }],
   };
+  const unreadCond = { read: false, receipts: { none: { userId: session.user.id } } };
+  // Liste filtrée si « Non lues », sinon toutes ; le compteur « X non lue(s) »
+  // reste le total non-lu réel (indépendant du filtre).
+  const listWhere = onlyUnread ? { ...baseWhere, ...unreadCond } : baseWhere;
 
   const [total, notifications, unread] = await Promise.all([
-    prisma.notification.count({ where }),
+    prisma.notification.count({ where: listWhere }),
     prisma.notification.findMany({
-      where,
+      where: listWhere,
       orderBy: { createdAt: "desc" },
       skip,
       take: size,
@@ -53,7 +59,7 @@ export default async function NotificationsPage({
       },
     }),
     prisma.notification.count({
-      where: { ...where, read: false, receipts: { none: { userId: session.user.id } } },
+      where: { ...baseWhere, ...unreadCond },
     }),
   ]);
 
@@ -62,7 +68,25 @@ export default async function NotificationsPage({
       <PageHeader
         title="Notifications"
         subtitle={`${unread} non lue${unread > 1 ? "s" : ""}`}
-        actions={<MarkAllRead />}
+        actions={
+          <div className="flex items-center gap-2">
+            <div className="flex rounded-[var(--radius)] border border-[var(--color-border)] overflow-hidden text-[12px] font-medium">
+              <Link
+                href="/notifications"
+                className={`px-3 py-1.5 ${!onlyUnread ? "bg-[var(--color-accent)] text-white" : "text-[var(--color-fg-3)] hover:bg-[var(--color-surface-2)]"}`}
+              >
+                Toutes
+              </Link>
+              <Link
+                href="/notifications?unread=1"
+                className={`px-3 py-1.5 border-l border-[var(--color-border)] ${onlyUnread ? "bg-[var(--color-accent)] text-white" : "text-[var(--color-fg-3)] hover:bg-[var(--color-surface-2)]"}`}
+              >
+                Non lues
+              </Link>
+            </div>
+            <MarkAllRead />
+          </div>
+        }
       />
       <Card>
         {notifications.length === 0 ? (
@@ -89,6 +113,7 @@ export default async function NotificationsPage({
           pageSize={size}
           total={total}
           basePath="/notifications"
+          extraParams={{ unread: onlyUnread ? "1" : undefined }}
         />
       </Card>
     </div>

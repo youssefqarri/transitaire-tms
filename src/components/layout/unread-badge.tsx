@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 /**
  * Badge "non lu" pour les notifications.
@@ -16,11 +17,30 @@ export function UnreadBadge({
   className?: string;
 }) {
   const [count, setCount] = useState(initial);
+  const pathname = usePathname();
 
   // Re-sync quand la prop change (navigation interne)
   useEffect(() => {
     setCount(initial);
   }, [initial]);
+
+  // Re-sync à chaque navigation interne : le badge vit dans le layout persistant
+  // (pas re-rendu serveur en navigation douce) → sans ça il reste périmé. Refetch
+  // la vraie valeur serveur à chaque changement de route.
+  useEffect(() => {
+    let cancel = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/notifications/unread-count", { cache: "no-store" });
+        if (!res.ok) return;
+        const j = await res.json();
+        if (!cancel && typeof j.count === "number") setCount(j.count);
+      } catch {}
+    })();
+    return () => {
+      cancel = true;
+    };
+  }, [pathname]);
 
   // Listen for client-side "read" events
   useEffect(() => {

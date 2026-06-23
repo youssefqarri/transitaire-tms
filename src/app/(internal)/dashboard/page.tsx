@@ -311,14 +311,12 @@ export default async function DashboardPage() {
                   <span className="text-[13.5px] font-medium text-[var(--color-fg)] truncate flex-1">
                     {g.clientName}
                   </span>
-                  <span className="text-[11.5px] text-[var(--color-fg-3)] shrink-0">
+                  <span className="text-[11.5px] text-[var(--color-fg-3)] shrink-0 w-[74px] text-right tnum">
                     {g.dossiers.length} dossier{g.dossiers.length > 1 ? "s" : ""}
                   </span>
-                  {g.totalValue > 0 && (
-                    <span className="hidden sm:inline font-mono text-[12px] tnum text-[var(--color-fg-3)] shrink-0 w-[110px] text-right">
-                      {formatCurrency(g.totalValue, "EUR")}
-                    </span>
-                  )}
+                  <span className="hidden sm:inline font-mono text-[11.5px] tnum text-[var(--color-fg-3)] shrink-0 w-[110px] text-right">
+                    {g.totalValue > 0 ? formatCurrency(g.totalValue, "EUR") : "—"}
+                  </span>
                 </summary>
                 <div className="bg-[var(--color-surface-2)]/40 divide-y divide-[var(--color-border)]">
                   <Link

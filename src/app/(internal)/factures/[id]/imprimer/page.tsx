@@ -108,11 +108,12 @@ export default async function InvoicePrintPage({
           <div style={{ textAlign: "right" }}>
             <div
               style={{
-                fontSize: 9.5,
-                letterSpacing: "0.16em",
+                fontSize: 22,
+                fontWeight: 700,
+                letterSpacing: "0.08em",
                 textTransform: "uppercase",
-                color: "#777",
-                marginBottom: 6,
+                color: "#1a1a1a",
+                marginBottom: 2,
               }}
             >
               Facture
@@ -331,6 +332,10 @@ export default async function InvoicePrintPage({
             {montantEnLettres(computed.totalTTC)}
           </strong>
           .
+        </div>
+
+        <div style={{ marginTop: 12, fontSize: 10.5, color: "#666", textAlign: "center" }}>
+          Cette facture est régie par les dispositions de la loi 32-10 sur les délais de règlement.
         </div>
 
         {(invoice.termsOfPayment || invoice.paymentMethod || invoice.notes) && (
