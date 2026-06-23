@@ -38,6 +38,11 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
         include: { author: { select: { name: true } } },
       },
       statusChanges: { orderBy: { createdAt: "desc" }, take: 12 },
+      // demandes personnalisées du transitaire (ex. catégorie « Autre ») non encore fournies
+      expectedDocuments: {
+        where: { deletedAt: null, fulfilledAt: null },
+        orderBy: { createdAt: "asc" },
+      },
     },
   });
   if (!dossier) notFound();
@@ -45,6 +50,15 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
   const required = requiredDocuments(dossier.paymentMode, dossier.transport);
   const presentCats = new Set(dossier.documents.map((d) => d.category));
   const missing = required.filter((c) => !presentCats.has(c));
+  // Demandes personnalisées à montrer au client (on exclut les catégories internes).
+  const requested = dossier.expectedDocuments
+    .filter((e) => !INTERNAL_ONLY_CATEGORIES.includes(e.category))
+    .map((e) => ({
+      id: e.id,
+      category: e.category,
+      label: e.name?.trim() || DOCUMENT_CATEGORY_LABELS[e.category],
+      note: e.note ?? undefined,
+    }));
   const progressIndex = STATUS_ORDER.indexOf(dossier.status);
   const totalSteps = STATUS_ORDER.length;
   const progressPct = progressIndex >= 0 ? ((progressIndex + 1) / totalSteps) * 100 : 0;
@@ -109,7 +123,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
         </div>
       </Card>
 
-      {missing.length > 0 && (
+      {(missing.length > 0 || requested.length > 0) && (
         <Card className="border-[var(--color-warning)]/30 bg-[var(--color-warning-soft)]">
           <div className="p-4 flex items-start gap-3">
             <AlertCircle className="size-4 text-[var(--color-warning)] shrink-0 mt-0.5" strokeWidth={1.75} />
@@ -118,14 +132,14 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
               <div className="text-[12.5px] text-[var(--color-fg-2)] mt-1 mb-3">
                 Cliquez sur un type ci-dessous pour téléverser le document correspondant.
               </div>
-              <ClientUploadForm dossierId={dossier.id} missing={missing} />
+              <ClientUploadForm dossierId={dossier.id} missing={missing} requested={requested} />
             </div>
           </div>
         </Card>
       )}
 
       {/* Bouton d'ajout de pièce complémentaire même sans documents manquants */}
-      {missing.length === 0 && (
+      {missing.length === 0 && requested.length === 0 && (
         <Card>
           <div className="p-4 flex items-start gap-3">
             <div className="flex-1">

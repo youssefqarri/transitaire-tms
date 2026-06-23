@@ -3,28 +3,11 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { isInternal } from "@/lib/roles";
+import { DOCUMENT_CATEGORY_VALUES } from "@/lib/statuses";
 import { audit } from "@/lib/audit";
 
-const DOC_CATEGORIES = [
-  "FACTURE_COMMERCIALE",
-  "COLISAGE",
-  "FACTURE_FRET",
-  "CONNAISSEMENT",
-  "ENGAGEMENT_IMPORTATION",
-  "BON_A_DELIVRER",
-  "CERTIFICAT_ORIGINE",
-  "ASSURANCE",
-  "LICENCE",
-  "CERTIFICAT_SANITAIRE",
-  "CERTIFICAT_CONFORMITE",
-  "FICHE_LIQUIDATION",
-  "TICKET_PAIEMENT",
-  "BON_A_ENLEVER",
-  "AUTRE",
-] as const;
-
 const schema = z.object({
-  category: z.enum(DOC_CATEGORIES),
+  category: z.enum(DOCUMENT_CATEGORY_VALUES),
   name: z.string().optional(),
   note: z.string().optional(),
 });

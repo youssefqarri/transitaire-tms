@@ -3,13 +3,14 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canCreateDUM } from "@/lib/roles";
+import { DUM_STATUS_VALUES } from "@/lib/statuses";
 import { audit } from "@/lib/audit";
 
 const patchSchema = z.object({
   number: z.string().optional(),
   bureau: z.string().nullable().optional(),
   regime: z.string().nullable().optional(),
-  status: z.enum(["DRAFT", "ENREGISTRE", "VALIDE", "LIQUIDE", "CLOTURE"]).optional(),
+  status: z.enum(DUM_STATUS_VALUES).optional(),
   registeredAt: z.string().nullable().optional(),
   liquidatedAt: z.string().nullable().optional(),
   customsValue: z.number().nonnegative().nullable().optional(),

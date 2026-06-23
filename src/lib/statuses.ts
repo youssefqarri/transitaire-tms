@@ -136,6 +136,9 @@ export const DUM_STATUS_LABELS: Record<DUMStatus, string> = {
   CLOTURE: "Clôturé",
 };
 
+// Source unique pour la validation API des statuts DUM (évite les listes codées en dur).
+export const DUM_STATUS_VALUES = Object.keys(DUM_STATUS_LABELS) as [DUMStatus, ...DUMStatus[]];
+
 export const DOCUMENT_CATEGORY_LABELS: Record<DocumentCategory, string> = {
   FACTURE_COMMERCIALE: "Facture commerciale",
   FACTURE_ORIGINALE: "Facture originale",
@@ -168,6 +171,12 @@ export const DOCUMENT_CATEGORY_LABELS: Record<DocumentCategory, string> = {
   MESSAGE_CONFORMITE: "Message conformité (MCI)",
   AUTRE: "Autre",
 };
+
+// Source unique pour la validation API des catégories de documents.
+export const DOCUMENT_CATEGORY_VALUES = Object.keys(DOCUMENT_CATEGORY_LABELS) as [
+  DocumentCategory,
+  ...DocumentCategory[],
+];
 
 // Catégories de documents générées en interne (douane/transitaire) que le CLIENT
 // ne doit PAS voir/télécharger via le portail ou l'API v1 (révèlent montants,

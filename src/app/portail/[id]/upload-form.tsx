@@ -15,9 +15,12 @@ import type { DocumentCategory } from "@/generated/prisma/enums";
 export function ClientUploadForm({
   dossierId,
   missing,
+  requested = [],
 }: {
   dossierId: string;
   missing: DocumentCategory[];
+  /** Demandes personnalisées du transitaire (ex. « Certificat halal » en catégorie Autre). */
+  requested?: { id: string; category: DocumentCategory; label: string; note?: string }[];
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -29,6 +32,12 @@ export function ClientUploadForm({
 
   function openWith(cat: DocumentCategory) {
     setCategory(cat);
+    setOpen(true);
+  }
+
+  function openRequested(r: { category: DocumentCategory; label: string }) {
+    setCategory(r.category);
+    setName(r.label);
     setOpen(true);
   }
 
@@ -64,7 +73,7 @@ export function ClientUploadForm({
 
   return (
     <div className="space-y-3">
-      {missing.length > 0 && (
+      {(missing.length > 0 || requested.length > 0) && (
         <div className="flex flex-wrap gap-1.5">
           {missing.map((c) => (
             <button
@@ -75,6 +84,18 @@ export function ClientUploadForm({
             >
               <Upload className="size-3" strokeWidth={2.25} />
               Envoyer : {DOCUMENT_CATEGORY_LABELS[c]}
+            </button>
+          ))}
+          {requested.map((r) => (
+            <button
+              key={r.id}
+              type="button"
+              onClick={() => openRequested(r)}
+              title={r.note}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11.5px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] hover:opacity-80 transition-opacity"
+            >
+              <Upload className="size-3" strokeWidth={2.25} />
+              Envoyer : {r.label}
             </button>
           ))}
         </div>
