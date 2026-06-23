@@ -57,7 +57,9 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
     .map((e) => ({
       id: e.id,
       category: e.category,
-      label: e.name?.trim() || DOCUMENT_CATEGORY_LABELS[e.category],
+      // libellé visible par le client : son nom, sinon le texte de la demande
+      // (note), sinon le libellé de catégorie — évite un générique « Autre ».
+      label: e.name?.trim() || e.note?.trim() || DOCUMENT_CATEGORY_LABELS[e.category],
       note: e.note ?? undefined,
     }));
   const progressIndex = STATUS_ORDER.indexOf(dossier.status);

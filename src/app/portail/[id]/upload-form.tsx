@@ -74,30 +74,49 @@ export function ClientUploadForm({
   return (
     <div className="space-y-3">
       {(missing.length > 0 || requested.length > 0) && (
-        <div className="flex flex-wrap gap-1.5">
-          {missing.map((c) => (
-            <button
-              key={c}
-              type="button"
-              onClick={() => openWith(c)}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11.5px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] hover:opacity-80 transition-opacity"
-            >
-              <Upload className="size-3" strokeWidth={2.25} />
-              Envoyer : {DOCUMENT_CATEGORY_LABELS[c]}
-            </button>
-          ))}
-          {requested.map((r) => (
-            <button
-              key={r.id}
-              type="button"
-              onClick={() => openRequested(r)}
-              title={r.note}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11.5px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] hover:opacity-80 transition-opacity"
-            >
-              <Upload className="size-3" strokeWidth={2.25} />
-              Envoyer : {r.label}
-            </button>
-          ))}
+        <div className="space-y-2.5">
+          {/* Demandes spécifiques du transitaire — mises en avant (accent) */}
+          {requested.length > 0 && (
+            <div>
+              <div className="text-[11px] font-semibold text-[var(--color-accent)] mb-1.5">
+                Demandés par votre transitaire
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {requested.map((r) => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => openRequested(r)}
+                    title={r.note}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11.5px] font-medium bg-[var(--color-accent-soft)] text-[var(--color-accent)] border border-[var(--color-accent)]/25 hover:opacity-80 transition-opacity"
+                  >
+                    <Upload className="size-3" strokeWidth={2.25} />
+                    Envoyer : {r.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {missing.length > 0 && (
+            <div>
+              <div className="text-[11px] font-medium text-[var(--color-fg-3)] mb-1.5">
+                Documents requis manquants
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {missing.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => openWith(c)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11.5px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] hover:opacity-80 transition-opacity"
+                  >
+                    <Upload className="size-3" strokeWidth={2.25} />
+                    Envoyer : {DOCUMENT_CATEGORY_LABELS[c]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
