@@ -7,18 +7,31 @@ import { notifyClient } from "@/lib/messaging-server";
 import { audit } from "@/lib/audit";
 import type { TemplateKey } from "@/lib/messaging";
 
-const schema = z.object({
-  templateKey: z.string().min(1),
-  channel: z.enum(["EMAIL", "WHATSAPP"]),
-  lang: z.enum(["FR", "AR", "EN"]).default("FR"),
-  customSubject: z.string().optional(),
-  customBody: z.string().optional(),
-  // destinataire choisi (email pour EMAIL, téléphone pour WHATSAPP ; sinon contact principal)
-  toAddress: z.string().optional(),
-  // enregistrer ce destinataire dans le carnet du client
-  saveAsContact: z.boolean().optional(),
-  contactName: z.string().optional(),
-});
+const schema = z
+  .object({
+    templateKey: z.string().min(1),
+    channel: z.enum(["EMAIL", "WHATSAPP"]),
+    lang: z.enum(["FR", "AR", "EN"]).default("FR"),
+    customSubject: z.string().optional(),
+    customBody: z.string().optional(),
+    // destinataire choisi (email pour EMAIL, téléphone pour WHATSAPP ; sinon contact principal)
+    toAddress: z.string().optional(),
+    // enregistrer ce destinataire dans le carnet du client
+    saveAsContact: z.boolean().optional(),
+    contactName: z.string().optional(),
+  })
+  // Validation du destinataire selon le canal : un e-mail / numéro mal saisi ne doit
+  // pas partir puis échouer côté serveur — on renvoie un message clair.
+  .superRefine((data, ctx) => {
+    const v = data.toAddress?.trim();
+    if (!v) return; // pas de destinataire explicite → contact principal du dossier
+    if (data.channel === "EMAIL" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["toAddress"], message: "Adresse e-mail invalide" });
+    }
+    if (data.channel === "WHATSAPP" && !/^[0-9+()\s-]{6,20}$/.test(v)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["toAddress"], message: "Numéro de téléphone invalide" });
+    }
+  });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -26,7 +39,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!session || !canNotifyClient(session.user.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const parsed = schema.safeParse(await req.json());
-  if (!parsed.success) return NextResponse.json({ error: "Invalid" }, { status: 400 });
+  if (!parsed.success)
+    return NextResponse.json(
+      { error: parsed.error.issues[0]?.message || "Données invalides" },
+      { status: 400 },
+    );
 
   const result = await notifyClient({
     dossierId: id,

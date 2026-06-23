@@ -76,56 +76,57 @@ ${issuer.name}`;
 
   const body = parsed.data.body?.trim() || defaultBody;
 
+  // 1) Envoi de l'e-mail. S'il échoue, l'e-mail n'est pas parti → vrai échec :
+  //    l'utilisateur peut réessayer sans risque de doublon.
+  let result: { messageId: string };
   try {
-    const result = await sendMail({
-      to,
-      subject,
-      text: body,
-      html: textToHtml(body),
-    });
-
-    // Marque la facture comme envoyée si elle était en brouillon
-    if (invoice.status === "DRAFT") {
-      await prisma.invoice.update({
-        where: { id },
-        data: { status: "SENT", issuedAt: invoice.issuedAt ?? new Date() },
-      });
-    }
-
-    // Trace l'envoi dans OutgoingMessage si possible (lié au dossier de la première ligne)
-    const firstDossierId = invoice.items.find((it) => it.dossierId)?.dossierId;
-    if (firstDossierId) {
-      await prisma.outgoingMessage.create({
-        data: {
-          dossierId: firstDossierId,
-          channel: "EMAIL",
-          lang: "FR",
-          toAddress: to,
-          subject,
-          body,
-          status: "SENT",
-          sentAt: new Date(),
-          sentById: session.user.id,
-          clientId: invoice.clientId,
-          templateKey: "INVOICE_SENT",
-        },
-      });
-    }
-
-    await audit({
-      userId: session.user.id,
-      action: "SEND_INVOICE_EMAIL",
-      entity: "Invoice",
-      entityId: id,
-      metadata: { to, subject, messageId: result.messageId },
-    });
-
-    return NextResponse.json({ ok: true, messageId: result.messageId });
+    result = await sendMail({ to, subject, text: body, html: textToHtml(body) });
   } catch (e: unknown) {
     const err = e as Error;
-    return NextResponse.json(
-      { error: err.message || "Échec de l'envoi" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: err.message || "Échec de l'envoi" }, { status: 500 });
   }
+
+  // 2) L'e-mail est parti : maj du statut (brouillon → envoyé) + trace, de façon
+  //    ATOMIQUE. Si cette partie échoue, l'e-mail est déjà envoyé → on journalise
+  //    mais on ne renvoie PAS d'échec (sinon l'utilisateur renverrait un doublon).
+  const firstDossierId = invoice.items.find((it) => it.dossierId)?.dossierId;
+  try {
+    await prisma.$transaction(async (tx) => {
+      if (invoice.status === "DRAFT") {
+        await tx.invoice.update({
+          where: { id },
+          data: { status: "SENT", issuedAt: invoice.issuedAt ?? new Date() },
+        });
+      }
+      if (firstDossierId) {
+        await tx.outgoingMessage.create({
+          data: {
+            dossierId: firstDossierId,
+            channel: "EMAIL",
+            lang: "FR",
+            toAddress: to,
+            subject,
+            body,
+            status: "SENT",
+            sentAt: new Date(),
+            sentById: session.user.id,
+            clientId: invoice.clientId,
+            templateKey: "INVOICE_SENT",
+          },
+        });
+      }
+    });
+  } catch (e) {
+    console.error(`Facture ${invoice.number} envoyée mais maj statut/trace échouée:`, e);
+  }
+
+  await audit({
+    userId: session.user.id,
+    action: "SEND_INVOICE_EMAIL",
+    entity: "Invoice",
+    entityId: id,
+    metadata: { to, subject, messageId: result.messageId },
+  });
+
+  return NextResponse.json({ ok: true, messageId: result.messageId });
 }
