@@ -333,6 +333,12 @@ export default async function DossierDetailPage({
                     createdAt: e.createdAt,
                   }))}
                   readOnly={readOnly}
+                  clientId={dossier.clientId}
+                  clientEmail={dossier.client.email}
+                  clientPhone={dossier.client.phone}
+                  contacts={dossier.client.contacts}
+                  dossierContactEmail={dossier.contactEmail}
+                  waConfigured={waConfigured}
                 />
               </>
             );

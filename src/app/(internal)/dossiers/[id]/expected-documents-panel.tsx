@@ -14,6 +14,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
 import type { DocumentCategory } from "@/generated/prisma/enums";
 import { formatDate } from "@/lib/utils";
+import { NotifyClientButton } from "./notify-button";
+
+type Contact = { id: string; name: string | null; email: string };
 
 type Expected = {
   id: string;
@@ -29,10 +32,22 @@ export function ExpectedDocumentsPanel({
   dossierId,
   expected,
   readOnly = false,
+  clientId,
+  clientEmail,
+  clientPhone,
+  contacts,
+  dossierContactEmail,
+  waConfigured,
 }: {
   dossierId: string;
   expected: Expected[];
   readOnly?: boolean;
+  clientId: string;
+  clientEmail: string | null;
+  clientPhone: string | null;
+  contacts: Contact[];
+  dossierContactEmail: string | null;
+  waConfigured: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -102,9 +117,23 @@ export function ExpectedDocumentsPanel({
           )}
         </CardTitle>
         {!readOnly && (
-          <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
-            <Plus /> Demander
-          </Button>
+          <div className="flex items-center gap-2">
+            {pendingCount > 0 && (
+              <NotifyClientButton
+                dossierId={dossierId}
+                clientId={clientId}
+                clientEmail={clientEmail}
+                clientPhone={clientPhone}
+                contacts={contacts}
+                dossierContactEmail={dossierContactEmail}
+                waConfigured={waConfigured}
+                label="Envoyer au client"
+              />
+            )}
+            <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
+              <Plus /> Demander
+            </Button>
+          </div>
         )}
       </CardHeader>
 

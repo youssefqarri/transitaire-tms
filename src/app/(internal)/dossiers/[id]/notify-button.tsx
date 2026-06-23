@@ -34,6 +34,7 @@ export function NotifyClientButton({
   contacts,
   dossierContactEmail,
   waConfigured,
+  label = "Notifier le client",
 }: {
   dossierId: string;
   clientId: string;
@@ -42,6 +43,7 @@ export function NotifyClientButton({
   contacts: Contact[];
   dossierContactEmail: string | null;
   waConfigured: boolean;
+  label?: string;
 }) {
   void clientId;
   const router = useRouter();
@@ -317,7 +319,7 @@ export function NotifyClientButton({
   return (
     <>
       <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
-        <Send /> Notifier le client
+        <Send /> {label}
       </Button>
       {mounted && open && createPortal(modal, document.body)}
     </>
