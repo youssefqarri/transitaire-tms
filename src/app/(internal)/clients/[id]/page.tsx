@@ -27,6 +27,7 @@ export default async function ClientDetailPage({
     where: { id },
     include: {
       dossiers: {
+        where: { deletedAt: null },
         orderBy: { updatedAt: "desc" },
         take: 50,
         include: { dums: true },

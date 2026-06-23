@@ -21,7 +21,7 @@ export default async function SuppliersPage({
     prisma.supplier.count(),
     prisma.supplier.findMany({
       orderBy: { name: "asc" },
-      include: { _count: { select: { dossiers: true } } },
+      include: { _count: { select: { dossiers: { where: { deletedAt: null } } } } },
       skip,
       take: size,
     }),

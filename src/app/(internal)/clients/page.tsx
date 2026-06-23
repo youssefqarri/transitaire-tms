@@ -23,7 +23,7 @@ export default async function ClientsPage({
     prisma.client.findMany({
       where: { deletedAt: null },
       orderBy: { name: "asc" },
-      include: { _count: { select: { dossiers: true, users: true } } },
+      include: { _count: { select: { dossiers: { where: { deletedAt: null } }, users: true } } },
       skip,
       take: size,
     }),

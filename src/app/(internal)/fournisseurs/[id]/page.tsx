@@ -25,6 +25,7 @@ export default async function SupplierDetailPage({
     where: { id },
     include: {
       dossiers: {
+        where: { deletedAt: null },
         orderBy: { updatedAt: "desc" },
         take: 50,
         include: { client: true },
