@@ -28,10 +28,10 @@ export function canManageUsers(role: UserRole) {
   return role === "ADMIN";
 }
 
-// Gestion du référentiel commercial (clients, fournisseurs, contacts) : rôles
-// internes SAUF COMMIS_DOUANE (consultation seule). Utilisé sur tous les écrits API.
+// Saisie du référentiel commercial (clients, fournisseurs, contacts) : réservée à
+// Exploitation + Admin ; les autres rôles internes consultent seulement. Demande cliente.
 export function canManageRegistry(role: UserRole) {
-  return isInternal(role) && role !== "COMMIS_DOUANE";
+  return ["ADMIN", "EXPLOITATION"].includes(role);
 }
 
 // Gestion de la facturation (création/édition/encaissement) : seuls ADMIN et
@@ -44,17 +44,20 @@ export function canCreateDossier(role: UserRole) {
   return ["ADMIN", "EXPLOITATION"].includes(role);
 }
 
+// Saisie / modification des dossiers : réservée à Exploitation + Admin ; les autres
+// rôles consultent seulement (Déclarant, Bureau, Commis, Compta). Demande cliente.
 export function canModifyDossier(role: UserRole) {
-  return ["ADMIN", "EXPLOITATION", "DECLARANT", "BUREAU"].includes(role);
+  return ["ADMIN", "EXPLOITATION"].includes(role);
 }
 
 export function canCloseDossier(role: UserRole) {
   return ["ADMIN", "DECLARANT", "BUREAU"].includes(role);
 }
 
+// Saisie des DUM : réservée à Exploitation + Admin. Le Déclarant dépose la DUM dans
+// BADR ; l'Exploitant la saisit ici. Les autres consultent seulement. Demande cliente.
 export function canCreateDUM(role: UserRole) {
-  // Exploitation peut saisir les numéros de DUM au même titre que le Déclarant.
-  return ["ADMIN", "EXPLOITATION", "DECLARANT"].includes(role);
+  return ["ADMIN", "EXPLOITATION"].includes(role);
 }
 
 export function canViewAccountingEmails(role: UserRole) {
@@ -100,6 +103,7 @@ export function canUploadDocument(role: UserRole) {
   return ["ADMIN", "EXPLOITATION", "DECLARANT", "BUREAU"].includes(role);
 }
 
+// Envoi de notifications / e-mails au client : réservé à Exploitation + Admin. Demande cliente.
 export function canNotifyClient(role: UserRole) {
-  return ["ADMIN", "EXPLOITATION", "DECLARANT", "BUREAU"].includes(role);
+  return ["ADMIN", "EXPLOITATION"].includes(role);
 }
