@@ -36,11 +36,14 @@ type DossierOpt = {
   customsValue: number | null;
   customsDuties: number | null;
   articleCount: number | null;
+  transport: string | null;
 };
 
-// Barème proposé : 0 % (débours refacturé à l'identique), 3 % (taxe régionale
-// conteneurs au port), 10 % (transport refacturé), 14 %, 20 % (honoraires & frais).
-const VAT_RATES = [0, 3, 10, 14, 20] as const;
+// Barème TVA proposé : 0 % (débours refacturé à l'identique), 10 % (transport
+// refacturé), 14 %, 20 % (honoraires & frais). NB : la taxe régionale (3 % du
+// total taxable, conteneurs maritimes) n'est PAS un taux de TVA — elle a son
+// propre bouton et s'ajoute en ligne à 20 %.
+const VAT_RATES = [0, 10, 14, 20] as const;
 
 export type InvoiceEditInit = {
   id: string;
@@ -126,6 +129,34 @@ export function NewInvoiceForm({
   }
   function removeItem(i: number) {
     setItems((arr) => arr.filter((_, idx) => idx !== i));
+  }
+
+  // Taxe régionale (conteneurs maritimes au port) = 3 % du total des montants
+  // TAXABLES (lignes à TVA > 0), hors la taxe elle-même ; ajoutée à 20 % de TVA.
+  // Affichée uniquement pour les dossiers maritimes (cf. règle cliente : pas
+  // d'aérien). Action manuelle → gère naturellement le cas « maritime en colis ».
+  function applyTaxeRegionale() {
+    const base = items
+      .filter((it) => it.code !== "TAXREG" && Number(it.vatRate) > 0)
+      .reduce((s, it) => s + it.quantity * it.unitPrice, 0);
+    if (base <= 0) {
+      toast.error("Ajoutez d'abord les lignes taxables (TVA > 0)");
+      return;
+    }
+    const montant = Math.round(base * 0.03 * 100) / 100;
+    const line: LineItem = {
+      kind: "HONORAIRE",
+      code: "TAXREG",
+      description: "TAXE REGIONALE (3%)",
+      quantity: 1,
+      unitPrice: montant,
+      vatRate: 20,
+    };
+    setItems((arr) => {
+      const idx = arr.findIndex((it) => it.code === "TAXREG");
+      return idx >= 0 ? arr.map((it, i) => (i === idx ? line : it)) : [...arr, line];
+    });
+    toast.success(`Taxe régionale (3 %) : ${formatMAD(montant)}`);
   }
 
   // À la sélection d'un client, pré-remplit les lignes depuis sa fiche tarifaire
@@ -300,6 +331,17 @@ export function NewInvoiceForm({
             <Button type="button" variant="outline" size="sm" onClick={() => addItem("DEBOURS")}>
               <Plus /> Débours (0 %)
             </Button>
+            {selectedDossier?.transport === "MARITIME" && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={applyTaxeRegionale}
+                title="Conteneurs maritimes : 3 % du total des montants taxables"
+              >
+                <Plus /> Taxe régionale (3 %)
+              </Button>
+            )}
           </div>
         </div>
         <div className="border border-[var(--color-border)] rounded-[var(--radius)] divide-y divide-[var(--color-border)] overflow-x-auto">

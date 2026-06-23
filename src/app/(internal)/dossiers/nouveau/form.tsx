@@ -126,6 +126,10 @@ export function NewDossierForm({
       toast.error("Client requis");
       return;
     }
+    if (mode !== "edit" && !form.transport) {
+      toast.error("Mode de transport requis (maritime, aérien ou routier)");
+      return;
+    }
 
     start(async () => {
       const url = mode === "edit" ? `/api/dossiers/${dossierId}` : "/api/dossiers";
@@ -257,13 +261,16 @@ export function NewDossierForm({
           </Select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="transport">Mode de transport</Label>
+          <Label htmlFor="transport">
+            Mode de transport
+            {mode !== "edit" && <span className="text-[var(--color-danger)]"> *</span>}
+          </Label>
           <Select
             id="transport"
             value={form.transport}
             onChange={(e) => set("transport", e.target.value as FormState["transport"])}
           >
-            <option value="">— À préciser —</option>
+            <option value="">— Sélectionner —</option>
             <option value="MARITIME">Maritime (connaissement / BL)</option>
             <option value="AERIEN">Aérien (LTA)</option>
             <option value="ROUTIER">Routier (CMR)</option>

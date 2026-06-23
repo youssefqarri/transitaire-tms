@@ -44,6 +44,7 @@ export default async function EditInvoicePage({
         number: true,
         reference: true,
         clientId: true,
+        transport: true,
         dums: {
           orderBy: { createdAt: "desc" },
           take: 1,
@@ -86,6 +87,7 @@ export default async function EditInvoicePage({
               number: d.number,
               reference: d.reference,
               clientId: d.clientId,
+              transport: d.transport,
               customsValue: d.dums[0]?.customsValue != null ? Number(d.dums[0].customsValue) : null,
               customsDuties:
                 d.dums[0]?.liquidatedDuties != null
