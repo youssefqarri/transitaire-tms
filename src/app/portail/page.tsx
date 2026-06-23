@@ -10,6 +10,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { parsePagination } from "@/lib/pagination";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { KeyDates } from "@/components/dossier/key-dates";
+import type { DossierStatus } from "@/generated/prisma/enums";
 import { formatDate, formatCurrency } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +24,12 @@ export default async function PortalHomePage({
   const session = await auth();
   if (!session?.user.clientId) return null;
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
-  const where = { deletedAt: null, clientId: session.user.clientId };
+  const where = {
+    deletedAt: null,
+    clientId: session.user.clientId,
+    // les dossiers clôturés / annulés ne sont plus affichés au client
+    status: { notIn: ["CLOTURE", "ANNULE"] as DossierStatus[] },
+  };
   const [total, dossiers] = await Promise.all([
     prisma.dossier.count({ where }),
     prisma.dossier.findMany({

@@ -11,6 +11,7 @@ const patchSchema = z.object({
   clientReference: z.string().nullable().optional(),
   transportRegistration: z.string().nullable().optional(),
   clientId: z.string().optional(),
+  clientName: z.string().optional(),
   supplierId: z.string().nullable().optional(),
   supplierName: z.string().optional(),
   transport: z.enum(["MARITIME", "AERIEN", "ROUTIER"]).nullable().optional(),
@@ -55,8 +56,21 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const dossier = await prisma.dossier.findUnique({ where: { id } });
   if (!dossier) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  // Client et fournisseur saisis à la volée : on les retire de `patch` (ce ne sont
+  // pas des champs Prisma) puis on les résout (retrouver, insensible à la casse, ou créer).
+  const { supplierName, clientName, ...patch } = parsed.data;
+
+  let clientIdResolved = patch.clientId?.trim() || undefined;
+  if (!clientIdResolved && clientName?.trim()) {
+    const name = clientName.trim();
+    const existing = await prisma.client.findFirst({
+      where: { name: { equals: name, mode: "insensitive" }, deletedAt: null },
+    });
+    clientIdResolved = existing ? existing.id : (await prisma.client.create({ data: { name } })).id;
+  }
+
   // règle: client modifiable uniquement avant validation de DUM
-  if (parsed.data.clientId && parsed.data.clientId !== dossier.clientId) {
+  if (clientIdResolved && clientIdResolved !== dossier.clientId) {
     const hasValidatedDUM = await prisma.dUM.count({
       where: { dossierId: id, status: { in: ["VALIDE", "LIQUIDE", "CLOTURE"] } },
     });
@@ -68,9 +82,6 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
   }
 
-  // Fournisseur saisi à la volée : retrouver (insensible à la casse) ou créer ;
-  // supplierName ne doit pas être passé tel quel à Prisma (champ inexistant).
-  const { supplierName, ...patch } = parsed.data;
   let supplierIdResolved = patch.supplierId;
   if (supplierName?.trim() && !patch.supplierId) {
     const name = supplierName.trim();
@@ -85,6 +96,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       where: { id },
       data: {
         ...patch,
+        clientId: clientIdResolved,
         supplierId: supplierIdResolved,
         number: parsed.data.number?.trim() || undefined,
         visitDate:

@@ -34,6 +34,8 @@ type FormState = {
   paymentMode: "WITH_PAYMENT" | "WITHOUT_PAYMENT";
   transport: "" | "MARITIME" | "AERIEN" | "ROUTIER";
   clientId: string;
+  /** Nom d'un nouveau client saisi à la volée (créé à l'enregistrement si clientId vide). */
+  clientName: string;
   supplierId: string;
   /** Nom d'un nouveau fournisseur saisi à la volée (créé à l'enregistrement si supplierId vide). */
   supplierName: string;
@@ -62,6 +64,7 @@ type FormState = {
 
 // Identifiant sentinelle pour afficher un fournisseur saisi à la volée (pas encore en base).
 const NEW_SUPPLIER = "__new_supplier__";
+const NEW_CLIENT = "__new_client__";
 
 export function NewDossierForm({
   clients,
@@ -87,6 +90,7 @@ export function NewDossierForm({
     paymentMode: "WITH_PAYMENT",
     transport: "",
     clientId: clients[0]?.id ?? "",
+    clientName: "",
     supplierId: "",
     supplierName: "",
     goodsValue: "",
@@ -118,7 +122,7 @@ export function NewDossierForm({
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.clientId) {
+    if (!form.clientId && !form.clientName.trim()) {
       toast.error("Client requis");
       return;
     }
@@ -135,6 +139,7 @@ export function NewDossierForm({
               clientReference: form.clientReference || null,
               transportRegistration: form.transportRegistration || null,
               clientId: form.clientId,
+              clientName: form.clientName || undefined,
               supplierId: form.supplierId || null,
               supplierName: form.supplierName || undefined,
               transport: form.transport || null,
@@ -268,17 +273,32 @@ export function NewDossierForm({
           <Label htmlFor="clientId">Client *</Label>
           <Combobox
             id="clientId"
-            items={clients.map((c) => ({
-              id: c.id,
-              label: c.name,
-              sublabel: [c.code, c.city].filter(Boolean).join(" · ") || undefined,
-            }))}
-            value={form.clientId}
-            onChange={(id) => set("clientId", id)}
+            items={[
+              ...clients.map((c) => ({
+                id: c.id,
+                label: c.name,
+                sublabel: [c.code, c.city].filter(Boolean).join(" · ") || undefined,
+              })),
+              ...(form.clientName
+                ? [{ id: NEW_CLIENT, label: form.clientName, sublabel: "Nouveau client" }]
+                : []),
+            ]}
+            value={form.clientName ? NEW_CLIENT : form.clientId}
+            onChange={(id) => {
+              if (id === NEW_CLIENT) return;
+              setForm((f) => ({ ...f, clientId: id, clientName: "" }));
+            }}
+            onCreate={(name) => setForm((f) => ({ ...f, clientName: name, clientId: "" }))}
             placeholder="Sélectionner un client…"
-            searchPlaceholder="Rechercher par nom, code, ville…"
+            searchPlaceholder="Rechercher ou saisir un nouveau client…"
             emptyText="Aucun client trouvé"
           />
+          {form.clientName && (
+            <p className="text-[11px] text-[var(--color-fg-mute)]">
+              Nouveau client « {form.clientName} » — créé et ajouté à la liste à
+              l&apos;enregistrement.
+            </p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="supplierId">Fournisseur</Label>

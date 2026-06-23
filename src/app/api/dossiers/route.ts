@@ -14,7 +14,8 @@ const createSchema = z.object({
   type: z.enum(["IMPORT", "EXPORT"]),
   paymentMode: z.enum(["WITH_PAYMENT", "WITHOUT_PAYMENT"]),
   transport: z.enum(["MARITIME", "AERIEN", "ROUTIER"]).or(z.literal("")).optional(),
-  clientId: z.string().min(1),
+  clientId: z.string().optional(),
+  clientName: z.string().optional(),
   supplierId: z.string().optional(),
   supplierName: z.string().optional(),
   goodsValue: z.string().optional(),
@@ -39,6 +40,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid payload", details: parsed.error.flatten() }, { status: 400 });
   }
   const data = parsed.data;
+
+  // Client : si un nom est saisi sans id (nouveau client à la création), on le
+  // retrouve (insensible à la casse) ou on le crée, puis on rattache le dossier.
+  let clientId = data.clientId?.trim() || null;
+  if (!clientId && data.clientName?.trim()) {
+    const name = data.clientName.trim();
+    const existing = await prisma.client.findFirst({
+      where: { name: { equals: name, mode: "insensitive" }, deletedAt: null },
+    });
+    clientId = existing ? existing.id : (await prisma.client.create({ data: { name } })).id;
+  }
+  if (!clientId) return NextResponse.json({ error: "Client requis" }, { status: 400 });
 
   // Fournisseur : si un nom est saisi sans id (nouveau fournisseur), on le retrouve
   // (insensible à la casse) ou on le crée, puis on rattache le dossier.
@@ -68,7 +81,7 @@ export async function POST(req: Request) {
             type: data.type,
             paymentMode: data.paymentMode,
             transport: data.transport || null,
-            clientId: data.clientId,
+            clientId,
             supplierId,
             goodsValue: data.goodsValue ? Number(data.goodsValue) : null,
             goodsCurrency: data.goodsCurrency || "EUR",

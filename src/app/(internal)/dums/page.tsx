@@ -23,7 +23,8 @@ export default async function DUMsPage({
   const [total, dums] = await Promise.all([
     prisma.dUM.count(),
     prisma.dUM.findMany({
-      orderBy: { createdAt: "desc" },
+      // Par étape (brouillon → clôturé) puis récentes d'abord → les clôturées en fin.
+      orderBy: [{ status: "asc" }, { createdAt: "desc" }],
       skip,
       take: size,
       include: {

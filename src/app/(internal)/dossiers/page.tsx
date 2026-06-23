@@ -64,7 +64,8 @@ export default async function DossiersPage({
           select: { category: true, uploadedBy: { select: { role: true } } },
         },
       },
-      orderBy: { updatedAt: "desc" },
+      // Dossiers actifs d'abord (par dernière maj), dossiers clôturés à la fin.
+      orderBy: [{ closedAt: { sort: "desc", nulls: "first" } }, { updatedAt: "desc" }],
       skip,
       take: size,
     }),
