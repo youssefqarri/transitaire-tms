@@ -192,16 +192,19 @@ export default async function InvoicePrintPage({
             {invoice.dossier.dums[0]?.number && (
               <RefField label="Déclaration N°" value={invoice.dossier.dums[0].number} />
             )}
-            {invoice.dossier.declarationAt && (
+            {(invoice.dossier.dums[0]?.registeredAt || invoice.dossier.declarationAt) && (
               <RefField
                 label="Déclaration le"
-                value={formatDate(invoice.dossier.declarationAt) || "—"}
+                value={
+                  formatDate(
+                    invoice.dossier.dums[0]?.registeredAt ?? invoice.dossier.declarationAt,
+                  ) || "—"
+                }
               />
             )}
             {invoice.dossier.supplier?.name && (
               <RefField label="Expéditeur" value={invoice.dossier.supplier.name} />
             )}
-            <RefField label="Destinataire" value={invoice.client.name} />
             {invoice.dossier.goodsDescription && (
               <RefField label="Marchandise" value={invoice.dossier.goodsDescription} />
             )}
