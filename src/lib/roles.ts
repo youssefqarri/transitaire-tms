@@ -29,9 +29,9 @@ export function canManageUsers(role: UserRole) {
 }
 
 // Saisie du référentiel commercial (clients, fournisseurs, contacts) : réservée à
-// Exploitation + Admin ; les autres rôles internes consultent seulement. Demande cliente.
+// Exploitation, Admin et Déclarant ; les autres rôles consultent seulement. Demande cliente.
 export function canManageRegistry(role: UserRole) {
-  return ["ADMIN", "EXPLOITATION"].includes(role);
+  return ["ADMIN", "EXPLOITATION", "DECLARANT"].includes(role);
 }
 
 // Gestion de la facturation (création/édition/encaissement) : seuls ADMIN et
@@ -44,20 +44,20 @@ export function canCreateDossier(role: UserRole) {
   return ["ADMIN", "EXPLOITATION"].includes(role);
 }
 
-// Saisie / modification des dossiers : réservée à Exploitation + Admin ; les autres
-// rôles consultent seulement (Déclarant, Bureau, Commis, Compta). Demande cliente.
+// Saisie / modification des dossiers : réservée à Exploitation, Admin et Déclarant ;
+// les autres rôles consultent seulement (Bureau, Commis, Compta). Demande cliente.
 export function canModifyDossier(role: UserRole) {
-  return ["ADMIN", "EXPLOITATION"].includes(role);
+  return ["ADMIN", "EXPLOITATION", "DECLARANT"].includes(role);
 }
 
 export function canCloseDossier(role: UserRole) {
   return ["ADMIN", "DECLARANT", "BUREAU"].includes(role);
 }
 
-// Saisie des DUM : réservée à Exploitation + Admin. Le Déclarant dépose la DUM dans
-// BADR ; l'Exploitant la saisit ici. Les autres consultent seulement. Demande cliente.
+// Saisie des DUM : réservée à Exploitation, Admin et Déclarant. Les autres
+// consultent seulement (Bureau, Commis, Compta). Demande cliente.
 export function canCreateDUM(role: UserRole) {
-  return ["ADMIN", "EXPLOITATION"].includes(role);
+  return ["ADMIN", "EXPLOITATION", "DECLARANT"].includes(role);
 }
 
 export function canViewAccountingEmails(role: UserRole) {
@@ -103,7 +103,7 @@ export function canUploadDocument(role: UserRole) {
   return ["ADMIN", "EXPLOITATION", "DECLARANT", "BUREAU"].includes(role);
 }
 
-// Envoi de notifications / e-mails au client : réservé à Exploitation + Admin. Demande cliente.
+// Envoi de notifications / e-mails au client : réservé à Exploitation, Admin et Déclarant. Demande cliente.
 export function canNotifyClient(role: UserRole) {
-  return ["ADMIN", "EXPLOITATION"].includes(role);
+  return ["ADMIN", "EXPLOITATION", "DECLARANT"].includes(role);
 }
