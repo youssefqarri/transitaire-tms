@@ -32,6 +32,14 @@ export const STATUS_LABELS: Record<DossierStatus, string> = {
   ANNULE: "Annulé",
 };
 
+// Toutes les valeurs de statut, dérivées de STATUS_LABELS — source unique pour la
+// validation API (évite les listes hardcodées qui se désynchronisent à chaque ajout
+// de statut, comme ça avait été le cas pour les nouveaux statuts douane).
+export const DOSSIER_STATUS_VALUES = Object.keys(STATUS_LABELS) as [
+  DossierStatus,
+  ...DossierStatus[],
+];
+
 // ordre logique du workflow (utilisé pour la timeline + progression)
 export const STATUS_ORDER: DossierStatus[] = [
   "OUVERTURE",

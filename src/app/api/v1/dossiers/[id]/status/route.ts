@@ -3,40 +3,11 @@ import { z } from "zod";
 import { authenticate } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { canModifyDossier } from "@/lib/roles";
-import { statusRequiresDum } from "@/lib/statuses";
+import { statusRequiresDum, DOSSIER_STATUS_VALUES } from "@/lib/statuses";
 import { audit } from "@/lib/audit";
 
-const DOSSIER_STATUSES = [
-  "OUVERTURE",
-  "RECEPTIONNE",
-  "DOCUMENTS_MANQUANTS",
-  "DOCUMENTS_RECUS",
-  "BON_A_DELIVRER_RECU",
-  "DECLARATION_EN_COURS",
-  "VALIDATION_DOUANE",
-  "VISITE",
-  "CONFORME",
-  "BUREAU_VALEUR",
-  "DEMANDE_DOCUMENTS",
-  "INSTANCE_FICHE_LIQUIDATION",
-  "LIQUIDE",
-  "BON_A_ENLEVER_RESERVE",
-  "MAIN_LEVEE_RESERVE_CONFORMITE",
-  "MAIN_LEVEE_RESERVE_DOCUMENTS",
-  "VALIDATION_MCA",
-  "BON_A_ENLEVER",
-  "BON_A_ENLEVER_DEFINITIF",
-  "EMBARQUEMENT",
-  "SORTIE_MARCHANDISE",
-  "LIVRAISON",
-  "FACTURATION",
-  "FACTURE",
-  "CLOTURE",
-  "ANNULE",
-] as const;
-
 const schema = z.object({
-  status: z.enum(DOSSIER_STATUSES),
+  status: z.enum(DOSSIER_STATUS_VALUES),
   note: z.string().optional(),
 });
 
