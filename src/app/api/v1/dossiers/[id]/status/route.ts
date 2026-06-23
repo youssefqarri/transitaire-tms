@@ -41,7 +41,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     where: { id: dossier.id },
     data: {
       status: parsed.data.status,
-      closedAt: parsed.data.status === "CLOTURE" ? new Date() : undefined,
+      // closedAt posé à la clôture (1re fois conservée), effacé à la réouverture.
+      closedAt: parsed.data.status === "CLOTURE" ? (dossier.closedAt ?? new Date()) : null,
       // horodate la liquidation des droits et taxes (première fois seulement)
       liquidationAt: isLiquidating && !dossier.liquidationAt ? new Date() : undefined,
       statusChanges: {

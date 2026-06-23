@@ -75,8 +75,8 @@ export default async function DossiersPage({
           select: { category: true, uploadedBy: { select: { role: true } } },
         },
       },
-      // Dossiers actifs d'abord (par dernière maj), dossiers clôturés à la fin.
-      orderBy: [{ closedAt: { sort: "desc", nulls: "first" } }, { updatedAt: "desc" }],
+      // Ordre chronologique (dossiers récents en tête) ; clôturés rejetés à la fin.
+      orderBy: [{ closedAt: { sort: "desc", nulls: "first" } }, { createdAt: "desc" }],
       skip,
       take: size,
     }),
@@ -104,14 +104,6 @@ export default async function DossiersPage({
         fromClientDocs,
         isNewFromClient,
       };
-    })
-    // tri secondaire : regrouper les dossiers du même client, puis par date de maj
-    .sort((a, b) => {
-      const cmp = a.client.name.localeCompare(b.client.name, "fr", {
-        sensitivity: "base",
-      });
-      if (cmp !== 0) return cmp;
-      return b.updatedAt.getTime() - a.updatedAt.getTime();
     });
 
   const hasFilter = !!q || !!params.status;
