@@ -146,10 +146,11 @@ export async function notifyClient(opts: {
     return { ok: true, messageId: msg.id };
   } catch (e: unknown) {
     const err = (e as Error).message;
-    await prisma.outgoingMessage.update({
-      where: { id: msg.id },
-      data: { status: "FAILED", error: err },
-    });
+    // Ne pas laisser un échec (rare) de cette mise à jour masquer l'erreur d'envoi
+    // d'origine (éviterait un rejet de promesse non géré).
+    await prisma.outgoingMessage
+      .update({ where: { id: msg.id }, data: { status: "FAILED", error: err } })
+      .catch(() => {});
     return { ok: false, error: err };
   }
 }

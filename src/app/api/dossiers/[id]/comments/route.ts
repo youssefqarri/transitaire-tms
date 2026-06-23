@@ -18,6 +18,20 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: "Invalid" }, { status: 400 });
 
+  // Scoping : un CLIENT ne peut commenter que ses propres dossiers (non clôturés ni supprimés).
+  if (session.user.role === "CLIENT") {
+    const owns = await prisma.dossier.findFirst({
+      where: {
+        id,
+        clientId: session.user.clientId ?? "",
+        deletedAt: null,
+        status: { notIn: ["CLOTURE", "ANNULE"] },
+      },
+      select: { id: true },
+    });
+    if (!owns) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const comment = await prisma.dossierComment.create({
     data: {
       dossierId: id,

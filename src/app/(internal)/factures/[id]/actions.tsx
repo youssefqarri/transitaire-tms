@@ -16,17 +16,22 @@ export function InvoiceActions({
   currentStatus,
   paidAmount,
   totalTTC,
+  totalCredits,
 }: {
   id: string;
   currentStatus: InvoiceStatus;
   paidAmount: number;
   totalTTC: number;
+  /** Total des avoirs actifs — déduit du montant à régler et du seuil « réglée ». */
+  totalCredits: number;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
   const [status, setStatus] = useState<InvoiceStatus>(currentStatus);
-  const [payAmount, setPayAmount] = useState((totalTTC - paidAmount).toFixed(2));
+  const [payAmount, setPayAmount] = useState(
+    Math.max(0, totalTTC - paidAmount - totalCredits).toFixed(2),
+  );
   const [method, setMethod] = useState<PaymentMethod>("VIREMENT");
   const [ref, setRef] = useState("");
 
@@ -53,7 +58,7 @@ export function InvoiceActions({
     start(async () => {
       const newPaid = paidAmount + amt;
       const newStatus: InvoiceStatus =
-        newPaid >= totalTTC ? "PAID" : "PARTIALLY_PAID";
+        newPaid + totalCredits >= totalTTC ? "PAID" : "PARTIALLY_PAID";
       const res = await fetch(`/api/invoices/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },

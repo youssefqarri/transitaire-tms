@@ -122,6 +122,7 @@ export default async function InvoiceDetailPage({
             currentStatus={invoice.status}
             paidAmount={Number(invoice.paidAmount)}
             totalTTC={computed.totalTTC}
+            totalCredits={totalCredits}
           />
         </div>
       </header>

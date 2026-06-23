@@ -95,10 +95,17 @@ export async function PATCH(
     entity: "DUM",
     entityId: dumId,
     metadata: {
-      number: dum.number,
       dossierId: id,
+      number: dum.number,
+      ...(wantsNumberChange ? { newNumber } : {}),
+      status: d.status,
+      registeredAt: d.registeredAt,
+      customsValue: d.customsValue,
+      estimatedDuties: d.estimatedDuties,
       liquidatedDuties: d.liquidatedDuties,
       receiptNumber: d.receiptNumber,
+      paidAt: d.paidAt,
+      articleCount: d.articleCount,
     },
   });
 

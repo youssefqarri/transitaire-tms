@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Combobox } from "@/components/ui/combobox";
 import { FileInput } from "@/components/ui/file-input";
-import { DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
+import { DOCUMENT_CATEGORY_LABELS, isClientUploadableCategory } from "@/lib/statuses";
 import type { DocumentCategory } from "@/generated/prisma/enums";
 
 export function ClientUploadForm({
@@ -135,10 +135,9 @@ export function ClientUploadForm({
               <Label htmlFor="category">Type de document</Label>
               <Combobox
                 id="category"
-                items={Object.entries(DOCUMENT_CATEGORY_LABELS).map(([k, l]) => ({
-                  id: k,
-                  label: l,
-                }))}
+                items={Object.entries(DOCUMENT_CATEGORY_LABELS)
+                  .filter(([k]) => isClientUploadableCategory(k as DocumentCategory))
+                  .map(([k, l]) => ({ id: k, label: l }))}
                 value={category}
                 onChange={(v) => setCategory(v as DocumentCategory)}
                 placeholder="Choisir un type…"

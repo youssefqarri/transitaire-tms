@@ -24,7 +24,8 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
   if (!session?.user.clientId) return null;
 
   const dossier = await prisma.dossier.findFirst({
-    where: { deletedAt: null, id, clientId: session.user.clientId },
+    // un dossier clôturé / annulé n'est plus accessible au client, même par URL directe
+    where: { deletedAt: null, id, clientId: session.user.clientId, status: { notIn: ["CLOTURE", "ANNULE"] } },
     include: {
       dums: true,
       // le client ne voit pas les documents internes (fiche liquidation, ticket paiement…)
