@@ -4,15 +4,12 @@ import { authenticate, resolveDossierForCtx } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { canUploadDocument } from "@/lib/roles";
-import { DOCUMENT_CATEGORY_LABELS, isClientUploadableCategory } from "@/lib/statuses";
+import { DOCUMENT_CATEGORY_VALUES, isClientUploadableCategory } from "@/lib/statuses";
 import type { DocumentCategory } from "@/generated/prisma/enums";
-
-// Liste exhaustive des catégories (dérivée de l'enum, évite la dérive de l'ancienne sous-liste de 15)
-const ALL_CATEGORIES = Object.keys(DOCUMENT_CATEGORY_LABELS) as [string, ...string[]];
 
 const schema = z.object({
   name: z.string().min(1).max(200),
-  category: z.enum(ALL_CATEGORIES),
+  category: z.enum(DOCUMENT_CATEGORY_VALUES),
   notes: z.string().max(2000).optional(),
   // pas d'upload de fichier via JSON ; passer par /api/dossiers/[id]/documents (multipart) si besoin
 });
