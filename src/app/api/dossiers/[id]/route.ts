@@ -53,7 +53,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const parsed = patchSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
 
-  const dossier = await prisma.dossier.findUnique({ where: { id } });
+  // On ne modifie pas un dossier en corbeille (soft-delete).
+  const dossier = await prisma.dossier.findFirst({ where: { id, deletedAt: null } });
   if (!dossier) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   // Client et fournisseur saisis à la volée : on les retire de `patch` (ce ne sont

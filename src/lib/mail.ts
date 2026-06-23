@@ -20,6 +20,11 @@ async function buildTransporter(): Promise<nodemailer.Transporter> {
     port: s.smtpPort ?? 587,
     secure: s.smtpSecure || (s.smtpPort ?? 587) === 465,
     auth: { user: s.smtpUser, pass: s.smtpPass },
+    // Timeouts réseau : si le serveur SMTP se fige, on échoue vite au lieu de
+    // laisser la requête API suspendue. Valeurs larges → jamais atteintes en envoi normal.
+    connectionTimeout: 15_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 20_000,
   });
 }
 
