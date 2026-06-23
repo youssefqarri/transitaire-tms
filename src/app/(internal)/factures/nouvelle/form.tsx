@@ -32,6 +32,7 @@ type DossierOpt = {
   id: string;
   number: string;
   reference: string | null;
+  clientId: string;
   customsValue: number | null;
   customsDuties: number | null;
   articleCount: number | null;
@@ -269,7 +270,13 @@ export function NewInvoiceForm({
             sublabel: d.reference || undefined,
           }))}
           value={dossierId}
-          onChange={setDossierId}
+          onChange={(id) => {
+            setDossierId(id);
+            // Le client remonte automatiquement du dossier choisi (en plus des
+            // infos douane déjà reprises pour le tarif syndical).
+            const d = dossiers.find((x) => x.id === id);
+            if (d) setClientId(d.clientId);
+          }}
           placeholder="Aucun / sélectionner un dossier…"
           searchPlaceholder="Rechercher…"
         />
