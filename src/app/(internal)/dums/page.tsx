@@ -2,12 +2,11 @@ import Link from "next/link";
 import { FileText } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { DumStatusBadge } from "@/components/dossier/dum-status-badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
 import { parsePagination } from "@/lib/pagination";
-import { DUM_STATUS_LABELS } from "@/lib/statuses";
 import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -60,7 +59,7 @@ export default async function DUMsPage({
                     <span className="font-mono font-medium text-[14px] text-[var(--color-fg)]">
                       {d.number}
                     </span>
-                    <Badge tone="info">{DUM_STATUS_LABELS[d.status]}</Badge>
+                    <DumStatusBadge status={d.status} />
                   </div>
                   <div className="text-[13px] text-[var(--color-fg-2)]">
                     <span className="font-mono">{d.dossier.number}</span> · {d.dossier.client.name}
@@ -113,7 +112,7 @@ export default async function DUMsPage({
                         {d.bureau ?? "—"}
                       </td>
                       <td className="px-5 py-2.5">
-                        <Badge tone="info">{DUM_STATUS_LABELS[d.status]}</Badge>
+                        <DumStatusBadge status={d.status} />
                       </td>
                       <td className="px-5 py-2.5 text-right text-[13px] text-[var(--color-fg-3)]">
                         {formatDate(d.registeredAt)}

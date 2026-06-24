@@ -291,11 +291,11 @@ export function NotifyClientButton({
                   }}
                   placeholder="autre@adresse.ma"
                 />
-                <Button type="button" variant="outline" size="sm" onClick={() => addRecipient(newAddr)}>
+                <Button type="button" variant="outline" onClick={() => addRecipient(newAddr)}>
                   Ajouter
                 </Button>
               </div>
-              <label className="flex items-center gap-2 text-[13px] text-[var(--color-fg-2)] cursor-pointer">
+              <label className="inline-flex w-fit items-center gap-2 text-[13px] text-[var(--color-fg-2)] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={saveContacts}
@@ -333,7 +333,7 @@ export function NotifyClientButton({
               {waConfigured ? (
                 <>
                   WhatsApp sera <strong>envoyé directement</strong>
-                  {clientPhone ? ` au ${clientPhone}` : ""} depuis l&apos;outil.
+                  {clientPhone ? ` au ${clientPhone}` : ""}{" "}depuis l&apos;outil.
                 </>
               ) : (
                 <>

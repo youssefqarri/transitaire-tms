@@ -80,7 +80,7 @@ export function ColumnHeader({ label, align = "left", className, sortKey, filter
 
   const inputCls =
     "w-full h-7 text-[12px] rounded-[var(--radius)] bg-transparent border border-transparent " +
-    "hover:border-[var(--color-border-2)] focus:bg-[var(--color-surface)] focus:border-[var(--color-accent)] " +
+    "hover:border-[var(--color-border-2)] focus:bg-[var(--color-surface)] focus:border-[var(--color-fg-mute)] " +
     "focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-ring)] transition-colors " +
     "placeholder:text-[var(--color-fg-3)] placeholder:font-medium";
 

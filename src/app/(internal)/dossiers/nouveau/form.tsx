@@ -419,7 +419,7 @@ export function NewDossierForm({
       {mode === "edit" && (
         <>
           <div className="border-t border-[var(--color-border)] pt-6">
-            <div className="text-[14px] font-medium mb-3">Douane & organismes de contrôle</div>
+            <div className="text-[14px] font-medium mb-3">Douane & Organismes de contrôle</div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="controlOffice">Bureau de contrôle</Label>

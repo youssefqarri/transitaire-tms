@@ -139,6 +139,15 @@ export const DUM_STATUS_LABELS: Record<DUMStatus, string> = {
 // Source unique pour la validation API des statuts DUM (évite les listes codées en dur).
 export const DUM_STATUS_VALUES = Object.keys(DUM_STATUS_LABELS) as [DUMStatus, ...DUMStatus[]];
 
+// Une couleur distincte par statut DUM (badge avec puce, comme les dossiers).
+export const DUM_STATUS_TONE: Record<DUMStatus, "neutral" | "info" | "ok" | "warn" | "accent"> = {
+  DRAFT: "neutral",
+  ENREGISTRE: "info",
+  VALIDE: "ok",
+  LIQUIDE: "warn",
+  CLOTURE: "accent",
+};
+
 export const DOCUMENT_CATEGORY_LABELS: Record<DocumentCategory, string> = {
   FACTURE_COMMERCIALE: "Facture commerciale",
   FACTURE_ORIGINALE: "Facture originale",

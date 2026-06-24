@@ -24,7 +24,8 @@
   --color-accent:       oklch(24.5% 0.08 265);
   --color-accent-hover: oklch(32% 0.09 265);
   --color-accent-soft:  oklch(95.5% 0.025 265);
-  --color-accent-ring:  oklch(48% 0.12 265);
+  /* Anneau de focus volontairement NEUTRE (gris) — pas de bleu sur les composants. */
+  --color-accent-ring:  oklch(70% 0.02 255);
 
   /* ── Statuts ── */
   --color-success:       oklch(45% 0.13 150);

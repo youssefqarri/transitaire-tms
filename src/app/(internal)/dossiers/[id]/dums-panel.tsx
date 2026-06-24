@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { DUM_STATUS_LABELS } from "@/lib/statuses";
+import { DumStatusBadge } from "@/components/dossier/dum-status-badge";
 import { DUM_REGIMES, MAX_DUMS_PER_DOSSIER } from "@/lib/reference";
 import { formatMAD } from "@/lib/invoicing";
 import type { DUMStatus } from "@/generated/prisma/enums";
@@ -230,7 +231,7 @@ export function DUMsPanel({
                     {d.bureau ?? "Bureau ?"} · enregistré le {formatDate(d.registeredAt)}
                   </div>
                 </div>
-                <Badge tone="info">{DUM_STATUS_LABELS[d.status]}</Badge>
+                <DumStatusBadge status={d.status} />
                 {canCreate && (
                   <Button
                     size="icon"
