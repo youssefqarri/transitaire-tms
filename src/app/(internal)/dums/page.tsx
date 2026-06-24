@@ -161,7 +161,7 @@ export default async function DUMsPage({
                       sortKey="status"
                       filter={{ type: "select", param: "status", options: statusOptions }}
                     />
-                    <ColumnHeader label="Enregistré" align="right" sortKey="registered" />
+                    <ColumnHeader label="Date d'enregistrement" shortLabel="Enregistré" align="right" sortKey="registered" />
                   </tr>
                 </thead>
                 <tbody>

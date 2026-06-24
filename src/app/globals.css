@@ -88,6 +88,17 @@
     font-feature-settings: "cv11", "ss01";
   }
 
+  /* Curseur normal (flèche) partout : pas de curseur "texte" (I-beam) sur les
+     éléments non éditables (badges, libellés, dates…). Seuls les vrais champs de
+     saisie gardent le curseur texte ; les éléments interactifs restent en "main". */
+  body {
+    cursor: default;
+  }
+  input:not(:disabled),
+  textarea:not(:disabled) {
+    cursor: text;
+  }
+
   /* Curseur "main" sur tous les éléments interactifs (Tailwind v4 ne le met plus par défaut) */
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),

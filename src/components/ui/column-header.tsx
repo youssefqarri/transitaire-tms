@@ -104,7 +104,7 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
       className={cn(
         "relative px-3 py-1.5 align-middle font-medium text-[var(--color-fg-3)]",
         // séparateur : un fin pipe court et centré (pas une bordure pleine)
-        "before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-3.5 before:w-px before:bg-[var(--color-border-2)] first:before:hidden",
+        "before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-4 before:w-px before:bg-[var(--color-border-2)] first:before:hidden",
         align === "right" ? "text-right" : align === "center" ? "text-center" : "text-left",
         className,
       )}
