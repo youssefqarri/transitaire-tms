@@ -12,7 +12,7 @@ export const STATUS_LABELS: Record<DossierStatus, string> = {
   VISITE: "Visite planifiée",
   CONFORME: "Conforme",
   BUREAU_VALEUR: "Bureau de valeur",
-  DEMANDE_ACCEPTATION_VALEUR: "Demande d'acceptation de la nouvelle valeur en douane",
+  DEMANDE_ACCEPTATION_VALEUR: "Acceptation valeur en douane",
   DEMANDE_DOCUMENTS: "Demande documents",
   INSTANCE_FICHE_LIQUIDATION: "Instance fiche de liquidation",
   LIQUIDE: "Liquidé",
