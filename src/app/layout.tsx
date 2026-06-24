@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     default: "Escale",
     template: "%s · Escale",
   },
-  description: "Plateforme de gestion des dossiers de transit douanier au Maroc.",
+  description: "Escale — le transit intelligent, du port à la livraison.",
   applicationName: "Escale",
 };
 

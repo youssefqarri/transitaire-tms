@@ -27,9 +27,12 @@ export default async function LoginPage({
       />
 
       <div className="relative w-full max-w-[400px] animate-fade-in">
-        {/* Logo */}
+        {/* Logo + slogan */}
         <div className="mb-8">
           <LogoFull className="h-10 w-auto" />
+          <p className="text-[12.5px] text-[var(--color-fg-3)] mt-2.5">
+            Le transit intelligent, du port à la livraison.
+          </p>
         </div>
 
         {/* Card */}
