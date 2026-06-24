@@ -58,7 +58,7 @@ export function KeyDates({
       ? `${label} : effectué le ${formatDate(date)}`
       : `${label} : prévu le ${formatDate(date)} (à venir)`;
     return (
-      <span className="inline-flex items-center gap-1 whitespace-nowrap" title={title}>
+      <span className="inline-flex items-center gap-1 whitespace-nowrap cursor-default" title={title}>
         <PillIcon className={`${icon} ${color}`} strokeWidth={1.75} />
         <span className={`font-semibold ${color}`}>{label}</span>
         <span>{formatDate(date)}</span>
