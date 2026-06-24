@@ -249,7 +249,7 @@ export default async function DossiersPage({
                     <div className="flex items-center gap-1 shrink-0">
                       {d.fromClientCount > 0 && (
                         <span
-                          className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--color-danger)] text-white cursor-default"
+                          className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--color-info-soft)] text-[var(--color-info)] cursor-default"
                           title={`Reçus du client :\n• ${d.fromClientDocs.join("\n• ")}`}
                         >
                           ● {d.fromClientCount} doc client
@@ -305,11 +305,11 @@ export default async function DossiersPage({
                     <ColumnHeader label="Référence" sortKey="reference" filter={{ type: "text", param: "reference" }} />
                     <ColumnHeader label="Client" sortKey="client" filter={{ type: "text", param: "clientName" }} />
                     <ColumnHeader label="DUM(s)" filter={{ type: "text", param: "dum" }} />
-                    <ColumnHeader label="Docs" align="center" sortKey="docs" />
+                    <ColumnHeader label="Documents" shortLabel="Docs" align="center" sortKey="docs" />
                     <ColumnHeader label="Visite / Livraison" sortKey="visit" />
                     <ColumnHeader label="Valeur" align="right" sortKey="value" />
                     <ColumnHeader label="Poids" align="right" sortKey="weight" />
-                    <ColumnHeader label="Maj" align="right" sortKey="updatedAt" />
+                    <ColumnHeader label="M.à.j" align="right" sortKey="updatedAt" />
                   </tr>
                 </thead>
                 <tbody>
@@ -349,7 +349,7 @@ export default async function DossiersPage({
                         <div className="inline-flex items-center gap-1 justify-center whitespace-nowrap">
                           {d.fromClientCount > 0 && (
                             <span
-                              className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--color-danger)] text-white cursor-default"
+                              className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--color-info-soft)] text-[var(--color-info)] cursor-default"
                               title={`Reçus du client :\n• ${d.fromClientDocs.join("\n• ")}`}
                             >
                               ● {d.fromClientCount}
@@ -364,7 +364,10 @@ export default async function DossiersPage({
                               {d.missingCount}
                             </span>
                           ) : d.fromClientCount === 0 ? (
-                            <span className="text-[13px] text-[var(--color-fg-3)] tnum">
+                            <span
+                              className="text-[13px] font-semibold text-[var(--color-success)] tnum"
+                              title="Tous les documents requis sont présents"
+                            >
                               {d.docCount}
                             </span>
                           ) : null}
@@ -383,13 +386,13 @@ export default async function DossiersPage({
                           <span className="text-[12px] text-[var(--color-fg-mute)]">—</span>
                         )}
                       </td>
-                      <td className="px-5 py-2.5 text-right font-mono tnum text-[13px] text-[var(--color-fg-3)]">
+                      <td className="px-5 py-2.5 text-right font-mono tnum text-[13px] text-[var(--color-fg-3)] whitespace-nowrap">
                         {formatCurrency(
                           d.goodsValue ? Number(d.goodsValue) : null,
                           d.goodsCurrency ?? "EUR",
                         )}
                       </td>
-                      <td className="px-5 py-2.5 text-right font-mono tnum text-[13px] text-[var(--color-fg-3)]">
+                      <td className="px-5 py-2.5 text-right font-mono tnum text-[13px] text-[var(--color-fg-3)] whitespace-nowrap">
                         {d.goodsWeight ? `${formatNumber(Number(d.goodsWeight))} kg` : "—"}
                       </td>
                       <td className="px-5 py-2.5 text-right text-[13px] text-[var(--color-fg-3)] whitespace-nowrap">

@@ -227,7 +227,7 @@ export function DocumentsPanel({
                   <span className="font-mono text-[11px] text-[var(--color-fg-3)]">v{d.version}</span>
                 )}
                 {d.uploadedByIsClient && (
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--color-danger)] text-white">
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--color-info-soft)] text-[var(--color-info)]">
                     Reçu du client
                   </span>
                 )}

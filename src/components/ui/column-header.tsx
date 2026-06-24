@@ -17,6 +17,8 @@ export type ColumnFilter =
 
 type Props = {
   label: string;
+  /** Libellé court affiché sur écrans étroits (< lg), si l'espace manque. */
+  shortLabel?: string;
   align?: "left" | "right" | "center";
   /** Classe(s) de largeur/padding pour le <th>. */
   className?: string;
@@ -32,7 +34,7 @@ type Props = {
  * par l'URL (?sort=&dir=&<param>=). Bordure au survol, champ actif au focus.
  * Le tri par défaut de la table est conservé tant qu'aucune colonne n'est triée.
  */
-export function ColumnHeader({ label, align = "left", className, sortKey, filter }: Props) {
+export function ColumnHeader({ label, shortLabel, align = "left", className, sortKey, filter }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const sp = useSearchParams();
@@ -68,12 +70,22 @@ export function ColumnHeader({ label, align = "left", className, sortKey, filter
   const textParam = filter?.type === "text" ? filter.param : undefined;
   const urlValue = textParam ? sp.get(textParam) ?? "" : "";
   const [text, setText] = useState(urlValue);
-  useEffect(() => setText(urlValue), [urlValue]);
+  // Mémorise la dernière valeur qu'ON a poussée : on ne resynchronise depuis l'URL
+  // que sur navigation EXTERNE (back/forward), jamais sur nos propres push — sinon
+  // vider le champ pouvait le re-remplir avec l'ancienne valeur (bug mobile).
+  const pushedRef = useRef(urlValue);
+  useEffect(() => {
+    if (urlValue !== pushedRef.current) {
+      pushedRef.current = urlValue;
+      setText(urlValue);
+    }
+  }, [urlValue]);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   function onText(v: string) {
     setText(v);
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
+      pushedRef.current = v;
       push((p) => (v ? p.set(textParam!, v) : p.delete(textParam!)));
     }, 350);
   }
@@ -97,7 +109,7 @@ export function ColumnHeader({ label, align = "left", className, sortKey, filter
     >
       <div className={cn("flex items-center gap-0.5", justify)}>
         {filter?.type === "text" ? (
-          <div className="relative flex-1 min-w-0">
+          <div className="relative flex-1 min-w-[104px]">
             <Search
               className="absolute left-1.5 top-1/2 -translate-y-1/2 size-3 text-[var(--color-fg-mute)] pointer-events-none"
               strokeWidth={2}
@@ -136,6 +148,11 @@ export function ColumnHeader({ label, align = "left", className, sortKey, filter
               </option>
             ))}
           </select>
+        ) : shortLabel ? (
+          <span className="truncate px-1">
+            <span className="hidden lg:inline">{label}</span>
+            <span className="lg:hidden">{shortLabel}</span>
+          </span>
         ) : (
           <span className="truncate px-1">{label}</span>
         )}
