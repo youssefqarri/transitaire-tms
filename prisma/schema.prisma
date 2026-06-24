@@ -132,6 +132,7 @@ model Client {
   taxId        String?  // identifiant fiscal
   email        String?
   phone        String?
+  whatsapp     String?  // n° WhatsApp si différent du téléphone
   address      String?
   city         String?
   contactName  String?

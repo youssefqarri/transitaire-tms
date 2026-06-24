@@ -31,11 +31,22 @@ export default async function PortalLayout({ children }: { children: React.React
             >
               Mes dossiers
             </Link>
+            <Link
+              href="/portail/profil"
+              className="text-[var(--color-fg-2)] hover:text-[var(--color-fg)] transition-colors"
+            >
+              Mon profil
+            </Link>
             <div className="flex items-center gap-2 pl-2 border-l border-[var(--color-border)]">
-              <Avatar name={session.user.name} size={28} />
-              <span className="hidden sm:inline text-[13px] text-[var(--color-fg-2)]">
-                {session.user.name}
-              </span>
+              <Link
+                href="/portail/profil"
+                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              >
+                <Avatar name={session.user.name} size={28} />
+                <span className="hidden sm:inline text-[13px] text-[var(--color-fg-2)]">
+                  {session.user.name}
+                </span>
+              </Link>
               <LogoutButton />
             </div>
           </nav>
