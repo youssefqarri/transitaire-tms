@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: {
     default: "Escale — le transit intelligent, du port à la livraison",
-    template: "%s · Escale — le transit intelligent, du port à la livraison",
+    template: "%s • Escale — le transit intelligent, du port à la livraison",
   },
   description: "Escale — le transit intelligent, du port à la livraison.",
   applicationName: "Escale",

@@ -26,7 +26,7 @@ export default async function CorbeillePage() {
   const rows: (TrashRow & { ts: number })[] = [
     ...dossiers.map((d) => ({ id: d.id, type: "dossier", typeLabel: "Dossier", label: d.number, sub: formatDateTime(d.deletedAt), viewHref: `/dossiers/${d.id}`, ts: d.deletedAt!.getTime() })),
     ...clients.map((c) => ({ id: c.id, type: "client", typeLabel: "Client", label: c.name, sub: formatDateTime(c.deletedAt), viewHref: `/clients/${c.id}`, ts: c.deletedAt!.getTime() })),
-    ...documents.map((d) => ({ id: d.id, type: "document", typeLabel: "Document", label: d.name, sub: `${DOCUMENT_CATEGORY_LABELS[d.category]} · ${formatDateTime(d.deletedAt)}`, viewHref: null, ts: d.deletedAt!.getTime() })),
+    ...documents.map((d) => ({ id: d.id, type: "document", typeLabel: "Document", label: d.name, sub: `${DOCUMENT_CATEGORY_LABELS[d.category]} • ${formatDateTime(d.deletedAt)}`, viewHref: null, ts: d.deletedAt!.getTime() })),
     ...contacts.map((c) => ({ id: c.id, type: "contact", typeLabel: "Contact", label: c.name || c.email, sub: formatDateTime(c.deletedAt), viewHref: null, ts: c.deletedAt!.getTime() })),
   ].sort((a, b) => b.ts - a.ts);
 

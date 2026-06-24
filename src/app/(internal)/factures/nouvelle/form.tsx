@@ -273,7 +273,7 @@ export function NewInvoiceForm({
           items={clients.map((c) => ({
             id: c.id,
             label: c.name,
-            sublabel: [c.code, c.city].filter(Boolean).join(" · ") || undefined,
+            sublabel: [c.code, c.city].filter(Boolean).join(" • ") || undefined,
           }))}
           value={clientId}
           onChange={onClientChange}

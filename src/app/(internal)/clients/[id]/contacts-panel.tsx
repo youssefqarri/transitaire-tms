@@ -88,7 +88,7 @@ export function ContactsPanel({
             <li key={c.id} className="flex items-center gap-2 group">
               <Mail className="size-3.5 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
               <span className="text-[13px] text-[var(--color-fg)] min-w-0 flex-1 truncate">
-                {c.name && <span className="font-medium">{c.name} · </span>}
+                {c.name && <span className="font-medium">{c.name} • </span>}
                 <span className="text-[var(--color-fg-2)] break-all">{c.email}</span>
               </span>
               <button

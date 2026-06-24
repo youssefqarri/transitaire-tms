@@ -64,11 +64,11 @@ export function OutgoingMessagesPanel({ messages }: { messages: Msg[] }) {
                     <Badge tone={STATUS_TONE[m.status] ?? "neutral"}>{m.status}</Badge>
                   </div>
                   <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
-                    → {m.toAddress} ·{" "}
+                    → {m.toAddress} •{" "}
                     {m.sentAt
                       ? formatDateTime(m.sentAt)
                       : `Tenté ${formatDateTime(m.createdAt)}`}
-                    {m.sentByName && ` · ${m.sentByName}`}
+                    {m.sentByName && ` • ${m.sentByName}`}
                   </div>
                 </div>
                 <ChevronDown

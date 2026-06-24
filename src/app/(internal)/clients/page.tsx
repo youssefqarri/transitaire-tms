@@ -126,7 +126,7 @@ export default async function ClientsPage({
                     </div>
                     <div className="text-[12px] text-[var(--color-fg-3)] truncate">
                       {c.code && <span>{c.code}</span>}
-                      {c.code && c.city && <span className="text-[var(--color-fg-mute)]"> · </span>}
+                      {c.code && c.city && <span className="text-[var(--color-fg-mute)]"> • </span>}
                       {c.city}
                     </div>
                   </div>

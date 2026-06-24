@@ -49,8 +49,8 @@ export default async function ClientDetailPage({
         title={client.name}
         subtitle={
           <>
-            {client.code && `Code ${client.code} · `}
-            {client.ice && `ICE ${client.ice} · `}
+            {client.code && `Code ${client.code} • `}
+            {client.ice && `ICE ${client.ice} • `}
             {client.city}
           </>
         }
@@ -99,7 +99,7 @@ export default async function ClientDetailPage({
                     </div>
                     <div className="text-[12px] text-[var(--color-fg-3)] truncate">
                       {d.reference && <span className="font-mono">{d.reference}</span>}
-                      {d.reference && <span className="text-[var(--color-fg-mute)]"> · </span>}
+                      {d.reference && <span className="text-[var(--color-fg-mute)]"> • </span>}
                       {formatDate(d.updatedAt)}
                     </div>
                   </div>
@@ -169,7 +169,7 @@ export default async function ClientDetailPage({
                 {client.users.map((u) => (
                   <li key={u.id} className="text-[13px] text-[var(--color-fg)]">
                     {u.name}{" "}
-                    <span className="text-[var(--color-fg-3)]">· {u.email}</span>
+                    <span className="text-[var(--color-fg-3)]">• {u.email}</span>
                   </li>
                 ))}
               </ul>

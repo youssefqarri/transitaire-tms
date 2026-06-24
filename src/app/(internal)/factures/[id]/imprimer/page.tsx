@@ -98,11 +98,11 @@ export default async function InvoicePrintPage({
             <div style={{ fontSize: 11.5, color: "#555", marginTop: 6, lineHeight: 1.6 }}>
               {issuer.address}
               <br />
-              Agrément {issuer.agrement} · ICE {issuer.ice} · IF {issuer.taxId}
+              Agrément {issuer.agrement} • ICE {issuer.ice} • IF {issuer.taxId}
               <br />
-              RC {issuer.rc} · Patente {issuer.patente} · CNSS {issuer.cnss}
+              RC {issuer.rc} • Patente {issuer.patente} • CNSS {issuer.cnss}
               <br />
-              {issuer.phone} · {issuer.email}
+              {issuer.phone} • {issuer.email}
             </div>
           </div>
           <div style={{ textAlign: "right" }}>
@@ -159,8 +159,8 @@ export default async function InvoicePrintPage({
               </>
             )}
             {invoice.client.ice && `ICE ${invoice.client.ice}`}
-            {invoice.client.rc && ` · RC ${invoice.client.rc}`}
-            {invoice.client.taxId && ` · IF ${invoice.client.taxId}`}
+            {invoice.client.rc && ` • RC ${invoice.client.rc}`}
+            {invoice.client.taxId && ` • IF ${invoice.client.taxId}`}
           </div>
         </div>
 
@@ -366,7 +366,7 @@ export default async function InvoicePrintPage({
               <div style={{ marginTop: 6, whiteSpace: "pre-wrap" }}>{invoice.notes}</div>
             )}
             <div style={{ marginTop: 6 }}>
-              <strong>Virement :</strong> {issuer.bank} · RIB {issuer.rib} · SWIFT {issuer.swift}
+              <strong>Virement :</strong> {issuer.bank} • RIB {issuer.rib} • SWIFT {issuer.swift}
             </div>
           </div>
         )}
@@ -381,7 +381,7 @@ export default async function InvoicePrintPage({
           }}
         >
           <span>
-            {issuer.name} {issuer.legalForm} · Agrément {issuer.agrement} · ICE {issuer.ice}
+            {issuer.name} {issuer.legalForm} • Agrément {issuer.agrement} • ICE {issuer.ice}
           </span>
           <span>Page 1 / 1</span>
         </div>

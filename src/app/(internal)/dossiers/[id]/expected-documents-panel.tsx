@@ -211,7 +211,7 @@ export function ExpectedDocumentsPanel({
                 <span className="text-[13px] font-medium">
                   {DOCUMENT_CATEGORY_LABELS[e.category]}
                   {e.name && (
-                    <span className="text-[var(--color-fg-3)] font-normal"> · {e.name}</span>
+                    <span className="text-[var(--color-fg-3)] font-normal"> • {e.name}</span>
                   )}
                 </span>
                 {e.fulfilledAt && (
@@ -226,7 +226,7 @@ export function ExpectedDocumentsPanel({
               <div className="text-[11px] text-[var(--color-fg-mute)] mt-1">
                 Demandé{" "}
                 {e.requestedByName && <span>par {e.requestedByName} </span>}
-                · {formatDate(e.createdAt)}
+                • {formatDate(e.createdAt)}
               </div>
             </div>
             {!readOnly && (

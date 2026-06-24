@@ -118,7 +118,7 @@ export default async function DossierDetailPage({
             )}
           </div>
           <p className="text-[13px] text-[var(--color-fg-3)]">
-            {dossier.reference ? <>Réf. <span className="font-mono text-[var(--color-fg-2)]">{dossier.reference}</span> · </> : ""}
+            {dossier.reference ? <>Réf. <span className="font-mono text-[var(--color-fg-2)]">{dossier.reference}</span> • </> : ""}
             Créé le{" "}
             <span title={formatDateTime(dossier.createdAt)} className="cursor-help">
               {formatDate(dossier.createdAt)}
@@ -482,7 +482,7 @@ export default async function DossierDetailPage({
                       ) : (
                         <>
                           {formatDateTime(e.date)}
-                          {e.meta && ` · ${e.meta}`}
+                          {e.meta && ` • ${e.meta}`}
                         </>
                       )}
                     </div>

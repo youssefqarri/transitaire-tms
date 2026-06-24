@@ -64,9 +64,9 @@ export function NotifyClientButton({
 
   const recipientOptions = useMemo(() => {
     const opts: { value: string; label: string }[] = [];
-    if (clientEmail) opts.push({ value: clientEmail, label: `Principal · ${clientEmail}` });
+    if (clientEmail) opts.push({ value: clientEmail, label: `Principal • ${clientEmail}` });
     for (const c of contacts)
-      opts.push({ value: c.email, label: c.name ? `${c.name} · ${c.email}` : c.email });
+      opts.push({ value: c.email, label: c.name ? `${c.name} • ${c.email}` : c.email });
     return opts;
   }, [clientEmail, contacts]);
 

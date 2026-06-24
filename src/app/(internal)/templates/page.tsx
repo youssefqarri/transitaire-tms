@@ -67,12 +67,12 @@ export default async function TemplatesPage() {
               <div className="px-5 py-3 flex flex-wrap gap-2">
                 {variants.length === 0 ? (
                   <span className="text-[12px] text-[var(--color-fg-3)] italic">
-                    Aucun template défini · les défauts intégrés seront utilisés
+                    Aucun template défini • les défauts intégrés seront utilisés
                   </span>
                 ) : (
                   variants.map((v) => (
                     <Badge key={v.id} tone={v.active ? "info" : "neutral"}>
-                      {CHANNEL_LABELS[v.channel]} · {LANG_LABELS[v.lang]}
+                      {CHANNEL_LABELS[v.channel]} • {LANG_LABELS[v.lang]}
                     </Badge>
                   ))
                 )}

@@ -77,7 +77,7 @@ export default async function EmailsPage({
         subtitle={
           <>
             {total} message{total > 1 ? "s" : ""}
-            {account && ` · compte ${account.emailAddress}`}
+            {account && ` • compte ${account.emailAddress}`}
           </>
         }
         actions={

@@ -282,7 +282,7 @@ export default async function DossiersPage({
                     {d.client.name}
                     {d.dums.length > 0 && (
                       <span className="font-mono ml-1.5">
-                        · DUM {d.dums.map((dum) => dum.number).join(", ")}
+                        • DUM {d.dums.map((dum) => dum.number).join(", ")}
                       </span>
                     )}
                   </div>
@@ -293,8 +293,8 @@ export default async function DossiersPage({
                         d.goodsValue ? Number(d.goodsValue) : null,
                         d.goodsCurrency ?? "EUR",
                       )}
-                      {d.goodsWeight && ` · ${formatNumber(Number(d.goodsWeight))} kg`}
-                      {d.docCount > 0 && ` · ${d.docCount} doc${d.docCount > 1 ? "s" : ""}`}
+                      {d.goodsWeight && ` • ${formatNumber(Number(d.goodsWeight))} kg`}
+                      {d.docCount > 0 && ` • ${d.docCount} doc${d.docCount > 1 ? "s" : ""}`}
                     </span>
                     <span>{formatDate(d.updatedAt)}</span>
                   </div>

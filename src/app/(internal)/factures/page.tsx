@@ -10,9 +10,12 @@ import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
+import { ColumnHeader } from "@/components/ui/column-header";
+import { TableMobileFilter } from "@/components/ui/table-mobile-filter";
 import { parsePagination } from "@/lib/pagination";
 import { formatDate } from "@/lib/utils";
 import { INVOICE_STATUS_LABELS, formatMAD, totals } from "@/lib/invoicing";
+import type { InvoiceStatus } from "@/generated/prisma/enums";
 
 export const dynamic = "force-dynamic";
 
@@ -28,18 +31,60 @@ const TONE_BY_STATUS = {
 export default async function InvoicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; size?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    number?: string;
+    clientName?: string;
+    status?: string;
+    sort?: string;
+    dir?: string;
+    page?: string;
+    size?: string;
+  }>;
 }) {
   const params = await searchParams;
   const session = await auth();
   if (!session) return null;
   if (!canViewInvoices(session.user.role)) redirect("/dashboard");
 
+  const q = params.q?.trim();
+  const fNumber = params.number?.trim();
+  const fClient = params.clientName?.trim();
+  const status =
+    params.status && params.status in INVOICE_STATUS_LABELS
+      ? (params.status as InvoiceStatus)
+      : undefined;
+  const dir = params.dir === "asc" ? ("asc" as const) : ("desc" as const);
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
+
+  const where = {
+    ...(q && {
+      OR: [
+        { number: { contains: q, mode: "insensitive" as const } },
+        { client: { name: { contains: q, mode: "insensitive" as const } } },
+      ],
+    }),
+    ...(fNumber && { number: { contains: fNumber, mode: "insensitive" as const } }),
+    ...(fClient && { client: { name: { contains: fClient, mode: "insensitive" as const } } }),
+    ...(status && { status }),
+  };
+
   const [total, invoices] = await Promise.all([
-    prisma.invoice.count(),
+    prisma.invoice.count({ where }),
     prisma.invoice.findMany({
-      orderBy: [{ year: "desc" }, { sequence: "desc" }],
+      where,
+      orderBy:
+        params.sort === "number"
+          ? { number: dir }
+          : params.sort === "client"
+            ? { client: { name: dir } }
+            : params.sort === "issued"
+              ? { issuedAt: { sort: dir, nulls: "last" } }
+              : params.sort === "due"
+                ? { dueAt: { sort: dir, nulls: "last" } }
+                : params.sort === "status"
+                  ? { status: dir }
+                  : [{ year: "desc" as const }, { sequence: "desc" as const }],
       skip,
       take: size,
       include: { client: true, items: true },
@@ -61,16 +106,20 @@ export default async function InvoicesPage({
       return s + t.totalTTC;
     }, 0);
 
+  const statusOptions = Object.entries(INVOICE_STATUS_LABELS).map(([value, label]) => ({
+    value,
+    label,
+  }));
+  const hasFilter = !!q || !!fNumber || !!fClient || !!status;
+
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
         title="Factures"
         subtitle={
           <>
-            {total} facture{total > 1 ? "s" : ""} · Total facturé{" "}
-            <span className="text-[var(--color-fg)] font-medium tnum">
-              {formatMAD(totalIssued)}
-            </span>
+            {total} facture{total > 1 ? "s" : ""} • Total facturé{" "}
+            <span className="text-[var(--color-fg)] font-medium tnum">{formatMAD(totalIssued)}</span>
           </>
         }
         actions={
@@ -83,15 +132,33 @@ export default async function InvoicesPage({
       />
 
       <Card>
+        <TableMobileFilter
+          searchPlaceholder="Rechercher (n°, client)…"
+          selects={[{ param: "status", placeholder: "Tous statuts", options: statusOptions }]}
+        />
+
         {invoices.length === 0 ? (
           <EmptyState
             icon={Receipt}
-            title="Aucune facture"
-            hint="Créez votre première facture pour commencer."
+            title={hasFilter ? "Aucun résultat" : "Aucune facture"}
+            hint={
+              hasFilter
+                ? "Aucune facture ne correspond à votre recherche."
+                : "Créez votre première facture pour commencer."
+            }
+            cta={
+              hasFilter ? (
+                <Link href="/factures">
+                  <Button variant="outline" size="sm">
+                    Réinitialiser
+                  </Button>
+                </Link>
+              ) : undefined
+            }
           />
         ) : (
           <>
-            {/* Mobile: cartes */}
+            {/* Mobile : cartes */}
             <div className="md:hidden divide-y divide-[var(--color-border)]">
               {invoices.map((inv) => {
                 const t = totals(
@@ -123,7 +190,7 @@ export default async function InvoicesPage({
                     <div className="flex items-center justify-between mt-1.5">
                       <span className="text-[12px] text-[var(--color-fg-3)]">
                         {formatDate(inv.issuedAt)}
-                        {inv.dueAt && ` · Éch. ${formatDate(inv.dueAt)}`}
+                        {inv.dueAt && ` • Éch. ${formatDate(inv.dueAt)}`}
                       </span>
                       <span className="font-mono text-[13px] tnum font-medium text-[var(--color-fg)]">
                         {formatMAD(t.totalTTC)}
@@ -134,17 +201,22 @@ export default async function InvoicesPage({
               })}
             </div>
 
-            {/* Desktop: tableau */}
+            {/* Desktop : tableau */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-[13px]">
                 <thead>
                   <tr className="border-b border-[var(--color-border)]">
-                    <th className="text-left text-[12px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">N°</th>
-                    <th className="text-left text-[12px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Client</th>
-                    <th className="text-left text-[12px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Émise le</th>
-                    <th className="text-left text-[12px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Échéance</th>
-                    <th className="text-right text-[12px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Total TTC</th>
-                    <th className="text-left text-[12px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Statut</th>
+                    <ColumnHeader label="N°" sortKey="number" filter={{ type: "text", param: "number" }} />
+                    <ColumnHeader label="Client" sortKey="client" filter={{ type: "text", param: "clientName" }} />
+                    <ColumnHeader label="Émise le" sortKey="issued" />
+                    <ColumnHeader label="Échéance" sortKey="due" />
+                    <ColumnHeader label="Total TTC" align="right" />
+                    <ColumnHeader
+                      label="Statut"
+                      className="w-[150px]"
+                      sortKey="status"
+                      filter={{ type: "select", param: "status", options: statusOptions }}
+                    />
                   </tr>
                 </thead>
                 <tbody>
@@ -174,13 +246,13 @@ export default async function InvoicesPage({
                         <td className="px-5 py-2.5 truncate max-w-[240px] text-[var(--color-fg-2)]">
                           {inv.client.name}
                         </td>
-                        <td className="px-5 py-2.5 text-[var(--color-fg-3)]">
+                        <td className="px-5 py-2.5 text-[var(--color-fg-3)] whitespace-nowrap">
                           {formatDate(inv.issuedAt)}
                         </td>
-                        <td className="px-5 py-2.5 text-[var(--color-fg-3)]">
+                        <td className="px-5 py-2.5 text-[var(--color-fg-3)] whitespace-nowrap">
                           {formatDate(inv.dueAt)}
                         </td>
-                        <td className="px-5 py-2.5 text-right font-mono tnum text-[var(--color-fg)]">
+                        <td className="px-5 py-2.5 text-right font-mono tnum text-[var(--color-fg)] whitespace-nowrap">
                           {formatMAD(t.totalTTC)}
                         </td>
                         <td className="px-5 py-2.5">
@@ -199,6 +271,14 @@ export default async function InvoicesPage({
               pageSize={size}
               total={total}
               basePath="/factures"
+              extraParams={{
+                q: params.q,
+                number: params.number,
+                clientName: params.clientName,
+                status: params.status,
+                sort: params.sort,
+                dir: params.dir,
+              }}
             />
           </>
         )}

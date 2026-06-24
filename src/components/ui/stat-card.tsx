@@ -69,7 +69,7 @@ export function StatCard({
           </span>
           {hint && (
             <span className="hidden sm:inline text-[11px] text-[var(--color-fg-mute)] truncate">
-              · {hint}
+              • {hint}
             </span>
           )}
         </div>

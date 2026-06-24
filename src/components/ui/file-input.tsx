@@ -82,7 +82,7 @@ export function FileInput({
               {placeholder}
             </div>
             <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
-              PDF, image ou Office{maxSize && ` · max ${formatBytes(maxSize)}`}
+              PDF, image ou Office{maxSize && ` • max ${formatBytes(maxSize)}`}
             </div>
           </div>
           <input

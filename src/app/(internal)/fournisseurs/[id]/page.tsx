@@ -43,7 +43,7 @@ export default async function SupplierDetailPage({
         subtitle={
           <>
             {supplier.country ?? "—"}
-            {supplier.email && ` · ${supplier.email}`}
+            {supplier.email && ` • ${supplier.email}`}
           </>
         }
         actions={
@@ -83,7 +83,7 @@ export default async function SupplierDetailPage({
                       {d.number}
                     </div>
                     <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
-                      {d.client.name} · {formatDate(d.updatedAt)}
+                      {d.client.name} • {formatDate(d.updatedAt)}
                     </div>
                   </div>
                   <div className="hidden sm:block text-right text-[12px] text-[var(--color-fg-3)]">

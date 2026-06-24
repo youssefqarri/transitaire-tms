@@ -84,12 +84,12 @@ export default async function PortalHomePage({
                     </span>
                     {d.reference && (
                       <span className="text-[12px] text-[var(--color-fg-3)]">
-                        · {d.reference}
+                        • {d.reference}
                       </span>
                     )}
                   </div>
                   <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
-                    {d._count.documents} document{d._count.documents > 1 ? "s" : ""} · Mis à jour le{" "}
+                    {d._count.documents} document{d._count.documents > 1 ? "s" : ""} • Mis à jour le{" "}
                     {formatDate(d.updatedAt)}
                   </div>
                 </div>

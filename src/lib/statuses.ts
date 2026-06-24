@@ -262,7 +262,7 @@ export const ACTION_REQUIRED_STATUSES: DossierStatus[] = [
 
 // Clé réservée (pseudo-statut) passée dans ?status= pour filtrer ce bucket.
 export const ACTION_REQUIRED_KEY = "A_TRAITER";
-export const ACTION_REQUIRED_LABEL = "À traiter (documents · valeur)";
+export const ACTION_REQUIRED_LABEL = "À traiter (documents • valeur)";
 
 // Titre de transport requis selon le mode : maritime → connaissement (BL),
 // aérien → LTA, routier → CMR. Par défaut (transport inconnu) : connaissement.

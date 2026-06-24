@@ -187,8 +187,8 @@ export function TokensClient({
                 )}
               </div>
               <div className="text-[12px] text-[var(--color-muted-foreground)]">
-                {t.userName} · {t.userRole} · créé le {formatDateTime(t.createdAt)}
-                {t.lastUsedAt && ` · dernière utilisation ${formatDateTime(t.lastUsedAt)}`}
+                {t.userName} • {t.userRole} • créé le {formatDateTime(t.createdAt)}
+                {t.lastUsedAt && ` • dernière utilisation ${formatDateTime(t.lastUsedAt)}`}
               </div>
             </div>
             {!t.revoked && (

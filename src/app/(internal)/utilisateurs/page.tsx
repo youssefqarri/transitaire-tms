@@ -138,7 +138,7 @@ export default async function UsersPage({
                     <div className="font-medium text-[13px] truncate">{u.name}</div>
                     <div className="text-[12px] text-[var(--color-fg-mute)] truncate">
                       {u.email}
-                      {u.client && ` · ${u.client.name}`}
+                      {u.client && ` • ${u.client.name}`}
                     </div>
                     <div className="mt-1 flex items-center gap-1.5">
                       <Badge tone={ROLE_TONE[u.role]}>{ROLE_LABELS[u.role]}</Badge>

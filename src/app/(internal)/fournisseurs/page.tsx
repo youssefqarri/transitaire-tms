@@ -60,7 +60,7 @@ export default async function SuppliersPage({
                   <div className="text-[12px] text-[var(--color-fg-3)] truncate">
                     {s.country}
                     {s.country && s.email && (
-                      <span className="text-[var(--color-fg-mute)]"> · </span>
+                      <span className="text-[var(--color-fg-mute)]"> • </span>
                     )}
                     {s.email}
                   </div>

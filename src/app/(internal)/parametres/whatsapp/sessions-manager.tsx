@@ -150,8 +150,8 @@ export function WhatsAppSessionsManager({ configured }: { configured: boolean })
                   </div>
                   <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
                     {s.phone ? `${s.phone}` : "non connecté"}
-                    {s.pushName ? ` · ${s.pushName}` : ""}
-                    {s.lastError ? ` · ${s.lastError.slice(0, 60)}` : ""}
+                    {s.pushName ? ` • ${s.pushName}` : ""}
+                    {s.lastError ? ` • ${s.lastError.slice(0, 60)}` : ""}
                   </div>
                 </div>
                 {!connected && (

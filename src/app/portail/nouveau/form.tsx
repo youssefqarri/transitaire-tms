@@ -99,7 +99,7 @@ export function NewDossierForm() {
           if (upRes.ok) uploaded++;
         }
         toast.success(
-          `Dossier ${data.number} créé · ${uploaded}/${attachments.length} document(s) transmis.`,
+          `Dossier ${data.number} créé • ${uploaded}/${attachments.length} document(s) transmis.`,
         );
       } else {
         toast.success(`Dossier ${data.number} créé. Notre équipe est notifiée.`);

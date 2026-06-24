@@ -86,7 +86,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
                 <StatusBadge status={dossier.status} />
               </div>
               <p className="text-[13px] text-[var(--color-fg-3)]">
-                {dossier.reference ? <>Réf. <span className="font-mono">{dossier.reference}</span> · </> : ""}
+                {dossier.reference ? <>Réf. <span className="font-mono">{dossier.reference}</span> • </> : ""}
                 Créé le {formatDate(dossier.createdAt)}
               </p>
               <KeyDates
@@ -175,7 +175,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
                   <div className="flex-1 min-w-0">
                     <div className="text-[13px] font-medium">{d.name}</div>
                     <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
-                      {DOCUMENT_CATEGORY_LABELS[d.category]} · {formatDate(d.receivedAt)}
+                      {DOCUMENT_CATEGORY_LABELS[d.category]} • {formatDate(d.receivedAt)}
                     </div>
                   </div>
                   {d.fileUrl && (
@@ -290,7 +290,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
               <div key={c.id} className="px-5 py-3">
                 <div className="text-[13px] text-[var(--color-fg)]">{c.body}</div>
                 <div className="text-[12px] text-[var(--color-fg-3)] mt-1">
-                  {c.author.name} · {formatDate(c.createdAt)}
+                  {c.author.name} • {formatDate(c.createdAt)}
                 </div>
               </div>
             ))}

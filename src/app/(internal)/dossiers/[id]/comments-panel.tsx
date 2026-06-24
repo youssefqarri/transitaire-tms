@@ -100,7 +100,7 @@ export function CommentsPanel({
                   {formatDateTime(c.createdAt)}
                 </span>
                 {!c.internal && (
-                  <span className="text-[11px] text-[var(--color-accent)]">· visible client</span>
+                  <span className="text-[11px] text-[var(--color-accent)]">• visible client</span>
                 )}
               </div>
               <div className="text-[13px] mt-1 whitespace-pre-wrap text-[var(--color-fg-2)]">{c.body}</div>

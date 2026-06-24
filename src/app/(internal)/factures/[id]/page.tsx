@@ -84,8 +84,8 @@ export default async function InvoiceDetailPage({
           </div>
           <p className="text-[13px] text-[var(--color-fg-3)]">
             Pour <span className="text-[var(--color-fg)] font-medium">{invoice.client.name}</span>
-            {invoice.issuedAt && ` · émise le ${formatDate(invoice.issuedAt)}`}
-            {invoice.createdBy && ` · par ${invoice.createdBy.name}`}
+            {invoice.issuedAt && ` • émise le ${formatDate(invoice.issuedAt)}`}
+            {invoice.createdBy && ` • par ${invoice.createdBy.name}`}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -158,7 +158,7 @@ export default async function InvoiceDetailPage({
                         {it.description}
                         {it.dossier && (
                           <span className="ml-2 font-mono text-[11px] text-[var(--color-fg-3)]">
-                            · {it.dossier.number}
+                            • {it.dossier.number}
                           </span>
                         )}
                       </td>
@@ -275,7 +275,7 @@ export default async function InvoiceDetailPage({
                     <span className="ml-2 text-[var(--color-fg-3)]">{cn.reason}</span>
                   )}
                   <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
-                    {formatDate(cn.issuedAt)} · {CREDIT_NOTE_STATUS_LABELS[cn.status]}
+                    {formatDate(cn.issuedAt)} • {CREDIT_NOTE_STATUS_LABELS[cn.status]}
                   </div>
                 </div>
                 <span className="font-mono tnum text-[var(--color-fg)]">

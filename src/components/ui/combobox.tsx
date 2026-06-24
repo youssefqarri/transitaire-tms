@@ -160,7 +160,7 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
               {selected.label}
               {selected.sublabel && (
                 <span className="ml-1.5 text-[var(--color-fg-mute)] text-[12px]">
-                  · {selected.sublabel}
+                  • {selected.sublabel}
                 </span>
               )}
             </>

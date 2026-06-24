@@ -236,7 +236,7 @@ export function DocumentsPanel({
                 <Badge tone="outline">{DOCUMENT_CATEGORY_LABELS[d.category]}</Badge>
                 <span>
                   {formatDate(d.receivedAt)}
-                  {d.uploadedByName && ` · ${d.uploadedByName}`}
+                  {d.uploadedByName && ` • ${d.uploadedByName}`}
                 </span>
               </div>
               {d.notes && (

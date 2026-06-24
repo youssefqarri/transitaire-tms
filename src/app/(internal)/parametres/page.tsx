@@ -27,7 +27,7 @@ export default async function SettingsPage() {
       title: "Email sortant (SMTP)",
       description: "Notifications clients par email (Gmail, Outlook, Brevo, Resend…)",
       status: smtpConfigured ? (
-        <Badge tone="ok">Configuré · {settings.smtpHost}</Badge>
+        <Badge tone="ok">Configuré • {settings.smtpHost}</Badge>
       ) : (
         <Badge tone="warn">Non configuré</Badge>
       ),
@@ -51,7 +51,7 @@ export default async function SettingsPage() {
       status:
         settings.storageDriver === "s3" ? (
           s3Configured ? (
-            <Badge tone="ok">S3 · {settings.s3Bucket}</Badge>
+            <Badge tone="ok">S3 • {settings.s3Bucket}</Badge>
           ) : (
             <Badge tone="warn">S3 incomplet</Badge>
           )

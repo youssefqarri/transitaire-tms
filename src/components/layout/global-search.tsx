@@ -108,7 +108,7 @@ export function GlobalSearch() {
       </form>
 
       {open && (
-        <div className="absolute left-0 top-full mt-1.5 w-[min(26rem,calc(100vw-1.5rem))] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-pop overflow-hidden z-40 animate-scale-in origin-top-left max-h-[75vh] overflow-y-auto">
+        <div className="absolute left-0 top-full mt-1.5 w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-pop overflow-hidden z-40 animate-scale-in origin-top-left max-h-[75vh] overflow-y-auto">
           {trimmed.length < 2 ? (
             <div className="px-4 py-3 text-[12.5px] text-[var(--color-fg-mute)]">
               Tapez au moins 2 caractères…
@@ -125,7 +125,7 @@ export function GlobalSearch() {
                 const Icon = TYPE_ICON[g.type] ?? Folder;
                 return (
                   <div key={g.type} className="border-b border-[var(--color-border)] last:border-b-0">
-                    <div className="px-3 pt-2 pb-1 flex items-center justify-between">
+                    <div className="px-3 py-1.5 flex items-center justify-between bg-[#f9fafc] border-b border-[var(--color-border)]">
                       <span className="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-fg-3)]">
                         {g.label}
                       </span>

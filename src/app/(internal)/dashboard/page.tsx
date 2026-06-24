@@ -151,7 +151,7 @@ export default async function DashboardPage() {
         <StatCard
           label="À traiter"
           value={blockedDossiers}
-          hint="documents · valeur · MCI"
+          hint="documents • valeur • MCI"
           icon={AlertCircle}
           tone={blockedDossiers > 0 ? "warn" : "default"}
           href={`/dossiers?status=${ACTION_REQUIRED_KEY}`}
@@ -199,7 +199,7 @@ export default async function DashboardPage() {
                   href={`/dossiers/${d.id}`}
                   className="row-link block px-5 py-3 hover:bg-[var(--color-surface-2)] transition-colors"
                 >
-                  {/* Ligne 1 : N° dossier + référence (gauche) · statut (droite, aligné en haut) */}
+                  {/* Ligne 1 : N° dossier + référence (gauche) • statut (droite, aligné en haut) */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2 flex-wrap min-w-0">
                       <span className="font-mono text-[13px] text-[var(--color-fg)] font-medium">
@@ -207,19 +207,19 @@ export default async function DashboardPage() {
                       </span>
                       {d.reference && (
                         <span className="text-[12px] text-[var(--color-fg-3)] truncate">
-                          · {d.reference}
+                          • {d.reference}
                         </span>
                       )}
                     </div>
                     <StatusBadge status={d.status} size="sm" wrap className="max-w-[60%]" />
                   </div>
-                  {/* Ligne 2 : client + DUM + docs (gauche) · valeur (droite) */}
+                  {/* Ligne 2 : client + DUM + docs (gauche) • valeur (droite) */}
                   <div className="flex items-center justify-between gap-3 mt-1">
                     <div className="text-[13px] text-[var(--color-fg-3)] flex items-center gap-1.5 flex-wrap min-w-0">
                       <span className="truncate">{d.client.name}</span>
                       {d.dums.length > 0 && (
                         <span className="font-mono">
-                          · DUM {d.dums.map((dum) => dum.number).join(", ")}
+                          • DUM {d.dums.map((dum) => dum.number).join(", ")}
                         </span>
                       )}
                       {missing > 0 && (
@@ -294,7 +294,7 @@ export default async function DashboardPage() {
         <CardHeader>
           <CardTitle>Dossiers actifs par client</CardTitle>
           <span className="text-[12px] text-[var(--color-fg-3)] tnum">
-            {groupedClients.length} client{groupedClients.length > 1 ? "s" : ""} ·{" "}
+            {groupedClients.length} client{groupedClients.length > 1 ? "s" : ""} •{" "}
             {totalActive} dossier{totalActive > 1 ? "s" : ""}
           </span>
         </CardHeader>
@@ -340,7 +340,7 @@ export default async function DashboardPage() {
                         </span>
                         {d.reference && (
                           <span className="text-[12px] text-[var(--color-fg-3)]">
-                            · {d.reference}
+                            • {d.reference}
                           </span>
                         )}
                         {d.dums.length > 0 && (

@@ -228,7 +228,7 @@ export function DUMsPanel({
                     {d.regime && <Badge tone="neutral">{d.regime}</Badge>}
                   </div>
                   <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
-                    {d.bureau ?? "Bureau ?"} · enregistré le {formatDate(d.registeredAt)}
+                    {d.bureau ?? "Bureau ?"} • enregistré le {formatDate(d.registeredAt)}
                   </div>
                 </div>
                 <DumStatusBadge status={d.status} />

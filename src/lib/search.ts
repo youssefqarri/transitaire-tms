@@ -56,7 +56,7 @@ export async function searchAll(q: string, perGroup = 5): Promise<SearchGroup[]>
       items: dossiers.map((d) => ({
         id: d.id,
         title: d.number,
-        sub: [d.client.name, d.reference].filter(Boolean).join(" · "),
+        sub: [d.client.name, d.reference].filter(Boolean).join(" • "),
         href: `/dossiers/${d.id}`,
       })),
     },
@@ -89,7 +89,7 @@ export async function searchAll(q: string, perGroup = 5): Promise<SearchGroup[]>
       items: clients.map((c) => ({
         id: c.id,
         title: c.name,
-        sub: [c.code, c.city].filter(Boolean).join(" · "),
+        sub: [c.code, c.city].filter(Boolean).join(" • "),
         href: `/clients/${c.id}`,
       })),
     },

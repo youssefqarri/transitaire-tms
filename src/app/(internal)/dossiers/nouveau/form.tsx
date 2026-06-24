@@ -284,7 +284,7 @@ export function NewDossierForm({
               ...clients.map((c) => ({
                 id: c.id,
                 label: c.name,
-                sublabel: [c.code, c.city].filter(Boolean).join(" · ") || undefined,
+                sublabel: [c.code, c.city].filter(Boolean).join(" • ") || undefined,
               })),
               ...(form.clientName
                 ? [{ id: NEW_CLIENT, label: form.clientName, sublabel: "Nouveau client" }]
