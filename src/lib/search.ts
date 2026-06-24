@@ -18,7 +18,7 @@ export async function searchAll(q: string, perGroup = 5): Promise<SearchGroup[]>
   const dumWhere = { dossier: { deletedAt: null }, number: ci };
   const invoiceWhere = { OR: [{ number: ci }, { client: { name: ci } }] };
   const clientWhere = { deletedAt: null, OR: [{ name: ci }, { code: ci }, { ice: ci }] };
-  const supplierWhere = { deletedAt: null, name: ci };
+  const supplierWhere = { name: ci };
 
   const [dossiers, dossierC, dums, dumC, invoices, invoiceC, clients, clientC, suppliers, supplierC] =
     await Promise.all([
