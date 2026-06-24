@@ -17,6 +17,7 @@ import {
 } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
 import { ColumnHeader } from "@/components/ui/column-header";
+import { DossiersMobileFilter } from "./mobile-filter";
 import { KeyDates } from "@/components/dossier/key-dates";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -29,6 +30,7 @@ export default async function DossiersPage({
   searchParams,
 }: {
   searchParams: Promise<{
+    q?: string;
     status?: string;
     number?: string;
     reference?: string;
@@ -52,7 +54,8 @@ export default async function DossiersPage({
     : undefined;
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
 
-  // Filtres par colonne (texte) + sens du tri.
+  // Recherche globale (barre mobile) + filtres par colonne (texte) + sens du tri.
+  const q = params.q?.trim();
   const fNumber = params.number?.trim();
   const fReference = params.reference?.trim();
   const fClient = params.clientName?.trim();
@@ -74,6 +77,14 @@ export default async function DossiersPage({
 
   const where = {
     deletedAt: null,
+    ...(q && {
+      OR: [
+        { number: { contains: q, mode: "insensitive" as const } },
+        { reference: { contains: q, mode: "insensitive" as const } },
+        { client: { name: { contains: q, mode: "insensitive" as const } } },
+        { dums: { some: { number: { contains: q, mode: "insensitive" as const } } } },
+      ],
+    }),
     ...(fNumber && { number: { contains: fNumber, mode: "insensitive" as const } }),
     ...(fReference && { reference: { contains: fReference, mode: "insensitive" as const } }),
     ...(fClient && { client: { name: { contains: fClient, mode: "insensitive" as const } } }),
@@ -150,7 +161,7 @@ export default async function DossiersPage({
     });
 
   const hasFilter =
-    !!fNumber || !!fReference || !!fClient || !!fDum || !!params.status;
+    !!q || !!fNumber || !!fReference || !!fClient || !!fDum || !!params.status;
 
   // Options de filtre pour la colonne « Statut » (bucket « À traiter » + tous les statuts).
   const statusOptions = [
@@ -179,6 +190,7 @@ export default async function DossiersPage({
       />
 
       <Card>
+        <DossiersMobileFilter statusOptions={statusOptions} />
         {enriched.length === 0 ? (
           hasFilter ? (
             <EmptyState
@@ -409,6 +421,7 @@ export default async function DossiersPage({
               total={total}
               basePath="/dossiers"
               extraParams={{
+                q: params.q,
                 status: params.status,
                 number: params.number,
                 reference: params.reference,

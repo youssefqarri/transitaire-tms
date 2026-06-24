@@ -104,6 +104,15 @@ export default async function SupplierDetailPage({
             <CardTitle>Coordonnées</CardTitle>
           </CardHeader>
           <div className="px-5 py-4 text-[13px] space-y-2 text-[var(--color-fg-2)]">
+            {!supplier.country &&
+              !supplier.email &&
+              !supplier.phone &&
+              !supplier.address &&
+              !supplier.notes && (
+                <div className="text-[var(--color-fg-mute)]">
+                  Aucune coordonnée renseignée — utilisez « Modifier » pour en ajouter.
+                </div>
+              )}
             {supplier.country && (
               <div>
                 <span className="text-[var(--color-fg-3)]">Pays : </span>
