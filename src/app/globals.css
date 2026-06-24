@@ -20,11 +20,11 @@
   --color-border:       oklch(92.5% 0.005 250);
   --color-border-2:     oklch(88% 0.008 250);
 
-  /* ── Accent (indigo discret) ── */
-  --color-accent:       oklch(48% 0.16 258);
-  --color-accent-hover: oklch(42% 0.18 258);
-  --color-accent-soft:  oklch(96% 0.03 258);
-  --color-accent-ring:  oklch(60% 0.14 258);
+  /* ── Accent (bleu marque « escale » #0D1D46) ── */
+  --color-accent:       oklch(24.5% 0.08 265);
+  --color-accent-hover: oklch(32% 0.09 265);
+  --color-accent-soft:  oklch(95.5% 0.025 265);
+  --color-accent-ring:  oklch(48% 0.12 265);
 
   /* ── Statuts ── */
   --color-success:       oklch(45% 0.13 150);
@@ -44,7 +44,7 @@
   --color-sidebar-fg-mute:   var(--color-fg-3);
   --color-sidebar-border:    var(--color-border);
   --color-sidebar-hover:     var(--color-surface-2);
-  --color-sidebar-active:    oklch(94% 0.006 250);
+  --color-sidebar-active:    oklch(94% 0.012 265);
 
   /* ── Typo & rayons ── */
   --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
