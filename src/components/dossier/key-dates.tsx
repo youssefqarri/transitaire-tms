@@ -49,14 +49,18 @@ export function KeyDates({
     onlyEffectiveColor = false,
   ) {
     const done = isTodayOrPast(date);
-    // Couleur : vert si dans le passé/aujourd'hui, bleu si dans le futur
-    // Pour la livraison on garde toujours du vert (onlyEffectiveColor=true)
+    // Couleur : vert si effectué (passé/aujourd'hui), bleu franc si à venir (futur).
+    // Pour la livraison on garde toujours du vert (onlyEffectiveColor=true).
     const color = onlyEffectiveColor || done
       ? "text-[var(--color-success)]"
-      : "text-[var(--color-accent)]";
+      : "text-[var(--color-info)]";
     const tag = onlyEffectiveColor ? "" : done ? " ✓" : "";
+    // Infobulle au survol : explicite « effectué » vs « à venir ».
+    const title = onlyEffectiveColor || done
+      ? `${label} : effectué le ${formatDate(date)}`
+      : `${label} : prévu le ${formatDate(date)} (à venir)`;
     return (
-      <span className="inline-flex items-center gap-1">
+      <span className="inline-flex items-center gap-1" title={title}>
         <Icon className={`${icon} ${color}`} strokeWidth={1.75} />
         <span className={`font-semibold ${color}`}>
           {label}
@@ -75,5 +79,29 @@ export function KeyDates({
       {conformityVisitDate && pill(BadgeCheck, conformityVisitDate, "Contrôle")}
       {deliveredAt && pill(Truck, deliveredAt, "Livraison", true)}
     </div>
+  );
+}
+
+/** Légende discrète du code couleur des dates clés (vert = effectué, bleu = à venir). */
+export function KeyDatesLegend({ className = "" }: { className?: string }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-2.5 text-[11px] text-[var(--color-fg-mute)] ${className}`}
+    >
+      <span className="inline-flex items-center gap-1">
+        <span
+          className="size-1.5 rounded-full bg-[var(--color-success)]"
+          aria-hidden
+        />
+        Effectué
+      </span>
+      <span className="inline-flex items-center gap-1">
+        <span
+          className="size-1.5 rounded-full bg-[var(--color-info)]"
+          aria-hidden
+        />
+        À venir
+      </span>
+    </span>
   );
 }

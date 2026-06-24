@@ -16,7 +16,7 @@ import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatCurrency } from "@/lib/utils";
 import { STATUS_LABELS, requiredDocuments, DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
-import { KeyDates } from "@/components/dossier/key-dates";
+import { KeyDates, KeyDatesLegend } from "@/components/dossier/key-dates";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 
@@ -169,10 +169,13 @@ export default async function DashboardPage() {
         {/* Mouvements récents */}
         <Card>
           <CardHeader>
-            <CardTitle>Mouvements récents</CardTitle>
+            <div className="flex items-center gap-3 min-w-0">
+              <CardTitle>Mouvements récents</CardTitle>
+              <KeyDatesLegend className="hidden md:inline-flex" />
+            </div>
             <Link
               href="/dossiers"
-              className="text-[12px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)] inline-flex items-center gap-1"
+              className="text-[12px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)] inline-flex items-center gap-1 shrink-0"
             >
               Tout voir <ArrowUpRight className="size-3" strokeWidth={2} />
             </Link>
