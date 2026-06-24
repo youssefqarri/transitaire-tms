@@ -30,6 +30,30 @@ export async function isWhatsAppConfigured(): Promise<boolean> {
   return (await getWaConfig()) !== null;
 }
 
+/**
+ * Résout l'identifiant de session à mettre dans les URLs.
+ * Cette variante OpenWA adresse les sessions par **id UUID**, qui CHANGE à chaque
+ * recréation de session (régénération de clé, reconnexion…). Le **nom** est stable.
+ * On stocke donc le nom dans `waSession` et on le résout vers l'id courant via
+ * `/api/sessions`. (Accepte aussi un id déjà valide → rétrocompatible.)
+ */
+async function resolveSessionId(cfg: WaConfig): Promise<string> {
+  try {
+    const res = await fetch(`${cfg.url}/api/sessions`, {
+      headers: { "X-API-Key": cfg.key },
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (res.ok) {
+      const list = (await res.json().catch(() => [])) as Array<{ id?: string; name?: string }>;
+      const match = list.find((s) => s.id === cfg.session || s.name === cfg.session);
+      if (match?.id) return match.id;
+    }
+  } catch {
+    /* réseau indisponible : on retombe sur la valeur configurée */
+  }
+  return cfg.session;
+}
+
 /** Envoie un message texte WhatsApp via l'API OpenWA/WAHA (POST send-text). */
 export async function sendWhatsApp(opts: {
   to: string;
@@ -38,9 +62,10 @@ export async function sendWhatsApp(opts: {
   const cfg = await getWaConfig();
   if (!cfg) throw new Error("WhatsApp non configuré (Paramètres → WhatsApp)");
   const chatId = opts.to.includes("@") ? opts.to : toChatId(opts.to);
+  const sid = await resolveSessionId(cfg);
 
   const res = await fetch(
-    `${cfg.url}/api/sessions/${encodeURIComponent(cfg.session)}/messages/send-text`,
+    `${cfg.url}/api/sessions/${encodeURIComponent(sid)}/messages/send-text`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-API-Key": cfg.key },
@@ -72,8 +97,9 @@ export async function verifyWhatsApp(): Promise<{
   const cfg = await getWaConfig();
   if (!cfg) return { ok: false, error: "WhatsApp non configuré" };
   try {
+    const sid = await resolveSessionId(cfg);
     const res = await fetch(
-      `${cfg.url}/api/sessions/${encodeURIComponent(cfg.session)}`,
+      `${cfg.url}/api/sessions/${encodeURIComponent(sid)}`,
       { headers: { "X-API-Key": cfg.key }, signal: AbortSignal.timeout(12_000) },
     );
     if (!res.ok) {
