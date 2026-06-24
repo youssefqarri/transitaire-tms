@@ -15,7 +15,7 @@ export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttribute
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)] focus-visible:border-transparent",
         "aria-[invalid=true]:border-[var(--color-danger)] aria-[invalid=true]:ring-2 aria-[invalid=true]:ring-[var(--color-danger)]/20",
         "disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[var(--color-surface-2)]",
-        "file:border-0 file:bg-transparent file:text-sm file:font-medium file:mr-3",
+        "file:border-0 file:bg-transparent file:text-[14px] file:font-medium file:mr-3",
         className,
       )}
       {...props}

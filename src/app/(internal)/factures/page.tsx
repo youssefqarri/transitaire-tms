@@ -121,7 +121,7 @@ export default async function InvoicesPage({
                       {inv.client.name}
                     </div>
                     <div className="flex items-center justify-between mt-1.5">
-                      <span className="text-[11.5px] text-[var(--color-fg-3)]">
+                      <span className="text-[12px] text-[var(--color-fg-3)]">
                         {formatDate(inv.issuedAt)}
                         {inv.dueAt && ` · Éch. ${formatDate(inv.dueAt)}`}
                       </span>
@@ -139,12 +139,12 @@ export default async function InvoicesPage({
               <table className="w-full text-[13px]">
                 <thead>
                   <tr className="border-b border-[var(--color-border)]">
-                    <th className="text-left text-[11.5px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">N°</th>
-                    <th className="text-left text-[11.5px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Client</th>
-                    <th className="text-left text-[11.5px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Émise le</th>
-                    <th className="text-left text-[11.5px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Échéance</th>
-                    <th className="text-right text-[11.5px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Total TTC</th>
-                    <th className="text-left text-[11.5px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Statut</th>
+                    <th className="text-left text-[12px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">N°</th>
+                    <th className="text-left text-[12px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Client</th>
+                    <th className="text-left text-[12px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Émise le</th>
+                    <th className="text-left text-[12px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Échéance</th>
+                    <th className="text-right text-[12px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Total TTC</th>
+                    <th className="text-left text-[12px] font-medium text-[var(--color-fg-3)] px-5 py-2.5">Statut</th>
                   </tr>
                 </thead>
                 <tbody>

@@ -76,7 +76,7 @@ export default async function ClientDetailPage({
             <h3 className="text-[14px] font-semibold tracking-tight text-[var(--color-fg)]">
               Dossiers
             </h3>
-            <span className="text-[11.5px] text-[var(--color-fg-3)] tnum">
+            <span className="text-[12px] text-[var(--color-fg-3)] tnum">
               {client.dossiers.length}
             </span>
           </div>
@@ -97,13 +97,13 @@ export default async function ClientDetailPage({
                     <div className="text-[13px] font-mono font-medium text-[var(--color-fg)]">
                       {d.number}
                     </div>
-                    <div className="text-[11.5px] text-[var(--color-fg-3)] truncate">
+                    <div className="text-[12px] text-[var(--color-fg-3)] truncate">
                       {d.reference && <span className="font-mono">{d.reference}</span>}
                       {d.reference && <span className="text-[var(--color-fg-mute)]"> · </span>}
                       {formatDate(d.updatedAt)}
                     </div>
                   </div>
-                  <div className="text-[11.5px] font-mono tnum text-[var(--color-fg-3)] hidden sm:block">
+                  <div className="text-[12px] font-mono tnum text-[var(--color-fg-3)] hidden sm:block">
                     {formatCurrency(
                       d.goodsValue ? Number(d.goodsValue) : null,
                       d.goodsCurrency ?? "EUR",
@@ -153,15 +153,15 @@ export default async function ClientDetailPage({
           </dl>
           <div className="px-5 py-4 border-t border-[var(--color-border)]">
             <div className="flex items-center justify-between mb-2">
-              <div className="text-[10.5px] uppercase tracking-wider font-semibold text-[var(--color-fg-3)]">
+              <div className="text-[11px] uppercase tracking-wider font-semibold text-[var(--color-fg-3)]">
                 Accès portail
               </div>
-              <span className="text-[11.5px] text-[var(--color-fg-3)] tnum">
+              <span className="text-[12px] text-[var(--color-fg-3)] tnum">
                 {client.users.length}
               </span>
             </div>
             {client.users.length === 0 ? (
-              <div className="text-[12.5px] text-[var(--color-fg-3)]">
+              <div className="text-[13px] text-[var(--color-fg-3)]">
                 Aucun accès configuré.
               </div>
             ) : (

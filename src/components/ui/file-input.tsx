@@ -81,7 +81,7 @@ export function FileInput({
             <div className="text-[13px] font-medium text-[var(--color-fg)]">
               {placeholder}
             </div>
-            <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+            <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
               PDF, image ou Office{maxSize && ` · max ${formatBytes(maxSize)}`}
             </div>
           </div>
@@ -102,7 +102,7 @@ export function FileInput({
             <div className="text-[13px] font-medium text-[var(--color-fg)] truncate">
               {value.name}
             </div>
-            <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5 tnum">
+            <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5 tnum">
               {formatBytes(value.size)}
             </div>
           </div>
@@ -119,7 +119,7 @@ export function FileInput({
       )}
 
       {err && (
-        <div className="mt-1.5 text-[11.5px] text-[var(--color-danger)]">{err}</div>
+        <div className="mt-1.5 text-[12px] text-[var(--color-danger)]">{err}</div>
       )}
     </div>
   );

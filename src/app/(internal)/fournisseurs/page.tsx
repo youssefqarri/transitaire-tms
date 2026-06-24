@@ -57,7 +57,7 @@ export default async function SuppliersPage({
                   <div className="font-medium text-[13px] text-[var(--color-fg)] truncate">
                     {s.name}
                   </div>
-                  <div className="text-[11.5px] text-[var(--color-fg-3)] truncate">
+                  <div className="text-[12px] text-[var(--color-fg-3)] truncate">
                     {s.country}
                     {s.country && s.email && (
                       <span className="text-[var(--color-fg-mute)]"> · </span>
@@ -65,7 +65,7 @@ export default async function SuppliersPage({
                     {s.email}
                   </div>
                 </div>
-                <div className="text-[11.5px] text-[var(--color-fg-3)] tnum text-right">
+                <div className="text-[12px] text-[var(--color-fg-3)] tnum text-right">
                   <span className="font-semibold text-[var(--color-fg-2)]">
                     {s._count.dossiers}
                   </span>{" "}

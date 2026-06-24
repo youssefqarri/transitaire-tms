@@ -79,7 +79,7 @@ export default async function PortalHomePage({
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-[13.5px] font-medium text-[var(--color-fg)]">
+                    <span className="font-mono text-[14px] font-medium text-[var(--color-fg)]">
                       {d.number}
                     </span>
                     {d.reference && (

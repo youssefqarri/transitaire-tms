@@ -31,7 +31,7 @@ export function KeyDates({
 }: Props) {
   if (!visitDate && !conformityVisitDate && !deliveredAt) return null;
 
-  const text = size === "sm" ? "text-[10.5px]" : "text-[12px]";
+  const text = size === "sm" ? "text-[11px]" : "text-[12px]";
   const icon = size === "sm" ? "size-2.5" : "size-3";
   const wrapper =
     layout === "row" ? "flex flex-wrap gap-x-2 gap-y-0.5" : "flex flex-col gap-0.5";

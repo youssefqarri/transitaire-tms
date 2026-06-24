@@ -185,7 +185,7 @@ export function NotifyClientButton({
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
           <div>
-            <div className="text-[15px] font-semibold">Notifier le client</div>
+            <div className="text-[14px] font-semibold">Notifier le client</div>
             <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
               Aperçu et personnalisation du message avant envoi
             </div>
@@ -294,7 +294,7 @@ export function NotifyClientButton({
                   Ajouter
                 </Button>
               </div>
-              <label className="flex items-center gap-2 text-[12.5px] text-[var(--color-fg-2)] cursor-pointer">
+              <label className="flex items-center gap-2 text-[13px] text-[var(--color-fg-2)] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={saveContacts}
@@ -319,7 +319,7 @@ export function NotifyClientButton({
               id="body"
               value={editedBody}
               onChange={(e) => setEditedBody(e.target.value)}
-              className="min-h-[200px] font-mono text-[12.5px]"
+              className="min-h-[200px] font-mono text-[13px]"
             />
             <p className="text-[11px] text-[var(--color-fg-mute)]">
               Variables remplacées automatiquement depuis le dossier. Le même message part sur les

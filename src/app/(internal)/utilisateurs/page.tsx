@@ -60,7 +60,7 @@ export default async function UsersPage({
                 <Avatar name={u.name} size={36} />
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-[13px]">{u.name}</div>
-                  <div className="text-[11.5px] text-[var(--color-fg-mute)]">
+                  <div className="text-[12px] text-[var(--color-fg-mute)]">
                     {u.email}
                     {u.client && ` · ${u.client.name}`}
                   </div>

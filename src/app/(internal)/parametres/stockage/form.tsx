@@ -98,7 +98,7 @@ export function StorageSettingsForm({ initial }: { initial: FormState }) {
             }`}
           >
             <div className="text-[13px] font-medium">Local (filesystem)</div>
-            <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+            <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
               ./uploads — pour le développement
             </div>
           </button>
@@ -112,7 +112,7 @@ export function StorageSettingsForm({ initial }: { initial: FormState }) {
             }`}
           >
             <div className="text-[13px] font-medium">S3 / Backblaze / R2</div>
-            <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+            <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
               Production — fichiers chez un provider cloud
             </div>
           </button>
@@ -219,7 +219,7 @@ export function StorageSettingsForm({ initial }: { initial: FormState }) {
         </Button>
         {testResult && (
           <div
-            className={`mt-3 rounded-[var(--radius)] border p-3 text-[12.5px] ${
+            className={`mt-3 rounded-[var(--radius)] border p-3 text-[13px] ${
               testResult.ok
                 ? "border-[var(--color-success)]/30 bg-[var(--color-success-soft)] text-[var(--color-success)]"
                 : "border-[var(--color-danger)]/30 bg-[var(--color-danger-soft)] text-[var(--color-danger)]"
@@ -235,7 +235,7 @@ export function StorageSettingsForm({ initial }: { initial: FormState }) {
                 <AlertCircle className="size-4 mt-0.5 shrink-0" strokeWidth={2} />
                 <div>
                   <div className="font-medium">Échec</div>
-                  <div className="font-mono text-[11.5px] mt-1">{testResult.error}</div>
+                  <div className="font-mono text-[12px] mt-1">{testResult.error}</div>
                 </div>
               </div>
             )}

@@ -103,7 +103,7 @@ export function TooltipProvider() {
         zIndex: 9999,
         pointerEvents: "none",
       }}
-      className={`px-2 py-1 rounded-[var(--radius-sm)] bg-[var(--color-fg)] text-[var(--color-surface)] text-[11.5px] font-medium leading-snug shadow-[0_6px_20px_-6px_rgba(0,0,0,0.35)] max-w-[280px] whitespace-pre-line ${
+      className={`px-2 py-1 rounded-[var(--radius-sm)] bg-[var(--color-fg)] text-[var(--color-surface)] text-[12px] font-medium leading-snug shadow-[0_6px_20px_-6px_rgba(0,0,0,0.35)] max-w-[280px] whitespace-pre-line ${
         tip.text.includes("\n") ? "text-left" : "text-center"
       }`}
     >

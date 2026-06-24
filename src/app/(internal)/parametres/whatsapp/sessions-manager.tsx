@@ -110,7 +110,7 @@ export function WhatsAppSessionsManager({ configured }: { configured: boolean })
 
   if (!configured) {
     return (
-      <p className="text-[12.5px] text-[var(--color-fg-3)]">
+      <p className="text-[13px] text-[var(--color-fg-3)]">
         Enregistrez d&apos;abord l&apos;URL et la clé API ci-dessus pour gérer les sessions.
       </p>
     );
@@ -133,9 +133,9 @@ export function WhatsAppSessionsManager({ configured }: { configured: boolean })
 
       <div className="border border-[var(--color-border)] rounded-[var(--radius)] divide-y divide-[var(--color-border)]">
         {sessions === null ? (
-          <div className="p-4 text-[12.5px] text-[var(--color-fg-3)]">Chargement…</div>
+          <div className="p-4 text-[13px] text-[var(--color-fg-3)]">Chargement…</div>
         ) : sessions.length === 0 ? (
-          <div className="p-4 text-[12.5px] text-[var(--color-fg-3)]">
+          <div className="p-4 text-[13px] text-[var(--color-fg-3)]">
             {loadError ? "—" : "Aucune session. Créez-en une ci-dessous."}
           </div>
         ) : (
@@ -148,7 +148,7 @@ export function WhatsAppSessionsManager({ configured }: { configured: boolean })
                     <span className="text-[13px] font-medium text-[var(--color-fg)]">{s.name}</span>
                     <Badge tone={tone(s.status)}>{s.status}</Badge>
                   </div>
-                  <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+                  <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
                     {s.phone ? `${s.phone}` : "non connecté"}
                     {s.pushName ? ` · ${s.pushName}` : ""}
                     {s.lastError ? ` · ${s.lastError.slice(0, 60)}` : ""}
@@ -265,13 +265,13 @@ function QrDialog({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={qr} alt="QR WhatsApp" className="w-full rounded-[var(--radius)] bg-white p-2" />
         ) : err ? (
-          <div className="py-8 text-[12.5px] text-[var(--color-danger)] font-mono">{err}</div>
+          <div className="py-8 text-[13px] text-[var(--color-danger)] font-mono">{err}</div>
         ) : (
-          <div className="py-8 text-[12.5px] text-[var(--color-fg-3)]">
+          <div className="py-8 text-[13px] text-[var(--color-fg-3)]">
             En attente du QR… (statut : {status})
           </div>
         )}
-        <p className="text-[11.5px] text-[var(--color-fg-3)] mt-3">
+        <p className="text-[12px] text-[var(--color-fg-3)] mt-3">
           WhatsApp → Appareils connectés → Lier un appareil. La fenêtre se ferme dès la connexion.
         </p>
       </div>

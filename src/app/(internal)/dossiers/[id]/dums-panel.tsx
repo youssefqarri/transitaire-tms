@@ -108,7 +108,7 @@ export function DUMsPanel({
       <CardHeader>
         <CardTitle>
           DUMs
-          <span className="ml-2 text-[11.5px] font-normal text-[var(--color-fg-3)] tnum">
+          <span className="ml-2 text-[12px] font-normal text-[var(--color-fg-3)] tnum">
             {dums.length}
           </span>
         </CardTitle>
@@ -226,7 +226,7 @@ export function DUMsPanel({
                     <span className="font-mono text-[13px] font-medium text-[var(--color-fg)]">{d.number}</span>
                     {d.regime && <Badge tone="neutral">{d.regime}</Badge>}
                   </div>
-                  <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+                  <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
                     {d.bureau ?? "Bureau ?"} · enregistré le {formatDate(d.registeredAt)}
                   </div>
                 </div>
@@ -248,7 +248,7 @@ export function DUMsPanel({
                 d.receiptNumber ||
                 d.paidAt ||
                 d.articleCount != null) && (
-                <dl className="mt-2.5 ml-7 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1.5 text-[11.5px]">
+                <dl className="mt-2.5 ml-7 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1.5 text-[12px]">
                   <Field label="Valeur en douane" value={fmt(d.customsValue)} />
                   <Field label="Nombre d'articles" value={d.articleCount != null ? String(d.articleCount) : "—"} />
                   <Field label="Droits estimés" value={fmt(d.estimatedDuties)} />
@@ -261,7 +261,7 @@ export function DUMsPanel({
           ),
         )}
         {canCreate && atMax && (
-          <div className="px-5 py-2.5 text-[11.5px] text-[var(--color-fg-3)] bg-[var(--color-surface-2)]">
+          <div className="px-5 py-2.5 text-[12px] text-[var(--color-fg-3)] bg-[var(--color-surface-2)]">
             Maximum {MAX_DUMS_PER_DOSSIER} DUM par dossier atteint (un dossier peut cumuler 2 régimes).
           </div>
         )}
@@ -338,7 +338,7 @@ function LiquidationForm({
       <div className="flex items-center gap-2 mb-3">
         <FileText className="size-4 text-[var(--color-fg-mute)]" strokeWidth={1.75} />
         <span className="font-mono text-[13px] font-medium text-[var(--color-fg)]">{dum.number}</span>
-        <span className="text-[11.5px] text-[var(--color-fg-3)]">— liquidation des droits &amp; taxes</span>
+        <span className="text-[12px] text-[var(--color-fg-3)]">— liquidation des droits &amp; taxes</span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {canEditNumber && (

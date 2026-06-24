@@ -75,7 +75,7 @@ export function SendInvoiceButton({
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-[15px] font-semibold">
+                <div className="text-[14px] font-semibold">
                   Envoyer la facture {invoiceNumber}
                 </div>
                 <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">

@@ -340,7 +340,7 @@ export function NewDossierForm({
       </div>
 
       <div className="border-t border-[var(--color-border)] pt-6">
-        <div className="text-sm font-medium mb-3">Marchandise</div>
+        <div className="text-[14px] font-medium mb-3">Marchandise</div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="space-y-2 md:col-span-2">
             <Label htmlFor="goodsValue">Valeur</Label>
@@ -419,7 +419,7 @@ export function NewDossierForm({
       {mode === "edit" && (
         <>
           <div className="border-t border-[var(--color-border)] pt-6">
-            <div className="text-sm font-medium mb-3">Douane & organismes de contrôle</div>
+            <div className="text-[14px] font-medium mb-3">Douane & organismes de contrôle</div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="controlOffice">Bureau de contrôle</Label>
@@ -507,7 +507,7 @@ export function NewDossierForm({
           </div>
 
           <div className="border-t border-[var(--color-border)] pt-6">
-            <div className="text-sm font-medium mb-3">État du dossier</div>
+            <div className="text-[14px] font-medium mb-3">État du dossier</div>
             <p className="text-[12px] text-[var(--color-fg-3)] mb-3">
               Cochez tous les drapeaux applicables. Ces informations apparaissent en haut du dossier.
             </p>

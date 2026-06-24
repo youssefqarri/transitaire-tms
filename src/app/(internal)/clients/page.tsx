@@ -59,7 +59,7 @@ export default async function ClientsPage({
                   <div className="font-medium text-[13px] text-[var(--color-fg)] truncate">
                     {c.name}
                   </div>
-                  <div className="text-[11.5px] text-[var(--color-fg-3)] truncate">
+                  <div className="text-[12px] text-[var(--color-fg-3)] truncate">
                     {c.code && <span>{c.code}</span>}
                     {c.code && (c.ice || c.city) && <span className="text-[var(--color-fg-mute)]"> · </span>}
                     {c.ice && <span>ICE {c.ice}</span>}
@@ -67,7 +67,7 @@ export default async function ClientsPage({
                     {c.city}
                   </div>
                 </div>
-                <div className="text-right text-[11.5px] text-[var(--color-fg-3)] tnum">
+                <div className="text-right text-[12px] text-[var(--color-fg-3)] tnum">
                   <div>
                     <span className="font-semibold text-[var(--color-fg-2)]">{c._count.dossiers}</span>{" "}
                     dossier{c._count.dossiers > 1 ? "s" : ""}

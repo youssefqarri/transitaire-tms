@@ -54,7 +54,7 @@ export function CommentsPanel({
       <CardHeader>
         <CardTitle>
           Commentaires
-          <span className="ml-2 text-[11.5px] font-normal text-[var(--color-fg-3)] tnum">
+          <span className="ml-2 text-[12px] font-normal text-[var(--color-fg-3)] tnum">
             {comments.length}
           </span>
         </CardTitle>

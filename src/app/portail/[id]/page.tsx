@@ -70,7 +70,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
     <div className="space-y-5">
       <Link
         href="/portail"
-        className="inline-flex items-center gap-1 text-[12.5px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)]"
+        className="inline-flex items-center gap-1 text-[13px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)]"
       >
         <ArrowLeft className="size-3.5" strokeWidth={1.75} /> Mes dossiers
       </Link>
@@ -85,7 +85,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
                 </h1>
                 <StatusBadge status={dossier.status} />
               </div>
-              <p className="text-[12.5px] text-[var(--color-fg-3)]">
+              <p className="text-[13px] text-[var(--color-fg-3)]">
                 {dossier.reference ? <>Réf. <span className="font-mono">{dossier.reference}</span> · </> : ""}
                 Créé le {formatDate(dossier.createdAt)}
               </p>
@@ -101,7 +101,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
               />
             </div>
             <div className="text-right">
-              <div className="text-[11.5px] text-[var(--color-fg-3)]">Valeur</div>
+              <div className="text-[12px] text-[var(--color-fg-3)]">Valeur</div>
               <div className="text-[18px] font-semibold font-mono tnum">
                 {formatCurrency(
                   dossier.goodsValue ? Number(dossier.goodsValue) : null,
@@ -112,7 +112,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
           </div>
 
           <div className="mt-5">
-            <div className="flex items-center justify-between text-[11.5px] text-[var(--color-fg-3)] mb-1.5">
+            <div className="flex items-center justify-between text-[12px] text-[var(--color-fg-3)] mb-1.5">
               <span>Avancement</span>
               <span className="tnum">{Math.round(progressPct)}%</span>
             </div>
@@ -132,7 +132,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
             <AlertCircle className="size-4 text-[var(--color-warning)] shrink-0 mt-0.5" strokeWidth={1.75} />
             <div className="flex-1">
               <div className="text-[13px] font-medium">Documents à fournir</div>
-              <div className="text-[12.5px] text-[var(--color-fg-2)] mt-1 mb-3">
+              <div className="text-[13px] text-[var(--color-fg-2)] mt-1 mb-3">
                 Cliquez sur un type ci-dessous pour téléverser le document correspondant.
               </div>
               <ClientUploadForm dossierId={dossier.id} missing={missing} requested={requested} />
@@ -147,7 +147,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
           <div className="p-4 flex items-start gap-3">
             <div className="flex-1">
               <div className="text-[13px] font-medium">Ajouter une pièce complémentaire</div>
-              <div className="text-[12.5px] text-[var(--color-fg-3)] mt-1 mb-3">
+              <div className="text-[13px] text-[var(--color-fg-3)] mt-1 mb-3">
                 Tous les documents requis sont reçus. Vous pouvez néanmoins envoyer toute pièce
                 supplémentaire utile à notre équipe.
               </div>
@@ -174,7 +174,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
                   <FileText className="size-4 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
                   <div className="flex-1 min-w-0">
                     <div className="text-[13px] font-medium">{d.name}</div>
-                    <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+                    <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
                       {DOCUMENT_CATEGORY_LABELS[d.category]} · {formatDate(d.receivedAt)}
                     </div>
                   </div>
@@ -190,7 +190,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
                   )}
                 </div>
                 {d.notes && (
-                  <div className="ml-7 mt-2 text-[12.5px] text-[var(--color-fg-2)] bg-[var(--color-accent-soft)] border border-[var(--color-accent)]/20 rounded px-3 py-2 whitespace-pre-wrap">
+                  <div className="ml-7 mt-2 text-[13px] text-[var(--color-fg-2)] bg-[var(--color-accent-soft)] border border-[var(--color-accent)]/20 rounded px-3 py-2 whitespace-pre-wrap">
                     <span className="font-medium text-[var(--color-accent)]">Note : </span>
                     {d.notes}
                   </div>
@@ -268,7 +268,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
                     />
                     <div className="text-[13px] font-medium">{e.label}</div>
                     {!e.hideDate && (
-                      <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+                      <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
                         {formatDate(e.date)}
                       </div>
                     )}
@@ -289,7 +289,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
             {dossier.comments.map((c) => (
               <div key={c.id} className="px-5 py-3">
                 <div className="text-[13px] text-[var(--color-fg)]">{c.body}</div>
-                <div className="text-[11.5px] text-[var(--color-fg-3)] mt-1">
+                <div className="text-[12px] text-[var(--color-fg-3)] mt-1">
                   {c.author.name} · {formatDate(c.createdAt)}
                 </div>
               </div>

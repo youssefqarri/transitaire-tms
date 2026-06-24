@@ -79,7 +79,7 @@ export function ConfirmDialog({
               <AlertTriangle className="size-4" strokeWidth={2} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-[15px] font-semibold text-[var(--color-fg)]">{title}</div>
+              <div className="text-[14px] font-semibold text-[var(--color-fg)]">{title}</div>
               {description && (
                 <div className="text-[13px] text-[var(--color-fg-3)] mt-1.5 leading-relaxed">
                   {description}

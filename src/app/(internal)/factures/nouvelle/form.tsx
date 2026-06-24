@@ -281,7 +281,7 @@ export function NewInvoiceForm({
           searchPlaceholder="Rechercher…"
         />
         {selectedClient?.separateDebours && (
-          <p className="text-[11.5px] text-[var(--color-warning)] flex items-start gap-1.5">
+          <p className="text-[12px] text-[var(--color-warning)] flex items-start gap-1.5">
             <span>⚠️</span>
             <span>
               Ce client facture ses débours séparément — pensez à établir une facture de
@@ -434,12 +434,12 @@ export function NewInvoiceForm({
           <button
             type="button"
             onClick={() => addItem("HONORAIRE")}
-            className="w-full px-3 py-2.5 text-[12.5px] font-medium text-[var(--color-accent)] hover:bg-[var(--color-surface-2)] flex items-center justify-center gap-1.5 min-w-[860px]"
+            className="w-full px-3 py-2.5 text-[13px] font-medium text-[var(--color-accent)] hover:bg-[var(--color-surface-2)] flex items-center justify-center gap-1.5 min-w-[860px]"
           >
             <Plus className="size-4" /> Ajouter une ligne
           </button>
         </div>
-        <p className="text-[11.5px] text-[var(--color-fg-3)]">
+        <p className="text-[12px] text-[var(--color-fg-3)]">
           <Badge tone="outline">Note</Badge>{" "}
           Débours = refacturés à l&apos;identique, en principe à 0 % (sauf transport refacturé,
           à 10 %). Les lignes à 0 % vont en « Montant Non Taxable », les autres en « Montant Taxable ».

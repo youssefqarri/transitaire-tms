@@ -82,7 +82,7 @@ export function UnreadBadge({
     <span
       className={
         className ??
-        "bg-[var(--color-accent)] text-white text-[10px] font-semibold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center tnum"
+        "bg-[var(--color-accent)] text-white text-[11px] font-semibold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center tnum"
       }
     >
       {count > 99 ? "99+" : count}

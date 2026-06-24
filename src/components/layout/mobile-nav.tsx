@@ -91,7 +91,7 @@ export function MobileNav({
               {sections.map((section, idx) => (
                 <div key={section.title ?? idx}>
                   {section.title && (
-                    <div className="px-2.5 mb-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-[var(--color-fg-mute)]">
+                    <div className="px-2.5 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-fg-mute)]">
                       {section.title}
                     </div>
                   )}

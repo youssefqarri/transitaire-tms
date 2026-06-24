@@ -165,7 +165,7 @@ export function ClientTariffEditor({
       )}
 
       {lines.length === 0 && (
-        <div className="text-[12.5px] text-[var(--color-fg-3)] py-2">
+        <div className="text-[13px] text-[var(--color-fg-3)] py-2">
           Aucun tarif récurrent enregistré pour ce client.
         </div>
       )}

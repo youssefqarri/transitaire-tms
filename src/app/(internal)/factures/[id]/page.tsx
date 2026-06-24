@@ -135,7 +135,7 @@ export default async function InvoiceDetailPage({
           <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
               <thead>
-                <tr className="border-b border-[var(--color-border)] text-[11.5px] font-medium text-[var(--color-fg-3)]">
+                <tr className="border-b border-[var(--color-border)] text-[12px] font-medium text-[var(--color-fg-3)]">
                   <th className="text-left px-5 py-2.5">Type</th>
                   <th className="text-left px-5 py-2.5">Description</th>
                   <th className="text-right px-5 py-2.5">Qté</th>
@@ -274,7 +274,7 @@ export default async function InvoiceDetailPage({
                   {cn.reason && (
                     <span className="ml-2 text-[var(--color-fg-3)]">{cn.reason}</span>
                   )}
-                  <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+                  <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
                     {formatDate(cn.issuedAt)} · {CREDIT_NOTE_STATUS_LABELS[cn.status]}
                   </div>
                 </div>

@@ -97,7 +97,7 @@ export function DocumentsPanel({
       <CardHeader>
         <CardTitle>
           Documents
-          <span className="ml-2 text-[11.5px] font-normal text-[var(--color-fg-3)] tnum">
+          <span className="ml-2 text-[12px] font-normal text-[var(--color-fg-3)] tnum">
             {documents.length}
           </span>
         </CardTitle>
@@ -109,7 +109,7 @@ export function DocumentsPanel({
       </CardHeader>
 
       <div className="px-5 py-3 border-b border-[var(--color-border)]">
-        <div className="text-[11.5px] font-medium text-[var(--color-fg-3)] mb-2">
+        <div className="text-[12px] font-medium text-[var(--color-fg-3)] mb-2">
           Documents obligatoires
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -224,15 +224,15 @@ export function DocumentsPanel({
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[13px] font-medium text-[var(--color-fg)] truncate">{d.name}</span>
                 {d.version > 1 && (
-                  <span className="font-mono text-[10.5px] text-[var(--color-fg-3)]">v{d.version}</span>
+                  <span className="font-mono text-[11px] text-[var(--color-fg-3)]">v{d.version}</span>
                 )}
                 {d.uploadedByIsClient && (
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--color-danger)] text-white">
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--color-danger)] text-white">
                     Reçu du client
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2 mt-0.5 text-[11.5px] text-[var(--color-fg-3)]">
+              <div className="flex items-center gap-2 mt-0.5 text-[12px] text-[var(--color-fg-3)]">
                 <Badge tone="outline">{DOCUMENT_CATEGORY_LABELS[d.category]}</Badge>
                 <span>
                   {formatDate(d.receivedAt)}
@@ -255,7 +255,7 @@ export function DocumentsPanel({
                 <Download className="size-3" strokeWidth={2} /> Ouvrir
               </a>
             ) : (
-              <span className="text-[11.5px] text-[var(--color-fg-mute)]">—</span>
+              <span className="text-[12px] text-[var(--color-fg-mute)]">—</span>
             )}
             {!readOnly && (
               <button

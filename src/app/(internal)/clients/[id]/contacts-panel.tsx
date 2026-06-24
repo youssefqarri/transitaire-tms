@@ -64,20 +64,20 @@ export function ContactsPanel({
   return (
     <div className="px-5 py-4 border-t border-[var(--color-border)]">
       <div className="flex items-center justify-between mb-2">
-        <div className="text-[10.5px] uppercase tracking-wider font-semibold text-[var(--color-fg-3)]">
+        <div className="text-[11px] uppercase tracking-wider font-semibold text-[var(--color-fg-3)]">
           Contacts (destinataires)
         </div>
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className="inline-flex items-center gap-1 text-[11.5px] text-[var(--color-accent)] hover:underline"
+          className="inline-flex items-center gap-1 text-[12px] text-[var(--color-accent)] hover:underline"
         >
           <Plus className="size-3.5" strokeWidth={2} /> Ajouter
         </button>
       </div>
 
       {contacts.length === 0 && !open && (
-        <div className="text-[12.5px] text-[var(--color-fg-3)]">
+        <div className="text-[13px] text-[var(--color-fg-3)]">
           Aucun contact secondaire. Le contact principal est l&apos;email du client.
         </div>
       )}

@@ -59,14 +59,14 @@ export default async function AuditPage({
                     <Badge tone="outline">{l.action}</Badge>{" "}
                     <span className="text-[var(--color-fg-3)]">{l.entity}</span>
                     {l.entityId && (
-                      <span className="text-[11.5px] text-[var(--color-fg-mute)]"> · {l.entityId.slice(0, 8)}</span>
+                      <span className="text-[12px] text-[var(--color-fg-mute)]"> · {l.entityId.slice(0, 8)}</span>
                     )}
                     {l.ip && (
-                      <span className="text-[11.5px] text-[var(--color-fg-mute)] tnum"> · {l.ip}</span>
+                      <span className="text-[12px] text-[var(--color-fg-mute)] tnum"> · {l.ip}</span>
                     )}
                   </div>
                 </div>
-                <div className="text-[11.5px] text-[var(--color-fg-mute)] whitespace-nowrap">
+                <div className="text-[12px] text-[var(--color-fg-mute)] whitespace-nowrap">
                   {formatDateTime(l.createdAt)}
                 </div>
               </div>

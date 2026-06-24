@@ -60,7 +60,7 @@ export default async function SupplierDetailPage({
           <CardHeader>
             <CardTitle>
               Dossiers
-              <span className="ml-2 text-[11.5px] font-normal text-[var(--color-fg-3)] tnum">
+              <span className="ml-2 text-[12px] font-normal text-[var(--color-fg-3)] tnum">
                 {supplier.dossiers.length}
               </span>
             </CardTitle>
@@ -82,7 +82,7 @@ export default async function SupplierDetailPage({
                     <div className="font-mono text-[13px] font-medium text-[var(--color-fg)]">
                       {d.number}
                     </div>
-                    <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+                    <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
                       {d.client.name} · {formatDate(d.updatedAt)}
                     </div>
                   </div>
@@ -130,7 +130,7 @@ export default async function SupplierDetailPage({
             )}
             {supplier.notes && (
               <div className="pt-2 border-t border-[var(--color-border)]">
-                <div className="text-[var(--color-fg-3)] text-[11.5px] mb-1">Notes</div>
+                <div className="text-[var(--color-fg-3)] text-[12px] mb-1">Notes</div>
                 <div className="whitespace-pre-wrap">{supplier.notes}</div>
               </div>
             )}

@@ -77,7 +77,7 @@ export function Pagination({
         className,
       )}
     >
-      <div className="text-[11.5px] text-[var(--color-fg-3)] tnum">
+      <div className="text-[12px] text-[var(--color-fg-3)] tnum">
         <span className="text-[var(--color-fg)] font-medium">{from}</span>–
         <span className="text-[var(--color-fg)] font-medium">{to}</span>
         {" "}sur{" "}
@@ -86,7 +86,7 @@ export function Pagination({
 
       <div className="flex items-center gap-2">
         {/* Sélecteur taille de page */}
-        <div className="flex items-center gap-1.5 text-[11.5px] text-[var(--color-fg-3)] mr-2">
+        <div className="flex items-center gap-1.5 text-[12px] text-[var(--color-fg-3)] mr-2">
           <span>Par page</span>
           <div className="flex items-center gap-0.5 rounded-[var(--radius)] bg-[var(--color-surface-2)] p-0.5">
             {pageSizeOptions.map((s) => {
@@ -97,7 +97,7 @@ export function Pagination({
                   key={s}
                   href={url}
                   className={cn(
-                    "px-2 h-6 inline-flex items-center justify-center rounded-[var(--radius-sm)] text-[11.5px] tnum transition-colors",
+                    "px-2 h-6 inline-flex items-center justify-center rounded-[var(--radius-sm)] text-[12px] tnum transition-colors",
                     active
                       ? "bg-[var(--color-surface)] text-[var(--color-fg)] font-medium shadow-card"
                       : "text-[var(--color-fg-3)] hover:text-[var(--color-fg)]",
@@ -134,7 +134,7 @@ export function Pagination({
             p === "…" ? (
               <span
                 key={`e-${i}`}
-                className="size-8 inline-flex items-center justify-center text-[11.5px] text-[var(--color-fg-mute)]"
+                className="size-8 inline-flex items-center justify-center text-[12px] text-[var(--color-fg-mute)]"
               >
                 …
               </span>

@@ -88,7 +88,7 @@ export function ClientUploadForm({
                     type="button"
                     onClick={() => openRequested(r)}
                     title={r.note}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11.5px] font-medium bg-[var(--color-accent-soft)] text-[var(--color-accent)] border border-[var(--color-accent)]/25 hover:opacity-80 transition-opacity"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] font-medium bg-[var(--color-accent-soft)] text-[var(--color-accent)] border border-[var(--color-accent)]/25 hover:opacity-80 transition-opacity"
                   >
                     <Upload className="size-3" strokeWidth={2.25} />
                     Envoyer : {r.label}
@@ -108,7 +108,7 @@ export function ClientUploadForm({
                     key={c}
                     type="button"
                     onClick={() => openWith(c)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11.5px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] hover:opacity-80 transition-opacity"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] hover:opacity-80 transition-opacity"
                   >
                     <Upload className="size-3" strokeWidth={2.25} />
                     Envoyer : {DOCUMENT_CATEGORY_LABELS[c]}
@@ -134,8 +134,8 @@ export function ClientUploadForm({
         >
           <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="text-[13.5px] font-medium">Envoyer un document</div>
-              <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+              <div className="text-[14px] font-medium">Envoyer un document</div>
+              <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
                 Notre équipe sera automatiquement notifiée.
               </div>
             </div>

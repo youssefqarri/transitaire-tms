@@ -91,8 +91,8 @@ export function Topbar({
         >
           <Avatar name={name} size={28} />
           <div className="text-left hidden lg:block leading-tight">
-            <div className="text-[12.5px] font-medium text-[var(--color-fg)]">{name}</div>
-            <div className="text-[10.5px] text-[var(--color-fg-3)]">{ROLE_LABELS[role]}</div>
+            <div className="text-[13px] font-medium text-[var(--color-fg)]">{name}</div>
+            <div className="text-[11px] text-[var(--color-fg-3)]">{ROLE_LABELS[role]}</div>
           </div>
           <ChevronDown
             className={`size-3 text-[var(--color-fg-mute)] hidden sm:block transition-transform ${open ? "rotate-180" : ""}`}
@@ -110,10 +110,10 @@ export function Topbar({
                 <div className="text-[13px] font-medium text-[var(--color-fg)] truncate">
                   {name}
                 </div>
-                <div className="text-[11.5px] text-[var(--color-fg-3)] truncate">
+                <div className="text-[12px] text-[var(--color-fg-3)] truncate">
                   {email}
                 </div>
-                <div className="text-[10.5px] text-[var(--color-fg-mute)] mt-0.5">
+                <div className="text-[11px] text-[var(--color-fg-mute)] mt-0.5">
                   {ROLE_LABELS[role]}
                 </div>
               </div>

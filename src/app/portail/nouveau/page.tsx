@@ -15,7 +15,7 @@ export default async function PortalNewDossierPage() {
     <div className="space-y-5 max-w-2xl mx-auto">
       <Link
         href="/portail"
-        className="inline-flex items-center gap-1 text-[12.5px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)]"
+        className="inline-flex items-center gap-1 text-[13px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)]"
       >
         <ArrowLeft className="size-3.5" strokeWidth={1.75} /> Mes dossiers
       </Link>

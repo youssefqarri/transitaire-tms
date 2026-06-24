@@ -30,7 +30,7 @@ export function Sidebar({ role, unreadCount = 0 }: { role: UserRole; unreadCount
         {sections.map((section, idx) => (
           <div key={section.title ?? idx}>
             {section.title && (
-              <div className="px-2.5 mb-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-[var(--color-fg-mute)]">
+              <div className="px-2.5 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-fg-mute)]">
                 {section.title}
               </div>
             )}
@@ -79,7 +79,7 @@ export function Sidebar({ role, unreadCount = 0 }: { role: UserRole; unreadCount
         ))}
       </nav>
 
-      <div className="px-4 py-3 border-t border-[var(--color-sidebar-border)] flex items-center justify-between text-[10.5px] text-[var(--color-fg-mute)]">
+      <div className="px-4 py-3 border-t border-[var(--color-sidebar-border)] flex items-center justify-between text-[11px] text-[var(--color-fg-mute)]">
         <span>v1.0</span>
         <span className="size-1.5 rounded-full bg-[var(--color-success)]" title="En ligne" />
       </div>

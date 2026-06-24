@@ -48,14 +48,14 @@ export default async function CorbeillePage() {
               <Card key={s.title}>
                 <div className="px-5 py-3 border-b border-[var(--color-border)] flex items-center justify-between">
                   <h3 className="text-[14px] font-semibold tracking-tight">{s.title}</h3>
-                  <span className="text-[11.5px] text-[var(--color-fg-3)] tnum">{s.rows.length}</span>
+                  <span className="text-[12px] text-[var(--color-fg-3)] tnum">{s.rows.length}</span>
                 </div>
                 <div className="divide-y divide-[var(--color-border)]">
                   {s.rows.map((it) => (
                     <div key={it.id} className="px-5 py-3 flex items-center gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="text-[13px] font-medium truncate">{it.label}</div>
-                        <div className="text-[11.5px] text-[var(--color-fg-3)]">Supprimé le {it.sub}</div>
+                        <div className="text-[12px] text-[var(--color-fg-3)]">Supprimé le {it.sub}</div>
                       </div>
                       <RestoreButton type={it.type} id={it.id} />
                     </div>

@@ -49,7 +49,7 @@ export default async function TemplateEditPage({
     <div className="max-w-4xl space-y-5">
       <Link
         href="/templates"
-        className="inline-flex items-center gap-1 text-[12.5px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)]"
+        className="inline-flex items-center gap-1 text-[13px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)]"
       >
         <ArrowLeft className="size-3.5" strokeWidth={1.75} /> Templates
       </Link>
@@ -74,7 +74,7 @@ export default async function TemplateEditPage({
           ].map((v) => (
             <code
               key={v}
-              className="font-mono text-[11.5px] bg-[var(--color-surface-2)] px-1 py-0.5 rounded mr-1"
+              className="font-mono text-[12px] bg-[var(--color-surface-2)] px-1 py-0.5 rounded mr-1"
             >
               {v}
             </code>

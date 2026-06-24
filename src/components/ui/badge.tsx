@@ -29,7 +29,7 @@ const badgeVariants = cva(
           "border-transparent bg-[var(--color-fg)] text-[var(--color-surface)]",
       },
       size: {
-        sm: "text-[10px] px-1.5 py-0.5",
+        sm: "text-[11px] px-1.5 py-0.5",
         default: "text-[11px] px-2 py-0.5",
         lg: "text-[12px] px-2.5 py-1",
       },

@@ -32,7 +32,7 @@ export default async function PortalLayout({ children }: { children: React.React
             </Link>
             <div className="flex items-center gap-2 pl-2 border-l border-[var(--color-border)]">
               <Avatar name={session.user.name} size={28} />
-              <span className="hidden sm:inline text-[12.5px] text-[var(--color-fg-2)]">
+              <span className="hidden sm:inline text-[13px] text-[var(--color-fg-2)]">
                 {session.user.name}
               </span>
               <LogoutButton />

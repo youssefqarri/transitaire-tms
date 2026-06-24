@@ -25,7 +25,7 @@ export default async function ResetPasswordPage({
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-7">
           {valid ? (
             <>
-              <h1 className="text-[20px] font-semibold tracking-tight">
+              <h1 className="text-[22px] font-semibold tracking-tight">
                 Nouveau mot de passe
               </h1>
               <p className="text-[13px] text-[var(--color-fg-3)] mt-1">
@@ -37,7 +37,7 @@ export default async function ResetPasswordPage({
             </>
           ) : (
             <>
-              <h1 className="text-[20px] font-semibold tracking-tight">Lien invalide</h1>
+              <h1 className="text-[22px] font-semibold tracking-tight">Lien invalide</h1>
               <p className="text-[13px] text-[var(--color-fg-3)] mt-1">
                 Ce lien est invalide ou a expiré. Demandez un nouveau lien de réinitialisation.
               </p>

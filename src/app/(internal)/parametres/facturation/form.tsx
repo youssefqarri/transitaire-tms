@@ -52,7 +52,7 @@ export function InvoiceNumberForm({ current }: { current: string }) {
           placeholder="ex. FA261242"
           className="font-mono"
         />
-        <p className="text-[11.5px] text-[var(--color-fg-3)]">
+        <p className="text-[12px] text-[var(--color-fg-3)]">
           Laisser vide pour une numérotation 100 % automatique. Sinon, l&apos;outil démarre à
           ce numéro et n&apos;en redescend jamais.
         </p>

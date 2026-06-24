@@ -181,7 +181,7 @@ export default async function DossiersPage({
                     <div className="flex items-center gap-2 flex-wrap">
                       <StatusBadge status={d.status} />
                       {d.isNewFromClient && (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--color-danger)] text-white" title="Nouveau dossier créé par le client">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--color-danger)] text-white" title="Nouveau dossier créé par le client">
                           NOUVEAU CLIENT
                         </span>
                       )}
@@ -206,7 +206,7 @@ export default async function DossiersPage({
                     <div className="flex items-center gap-1 shrink-0">
                       {d.fromClientCount > 0 && (
                         <span
-                          className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10.5px] font-semibold bg-[var(--color-danger)] text-white cursor-default"
+                          className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--color-danger)] text-white cursor-default"
                           title={`Reçus du client :\n• ${d.fromClientDocs.join("\n• ")}`}
                         >
                           ● {d.fromClientCount} doc client
@@ -214,7 +214,7 @@ export default async function DossiersPage({
                       )}
                       {d.missingCount > 0 && (
                         <span
-                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10.5px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] cursor-default"
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] cursor-default"
                           title={`Documents manquants :\n• ${d.missingDocs.join("\n• ")}`}
                         >
                           <AlertTriangle className="size-2.5" strokeWidth={2.25} />
@@ -232,7 +232,7 @@ export default async function DossiersPage({
                     )}
                   </div>
                   {/* ligne 3 : infos secondaires en petit gris */}
-                  <div className="flex items-center justify-between mt-1.5 text-[10.5px] text-[var(--color-fg-3)] tnum">
+                  <div className="flex items-center justify-between mt-1.5 text-[11px] text-[var(--color-fg-3)] tnum">
                     <span>
                       {formatCurrency(
                         d.goodsValue ? Number(d.goodsValue) : null,
@@ -251,7 +251,7 @@ export default async function DossiersPage({
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-[13px]">
                 <thead>
-                  <tr className="border-b border-[var(--color-border)] text-[11.5px] font-medium text-[var(--color-fg-3)]">
+                  <tr className="border-b border-[var(--color-border)] text-[12px] font-medium text-[var(--color-fg-3)]">
                     <th className="text-left px-5 py-2.5 w-[180px]">Statut</th>
                     <th className="text-left px-5 py-2.5">Dossier</th>
                     <th className="text-left px-5 py-2.5">Référence</th>
@@ -274,7 +274,7 @@ export default async function DossiersPage({
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <StatusBadge status={d.status} size="sm" />
                           {d.isNewFromClient && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--color-danger)] text-white" title="Nouveau dossier créé par le client">
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--color-danger)] text-white" title="Nouveau dossier créé par le client">
                               NOUVEAU
                             </span>
                           )}
@@ -301,7 +301,7 @@ export default async function DossiersPage({
                         <div className="inline-flex items-center gap-1 flex-wrap justify-center">
                           {d.fromClientCount > 0 && (
                             <span
-                              className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10.5px] font-semibold bg-[var(--color-danger)] text-white cursor-default"
+                              className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--color-danger)] text-white cursor-default"
                               title={`Reçus du client :\n• ${d.fromClientDocs.join("\n• ")}`}
                             >
                               ● {d.fromClientCount}
@@ -309,7 +309,7 @@ export default async function DossiersPage({
                           )}
                           {d.missingCount > 0 ? (
                             <span
-                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10.5px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] cursor-default"
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] cursor-default"
                               title={`Documents manquants :\n• ${d.missingDocs.join("\n• ")}`}
                             >
                               <AlertTriangle className="size-2.5" strokeWidth={2.25} />

@@ -106,7 +106,7 @@ export default async function DossierDetailPage({
             <StatusBadge status={dossier.status} />
             {dossier.secondaryStatus && (
               <span className="inline-flex items-center gap-1.5" title="Statut organismes de contrôle (en parallèle de la douane)">
-                <span className="text-[10.5px] text-[var(--color-fg-3)]">Organismes&nbsp;:</span>
+                <span className="text-[11px] text-[var(--color-fg-3)]">Organismes&nbsp;:</span>
                 <StatusBadge status={dossier.secondaryStatus} size="sm" />
               </span>
             )}
@@ -276,7 +276,7 @@ export default async function DossierDetailPage({
               <Field label="Type" value={dossier.type} />
               {dossier.goodsDescription && (
                 <div className="md:col-span-4 pt-1">
-                  <div className="text-[11.5px] font-medium text-[var(--color-fg-3)] mb-1">
+                  <div className="text-[12px] font-medium text-[var(--color-fg-3)] mb-1">
                     Description marchandise
                   </div>
                   <div className="text-[13px] text-[var(--color-fg)] whitespace-pre-wrap">
@@ -469,7 +469,7 @@ export default async function DossierDetailPage({
                       {e.label}
                     </div>
                     <div
-                      className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5"
+                      className="text-[12px] text-[var(--color-fg-3)] mt-0.5"
                       title={e.hideDate ? `Statut modifié le ${formatDateTime(e.date)}` : undefined}
                     >
                       {e.hideDate ? (
@@ -524,7 +524,7 @@ function Field({
 }) {
   return (
     <div>
-      <div className="text-[11.5px] font-medium text-[var(--color-fg-3)] mb-1">{label}</div>
+      <div className="text-[12px] font-medium text-[var(--color-fg-3)] mb-1">{label}</div>
       <div
         className={
           mono

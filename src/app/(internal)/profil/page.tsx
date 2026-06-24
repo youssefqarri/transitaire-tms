@@ -37,13 +37,13 @@ export default async function ProfilePage() {
           <Avatar name={user.name} size={48} />
           <div className="flex-1 min-w-0">
             <div className="text-[14px] font-medium">{user.name}</div>
-            <div className="text-[12.5px] text-[var(--color-fg-3)]">{user.email}</div>
+            <div className="text-[13px] text-[var(--color-fg-3)]">{user.email}</div>
             <div className="mt-2 flex items-center gap-2">
               <Badge tone={ROLE_TONE[user.role]}>{ROLE_LABELS[user.role]}</Badge>
               {user.client && <Badge tone="outline">{user.client.name}</Badge>}
             </div>
           </div>
-          <div className="text-right text-[11.5px] text-[var(--color-fg-mute)]">
+          <div className="text-right text-[12px] text-[var(--color-fg-mute)]">
             Membre depuis {formatDate(user.createdAt)}
           </div>
         </div>

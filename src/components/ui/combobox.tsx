@@ -209,7 +209,7 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
               placeholder={searchPlaceholder}
               className="w-full h-9 pl-8 pr-3 text-[13px] bg-transparent placeholder:text-[var(--color-fg-mute)] focus:outline-none"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10.5px] text-[var(--color-fg-mute)] tnum">
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[var(--color-fg-mute)] tnum">
               {filtered.length}/{items.length}
             </span>
           </div>
@@ -220,7 +220,7 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
             className="max-h-[260px] overflow-y-auto scrollbar-thin py-1"
           >
             {filtered.length === 0 && !showCreate && (
-              <div className="px-3 py-6 text-center text-[12.5px] text-[var(--color-fg-3)]">
+              <div className="px-3 py-6 text-center text-[13px] text-[var(--color-fg-3)]">
                 {emptyText}
               </div>
             )}
@@ -255,7 +255,7 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
                       <div className="flex-1 min-w-0">
                         <div className="truncate">{it.label}</div>
                         {it.sublabel && (
-                          <div className="text-[11.5px] text-[var(--color-fg-mute)] truncate">
+                          <div className="text-[12px] text-[var(--color-fg-mute)] truncate">
                             {it.sublabel}
                           </div>
                         )}

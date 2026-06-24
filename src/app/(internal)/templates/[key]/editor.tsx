@@ -111,7 +111,7 @@ export function TemplateEditor({
           <CardTitle className="flex items-center gap-2">
             <Mail className="size-4 text-[var(--color-fg-mute)]" strokeWidth={1.75} />
             Email
-            <span className={`ml-2 text-[10.5px] font-medium uppercase tracking-wider ${emailIsCustom ? "text-[var(--color-accent)]" : "text-[var(--color-fg-mute)]"}`}>
+            <span className={`ml-2 text-[11px] font-medium uppercase tracking-wider ${emailIsCustom ? "text-[var(--color-accent)]" : "text-[var(--color-fg-mute)]"}`}>
               {emailIsCustom ? "Personnalisé" : "Défaut"}
             </span>
           </CardTitle>
@@ -140,7 +140,7 @@ export function TemplateEditor({
               id="ebody"
               value={emailBody}
               onChange={(e) => setEmailBody(e.target.value)}
-              className="min-h-[220px] font-mono text-[12.5px]"
+              className="min-h-[220px] font-mono text-[13px]"
             />
           </div>
           <div className="flex items-center justify-end gap-2 pt-1">
@@ -162,7 +162,7 @@ export function TemplateEditor({
           <CardTitle className="flex items-center gap-2">
             <MessageCircle className="size-4 text-[var(--color-fg-mute)]" strokeWidth={1.75} />
             WhatsApp
-            <span className={`ml-2 text-[10.5px] font-medium uppercase tracking-wider ${waIsCustom ? "text-[var(--color-accent)]" : "text-[var(--color-fg-mute)]"}`}>
+            <span className={`ml-2 text-[11px] font-medium uppercase tracking-wider ${waIsCustom ? "text-[var(--color-accent)]" : "text-[var(--color-fg-mute)]"}`}>
               {waIsCustom ? "Personnalisé" : "Défaut"}
             </span>
           </CardTitle>
@@ -183,7 +183,7 @@ export function TemplateEditor({
               id="wbody"
               value={waBody}
               onChange={(e) => setWaBody(e.target.value)}
-              className="min-h-[140px] font-mono text-[12.5px]"
+              className="min-h-[140px] font-mono text-[13px]"
             />
             <p className="text-[11px] text-[var(--color-fg-mute)]">
               Tu peux utiliser *gras*, _italique_ et ~barré~ (formatage WhatsApp).

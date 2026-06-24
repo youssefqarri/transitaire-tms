@@ -36,7 +36,7 @@ export function OutgoingMessagesPanel({ messages }: { messages: Msg[] }) {
       <CardHeader>
         <CardTitle>
           Notifications envoyées
-          <span className="ml-2 text-[11.5px] font-normal text-[var(--color-fg-3)] tnum">
+          <span className="ml-2 text-[12px] font-normal text-[var(--color-fg-3)] tnum">
             {messages.length}
           </span>
         </CardTitle>
@@ -63,7 +63,7 @@ export function OutgoingMessagesPanel({ messages }: { messages: Msg[] }) {
                     </span>
                     <Badge tone={STATUS_TONE[m.status] ?? "neutral"}>{m.status}</Badge>
                   </div>
-                  <div className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+                  <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
                     → {m.toAddress} ·{" "}
                     {m.sentAt
                       ? formatDateTime(m.sentAt)
@@ -85,7 +85,7 @@ export function OutgoingMessagesPanel({ messages }: { messages: Msg[] }) {
                       {m.error}
                     </div>
                   )}
-                  <pre className="text-[12.5px] whitespace-pre-wrap font-sans text-[var(--color-fg-2)] bg-[var(--color-surface-2)] rounded-[var(--radius)] px-3 py-2">
+                  <pre className="text-[13px] whitespace-pre-wrap font-sans text-[var(--color-fg-2)] bg-[var(--color-surface-2)] rounded-[var(--radius)] px-3 py-2">
                     {m.body}
                   </pre>
                 </div>

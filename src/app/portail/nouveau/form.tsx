@@ -253,7 +253,7 @@ export function NewDossierForm() {
               Pièces jointes{" "}
               <span className="text-[var(--color-fg-mute)] font-normal">(optionnel)</span>
             </Label>
-            <p className="text-[11.5px] text-[var(--color-fg-3)] mt-0.5">
+            <p className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
               Vous pouvez joindre dès maintenant facture, BL, etc. Ils seront rattachés au dossier.
             </p>
           </div>
@@ -281,7 +281,7 @@ export function NewDossierForm() {
                 className="flex items-center gap-2 bg-[var(--color-surface-2)] rounded-[var(--radius)] px-3 py-2"
               >
                 <Paperclip className="size-3.5 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
-                <span className="text-[12.5px] text-[var(--color-fg)] truncate flex-1 min-w-0">
+                <span className="text-[13px] text-[var(--color-fg)] truncate flex-1 min-w-0">
                   {att.file.name}
                 </span>
                 <div className="w-[220px]">

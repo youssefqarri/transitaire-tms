@@ -88,13 +88,13 @@ export function TokensClient({
     <div className="space-y-6">
       {createdToken && (
         <div className="rounded-[var(--radius)] border border-[oklch(80%_0.18_75)] bg-[oklch(98%_0.06_75)] p-4">
-          <div className="font-medium text-sm mb-2">Token généré — copiez-le maintenant</div>
-          <div className="text-xs text-[var(--color-muted-foreground)] mb-3">
+          <div className="font-medium text-[14px] mb-2">Token généré — copiez-le maintenant</div>
+          <div className="text-[12px] text-[var(--color-muted-foreground)] mb-3">
             Ce token n'est affiché qu'une seule fois. Stockez-le dans un endroit sûr (gestionnaire
             de mots de passe, ou variable d'environnement).
           </div>
           <div className="flex items-center gap-2">
-            <code className="flex-1 text-xs font-mono bg-[var(--color-card)] px-3 py-2 rounded border border-[var(--color-border)] break-all">
+            <code className="flex-1 text-[12px] font-mono bg-[var(--color-card)] px-3 py-2 rounded border border-[var(--color-border)] break-all">
               {createdToken}
             </code>
             <Button variant="outline" size="sm" onClick={copyToken}>
@@ -110,7 +110,7 @@ export function TokensClient({
       <div className="flex items-center justify-between">
         <div>
           <div className="font-medium">Tokens existants</div>
-          <div className="text-xs text-[var(--color-muted-foreground)]">
+          <div className="text-[12px] text-[var(--color-muted-foreground)]">
             {tokens.length} token{tokens.length > 1 ? "s" : ""}
           </div>
         </div>
@@ -165,7 +165,7 @@ export function TokensClient({
 
       <div className="divide-y divide-[var(--color-border)]">
         {tokens.length === 0 && !showForm && (
-          <div className="p-8 text-center text-sm text-[var(--color-muted-foreground)]">
+          <div className="p-8 text-center text-[14px] text-[var(--color-muted-foreground)]">
             <Key className="size-8 mx-auto mb-2 text-[var(--color-muted-foreground)]" />
             Aucun token. Créez-en un pour permettre à une intégration externe d'accéder à l'API.
           </div>
@@ -177,8 +177,8 @@ export function TokensClient({
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-medium text-sm">{t.label}</span>
-                <code className="text-xs text-[var(--color-muted-foreground)] font-mono">
+                <span className="font-medium text-[14px]">{t.label}</span>
+                <code className="text-[12px] text-[var(--color-muted-foreground)] font-mono">
                   {t.prefix}…
                 </code>
                 {t.revoked && <Badge tone="danger">Révoqué</Badge>}
@@ -186,7 +186,7 @@ export function TokensClient({
                   <Badge tone="danger">Expiré</Badge>
                 )}
               </div>
-              <div className="text-xs text-[var(--color-muted-foreground)]">
+              <div className="text-[12px] text-[var(--color-muted-foreground)]">
                 {t.userName} · {t.userRole} · créé le {formatDateTime(t.createdAt)}
                 {t.lastUsedAt && ` · dernière utilisation ${formatDateTime(t.lastUsedAt)}`}
               </div>

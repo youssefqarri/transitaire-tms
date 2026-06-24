@@ -104,7 +104,7 @@ export default async function SettingsPage() {
         subtitle={
           <>
             Configuration de la plateforme. Les valeurs définies ici prennent le pas sur celles du fichier{" "}
-            <code className="font-mono text-[11.5px] bg-[var(--color-surface-2)] px-1 py-0.5 rounded">
+            <code className="font-mono text-[12px] bg-[var(--color-surface-2)] px-1 py-0.5 rounded">
               .env
             </code>
             .

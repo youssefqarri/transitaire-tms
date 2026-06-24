@@ -81,7 +81,7 @@ export function SyndicalCalculator({
         <div className="px-3.5 pb-3.5 pt-1 space-y-3 border-t border-[var(--color-border)]">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div className="space-y-1">
-              <Label htmlFor="syn-val" className="text-[11.5px]">
+              <Label htmlFor="syn-val" className="text-[12px]">
                 Valeur en douane (DH)
               </Label>
               <Input
@@ -95,7 +95,7 @@ export function SyndicalCalculator({
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="syn-droits" className="text-[11.5px]">
+              <Label htmlFor="syn-droits" className="text-[12px]">
                 Droits de douane (DH)
               </Label>
               <Input
@@ -109,7 +109,7 @@ export function SyndicalCalculator({
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="syn-art" className="text-[11.5px]">
+              <Label htmlFor="syn-art" className="text-[12px]">
                 Nombre d&apos;articles
               </Label>
               <Input
@@ -123,7 +123,7 @@ export function SyndicalCalculator({
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="syn-red" className="text-[11.5px]">
+              <Label htmlFor="syn-red" className="text-[12px]">
                 Réduction (%)
               </Label>
               <div className="flex gap-1.5">
@@ -149,7 +149,7 @@ export function SyndicalCalculator({
                 key={p}
                 type="button"
                 onClick={() => setReduction(p)}
-                className={`px-2.5 py-1 text-[11.5px] rounded-[var(--radius)] border ${
+                className={`px-2.5 py-1 text-[12px] rounded-[var(--radius)] border ${
                   reduction === p
                     ? "border-[var(--color-accent)] text-[var(--color-accent)] bg-[var(--color-accent-soft)]"
                     : "border-[var(--color-border-2)] text-[var(--color-fg-3)] hover:bg-[var(--color-surface-2)]"
@@ -161,7 +161,7 @@ export function SyndicalCalculator({
           </div>
 
           <div className="flex items-end justify-between gap-3 flex-wrap bg-[var(--color-surface-2)] rounded-[var(--radius)] px-3 py-2.5">
-            <div className="text-[11.5px] text-[var(--color-fg-3)] leading-relaxed font-mono">
+            <div className="text-[12px] text-[var(--color-fg-3)] leading-relaxed font-mono">
               Assiette {formatMAD(base)} (valeur + droits) → tarif {formatMAD(r.base)}
               {r.multiplier !== 1 && <> × {r.multiplier} (feuillet)</>}
               {r.reductionPct > 0 && <> − {r.reductionPct} %</>}
@@ -174,7 +174,7 @@ export function SyndicalCalculator({
               Insérer les honoraires
             </Button>
           </div>
-          <p className="text-[10.5px] text-[var(--color-fg-mute)]">
+          <p className="text-[11px] text-[var(--color-fg-mute)]">
             Base de calcul = valeur en douane + droits de douane (Art. 2). Barème ARTICLE 3
             (même barème à l&apos;import et à l&apos;export), minimum 75 DH ; supplément feuillet
             au-delà de 4 / 8 / 12 articles.

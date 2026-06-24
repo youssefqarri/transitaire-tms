@@ -62,7 +62,7 @@ export default async function DUMsPage({
                     </span>
                     <Badge tone="info">{DUM_STATUS_LABELS[d.status]}</Badge>
                   </div>
-                  <div className="text-[12.5px] text-[var(--color-fg-2)]">
+                  <div className="text-[13px] text-[var(--color-fg-2)]">
                     <span className="font-mono">{d.dossier.number}</span> · {d.dossier.client.name}
                   </div>
                   <div className="flex items-center justify-between text-[11px] text-[var(--color-fg-3)] mt-1">
@@ -77,7 +77,7 @@ export default async function DUMsPage({
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-[13px]">
                 <thead>
-                  <tr className="border-b border-[var(--color-border)] text-[11.5px] font-medium text-[var(--color-fg-3)]">
+                  <tr className="border-b border-[var(--color-border)] text-[12px] font-medium text-[var(--color-fg-3)]">
                     <th className="text-left px-5 py-2.5">N° DUM</th>
                     <th className="text-left px-5 py-2.5">Dossier</th>
                     <th className="text-left px-5 py-2.5">Client</th>

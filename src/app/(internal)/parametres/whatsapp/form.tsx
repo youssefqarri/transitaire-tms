@@ -141,7 +141,7 @@ export function WhatsAppSettingsForm({
         </div>
         {testResult && (
           <div
-            className={`mt-3 rounded-[var(--radius)] border p-3 text-[12.5px] ${
+            className={`mt-3 rounded-[var(--radius)] border p-3 text-[13px] ${
               testResult.ok
                 ? "border-[var(--color-success)]/30 bg-[var(--color-success-soft)] text-[var(--color-success)]"
                 : "border-[var(--color-danger)]/30 bg-[var(--color-danger-soft)] text-[var(--color-danger)]"
@@ -162,7 +162,7 @@ export function WhatsAppSettingsForm({
                     Échec ({testResult.step === "verify" ? "session/connexion" : "envoi"})
                     {testResult.status ? ` — statut ${testResult.status}` : ""}
                   </div>
-                  <div className="font-mono text-[11.5px] mt-1">{testResult.error}</div>
+                  <div className="font-mono text-[12px] mt-1">{testResult.error}</div>
                 </div>
               </div>
             )}

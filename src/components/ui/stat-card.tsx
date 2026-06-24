@@ -26,7 +26,7 @@ export function StatCard({
   tone = "default",
 }: Props) {
   const valueClass = cn(
-    "text-[24px] leading-none font-semibold tracking-tight tnum",
+    "text-[22px] leading-none font-semibold tracking-tight tnum",
     tone === "default" && "text-[var(--color-fg)]",
     tone === "danger" && "text-[var(--color-danger)]",
     tone === "warn" && "text-[var(--color-warning)]",

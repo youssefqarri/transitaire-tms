@@ -110,7 +110,7 @@ export function InvoiceActions({
               <div className="text-[12px] font-semibold mb-2 text-[var(--color-fg)]">
                 Enregistrer un paiement
               </div>
-              <div className="text-[11.5px] text-[var(--color-fg-3)] mb-2">
+              <div className="text-[12px] text-[var(--color-fg-3)] mb-2">
                 Reste à régler : {formatMAD(totalTTC - paidAmount)}
               </div>
               <div className="space-y-2">

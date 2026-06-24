@@ -30,14 +30,14 @@ export default async function LoginPage({
         {/* Logo + slogan */}
         <div className="mb-8">
           <LogoFull className="h-10 w-auto" />
-          <p className="text-[12.5px] text-[var(--color-fg-3)] mt-2.5">
+          <p className="text-[13px] text-[var(--color-fg-3)] mt-2.5">
             Le transit intelligent, du port à la livraison.
           </p>
         </div>
 
         {/* Card */}
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-7 shadow-[var(--shadow-lg)]">
-          <h1 className="text-[20px] font-semibold tracking-tight text-[var(--color-fg)]">
+          <h1 className="text-[22px] font-semibold tracking-tight text-[var(--color-fg)]">
             Bienvenue
           </h1>
           <p className="text-[13px] text-[var(--color-fg-3)] mt-1">
@@ -51,7 +51,7 @@ export default async function LoginPage({
           <div className="mt-5 text-center">
             <a
               href="/mot-de-passe-oublie"
-              className="text-[12.5px] text-[var(--color-fg-3)] hover:text-[var(--color-accent)] underline-offset-4 hover:underline transition-colors"
+              className="text-[13px] text-[var(--color-fg-3)] hover:text-[var(--color-accent)] underline-offset-4 hover:underline transition-colors"
             >
               Mot de passe oublié ?
             </a>

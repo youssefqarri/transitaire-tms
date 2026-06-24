@@ -18,7 +18,7 @@ export default async function EmailSettingsPage() {
     <div className="max-w-3xl space-y-5">
       <Link
         href="/parametres"
-        className="inline-flex items-center gap-1 text-[12.5px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)]"
+        className="inline-flex items-center gap-1 text-[13px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)]"
       >
         <ArrowLeft className="size-3.5" strokeWidth={1.75} /> Paramètres
       </Link>

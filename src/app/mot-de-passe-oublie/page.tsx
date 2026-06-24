@@ -11,7 +11,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-7">
-          <h1 className="text-[20px] font-semibold tracking-tight">Mot de passe oublié</h1>
+          <h1 className="text-[22px] font-semibold tracking-tight">Mot de passe oublié</h1>
           <p className="text-[13px] text-[var(--color-fg-3)] mt-1">
             Entrez votre adresse email. Si un compte existe, nous vous enverrons un lien de
             réinitialisation valide pendant 1 heure.
