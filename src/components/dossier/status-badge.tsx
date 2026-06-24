@@ -22,16 +22,20 @@ export function StatusBadge({
   status,
   className,
   size = "md",
+  wrap = false,
 }: {
   status: DossierStatus;
   className?: string;
   size?: "sm" | "md";
+  /** Autorise le libellé à passer à la ligne (utile pour les longs statuts en colonne étroite). */
+  wrap?: boolean;
 }) {
   const tone = STATUS_TONE[status];
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full font-medium whitespace-nowrap",
+        "inline-flex gap-1.5 rounded-full font-medium",
+        wrap ? "items-start text-left" : "items-center whitespace-nowrap",
         TONE_BG[tone] ?? TONE_BG.neutral,
         size === "sm" ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-[12px]",
         className,
@@ -40,8 +44,8 @@ export function StatusBadge({
       <span
         aria-hidden
         className={cn(
-          "rounded-full shrink-0",
-          size === "sm" ? "size-1.5" : "size-1.5",
+          "rounded-full shrink-0 size-1.5",
+          wrap && "mt-[5px]",
           TONE_DOT[tone] ?? TONE_DOT.neutral,
         )}
       />

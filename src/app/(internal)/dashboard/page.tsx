@@ -134,7 +134,7 @@ export default async function DashboardPage() {
         subtitle={`Bonjour ${session.user.name.split(" ")[0]}, voici l'état actuel des dossiers.`}
       />
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatCard
           label="Dossiers ouverts"
           value={openDossiers}
@@ -181,71 +181,69 @@ export default async function DashboardPage() {
             {recentDossiers.length === 0 && (
               <EmptyState icon={Folder} title="Aucun dossier pour l'instant" />
             )}
-            {recentDossiers.map((d) => (
-              <Link
-                key={d.id}
-                href={`/dossiers/${d.id}`}
-                className="row-link flex sm:grid sm:grid-cols-[minmax(0,1fr)_120px_130px_120px] items-center gap-3 sm:gap-4 px-5 py-3 hover:bg-[var(--color-surface-2)] transition-colors"
-              >
-                {/* Col 1 : N° dossier + référence + client + docs manquants */}
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-[12.5px] text-[var(--color-fg)] font-medium">
-                      {d.number}
+            {recentDossiers.map((d) => {
+              const missing = countMissing(d);
+              const hasDates = d.visitDate || d.conformityVisitDate || d.deliveredAt;
+              return (
+                <Link
+                  key={d.id}
+                  href={`/dossiers/${d.id}`}
+                  className="row-link block px-5 py-3 hover:bg-[var(--color-surface-2)] transition-colors"
+                >
+                  {/* Ligne 1 : statut (en haut, peut passer à la ligne) + date de maj */}
+                  <div className="flex items-start justify-between gap-3">
+                    <StatusBadge status={d.status} size="sm" wrap />
+                    <span className="text-[10.5px] text-[var(--color-fg-mute)] shrink-0 mt-0.5 tnum">
+                      {formatDate(d.updatedAt)}
                     </span>
-                    {d.reference && (
-                      <span className="text-[11.5px] text-[var(--color-fg-3)]">
-                        · {d.reference}
+                  </div>
+                  {/* Ligne 2 : N° dossier + référence + valeur */}
+                  <div className="flex items-center justify-between gap-3 mt-2">
+                    <div className="flex items-center gap-2 flex-wrap min-w-0">
+                      <span className="font-mono text-[12.5px] text-[var(--color-fg)] font-medium">
+                        {d.number}
+                      </span>
+                      {d.reference && (
+                        <span className="text-[11.5px] text-[var(--color-fg-3)] truncate">
+                          · {d.reference}
+                        </span>
+                      )}
+                    </div>
+                    {d.goodsValue != null && (
+                      <span className="font-mono text-[12.5px] text-[var(--color-fg)] tnum shrink-0">
+                        {formatCurrency(Number(d.goodsValue), d.goodsCurrency ?? "EUR")}
                       </span>
                     )}
                   </div>
-                  <div className="text-[12.5px] text-[var(--color-fg-3)] truncate mt-0.5 flex items-center gap-1.5 flex-wrap">
+                  {/* Ligne 3 : client + DUM + docs manquants */}
+                  <div className="text-[12.5px] text-[var(--color-fg-3)] mt-0.5 flex items-center gap-1.5 flex-wrap">
                     <span className="truncate">{d.client.name}</span>
                     {d.dums.length > 0 && (
                       <span className="font-mono">
                         · DUM {d.dums.map((dum) => dum.number).join(", ")}
                       </span>
                     )}
-                    {countMissing(d) > 0 && (
+                    {missing > 0 && (
                       <span title={missingDocsOf(d)} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] cursor-default">
                         <AlertTriangle className="size-2.5" strokeWidth={2.25} />
-                        {countMissing(d)} doc{countMissing(d) > 1 ? "s" : ""}
+                        {missing} doc{missing > 1 ? "s" : ""}
                       </span>
                     )}
                   </div>
-                </div>
-                {/* Col 2 : Valeur + maj */}
-                <div className="text-right hidden sm:block">
-                  <div className="font-mono text-[12.5px] text-[var(--color-fg)] tnum">
-                    {formatCurrency(
-                      d.goodsValue ? Number(d.goodsValue) : null,
-                      d.goodsCurrency ?? "EUR",
-                    )}
-                  </div>
-                  <div className="text-[10.5px] text-[var(--color-fg-3)] mt-0.5">
-                    {formatDate(d.updatedAt)}
-                  </div>
-                </div>
-                {/* Col 3 : Dates visite douane / MCI / livraison */}
-                <div className="hidden sm:block">
-                  {d.visitDate || d.visitEffectiveDate || d.conformityVisitDate || d.conformityVisitEffectiveDate || d.deliveredAt ? (
-                    <KeyDates
-                      visitDate={d.visitDate}
-                      visitEffectiveDate={d.visitEffectiveDate}
-                      conformityVisitDate={d.conformityVisitDate}
-                      conformityVisitEffectiveDate={d.conformityVisitEffectiveDate}
-                      deliveredAt={d.deliveredAt}
-                    />
-                  ) : (
-                    <span className="text-[10.5px] text-[var(--color-fg-mute)]">—</span>
+                  {/* Ligne 4 : dates clés (sur une ligne, à gauche) */}
+                  {hasDates && (
+                    <div className="mt-1.5">
+                      <KeyDates
+                        visitDate={d.visitDate}
+                        conformityVisitDate={d.conformityVisitDate}
+                        deliveredAt={d.deliveredAt}
+                        layout="row"
+                      />
+                    </div>
                   )}
-                </div>
-                {/* Col 4 : Statut */}
-                <div className="flex justify-end shrink-0">
-                  <StatusBadge status={d.status} size="sm" />
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         </Card>
 
