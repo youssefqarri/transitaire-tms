@@ -8,6 +8,8 @@ const PUBLIC_PATHS = [
   "/login",
   "/mot-de-passe-oublie",
   "/reset-password",
+  "/confidentialite",
+  "/conditions",
   "/api/auth",
   "/api/v1",
   // la route /api/files fait elle-même son auth + contrôle d'accès (ownership clientId) ;
