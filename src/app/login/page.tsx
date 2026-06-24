@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { LoginForm } from "./login-form";
 import { LogoFull } from "@/components/brand/logo";
+import { Footer } from "@/components/layout/footer";
 
 export default async function LoginPage({
   searchParams,
@@ -61,6 +62,10 @@ export default async function LoginPage({
         <div className="mt-5 text-center text-[12px] text-[var(--color-fg-mute)]">
           En cas de difficulté, contactez votre administrateur.
         </div>
+      </div>
+
+      <div className="absolute bottom-0 inset-x-0">
+        <Footer />
       </div>
     </div>
   );

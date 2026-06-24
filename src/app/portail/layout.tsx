@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { Avatar } from "@/components/ui/avatar";
 import { LogoutButton } from "./logout-button";
 import { LogoFull } from "@/components/brand/logo";
+import { Footer } from "@/components/layout/footer";
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -11,7 +12,7 @@ export default async function PortalLayout({ children }: { children: React.React
   if (session.user.role !== "CLIENT") redirect("/dashboard");
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)]">
+    <div className="min-h-screen flex flex-col bg-[var(--color-bg)]">
       <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)]/95 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
           <Link
@@ -40,7 +41,8 @@ export default async function PortalLayout({ children }: { children: React.React
           </nav>
         </div>
       </header>
-      <main className="max-w-6xl mx-auto px-6 py-8 animate-fade-in">{children}</main>
+      <main className="flex-1 w-full max-w-6xl mx-auto px-6 py-8 animate-fade-in">{children}</main>
+      <Footer />
     </div>
   );
 }
