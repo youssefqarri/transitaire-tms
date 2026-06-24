@@ -5,7 +5,11 @@ import { useState, useTransition } from "react";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
-import { STATUS_LABELS } from "@/lib/statuses";
+import {
+  STATUS_LABELS,
+  ACTION_REQUIRED_KEY,
+  ACTION_REQUIRED_LABEL,
+} from "@/lib/statuses";
 
 export function DossiersFilterBar({
   initialQ,
@@ -79,6 +83,7 @@ export function DossiersFilterBar({
         <Combobox
           items={[
             { id: "", label: "Tous les statuts", pinned: true },
+            { id: ACTION_REQUIRED_KEY, label: ACTION_REQUIRED_LABEL, pinned: true },
             ...Object.entries(STATUS_LABELS).map(([k, label]) => ({
               id: k,
               label,

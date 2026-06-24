@@ -14,7 +14,13 @@ import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatCurrency } from "@/lib/utils";
-import { STATUS_LABELS, requiredDocuments, DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
+import {
+  STATUS_LABELS,
+  requiredDocuments,
+  DOCUMENT_CATEGORY_LABELS,
+  ACTION_REQUIRED_STATUSES,
+  ACTION_REQUIRED_KEY,
+} from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
 import { KeyDates, KeyDatesLegend } from "@/components/dossier/key-dates";
 import { PageHeader } from "@/components/ui/page-header";
@@ -39,7 +45,7 @@ export default async function DashboardPage() {
     prisma.dossier.count({ where: { deletedAt: null } }),
     prisma.dossier.count({ where: { deletedAt: null, status: { notIn: ["CLOTURE", "ANNULE"] } } }),
     prisma.dossier.count({
-      where: { deletedAt: null, status: { in: ["DOCUMENTS_MANQUANTS", "DEMANDE_DOCUMENTS", "BUREAU_VALEUR"] } },
+      where: { deletedAt: null, status: { in: ACTION_REQUIRED_STATUSES } },
     }),
     prisma.dossier.count({
       where: {
@@ -148,7 +154,7 @@ export default async function DashboardPage() {
           hint="documents · valeur · MCI"
           icon={AlertCircle}
           tone={blockedDossiers > 0 ? "warn" : "default"}
-          href="/dossiers?status=BUREAU_VALEUR"
+          href={`/dossiers?status=${ACTION_REQUIRED_KEY}`}
         />
         <StatCard
           label="Clôturés ce mois"

@@ -242,6 +242,19 @@ export function statusRequiresDum(status: DossierStatus): boolean {
   return STATUSES_REQUIRING_DUM.includes(status);
 }
 
+// Bucket « À traiter » : dossiers nécessitant une action (documents / valeur en douane).
+// Source unique partagée par le tableau de bord (compteur + lien) et le filtre /dossiers,
+// pour qu'ils ne se désynchronisent jamais.
+export const ACTION_REQUIRED_STATUSES: DossierStatus[] = [
+  "DOCUMENTS_MANQUANTS",
+  "DEMANDE_DOCUMENTS",
+  "BUREAU_VALEUR",
+];
+
+// Clé réservée (pseudo-statut) passée dans ?status= pour filtrer ce bucket.
+export const ACTION_REQUIRED_KEY = "A_TRAITER";
+export const ACTION_REQUIRED_LABEL = "À traiter (documents · valeur)";
+
 // Titre de transport requis selon le mode : maritime → connaissement (BL),
 // aérien → LTA, routier → CMR. Par défaut (transport inconnu) : connaissement.
 export function transportDocument(transport?: TransportMode | null): DocumentCategory {

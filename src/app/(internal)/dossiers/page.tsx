@@ -7,7 +7,12 @@ import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatDate, formatCurrency, formatNumber } from "@/lib/utils";
 import { canCreateDossier } from "@/lib/roles";
-import { requiredDocuments, DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
+import {
+  requiredDocuments,
+  DOCUMENT_CATEGORY_LABELS,
+  ACTION_REQUIRED_STATUSES,
+  ACTION_REQUIRED_KEY,
+} from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
 import { DossiersFilterBar } from "./filter-bar";
 import { KeyDates } from "@/components/dossier/key-dates";
@@ -34,19 +39,25 @@ export default async function DossiersPage({
   if (!session) return null;
 
   const q = params.q?.trim();
-  const statusFilter = params.status as DossierStatus | undefined;
+  // « A_TRAITER » est un bucket synthétique (plusieurs statuts), pas un vrai statut.
+  const isActionBucket = params.status === ACTION_REQUIRED_KEY;
+  const statusFilter = !isActionBucket
+    ? (params.status as DossierStatus | undefined)
+    : undefined;
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
 
   // Le commis en douane ne voit jamais les dossiers clôturés / annulés.
   const hideClosed = session.user.role === "COMMIS_DOUANE";
   const statusWhere =
-    statusFilter && hideClosed
-      ? { equals: statusFilter, notIn: ["CLOTURE", "ANNULE"] as DossierStatus[] }
-      : statusFilter
-        ? statusFilter
-        : hideClosed
-          ? { notIn: ["CLOTURE", "ANNULE"] as DossierStatus[] }
-          : undefined;
+    isActionBucket
+      ? { in: ACTION_REQUIRED_STATUSES }
+      : statusFilter && hideClosed
+        ? { equals: statusFilter, notIn: ["CLOTURE", "ANNULE"] as DossierStatus[] }
+        : statusFilter
+          ? statusFilter
+          : hideClosed
+            ? { notIn: ["CLOTURE", "ANNULE"] as DossierStatus[] }
+            : undefined;
 
   const where = {
     deletedAt: null,
