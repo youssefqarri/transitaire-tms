@@ -65,7 +65,7 @@ const TPL_FR: LangDefaults = {
         "Pour finaliser votre dossier {{dossier.number}}{{dossier.refSuffix}}, nous avons besoin des pièces suivantes :\n\n" +
         "{{missingList}}\n\n" +
         "Merci de nous les transmettre dans les meilleurs délais.\n\n" +
-        "Cordialement,\n{{user.name}}\nMaison de Transit",
+        "Cordialement,\n{{user.name}}\nTransit Multiservices",
     },
     WHATSAPP: {
       subject: null,
@@ -77,7 +77,7 @@ const TPL_FR: LangDefaults = {
     EMAIL: {
       subject: "Documents reçus — Dossier {{dossier.number}}{{dossier.refSuffix}}",
       body:
-        "Bonjour {{client.contactName}},\n\nNous avons bien reçu les documents pour le dossier {{dossier.number}}{{dossier.refSuffix}}. Nous procédons aux prochaines étapes.\n\nCordialement,\n{{user.name}}",
+        "Bonjour {{client.contactName}},\n\nNous avons bien reçu les documents pour le dossier {{dossier.number}}{{dossier.refSuffix}}. Nous procédons aux prochaines étapes.\n\nCordialement,\n{{user.name}}\nTransit Multiservices",
     },
     WHATSAPP: {
       subject: null,
@@ -88,7 +88,7 @@ const TPL_FR: LangDefaults = {
     EMAIL: {
       subject: "Ouverture du dossier {{dossier.number}}{{dossier.refSuffix}}",
       body:
-        "Bonjour {{client.contactName}},\n\nNous avons ouvert le dossier {{dossier.number}}{{dossier.refSuffix}} pour vos marchandises.\n\nVous pouvez en suivre l'avancement à tout moment depuis votre espace client.\n\nCordialement,\n{{user.name}}",
+        "Bonjour {{client.contactName}},\n\nNous avons ouvert le dossier {{dossier.number}}{{dossier.refSuffix}} pour vos marchandises.\n\nVous pouvez en suivre l'avancement à tout moment depuis votre espace client.\n\nCordialement,\n{{user.name}}\nTransit Multiservices",
     },
     WHATSAPP: {
       subject: null,
@@ -99,7 +99,7 @@ const TPL_FR: LangDefaults = {
     EMAIL: {
       subject: "DUM enregistrée — Dossier {{dossier.number}}{{dossier.refSuffix}}",
       body:
-        "Bonjour,\n\nLa DUM {{dum.number}} a été enregistrée pour votre dossier {{dossier.number}}{{dossier.refSuffix}}.\n\nCordialement,\n{{user.name}}",
+        "Bonjour,\n\nLa DUM {{dum.number}} a été enregistrée pour votre dossier {{dossier.number}}{{dossier.refSuffix}}.\n\nCordialement,\n{{user.name}}\nTransit Multiservices",
     },
     WHATSAPP: {
       subject: null,
@@ -110,7 +110,7 @@ const TPL_FR: LangDefaults = {
     EMAIL: {
       subject: "Visite douane programmée — {{dossier.number}}{{dossier.refSuffix}}",
       body:
-        "Bonjour,\n\nLa visite douane de votre dossier {{dossier.number}}{{dossier.refSuffix}} est programmée le {{visitDate}}.\n\nCordialement,\n{{user.name}}",
+        "Bonjour,\n\nLa visite douane de votre dossier {{dossier.number}}{{dossier.refSuffix}} est programmée le {{visitDate}}.\n\nCordialement,\n{{user.name}}\nTransit Multiservices",
     },
     WHATSAPP: {
       subject: null,
@@ -121,7 +121,7 @@ const TPL_FR: LangDefaults = {
     EMAIL: {
       subject: "Fiche de liquidation — Dossier {{dossier.number}}{{dossier.refSuffix}}",
       body:
-        "Bonjour,\n\nVeuillez trouver ci-joint la fiche de liquidation et le ticket de paiement pour votre dossier {{dossier.number}}{{dossier.refSuffix}}.\n\nMerci d'effectuer le règlement et de nous transmettre la preuve afin que nous puissions lever la marchandise.\n\nCordialement,\n{{user.name}}",
+        "Bonjour,\n\nVeuillez trouver ci-joint la fiche de liquidation et le ticket de paiement pour votre dossier {{dossier.number}}{{dossier.refSuffix}}.\n\nMerci d'effectuer le règlement et de nous transmettre la preuve afin que nous puissions lever la marchandise.\n\nCordialement,\n{{user.name}}\nTransit Multiservices",
     },
     WHATSAPP: {
       subject: null,
@@ -132,7 +132,7 @@ const TPL_FR: LangDefaults = {
     EMAIL: {
       subject: "Bon à enlever définitif — Dossier {{dossier.number}}{{dossier.refSuffix}}",
       body:
-        "Bonjour,\n\nBonne nouvelle : le bon à enlever définitif est obtenu pour votre dossier {{dossier.number}}{{dossier.refSuffix}}. La marchandise peut être enlevée.\n\nCordialement,\n{{user.name}}",
+        "Bonjour,\n\nBonne nouvelle : le bon à enlever définitif est obtenu pour votre dossier {{dossier.number}}{{dossier.refSuffix}}. La marchandise peut être enlevée.\n\nCordialement,\n{{user.name}}\nTransit Multiservices",
     },
     WHATSAPP: {
       subject: null,
@@ -143,7 +143,7 @@ const TPL_FR: LangDefaults = {
     EMAIL: {
       subject: "Dossier {{dossier.number}}{{dossier.refSuffix}} clôturé",
       body:
-        "Bonjour,\n\nVotre dossier {{dossier.number}}{{dossier.refSuffix}} est clôturé. Merci de votre confiance.\n\nCordialement,\n{{user.name}}",
+        "Bonjour,\n\nVotre dossier {{dossier.number}}{{dossier.refSuffix}} est clôturé. Merci de votre confiance.\n\nCordialement,\n{{user.name}}\nTransit Multiservices",
     },
     WHATSAPP: {
       subject: null,

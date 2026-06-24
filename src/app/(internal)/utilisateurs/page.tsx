@@ -12,6 +12,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
 import { parsePagination } from "@/lib/pagination";
+import { UserActiveToggle } from "./user-active-toggle";
 
 export const dynamic = "force-dynamic";
 
@@ -68,6 +69,11 @@ export default async function UsersPage({
                   {ROLE_LABELS[u.role]}
                 </Badge>
                 {!u.active && <Badge tone="danger">Inactif</Badge>}
+                <UserActiveToggle
+                  userId={u.id}
+                  active={u.active}
+                  self={u.id === session.user.id}
+                />
               </div>
             ))}
           </div>
