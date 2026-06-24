@@ -16,7 +16,7 @@ export default function ConfidentialitePage() {
         La présente politique décrit la manière dont la plateforme <strong>Escale</strong>{" "}
         (accessible à l&apos;adresse app.escale.ma, ci-après « la Plateforme ») collecte, utilise,
         conserve et protège les données à caractère personnel de ses utilisateurs, conformément à la{" "}
-        <strong>loi n° 09-08</strong> relative à la protection des personnes physiques à l&apos;égard
+        <strong>loi n° 09-08</strong>{" "}relative à la protection des personnes physiques à l&apos;égard
         du traitement des données à caractère personnel, à son décret d&apos;application n° 2-09-165,
         et aux délibérations de la <strong>Commission Nationale de contrôle de la protection des
         Données à caractère Personnel (CNDP)</strong>.

@@ -317,7 +317,7 @@ export default async function DossiersPage({
                     <ColumnHeader label="Référence" sortKey="reference" filter={{ type: "text", param: "reference" }} />
                     <ColumnHeader label="Client" sortKey="client" filter={{ type: "text", param: "clientName" }} />
                     <ColumnHeader label="DUM(s)" className="hidden 2xl:table-cell" filter={{ type: "text", param: "dum" }} />
-                    <ColumnHeader label="Documents" shortLabel="Docs" align="center" sortKey="docs" />
+                    <ColumnHeader label="Documents" shortLabel="Docs" align="right" sortKey="docs" />
                     <ColumnHeader label="Visite / Livraison" sortKey="visit" />
                     <ColumnHeader label="Valeur" align="right" sortKey="value" />
                     <ColumnHeader label="Poids" className="hidden 2xl:table-cell" align="right" sortKey="weight" />
@@ -357,8 +357,8 @@ export default async function DossiersPage({
                       <td className="px-3 py-2.5 font-mono text-[13px] text-[var(--color-fg-3)] hidden 2xl:table-cell">
                         {d.dums.length === 0 ? "—" : d.dums.map((dum) => dum.number).join(", ")}
                       </td>
-                      <td className="px-3 py-2.5 text-center whitespace-nowrap">
-                        <div className="inline-flex items-center gap-1 justify-center whitespace-nowrap">
+                      <td className="px-3 py-2.5 text-right whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1 justify-end whitespace-nowrap">
                           {d.fromClientCount > 0 && (
                             <span
                               className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--color-info-soft)] text-[var(--color-info)] cursor-default"

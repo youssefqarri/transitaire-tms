@@ -1,5 +1,5 @@
 import { Stamp, BadgeCheck, Truck, Clock } from "lucide-react";
-import { formatDate, formatDateTime } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 
 type Props = {
   visitDate?: Date | null;
@@ -50,23 +50,17 @@ export function KeyDates({
   ) {
     const done = isTodayOrPast(date);
     const isDone = onlyEffectiveColor || done;
-    // Couleur : vert si effectué (passé/aujourd'hui), bleu franc si à venir (futur).
-    // Pour la livraison on garde toujours du vert (onlyEffectiveColor=true).
+    // Vert = effectué (le vert suffit, pas de ✓). Bleu + horloge = à venir.
     const color = isDone ? "text-[var(--color-success)]" : "text-[var(--color-info)]";
-    const tag = onlyEffectiveColor ? "" : done ? " ✓" : "";
-    // À venir → petite horloge ; effectué → icône de l'événement.
     const PillIcon = isDone ? Icon : Clock;
-    // Infobulle au survol : explicite « effectué » vs « à venir » + l'HEURE.
+    // Événements externes (douane, contrôle, livraison) : on n'affiche que la date.
     const title = isDone
-      ? `${label} : effectué le ${formatDateTime(date)}`
-      : `${label} : prévu le ${formatDateTime(date)} (à venir)`;
+      ? `${label} : effectué le ${formatDate(date)}`
+      : `${label} : prévu le ${formatDate(date)} (à venir)`;
     return (
       <span className="inline-flex items-center gap-1 whitespace-nowrap" title={title}>
         <PillIcon className={`${icon} ${color}`} strokeWidth={1.75} />
-        <span className={`font-semibold ${color}`}>
-          {label}
-          {tag}
-        </span>
+        <span className={`font-semibold ${color}`}>{label}</span>
         <span>{formatDate(date)}</span>
       </span>
     );

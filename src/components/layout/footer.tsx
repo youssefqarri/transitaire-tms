@@ -4,7 +4,7 @@ import Link from "next/link";
 export function Footer() {
   const year = new Date().getFullYear();
   return (
-    <footer className="print:hidden border-t border-[var(--color-border)] px-4 sm:px-6 lg:px-8 py-4 text-[12px] text-[var(--color-fg-mute)]">
+    <footer className="print:hidden px-4 sm:px-6 lg:px-8 py-4 text-[12px] text-[var(--color-fg-mute)]">
       <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center">
         <span className="tnum">{year} © Escale.ma</span>
         <span aria-hidden>—</span>

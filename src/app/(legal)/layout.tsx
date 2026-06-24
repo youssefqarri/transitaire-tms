@@ -7,7 +7,7 @@ export default function LegalLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-bg)]">
       <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-[58rem] mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/">
             <LogoFull className="h-8 w-auto" />
           </Link>
@@ -19,7 +19,7 @@ export default function LegalLayout({ children }: { children: React.ReactNode })
           </Link>
         </div>
       </header>
-      <main className="flex-1 w-full max-w-3xl mx-auto px-6 py-10">{children}</main>
+      <main className="flex-1 w-full max-w-[58rem] mx-auto px-6 py-10">{children}</main>
       <Footer />
     </div>
   );
