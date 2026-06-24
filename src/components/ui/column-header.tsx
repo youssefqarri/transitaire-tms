@@ -96,8 +96,10 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
     "focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-ring)] transition-colors " +
     "placeholder:text-[var(--color-fg-3)] placeholder:font-medium";
 
-  const justify =
-    align === "right" ? "justify-end" : align === "center" ? "justify-center" : "justify-start";
+  // Le libellé/filtre prend toute la largeur (flex-1) → le bouton de tri est
+  // toujours collé à droite (juste avant le séparateur de la colonne suivante).
+  const labelAlign =
+    align === "right" ? "text-right" : align === "center" ? "text-center" : "text-left";
 
   return (
     <th
@@ -109,7 +111,7 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
         className,
       )}
     >
-      <div className={cn("flex items-center gap-0.5", justify)}>
+      <div className="flex items-center gap-1">
         {filter?.type === "text" ? (
           <div className="relative flex-1 min-w-[88px]">
             <Search
@@ -141,7 +143,7 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
               push((p) => (e.target.value ? p.set(filter.param, e.target.value) : p.delete(filter.param)))
             }
             aria-label={`Filtrer par ${label}`}
-            className={cn(inputCls, "px-1.5 font-medium", sp.get(filter.param) ? "text-[var(--color-fg)]" : "text-[var(--color-fg-3)]")}
+            className={cn(inputCls, "flex-1 px-1.5 font-medium", sp.get(filter.param) ? "text-[var(--color-fg)]" : "text-[var(--color-fg-3)]")}
           >
             <option value="">{label}</option>
             {filter.options.map((o) => (
@@ -151,12 +153,12 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
             ))}
           </select>
         ) : shortLabel ? (
-          <span className="truncate px-1">
+          <span className={cn("flex-1 truncate px-1", labelAlign)}>
             <span className="hidden lg:inline">{label}</span>
             <span className="lg:hidden">{shortLabel}</span>
           </span>
         ) : (
-          <span className="truncate px-1">{label}</span>
+          <span className={cn("flex-1 truncate px-1", labelAlign)}>{label}</span>
         )}
 
         {sortKey && (
