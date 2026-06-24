@@ -3,6 +3,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { Avatar } from "@/components/ui/avatar";
 import { LogoutButton } from "./logout-button";
+import { LogoFull } from "@/components/brand/logo";
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -17,23 +18,10 @@ export default async function PortalLayout({ children }: { children: React.React
             href="/portail"
             className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
           >
-            <div
-              className="size-8 rounded-[var(--radius)] flex items-center justify-center text-white text-[13px] font-bold tracking-tight"
-              style={{
-                background:
-                  "linear-gradient(135deg, var(--color-accent), oklch(38% 0.18 270))",
-              }}
-            >
-              T
-            </div>
-            <div>
-              <div className="text-[14px] font-semibold tracking-tight leading-tight text-[var(--color-fg)]">
-                Espace client
-              </div>
-              <div className="text-[10.5px] text-[var(--color-fg-mute)] leading-tight">
-                Transitaire TMS
-              </div>
-            </div>
+            <LogoFull className="h-7 w-auto" />
+            <span className="hidden sm:inline text-[12px] text-[var(--color-fg-mute)] border-l border-[var(--color-border)] pl-2.5">
+              Espace client
+            </span>
           </Link>
           <nav className="flex items-center gap-4 text-[13px]">
             <Link

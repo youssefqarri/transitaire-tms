@@ -18,11 +18,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Transitaire",
-    template: "%s · Transitaire",
+    default: "Escale",
+    template: "%s · Escale",
   },
   description: "Plateforme de gestion des dossiers de transit douanier au Maroc.",
-  applicationName: "Transitaire",
+  applicationName: "Escale",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

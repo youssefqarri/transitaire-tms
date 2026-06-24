@@ -47,13 +47,13 @@ export async function POST(req: Request) {
   try {
     await sendMail({
       to: email,
-      subject: "Réinitialisation de votre mot de passe — Transitaire",
+      subject: "Réinitialisation de votre mot de passe — Escale",
       text:
         `Bonjour ${user.name},\n\n` +
         `Vous avez demandé à réinitialiser votre mot de passe.\n\n` +
         `Cliquez sur le lien suivant (valide 1 heure) :\n${link}\n\n` +
         `Si vous n'êtes pas à l'origine de cette demande, ignorez ce message.\n\n` +
-        `— Transitaire`,
+        `— Escale`,
       html: textToHtml(
         `Bonjour ${user.name},\n\n` +
           `Vous avez demandé à réinitialiser votre mot de passe.\n\n` +

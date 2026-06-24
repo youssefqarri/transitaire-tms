@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import type { UserRole } from "@/generated/prisma/enums";
 import { visibleSections } from "./nav-items";
 import { UnreadBadge } from "./unread-badge";
+import { LogoFull } from "@/components/brand/logo";
 
 export function Sidebar({ role, unreadCount = 0 }: { role: UserRole; unreadCount?: number }) {
   const pathname = usePathname();
@@ -19,24 +20,10 @@ export function Sidebar({ role, unreadCount = 0 }: { role: UserRole; unreadCount
       )}
     >
       {/* Logo / branding */}
-      <div className="h-14 px-4 flex items-center gap-2.5 border-b border-[var(--color-sidebar-border)]">
-        <div
-          className="size-8 rounded-[var(--radius)] flex items-center justify-center text-white text-[13px] font-bold tracking-tight"
-          style={{
-            background:
-              "linear-gradient(135deg, var(--color-accent), oklch(38% 0.18 270))",
-          }}
-        >
-          T
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-[14px] font-semibold tracking-tight leading-tight">
-            Transitaire
-          </div>
-          <div className="text-[10.5px] text-[var(--color-fg-mute)] leading-tight">
-            TMS · Douane Maroc
-          </div>
-        </div>
+      <div className="h-14 px-4 flex items-center border-b border-[var(--color-sidebar-border)]">
+        <Link href="/dashboard" className="flex items-center" aria-label="escale — accueil">
+          <LogoFull className="h-7 w-auto" />
+        </Link>
       </div>
 
       <nav className="flex-1 px-2.5 py-4 overflow-y-auto scrollbar-thin space-y-5">

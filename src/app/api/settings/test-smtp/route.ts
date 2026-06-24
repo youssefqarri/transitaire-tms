@@ -31,10 +31,10 @@ export async function POST(req: Request) {
     try {
       const result = await sendMail({
         to: parsed.data.to,
-        subject: "Test SMTP — Transitaire TMS",
+        subject: "Test SMTP — Escale",
         text:
           "Si vous lisez ce message, la configuration SMTP fonctionne correctement.\n\n" +
-          "— Transitaire TMS",
+          "— Escale",
       });
       return NextResponse.json({
         ok: true,

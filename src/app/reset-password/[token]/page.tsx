@@ -1,6 +1,7 @@
 import { ResetForm } from "./form";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
+import { LogoFull } from "@/components/brand/logo";
 
 export const dynamic = "force-dynamic";
 
@@ -17,11 +18,8 @@ export default async function ResetPasswordPage({
   return (
     <div className="min-h-screen flex items-center justify-center px-6 bg-[var(--color-bg)]">
       <div className="w-full max-w-[380px]">
-        <div className="flex items-center gap-2.5 mb-8">
-          <div className="size-9 rounded-[var(--radius)] bg-[var(--color-fg)] flex items-center justify-center text-[var(--color-surface)] text-[14px] font-bold">
-            T
-          </div>
-          <span className="text-[16px] font-semibold tracking-tight">Transitaire</span>
+        <div className="mb-8">
+          <LogoFull className="h-9 w-auto" />
         </div>
 
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-7">

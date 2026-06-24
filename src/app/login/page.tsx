@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { LoginForm } from "./login-form";
+import { LogoFull } from "@/components/brand/logo";
 
 export default async function LoginPage({
   searchParams,
@@ -27,25 +28,8 @@ export default async function LoginPage({
 
       <div className="relative w-full max-w-[400px] animate-fade-in">
         {/* Logo */}
-        <div className="flex items-center gap-2.5 mb-8">
-          <div
-            className="size-10 rounded-[var(--radius-lg)] flex items-center justify-center text-white text-[15px] font-bold tracking-tight"
-            style={{
-              background:
-                "linear-gradient(135deg, var(--color-accent), oklch(38% 0.18 270))",
-              boxShadow: "0 8px 24px -8px oklch(48% 0.16 258 / 0.4)",
-            }}
-          >
-            T
-          </div>
-          <div>
-            <div className="text-[16px] font-semibold tracking-tight leading-tight">
-              Transitaire
-            </div>
-            <div className="text-[11px] text-[var(--color-fg-mute)] leading-tight">
-              TMS · Douane Maroc
-            </div>
-          </div>
+        <div className="mb-8">
+          <LogoFull className="h-10 w-auto" />
         </div>
 
         {/* Card */}
