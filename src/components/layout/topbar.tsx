@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, LogOut, ChevronDown, User } from "lucide-react";
+import { LogOut, ChevronDown, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "next-auth/react";
@@ -9,6 +9,7 @@ import { ROLE_LABELS } from "@/lib/roles";
 import type { UserRole } from "@/generated/prisma/enums";
 import { useRouter } from "next/navigation";
 import { MobileNav } from "./mobile-nav";
+import { GlobalSearch } from "./global-search";
 
 export function Topbar({
   name,
@@ -57,29 +58,7 @@ export function Topbar({
     <header className="h-14 px-3 sm:px-5 lg:px-6 border-b border-[var(--color-border)] bg-[var(--color-surface)]/95 backdrop-blur-md sticky top-0 z-30 flex items-center gap-3 sm:gap-4">
       <MobileNav role={role} unreadCount={unreadCount} />
 
-      <form
-        className="flex-1 sm:flex-initial sm:w-full sm:max-w-md"
-        role="search"
-        onSubmit={(e) => {
-          e.preventDefault();
-          const q = (e.currentTarget.elements.namedItem("q") as HTMLInputElement).value;
-          router.push(`/dossiers?q=${encodeURIComponent(q)}`);
-        }}
-      >
-        <label className="relative block">
-          <span className="sr-only">Rechercher</span>
-          <Search
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-[var(--color-fg-mute)] pointer-events-none"
-            strokeWidth={1.75}
-          />
-          <input
-            name="q"
-            placeholder="Rechercher un dossier, DUM, client…"
-            aria-label="Rechercher"
-            className="w-full h-9 pl-8 pr-3 text-[13px] bg-[var(--color-surface-2)] border border-transparent rounded-[var(--radius)] placeholder:text-[var(--color-fg-mute)] focus:outline-none focus:bg-[var(--color-surface)] focus:border-[var(--color-border-2)] focus:ring-2 focus:ring-[var(--color-accent-ring)] transition-all"
-          />
-        </label>
-      </form>
+      <GlobalSearch />
 
       <div ref={menuRef} className="relative ml-auto">
         <button
