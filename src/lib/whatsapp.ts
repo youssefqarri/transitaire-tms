@@ -85,8 +85,9 @@ export async function verifyWhatsApp(): Promise<{
       state?: string;
     };
     const status = String(data.status ?? data.state ?? "?");
-    // WAHA: "WORKING" = prêt ; open-wa: "CONNECTED"/"AUTHENTICATED".
-    const ok = ["WORKING", "CONNECTED", "AUTHENTICATED"].includes(status.toUpperCase());
+    // WAHA: "WORKING" = prêt ; open-wa: "CONNECTED"/"AUTHENTICATED" ; cette
+    // variante OpenWA (par id de session) renvoie "ready".
+    const ok = ["WORKING", "CONNECTED", "AUTHENTICATED", "READY"].includes(status.toUpperCase());
     return { ok, status };
   } catch (e: unknown) {
     return { ok: false, error: (e as Error).message };
