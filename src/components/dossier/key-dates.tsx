@@ -86,7 +86,7 @@ export function KeyDates({
 export function KeyDatesLegend({ className = "" }: { className?: string }) {
   return (
     <span
-      className={`inline-flex items-center gap-2.5 text-[11px] text-[var(--color-fg-mute)] ${className}`}
+      className={`inline-flex items-center gap-2.5 text-[11px] text-[var(--color-fg-3)] ${className}`}
     >
       <span className="inline-flex items-center gap-1">
         <span

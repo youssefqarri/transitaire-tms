@@ -110,7 +110,9 @@ export default async function DossierDetailPage({
                 <StatusBadge status={dossier.secondaryStatus} size="sm" />
               </span>
             )}
-            <Badge tone={dossier.type === "IMPORT" ? "info" : "ok"}>{dossier.type}</Badge>
+            <Badge tone={dossier.type === "IMPORT" ? "info" : "ok"}>
+              {dossier.type === "IMPORT" ? "Import" : "Export"}
+            </Badge>
             {dossier.paymentMode === "WITH_PAYMENT" && (
               <Badge tone="outline">Avec paiement</Badge>
             )}
@@ -273,7 +275,7 @@ export default async function DossierDetailPage({
                 value={dossier.regulatoryServices.length ? dossier.regulatoryServices.join(", ") : "—"}
               />
               <Field label="Assigné" value={dossier.assignedTo?.name ?? "—"} />
-              <Field label="Type" value={dossier.type} />
+              <Field label="Type" value={dossier.type === "IMPORT" ? "Import" : "Export"} />
               {dossier.goodsDescription && (
                 <div className="md:col-span-4 pt-1">
                   <div className="text-[12px] font-medium text-[var(--color-fg-3)] mb-1">

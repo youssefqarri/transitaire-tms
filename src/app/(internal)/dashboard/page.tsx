@@ -58,7 +58,7 @@ export default async function DashboardPage() {
     prisma.dossier.findMany({
       // Tableau de bord : on ne montre que les dossiers actifs (pas les clôturés/annulés).
       where: { deletedAt: null, status: { notIn: ["CLOTURE", "ANNULE"] } },
-      take: 8,
+      take: 6,
       orderBy: { updatedAt: "desc" },
       include: {
         client: true,
@@ -181,7 +181,7 @@ export default async function DashboardPage() {
             </div>
             <Link
               href="/dossiers"
-              className="text-[12px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)] inline-flex items-center gap-1 shrink-0"
+              className="text-[12px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)] hover:underline underline-offset-2 inline-flex items-center gap-1 shrink-0"
             >
               Tout voir <ArrowUpRight className="size-3" strokeWidth={2} />
             </Link>
@@ -258,7 +258,7 @@ export default async function DashboardPage() {
             <CardTitle>Répartition par statut</CardTitle>
             <span className="text-[12px] text-[var(--color-fg-3)] tnum">{totalActive} actifs</span>
           </CardHeader>
-          <div className="px-5 py-3 space-y-3">
+          <div className="px-5 py-3 space-y-2">
             {statusGroups.length === 0 && (
               <div className="py-6 text-center text-[13px] text-[var(--color-fg-3)]">
                 Aucun dossier actif.
