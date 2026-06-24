@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Folder, Plus, AlertTriangle, FilterX } from "lucide-react";
+import { Folder, Plus, AlertTriangle, FilterX, Check } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -309,18 +309,18 @@ export default async function DossiersPage({
                   <tr className="border-b border-[var(--color-border)] text-[12px]">
                     <ColumnHeader
                       label="Statut"
-                      className="w-[210px]"
+                      className="w-[160px]"
                       sortKey="status"
                       filter={{ type: "select", param: "status", options: statusOptions }}
                     />
                     <ColumnHeader label="Dossier" sortKey="number" filter={{ type: "text", param: "number" }} />
                     <ColumnHeader label="Référence" sortKey="reference" filter={{ type: "text", param: "reference" }} />
                     <ColumnHeader label="Client" sortKey="client" filter={{ type: "text", param: "clientName" }} />
-                    <ColumnHeader label="DUM(s)" filter={{ type: "text", param: "dum" }} />
+                    <ColumnHeader label="DUM(s)" className="hidden 2xl:table-cell" filter={{ type: "text", param: "dum" }} />
                     <ColumnHeader label="Documents" shortLabel="Docs" align="center" sortKey="docs" />
                     <ColumnHeader label="Visite / Livraison" sortKey="visit" />
                     <ColumnHeader label="Valeur" align="right" sortKey="value" />
-                    <ColumnHeader label="Poids" align="right" sortKey="weight" />
+                    <ColumnHeader label="Poids" className="hidden 2xl:table-cell" align="right" sortKey="weight" />
                     <ColumnHeader label="M.à.j" align="right" sortKey="updatedAt" />
                   </tr>
                 </thead>
@@ -330,7 +330,7 @@ export default async function DossiersPage({
                       key={d.id}
                       className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-2)] transition-colors"
                     >
-                      <td className="px-5 py-2.5">
+                      <td className="px-3 py-2.5">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <StatusBadge status={d.status} size="sm" />
                           {d.isNewFromClient && (
@@ -340,7 +340,7 @@ export default async function DossiersPage({
                           )}
                         </div>
                       </td>
-                      <td className="px-5 py-2.5">
+                      <td className="px-3 py-2.5">
                         <Link
                           href={`/dossiers/${d.id}`}
                           className="font-mono font-semibold text-[13px] text-[var(--color-fg)] hover:text-[var(--color-accent)]"
@@ -348,13 +348,13 @@ export default async function DossiersPage({
                           {d.number}
                         </Link>
                       </td>
-                      <td className="px-5 py-2.5 font-mono text-[13px] text-[var(--color-fg-2)]">
+                      <td className="px-3 py-2.5 font-mono text-[13px] text-[var(--color-fg-2)]">
                         {d.reference ?? <span className="text-[var(--color-fg-mute)] italic">—</span>}
                       </td>
-                      <td className="px-5 py-2.5 truncate max-w-[200px] text-[13px] text-[var(--color-fg-3)]">
+                      <td className="px-3 py-2.5 truncate max-w-[200px] text-[13px] text-[var(--color-fg-3)]">
                         {d.client.name}
                       </td>
-                      <td className="px-5 py-2.5 font-mono text-[13px] text-[var(--color-fg-3)]">
+                      <td className="px-3 py-2.5 font-mono text-[13px] text-[var(--color-fg-3)] hidden 2xl:table-cell">
                         {d.dums.length === 0 ? "—" : d.dums.map((dum) => dum.number).join(", ")}
                       </td>
                       <td className="px-3 py-2.5 text-center whitespace-nowrap">
@@ -377,9 +377,10 @@ export default async function DossiersPage({
                             </span>
                           ) : d.fromClientCount === 0 ? (
                             <span
-                              className="text-[13px] font-semibold text-[var(--color-success)] tnum"
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-medium bg-[var(--color-success-soft)] text-[var(--color-success)] cursor-default"
                               title="Tous les documents requis sont présents"
                             >
+                              <Check className="size-2.5" strokeWidth={3} />
                               {d.docCount}
                             </span>
                           ) : null}
@@ -398,16 +399,16 @@ export default async function DossiersPage({
                           <span className="text-[12px] text-[var(--color-fg-mute)]">—</span>
                         )}
                       </td>
-                      <td className="px-5 py-2.5 text-right font-mono tnum text-[13px] text-[var(--color-fg-3)] whitespace-nowrap">
+                      <td className="px-3 py-2.5 text-right font-mono tnum text-[13px] text-[var(--color-fg-3)] whitespace-nowrap">
                         {formatCurrency(
                           d.goodsValue ? Number(d.goodsValue) : null,
                           d.goodsCurrency ?? "EUR",
                         )}
                       </td>
-                      <td className="px-5 py-2.5 text-right font-mono tnum text-[13px] text-[var(--color-fg-3)] whitespace-nowrap">
+                      <td className="px-3 py-2.5 text-right font-mono tnum text-[13px] text-[var(--color-fg-3)] whitespace-nowrap hidden 2xl:table-cell">
                         {d.goodsWeight ? `${formatNumber(Number(d.goodsWeight))} kg` : "—"}
                       </td>
-                      <td className="px-5 py-2.5 text-right text-[13px] text-[var(--color-fg-3)] whitespace-nowrap">
+                      <td className="px-3 py-2.5 text-right text-[13px] text-[var(--color-fg-3)] whitespace-nowrap">
                         {formatDate(d.updatedAt)}
                       </td>
                     </tr>

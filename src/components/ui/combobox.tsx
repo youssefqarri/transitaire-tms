@@ -144,7 +144,7 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
         className={cn(
           "group flex h-9 w-full items-center gap-2 pl-3 pr-2 text-[13px] text-left",
           "bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)]",
-          "transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)] focus-visible:border-transparent",
+          "transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)]",
           "disabled:opacity-50 disabled:cursor-not-allowed",
           open && "ring-2 ring-[var(--color-accent-ring)] border-transparent",
         )}

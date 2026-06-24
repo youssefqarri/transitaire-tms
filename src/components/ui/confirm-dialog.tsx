@@ -113,7 +113,7 @@ export function ConfirmDialog({
                 value={typed}
                 onChange={(e) => setTyped(e.target.value)}
                 autoFocus
-                className="flex h-9 w-full px-3 text-[13px] bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)] focus-visible:border-transparent"
+                className="flex h-9 w-full px-3 text-[13px] bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)]"
               />
             </div>
           )}

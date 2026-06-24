@@ -42,7 +42,7 @@ export function CorbeilleClient({
   const field =
     "h-9 bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)] " +
     "hover:border-[var(--color-fg-mute)] focus-visible:outline-none focus-visible:ring-2 " +
-    "focus-visible:ring-[var(--color-accent-ring)] focus-visible:border-transparent transition-colors";
+    "focus-visible:ring-[var(--color-accent-ring)] transition-colors";
 
   return (
     <Card>

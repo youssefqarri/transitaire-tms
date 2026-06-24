@@ -92,7 +92,7 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
 
   const inputCls =
     "w-full h-7 text-[12px] rounded-[var(--radius)] bg-transparent border border-transparent " +
-    "hover:border-[var(--color-border-2)] focus:bg-[var(--color-surface)] focus:border-[var(--color-fg-mute)] " +
+    "hover:border-[var(--color-border-2)] focus:bg-[var(--color-surface)] " +
     "focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-ring)] transition-colors " +
     "placeholder:text-[var(--color-fg-3)] placeholder:font-medium";
 
@@ -103,13 +103,14 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
     <th
       className={cn(
         "px-3 py-1.5 align-middle font-medium text-[var(--color-fg-3)]",
+        "border-r border-[var(--color-border)] last:border-r-0",
         align === "right" ? "text-right" : align === "center" ? "text-center" : "text-left",
         className,
       )}
     >
       <div className={cn("flex items-center gap-0.5", justify)}>
         {filter?.type === "text" ? (
-          <div className="relative flex-1 min-w-[104px]">
+          <div className="relative flex-1 min-w-[88px]">
             <Search
               className="absolute left-1.5 top-1/2 -translate-y-1/2 size-3 text-[var(--color-fg-mute)] pointer-events-none"
               strokeWidth={2}

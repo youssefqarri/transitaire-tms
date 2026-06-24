@@ -13,7 +13,7 @@ export const Textarea = React.forwardRef<
       "placeholder:text-[var(--color-fg-mute)]",
       "transition-shadow duration-150",
       "hover:border-[var(--color-fg-mute)]",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)] focus-visible:border-transparent",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)]",
       "aria-[invalid=true]:border-[var(--color-danger)] aria-[invalid=true]:ring-2 aria-[invalid=true]:ring-[var(--color-danger)]/20",
       "disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[var(--color-surface-2)] resize-y",
       className,
