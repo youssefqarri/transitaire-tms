@@ -134,7 +134,7 @@ export default async function DossierDetailPage({
                 dossierId={dossier.id}
                 clientId={dossier.clientId}
                 clientEmail={dossier.client.email}
-                clientPhone={dossier.client.phone}
+                clientPhone={dossier.client.whatsapp ?? dossier.client.phone}
                 contacts={dossier.client.contacts}
                 dossierContactEmail={dossier.contactEmail}
                 waConfigured={waConfigured}
@@ -348,7 +348,7 @@ export default async function DossierDetailPage({
                   readOnly={readOnly}
                   clientId={dossier.clientId}
                   clientEmail={dossier.client.email}
-                  clientPhone={dossier.client.phone}
+                  clientPhone={dossier.client.whatsapp ?? dossier.client.phone}
                   contacts={dossier.client.contacts}
                   dossierContactEmail={dossier.contactEmail}
                   waConfigured={waConfigured}
