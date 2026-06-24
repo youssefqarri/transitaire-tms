@@ -38,10 +38,18 @@ export const dynamic = "force-dynamic";
 
 export default async function DossierDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string }>;
 }) {
   const { id } = await params;
+  const { from } = await searchParams;
+  // « Retour » dynamique : reflète d'où l'on vient (notifications vs liste dossiers).
+  const back =
+    from === "notifications"
+      ? { href: "/notifications", label: "Retour aux notifications" }
+      : { href: "/dossiers", label: "Retour aux dossiers" };
   const session = await auth();
   if (!session) return null;
 
@@ -87,7 +95,7 @@ export default async function DossierDetailPage({
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <BackLink href="/dossiers">Retour aux dossiers</BackLink>
+      <BackLink href={back.href}>{back.label}</BackLink>
 
       <header className="flex items-start justify-between gap-4 flex-wrap">
         <div className="space-y-2 min-w-0">

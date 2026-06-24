@@ -31,6 +31,8 @@ export function NotifRow({
   const router = useRouter();
   // optimistic state pour que la pastille disparaisse immédiatement
   const [localRead, setLocalRead] = useState(read);
+  // Marqueur d'origine : la page cible affichera « Retour aux notifications ».
+  const target = link + (link.includes("?") ? "&" : "?") + "from=notifications";
 
   async function handleClick(e: React.MouseEvent) {
     e.preventDefault();
@@ -41,12 +43,12 @@ export function NotifRow({
       // mark read en parallèle, sans bloquer la navigation
       fetch(`/api/notifications/${id}`, { method: "PATCH" }).catch(() => {});
     }
-    router.push(link);
+    router.push(target);
   }
 
   return (
     <a
-      href={link}
+      href={target}
       onClick={handleClick}
       className={cn(
         "flex items-start gap-3 p-4 hover:bg-[var(--color-surface-2)]/50 transition-colors",
