@@ -308,8 +308,8 @@ export default async function DossiersPage({
                       <td className="px-5 py-2.5 font-mono text-[13px] text-[var(--color-fg-3)]">
                         {d.dums.length === 0 ? "—" : d.dums.map((dum) => dum.number).join(", ")}
                       </td>
-                      <td className="px-3 py-2.5 text-center">
-                        <div className="inline-flex items-center gap-1 flex-wrap justify-center">
+                      <td className="px-3 py-2.5 text-center whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1 justify-center whitespace-nowrap">
                           {d.fromClientCount > 0 && (
                             <span
                               className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--color-danger)] text-white cursor-default"

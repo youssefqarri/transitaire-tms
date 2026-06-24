@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition, useMemo, useEffect } from "react";
+import { useState, useTransition, useMemo, useEffect, type ComponentType } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Send, X, Mail, MessageCircle } from "lucide-react";
+import { Send, X, Mail } from "lucide-react";
+import { WhatsAppIcon } from "@/components/brand/whatsapp-icon";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -215,7 +216,7 @@ export function NotifyClientButton({
                   active={waOn}
                   disabled={!clientPhone}
                   onClick={() => setWaOn((v) => !v)}
-                  icon={MessageCircle}
+                  icon={WhatsAppIcon}
                   label="WhatsApp"
                   title={clientPhone ? clientPhone : "Pas de téléphone client"}
                 />
@@ -378,7 +379,7 @@ function ChannelToggle({
   active: boolean;
   disabled?: boolean;
   onClick: () => void;
-  icon: typeof Mail;
+  icon: ComponentType<{ className?: string; strokeWidth?: number }>;
   label: string;
   title?: string;
 }) {
