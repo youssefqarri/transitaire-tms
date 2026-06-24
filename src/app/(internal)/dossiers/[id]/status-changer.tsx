@@ -62,6 +62,8 @@ export function StatusChanger({
   }
 
   function submit() {
+    // Statut inchangé + note = on ajoute simplement une note libre à la chronologie.
+    const noteOnly = target === activeCurrent;
     start(async () => {
       const res = await fetch(`/api/dossiers/${dossierId}/status`, {
         method: "POST",
@@ -69,10 +71,10 @@ export function StatusChanger({
         body: JSON.stringify({ status: target, note: note.trim() || undefined, track }),
       });
       if (!res.ok) {
-        toast.error("Erreur lors du changement de statut");
+        toast.error("Erreur lors de l'enregistrement");
         return;
       }
-      toast.success("Statut mis à jour");
+      toast.success(noteOnly ? "Note ajoutée à la chronologie" : "Statut mis à jour");
       setOpen(false);
       setNote("");
       router.refresh();
@@ -159,12 +161,12 @@ export function StatusChanger({
               )}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="note">Note (optionnel)</Label>
+              <Label htmlFor="note">Note libre / autre (optionnel)</Label>
               <Textarea
                 id="note"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Contexte du changement…"
+                placeholder="Texte libre — apparaît dans la chronologie…"
               />
             </div>
             <div className="flex items-center justify-between gap-2 pt-1">
@@ -184,8 +186,16 @@ export function StatusChanger({
                 <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
                   Fermer
                 </Button>
-                <Button size="sm" onClick={submit} disabled={pending || target === activeCurrent}>
-                  {pending ? "Mise à jour…" : "Confirmer"}
+                <Button
+                  size="sm"
+                  onClick={submit}
+                  disabled={pending || (target === activeCurrent && !note.trim())}
+                >
+                  {pending
+                    ? "Enregistrement…"
+                    : target === activeCurrent
+                      ? "Ajouter la note"
+                      : "Confirmer"}
                 </Button>
               </div>
             </div>

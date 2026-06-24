@@ -386,14 +386,22 @@ export default async function DossierDetailPage({
                 const events: Evt[] = [];
                 for (const sc of dossier.statusChanges) {
                   const isControl = sc.track === "CONTROLE";
+                  // Statut inchangé + note = note libre ajoutée à la chronologie.
+                  const isNote = sc.fromStatus === sc.toStatus;
                   events.push({
                     key: `sc-${sc.id}`,
                     date: sc.createdAt,
-                    label: STATUS_LABELS[sc.toStatus] + (isControl ? " — organismes" : ""),
+                    label: isNote
+                      ? "Note" + (isControl ? " — organismes" : "")
+                      : STATUS_LABELS[sc.toStatus] + (isControl ? " — organismes" : ""),
                     meta: sc.changedBy?.name,
                     note: sc.note ?? undefined,
-                    dot: isControl ? "bg-[var(--color-accent)]" : "bg-[var(--color-fg)]",
-                    hideDate: !isControl && sc.toStatus === "VISITE",
+                    dot: isNote
+                      ? "bg-[var(--color-fg-mute)]"
+                      : isControl
+                        ? "bg-[var(--color-accent)]"
+                        : "bg-[var(--color-fg)]",
+                    hideDate: !isNote && !isControl && sc.toStatus === "VISITE",
                   });
                 }
                 const todayMs = new Date().setHours(0, 0, 0, 0);
