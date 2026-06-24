@@ -13,7 +13,7 @@ import { auth } from "@/lib/auth";
 import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/dossier/status-badge";
-import { formatDate, formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import { STATUS_LABELS, requiredDocuments, DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
 import { KeyDates } from "@/components/dossier/key-dates";
@@ -190,15 +190,8 @@ export default async function DashboardPage() {
                   href={`/dossiers/${d.id}`}
                   className="row-link block px-5 py-3 hover:bg-[var(--color-surface-2)] transition-colors"
                 >
-                  {/* Ligne 1 : statut (en haut, peut passer à la ligne) + date de maj */}
+                  {/* Ligne 1 : N° dossier + référence (gauche) · statut (droite, aligné en haut) */}
                   <div className="flex items-start justify-between gap-3">
-                    <StatusBadge status={d.status} size="sm" wrap />
-                    <span className="text-[10.5px] text-[var(--color-fg-mute)] shrink-0 mt-0.5 tnum">
-                      {formatDate(d.updatedAt)}
-                    </span>
-                  </div>
-                  {/* Ligne 2 : N° dossier + référence + valeur */}
-                  <div className="flex items-center justify-between gap-3 mt-2">
                     <div className="flex items-center gap-2 flex-wrap min-w-0">
                       <span className="font-mono text-[12.5px] text-[var(--color-fg)] font-medium">
                         {d.number}
@@ -209,28 +202,31 @@ export default async function DashboardPage() {
                         </span>
                       )}
                     </div>
+                    <StatusBadge status={d.status} size="sm" wrap className="max-w-[60%]" />
+                  </div>
+                  {/* Ligne 2 : client + DUM + docs (gauche) · valeur (droite) */}
+                  <div className="flex items-center justify-between gap-3 mt-1">
+                    <div className="text-[12.5px] text-[var(--color-fg-3)] flex items-center gap-1.5 flex-wrap min-w-0">
+                      <span className="truncate">{d.client.name}</span>
+                      {d.dums.length > 0 && (
+                        <span className="font-mono">
+                          · DUM {d.dums.map((dum) => dum.number).join(", ")}
+                        </span>
+                      )}
+                      {missing > 0 && (
+                        <span title={missingDocsOf(d)} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] cursor-default">
+                          <AlertTriangle className="size-2.5" strokeWidth={2.25} />
+                          {missing} doc{missing > 1 ? "s" : ""}
+                        </span>
+                      )}
+                    </div>
                     {d.goodsValue != null && (
                       <span className="font-mono text-[12.5px] text-[var(--color-fg)] tnum shrink-0">
                         {formatCurrency(Number(d.goodsValue), d.goodsCurrency ?? "EUR")}
                       </span>
                     )}
                   </div>
-                  {/* Ligne 3 : client + DUM + docs manquants */}
-                  <div className="text-[12.5px] text-[var(--color-fg-3)] mt-0.5 flex items-center gap-1.5 flex-wrap">
-                    <span className="truncate">{d.client.name}</span>
-                    {d.dums.length > 0 && (
-                      <span className="font-mono">
-                        · DUM {d.dums.map((dum) => dum.number).join(", ")}
-                      </span>
-                    )}
-                    {missing > 0 && (
-                      <span title={missingDocsOf(d)} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] cursor-default">
-                        <AlertTriangle className="size-2.5" strokeWidth={2.25} />
-                        {missing} doc{missing > 1 ? "s" : ""}
-                      </span>
-                    )}
-                  </div>
-                  {/* Ligne 4 : dates clés (sur une ligne, à gauche) */}
+                  {/* Ligne 3 : dates clés (sur une ligne, à gauche) */}
                   {hasDates && (
                     <div className="mt-1.5">
                       <KeyDates
