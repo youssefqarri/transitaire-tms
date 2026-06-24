@@ -24,7 +24,6 @@ const TEMPLATES: TemplateInfo[] = [
 ];
 
 type Contact = { id: string; name: string | null; email: string };
-const OTHER = "__OTHER__";
 
 export function NotifyClientButton({
   dossierId,
@@ -70,21 +69,29 @@ export function NotifyClientButton({
     return opts;
   }, [clientEmail, contacts]);
 
-  const known = recipientOptions.map((o) => o.value);
-  const [recipient, setRecipient] = useState(
-    dossierContactEmail && known.includes(dossierContactEmail)
-      ? dossierContactEmail
-      : dossierContactEmail
-      ? OTHER
-      : known[0] ?? OTHER,
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Plusieurs destinataires possibles. Initialise avec le contact du dossier
+  // (sinon l'email principal du client).
+  const [recipients, setRecipients] = useState<string[]>(
+    dossierContactEmail ? [dossierContactEmail] : clientEmail ? [clientEmail] : [],
   );
-  const [otherEmail, setOtherEmail] = useState(
-    dossierContactEmail && !known.includes(dossierContactEmail) ? dossierContactEmail : "",
-  );
-  const [otherName, setOtherName] = useState("");
-  const [saveContact, setSaveContact] = useState(false);
+  const [newAddr, setNewAddr] = useState("");
+  const [saveContacts, setSaveContacts] = useState(false);
 
-  const toAddress = (recipient === OTHER ? otherEmail : recipient).trim();
+  function addRecipient(addr: string) {
+    const a = addr.trim();
+    if (!a) return;
+    if (!EMAIL_RE.test(a)) {
+      toast.error("Adresse email invalide");
+      return;
+    }
+    setRecipients((r) => (r.includes(a) ? r : [...r, a]));
+    setNewAddr("");
+  }
+  function removeRecipient(addr: string) {
+    setRecipients((r) => r.filter((x) => x !== addr));
+  }
+  const toAddress = recipients.join(", ");
 
   // Aperçu : recharge quand le modèle ou le canal principal change.
   useEffect(() => {
@@ -131,8 +138,8 @@ export function NotifyClientButton({
       toast.error("Message vide");
       return;
     }
-    if (emailOn && (!toAddress || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(toAddress))) {
-      toast.error("Destinataire email invalide");
+    if (emailOn && (recipients.length === 0 || recipients.some((a) => !EMAIL_RE.test(a)))) {
+      toast.error("Ajoute au moins une adresse email valide");
       return;
     }
     // wa.me (repli non configuré) doit s'ouvrir dans le geste utilisateur, avant tout await.
@@ -144,8 +151,7 @@ export function NotifyClientButton({
         const r = await postNotify("EMAIL", {
           customSubject: editedSubject || undefined,
           toAddress,
-          saveAsContact: recipient === OTHER && saveContact,
-          contactName: otherName || undefined,
+          saveAsContact: saveContacts,
         });
         results.push({ label: "Email", ...r });
       }
@@ -166,7 +172,7 @@ export function NotifyClientButton({
     });
   }
 
-  const sendDisabled = pending || (!emailOn && !waOn) || (emailOn && !toAddress);
+  const sendDisabled = pending || (!emailOn && !waOn) || (emailOn && recipients.length === 0);
 
   const modal = (
     <div
@@ -228,40 +234,75 @@ export function NotifyClientButton({
           </div>
 
           {emailOn && (
-            <div className="space-y-1.5">
-              <Label htmlFor="recipient">Destinataire (email)</Label>
-              <Select id="recipient" value={recipient} onChange={(e) => setRecipient(e.target.value)}>
-                {recipientOptions.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
+            <div className="space-y-2">
+              <Label>Destinataires (email)</Label>
+              {/* puces des destinataires sélectionnés */}
+              <div className="flex flex-wrap gap-1.5">
+                {recipients.length === 0 && (
+                  <span className="text-[12px] text-[var(--color-fg-mute)]">Aucun destinataire</span>
+                )}
+                {recipients.map((addr) => (
+                  <span
+                    key={addr}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[12px] bg-[var(--color-surface-2)] border border-[var(--color-border)]"
+                  >
+                    {addr}
+                    <button
+                      type="button"
+                      onClick={() => removeRecipient(addr)}
+                      className="text-[var(--color-fg-mute)] hover:text-[var(--color-danger)]"
+                      aria-label={`Retirer ${addr}`}
+                    >
+                      <X className="size-3" strokeWidth={2.5} />
+                    </button>
+                  </span>
                 ))}
-                <option value={OTHER}>Autre adresse…</option>
-              </Select>
-              {recipient === OTHER && (
-                <div className="space-y-2 pt-1.5">
-                  <Input
-                    type="email"
-                    value={otherEmail}
-                    onChange={(e) => setOtherEmail(e.target.value)}
-                    placeholder="email@destinataire.ma"
-                  />
-                  <Input
-                    value={otherName}
-                    onChange={(e) => setOtherName(e.target.value)}
-                    placeholder="Nom / libellé (optionnel)"
-                  />
-                  <label className="flex items-center gap-2 text-[12.5px] text-[var(--color-fg-2)] cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={saveContact}
-                      onChange={(e) => setSaveContact(e.target.checked)}
-                      className="accent-[var(--color-accent)] size-4"
-                    />
-                    Enregistrer ce contact pour le client
-                  </label>
-                </div>
+              </div>
+              {/* ajout depuis les contacts connus */}
+              {recipientOptions.some((o) => !recipients.includes(o.value)) && (
+                <Select
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value) addRecipient(e.target.value);
+                  }}
+                >
+                  <option value="">Ajouter un contact connu…</option>
+                  {recipientOptions
+                    .filter((o) => !recipients.includes(o.value))
+                    .map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                </Select>
               )}
+              {/* ajout d'une adresse libre */}
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  value={newAddr}
+                  onChange={(e) => setNewAddr(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addRecipient(newAddr);
+                    }
+                  }}
+                  placeholder="autre@adresse.ma"
+                />
+                <Button type="button" variant="outline" size="sm" onClick={() => addRecipient(newAddr)}>
+                  Ajouter
+                </Button>
+              </div>
+              <label className="flex items-center gap-2 text-[12.5px] text-[var(--color-fg-2)] cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={saveContacts}
+                  onChange={(e) => setSaveContacts(e.target.checked)}
+                  className="accent-[var(--color-accent)] size-4"
+                />
+                Enregistrer les nouvelles adresses comme contacts du client
+              </label>
             </div>
           )}
 

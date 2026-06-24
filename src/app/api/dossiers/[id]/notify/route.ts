@@ -25,8 +25,12 @@ const schema = z
   .superRefine((data, ctx) => {
     const v = data.toAddress?.trim();
     if (!v) return; // pas de destinataire explicite → contact principal du dossier
-    if (data.channel === "EMAIL" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["toAddress"], message: "Adresse e-mail invalide" });
+    if (data.channel === "EMAIL") {
+      // toAddress peut contenir PLUSIEURS adresses séparées par « , » ou « ; »
+      const emails = v.split(/[,;]/).map((s) => s.trim()).filter(Boolean);
+      if (emails.length === 0 || emails.some((e) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["toAddress"], message: "Adresse e-mail invalide" });
+      }
     }
     if (data.channel === "WHATSAPP" && !/^[0-9+()\s-]{6,20}$/.test(v)) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["toAddress"], message: "Numéro de téléphone invalide" });
@@ -60,22 +64,27 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ error: result.error }, { status: 500 });
   }
 
-  // Email envoyé : mémoriser le destinataire sur le dossier + carnet client si demandé
+  // Email envoyé : mémoriser le 1er destinataire sur le dossier + carnet client si demandé.
+  // toAddress peut contenir plusieurs adresses (séparées par « , »/« ; »).
   const to = parsed.data.toAddress;
   if (parsed.data.channel === "EMAIL" && to) {
+    const emails = to.split(/[,;]/).map((s) => s.trim()).filter(Boolean);
     const dossier = await prisma.dossier.findUnique({
       where: { id },
       select: { clientId: true },
     });
-    await prisma.dossier.update({ where: { id }, data: { contactEmail: to } }).catch(() => {});
+    if (emails[0])
+      await prisma.dossier.update({ where: { id }, data: { contactEmail: emails[0] } }).catch(() => {});
     if (parsed.data.saveAsContact && dossier) {
-      await prisma.clientContact
-        .upsert({
-          where: { clientId_email: { clientId: dossier.clientId, email: to } },
-          create: { clientId: dossier.clientId, email: to, name: parsed.data.contactName?.trim() || null },
-          update: { name: parsed.data.contactName?.trim() || undefined },
-        })
-        .catch(() => {});
+      for (const email of emails) {
+        await prisma.clientContact
+          .upsert({
+            where: { clientId_email: { clientId: dossier.clientId, email } },
+            create: { clientId: dossier.clientId, email, name: null },
+            update: {},
+          })
+          .catch(() => {});
+      }
     }
   }
 
