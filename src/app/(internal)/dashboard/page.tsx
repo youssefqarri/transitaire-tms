@@ -312,7 +312,7 @@ export default async function DashboardPage() {
                     {g.dossiers.length} dossier{g.dossiers.length > 1 ? "s" : ""}
                   </span>
                   <span className="hidden sm:inline font-mono text-[11.5px] tnum text-[var(--color-fg-3)] shrink-0 w-[110px] text-right">
-                    {g.totalValue > 0 ? formatCurrency(g.totalValue, "EUR") : "—"}
+                    {g.totalValue > 0 ? formatCurrency(g.totalValue, "EUR") : ""}
                   </span>
                 </summary>
                 <div className="bg-[var(--color-surface-2)]/40 divide-y divide-[var(--color-border)]">
@@ -328,44 +328,39 @@ export default async function DashboardPage() {
                       href={`/dossiers/${d.id}`}
                       className="flex items-center gap-3 pl-12 pr-5 py-2 hover:bg-[var(--color-surface-2)] transition-colors"
                     >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-mono text-[12.5px] text-[var(--color-fg)] font-medium">
-                            {d.number}
+                      <div className="flex-1 min-w-0 flex items-center gap-x-2 gap-y-0.5 flex-wrap">
+                        <span className="font-mono text-[12.5px] text-[var(--color-fg)] font-medium">
+                          {d.number}
+                        </span>
+                        {d.reference && (
+                          <span className="text-[11.5px] text-[var(--color-fg-3)]">
+                            · {d.reference}
                           </span>
-                          {d.reference && (
-                            <span className="text-[11.5px] text-[var(--color-fg-3)]">
-                              · {d.reference}
-                            </span>
-                          )}
-                          {d.dums.length > 0 && (
-                            <span className="font-mono text-[11px] text-[var(--color-fg-3)]">
-                              DUM {d.dums.map((dum) => dum.number).join(", ")}
-                            </span>
-                          )}
-                          {countMissing(d) > 0 && (
-                            <span title={missingDocsOf(d)} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] cursor-default">
-                              <AlertTriangle className="size-2.5" strokeWidth={2.25} />
-                              {countMissing(d)} doc{countMissing(d) > 1 ? "s" : ""}
-                            </span>
-                          )}
-                          <KeyDates
-                            visitDate={d.visitDate}
-                            visitEffectiveDate={d.visitEffectiveDate}
-                            conformityVisitDate={d.conformityVisitDate}
-                            conformityVisitEffectiveDate={d.conformityVisitEffectiveDate}
-                            deliveredAt={d.deliveredAt}
-                            layout="row"
-                          />
-                        </div>
-                      </div>
-                      <div className="hidden sm:block font-mono text-[12px] tnum text-[var(--color-fg-3)] shrink-0">
-                        {formatCurrency(
-                          d.goodsValue ? Number(d.goodsValue) : null,
-                          d.goodsCurrency ?? "EUR",
                         )}
+                        {d.dums.length > 0 && (
+                          <span className="font-mono text-[11px] text-[var(--color-fg-3)]">
+                            DUM {d.dums.map((dum) => dum.number).join(", ")}
+                          </span>
+                        )}
+                        {countMissing(d) > 0 && (
+                          <span title={missingDocsOf(d)} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)] cursor-default">
+                            <AlertTriangle className="size-2.5" strokeWidth={2.25} />
+                            {countMissing(d)} doc{countMissing(d) > 1 ? "s" : ""}
+                          </span>
+                        )}
+                        <KeyDates
+                          visitDate={d.visitDate}
+                          conformityVisitDate={d.conformityVisitDate}
+                          deliveredAt={d.deliveredAt}
+                          layout="row"
+                        />
                       </div>
-                      <StatusBadge status={d.status} size="sm" />
+                      {d.goodsValue != null && (
+                        <span className="hidden sm:block font-mono text-[12px] tnum text-[var(--color-fg-3)] shrink-0">
+                          {formatCurrency(Number(d.goodsValue), d.goodsCurrency ?? "EUR")}
+                        </span>
+                      )}
+                      <StatusBadge status={d.status} size="sm" className="shrink-0" />
                     </Link>
                   ))}
                 </div>
