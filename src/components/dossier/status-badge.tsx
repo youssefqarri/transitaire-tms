@@ -3,7 +3,7 @@ import { STATUS_LABELS, STATUS_TONE } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
 
 const TONE_BG: Record<string, string> = {
-  neutral: "bg-[var(--color-surface-2)] text-[var(--color-fg-2)] ring-1 ring-[var(--color-border-2)]",
+  neutral: "bg-[oklch(93.5%_0.005_250)] text-[var(--color-fg-2)]",
   info:    "bg-[var(--color-info-soft)] text-[var(--color-info)]",
   ok:      "bg-[var(--color-success-soft)] text-[var(--color-success)]",
   warn:    "bg-[var(--color-warning-soft)] text-[var(--color-warning)]",
