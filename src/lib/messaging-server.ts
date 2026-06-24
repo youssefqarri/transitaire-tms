@@ -62,11 +62,20 @@ export async function notifyClient(opts: {
     opts.channel,
     opts.lang ?? "FR",
   );
+  // Référence(s) que le CLIENT reconnaît — suffixe « (réf. X — votre réf. Y) »,
+  // vide si aucune référence. Indispensable pour qu'il sache de quel dossier il s'agit.
+  const refParts: string[] = [];
+  if (dossier.reference) refParts.push(`réf. ${dossier.reference}`);
+  if (dossier.clientReference && dossier.clientReference !== dossier.reference)
+    refParts.push(`votre réf. ${dossier.clientReference}`);
+
   const vars: Record<string, string | number | undefined | null> = {
     "client.name": dossier.client.name,
     "client.contactName": dossier.client.contactName ?? dossier.client.name,
     "dossier.number": dossier.number,
     "dossier.reference": dossier.reference ?? "",
+    "dossier.clientReference": dossier.clientReference ?? "",
+    "dossier.refSuffix": refParts.length ? ` (${refParts.join(" — ")})` : "",
     "user.name": user?.name ?? "",
     "dum.number": dossier.dums[0]?.number ?? "",
     "visitDate": dossier.visitDate
@@ -74,7 +83,7 @@ export async function notifyClient(opts: {
       : "",
     missingList: dossier.expectedDocuments.length
       ? dossier.expectedDocuments
-          .map((e) => `- ${e.name?.trim() || DOCUMENT_CATEGORY_LABELS[e.category]}`)
+          .map((e) => `- ${e.name?.trim() || e.note?.trim() || DOCUMENT_CATEGORY_LABELS[e.category]}`)
           .join("\n")
       : "- (à préciser)",
     portalUrl: process.env.AUTH_URL ?? "http://localhost:3000",

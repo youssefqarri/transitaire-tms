@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { isInternal } from "@/lib/roles";
 import { loadTemplate, renderTemplate, type TemplateKey } from "@/lib/messaging";
+import { DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
 import type { MessageChannel, MessageLang } from "@/generated/prisma/enums";
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -18,21 +19,38 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const dossier = await prisma.dossier.findUnique({
     where: { id },
-    include: { client: true, dums: true },
+    include: {
+      client: true,
+      dums: true,
+      expectedDocuments: { where: { deletedAt: null, fulfilledAt: null }, orderBy: { createdAt: "asc" } },
+    },
   });
   if (!dossier) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const tpl = await loadTemplate(templateKey, channel, lang);
+  // Mêmes variables que l'envoi réel (notifyClient) — sinon l'aperçu (qui devient le
+  // customBody envoyé) perdrait la liste des documents et les références.
+  const refParts: string[] = [];
+  if (dossier.reference) refParts.push(`réf. ${dossier.reference}`);
+  if (dossier.clientReference && dossier.clientReference !== dossier.reference)
+    refParts.push(`votre réf. ${dossier.clientReference}`);
   const vars = {
     "client.name": dossier.client.name,
     "client.contactName": dossier.client.contactName ?? dossier.client.name,
     "dossier.number": dossier.number,
     "dossier.reference": dossier.reference ?? "",
+    "dossier.clientReference": dossier.clientReference ?? "",
+    "dossier.refSuffix": refParts.length ? ` (${refParts.join(" — ")})` : "",
     "user.name": session.user.name,
     "dum.number": dossier.dums[0]?.number ?? "",
     visitDate: dossier.visitDate
       ? new Intl.DateTimeFormat("fr-FR").format(dossier.visitDate)
       : "",
+    missingList: dossier.expectedDocuments.length
+      ? dossier.expectedDocuments
+          .map((e) => `- ${e.name?.trim() || e.note?.trim() || DOCUMENT_CATEGORY_LABELS[e.category]}`)
+          .join("\n")
+      : "- (à préciser)",
     portalUrl: process.env.AUTH_URL ?? "http://localhost:3000",
   };
   return NextResponse.json({

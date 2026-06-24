@@ -59,10 +59,10 @@ type LangDefaults = Record<TemplateKey, ChannelDefaults>;
 const TPL_FR: LangDefaults = {
   docs_manquants: {
     EMAIL: {
-      subject: "Documents manquants — Dossier {{dossier.number}}",
+      subject: "Documents manquants — Dossier {{dossier.number}}{{dossier.refSuffix}}",
       body:
         "Bonjour {{client.contactName}},\n\n" +
-        "Pour finaliser votre dossier {{dossier.number}} ({{dossier.reference}}), nous avons besoin des pièces suivantes :\n\n" +
+        "Pour finaliser votre dossier {{dossier.number}}{{dossier.refSuffix}}, nous avons besoin des pièces suivantes :\n\n" +
         "{{missingList}}\n\n" +
         "Merci de nous les transmettre dans les meilleurs délais.\n\n" +
         "Cordialement,\n{{user.name}}\nMaison de Transit",
@@ -70,84 +70,84 @@ const TPL_FR: LangDefaults = {
     WHATSAPP: {
       subject: null,
       body:
-        "Bonjour {{client.contactName}}, pour avancer sur votre dossier *{{dossier.number}}* il nous manque :\n\n{{missingList}}\n\nMerci.",
+        "Bonjour {{client.contactName}}, pour avancer sur votre dossier *{{dossier.number}}*{{dossier.refSuffix}} il nous manque :\n\n{{missingList}}\n\nMerci.",
     },
   },
   docs_recus: {
     EMAIL: {
-      subject: "Documents reçus — Dossier {{dossier.number}}",
+      subject: "Documents reçus — Dossier {{dossier.number}}{{dossier.refSuffix}}",
       body:
-        "Bonjour {{client.contactName}},\n\nNous avons bien reçu les documents pour le dossier {{dossier.number}}. Nous procédons aux prochaines étapes.\n\nCordialement,\n{{user.name}}",
+        "Bonjour {{client.contactName}},\n\nNous avons bien reçu les documents pour le dossier {{dossier.number}}{{dossier.refSuffix}}. Nous procédons aux prochaines étapes.\n\nCordialement,\n{{user.name}}",
     },
     WHATSAPP: {
       subject: null,
-      body: "✅ Documents reçus pour le dossier *{{dossier.number}}*. Nous procédons à la suite.",
+      body: "✅ Documents reçus pour le dossier *{{dossier.number}}*{{dossier.refSuffix}}. Nous procédons à la suite.",
     },
   },
   dossier_ouvert: {
     EMAIL: {
-      subject: "Ouverture du dossier {{dossier.number}}",
+      subject: "Ouverture du dossier {{dossier.number}}{{dossier.refSuffix}}",
       body:
-        "Bonjour {{client.contactName}},\n\nNous avons ouvert le dossier {{dossier.number}} pour vos marchandises (réf. {{dossier.reference}}).\n\nVous pouvez en suivre l'avancement à tout moment depuis votre espace client.\n\nCordialement,\n{{user.name}}",
+        "Bonjour {{client.contactName}},\n\nNous avons ouvert le dossier {{dossier.number}}{{dossier.refSuffix}} pour vos marchandises.\n\nVous pouvez en suivre l'avancement à tout moment depuis votre espace client.\n\nCordialement,\n{{user.name}}",
     },
     WHATSAPP: {
       subject: null,
-      body: "Dossier *{{dossier.number}}* ouvert pour la réf. {{dossier.reference}}. Suivi : {{portalUrl}}",
+      body: "Dossier *{{dossier.number}}*{{dossier.refSuffix}} ouvert. Suivi : {{portalUrl}}",
     },
   },
   enregistre_douane: {
     EMAIL: {
-      subject: "DUM enregistrée — Dossier {{dossier.number}}",
+      subject: "DUM enregistrée — Dossier {{dossier.number}}{{dossier.refSuffix}}",
       body:
-        "Bonjour,\n\nLa DUM {{dum.number}} a été enregistrée pour votre dossier {{dossier.number}}.\n\nCordialement,\n{{user.name}}",
+        "Bonjour,\n\nLa DUM {{dum.number}} a été enregistrée pour votre dossier {{dossier.number}}{{dossier.refSuffix}}.\n\nCordialement,\n{{user.name}}",
     },
     WHATSAPP: {
       subject: null,
-      body: "DUM *{{dum.number}}* enregistrée pour le dossier {{dossier.number}}.",
+      body: "DUM *{{dum.number}}* enregistrée pour le dossier {{dossier.number}}{{dossier.refSuffix}}.",
     },
   },
   visite_programmee: {
     EMAIL: {
-      subject: "Visite douane programmée — {{dossier.number}}",
+      subject: "Visite douane programmée — {{dossier.number}}{{dossier.refSuffix}}",
       body:
-        "Bonjour,\n\nLa visite douane de votre dossier {{dossier.number}} est programmée le {{visitDate}}.\n\nCordialement,\n{{user.name}}",
+        "Bonjour,\n\nLa visite douane de votre dossier {{dossier.number}}{{dossier.refSuffix}} est programmée le {{visitDate}}.\n\nCordialement,\n{{user.name}}",
     },
     WHATSAPP: {
       subject: null,
-      body: "📅 Visite douane prévue le {{visitDate}} pour le dossier *{{dossier.number}}*.",
+      body: "📅 Visite douane prévue le {{visitDate}} pour le dossier *{{dossier.number}}*{{dossier.refSuffix}}.",
     },
   },
   fiche_liquidation: {
     EMAIL: {
-      subject: "Fiche de liquidation — Dossier {{dossier.number}}",
+      subject: "Fiche de liquidation — Dossier {{dossier.number}}{{dossier.refSuffix}}",
       body:
-        "Bonjour,\n\nVeuillez trouver ci-joint la fiche de liquidation et le ticket de paiement pour votre dossier {{dossier.number}}.\n\nMerci d'effectuer le règlement et de nous transmettre la preuve afin que nous puissions lever la marchandise.\n\nCordialement,\n{{user.name}}",
+        "Bonjour,\n\nVeuillez trouver ci-joint la fiche de liquidation et le ticket de paiement pour votre dossier {{dossier.number}}{{dossier.refSuffix}}.\n\nMerci d'effectuer le règlement et de nous transmettre la preuve afin que nous puissions lever la marchandise.\n\nCordialement,\n{{user.name}}",
     },
     WHATSAPP: {
       subject: null,
-      body: "💳 Fiche de liquidation prête pour le dossier *{{dossier.number}}*. Vérifiez votre email pour le détail.",
+      body: "💳 Fiche de liquidation prête pour le dossier *{{dossier.number}}*{{dossier.refSuffix}}. Vérifiez votre email pour le détail.",
     },
   },
   bae_pret: {
     EMAIL: {
-      subject: "Bon à enlever définitif — Dossier {{dossier.number}}",
+      subject: "Bon à enlever définitif — Dossier {{dossier.number}}{{dossier.refSuffix}}",
       body:
-        "Bonjour,\n\nBonne nouvelle : le bon à enlever définitif est obtenu pour votre dossier {{dossier.number}}. La marchandise peut être enlevée.\n\nCordialement,\n{{user.name}}",
+        "Bonjour,\n\nBonne nouvelle : le bon à enlever définitif est obtenu pour votre dossier {{dossier.number}}{{dossier.refSuffix}}. La marchandise peut être enlevée.\n\nCordialement,\n{{user.name}}",
     },
     WHATSAPP: {
       subject: null,
-      body: "🎉 BAE définitif obtenu pour le dossier *{{dossier.number}}*. Marchandise prête à enlever.",
+      body: "🎉 BAE définitif obtenu pour le dossier *{{dossier.number}}*{{dossier.refSuffix}}. Marchandise prête à enlever.",
     },
   },
   dossier_cloture: {
     EMAIL: {
-      subject: "Dossier {{dossier.number}} clôturé",
+      subject: "Dossier {{dossier.number}}{{dossier.refSuffix}} clôturé",
       body:
-        "Bonjour,\n\nVotre dossier {{dossier.number}} est clôturé. Merci de votre confiance.\n\nCordialement,\n{{user.name}}",
+        "Bonjour,\n\nVotre dossier {{dossier.number}}{{dossier.refSuffix}} est clôturé. Merci de votre confiance.\n\nCordialement,\n{{user.name}}",
     },
     WHATSAPP: {
       subject: null,
-      body: "✅ Dossier *{{dossier.number}}* clôturé. Merci de votre confiance.",
+      body: "✅ Dossier *{{dossier.number}}*{{dossier.refSuffix}} clôturé. Merci de votre confiance.",
     },
   },
 };
