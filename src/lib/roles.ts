@@ -10,6 +10,21 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   CLIENT: "Client",
 };
 
+// Une couleur distincte par type d'utilisateur (badge de rôle).
+// Les valeurs correspondent aux tons du composant Badge (ui/badge.tsx).
+export const ROLE_TONE: Record<
+  UserRole,
+  "purple" | "info" | "ok" | "warn" | "teal" | "neutral" | "outline"
+> = {
+  ADMIN: "purple",
+  EXPLOITATION: "info",
+  DECLARANT: "ok",
+  COMMIS_DOUANE: "warn",
+  COMPTABILITE: "teal",
+  BUREAU: "neutral",
+  CLIENT: "outline",
+};
+
 // rôles internes (vs client externe)
 export const INTERNAL_ROLES: UserRole[] = [
   "ADMIN",

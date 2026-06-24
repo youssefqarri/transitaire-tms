@@ -19,6 +19,10 @@ const badgeVariants = cva(
           "border-transparent bg-[var(--color-danger-soft)] text-[var(--color-danger)]",
         accent:
           "border-transparent bg-[var(--color-accent-soft)] text-[var(--color-accent)]",
+        teal:
+          "border-transparent bg-[oklch(95%_0.035_186)] text-[oklch(46%_0.10_186)]",
+        purple:
+          "border-transparent bg-[oklch(95%_0.03_300)] text-[oklch(48%_0.16_300)]",
         outline:
           "border-[var(--color-border-2)] text-[var(--color-fg-2)] bg-transparent",
         solid:

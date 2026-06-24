@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Plus, Users } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { canManageUsers, ROLE_LABELS } from "@/lib/roles";
+import { canManageUsers, ROLE_LABELS, ROLE_TONE } from "@/lib/roles";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -65,9 +65,7 @@ export default async function UsersPage({
                     {u.client && ` · ${u.client.name}`}
                   </div>
                 </div>
-                <Badge tone={u.role === "CLIENT" ? "outline" : "info"}>
-                  {ROLE_LABELS[u.role]}
-                </Badge>
+                <Badge tone={ROLE_TONE[u.role]}>{ROLE_LABELS[u.role]}</Badge>
                 {!u.active && <Badge tone="danger">Inactif</Badge>}
                 <UserActiveToggle
                   userId={u.id}

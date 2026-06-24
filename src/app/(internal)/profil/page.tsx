@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { ROLE_LABELS } from "@/lib/roles";
+import { ROLE_LABELS, ROLE_TONE } from "@/lib/roles";
 import { ChangePasswordForm } from "./change-password-form";
 import { prisma } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
@@ -39,7 +39,7 @@ export default async function ProfilePage() {
             <div className="text-[14px] font-medium">{user.name}</div>
             <div className="text-[12.5px] text-[var(--color-fg-3)]">{user.email}</div>
             <div className="mt-2 flex items-center gap-2">
-              <Badge tone="info">{ROLE_LABELS[user.role]}</Badge>
+              <Badge tone={ROLE_TONE[user.role]}>{ROLE_LABELS[user.role]}</Badge>
               {user.client && <Badge tone="outline">{user.client.name}</Badge>}
             </div>
           </div>
