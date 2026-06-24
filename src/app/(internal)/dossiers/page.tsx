@@ -10,11 +10,13 @@ import { canCreateDossier } from "@/lib/roles";
 import {
   requiredDocuments,
   DOCUMENT_CATEGORY_LABELS,
+  STATUS_LABELS,
   ACTION_REQUIRED_STATUSES,
   ACTION_REQUIRED_KEY,
+  ACTION_REQUIRED_LABEL,
 } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
-import { DossiersFilterBar } from "./filter-bar";
+import { ColumnHeader } from "@/components/ui/column-header";
 import { KeyDates } from "@/components/dossier/key-dates";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -27,9 +29,14 @@ export default async function DossiersPage({
   searchParams,
 }: {
   searchParams: Promise<{
-    q?: string;
     status?: string;
+    number?: string;
+    reference?: string;
+    clientName?: string;
+    dum?: string;
     client?: string;
+    sort?: string;
+    dir?: string;
     page?: string;
     size?: string;
   }>;
@@ -38,13 +45,19 @@ export default async function DossiersPage({
   const session = await auth();
   if (!session) return null;
 
-  const q = params.q?.trim();
   // « A_TRAITER » est un bucket synthétique (plusieurs statuts), pas un vrai statut.
   const isActionBucket = params.status === ACTION_REQUIRED_KEY;
   const statusFilter = !isActionBucket
     ? (params.status as DossierStatus | undefined)
     : undefined;
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
+
+  // Filtres par colonne (texte) + sens du tri.
+  const fNumber = params.number?.trim();
+  const fReference = params.reference?.trim();
+  const fClient = params.clientName?.trim();
+  const fDum = params.dum?.trim();
+  const dir = params.dir === "asc" ? ("asc" as const) : ("desc" as const);
 
   // Le commis en douane ne voit jamais les dossiers clôturés / annulés.
   const hideClosed = session.user.role === "COMMIS_DOUANE";
@@ -61,14 +74,10 @@ export default async function DossiersPage({
 
   const where = {
     deletedAt: null,
-    ...(q && {
-      OR: [
-        { number: { contains: q, mode: "insensitive" as const } },
-        { reference: { contains: q, mode: "insensitive" as const } },
-        { client: { name: { contains: q, mode: "insensitive" as const } } },
-        { dums: { some: { number: { contains: q, mode: "insensitive" as const } } } },
-      ],
-    }),
+    ...(fNumber && { number: { contains: fNumber, mode: "insensitive" as const } }),
+    ...(fReference && { reference: { contains: fReference, mode: "insensitive" as const } }),
+    ...(fClient && { client: { name: { contains: fClient, mode: "insensitive" as const } } }),
+    ...(fDum && { dums: { some: { number: { contains: fDum, mode: "insensitive" as const } } } }),
     ...(statusWhere && { status: statusWhere }),
     ...(params.client && { clientId: params.client }),
   };
@@ -86,8 +95,31 @@ export default async function DossiersPage({
           select: { category: true, uploadedBy: { select: { role: true } } },
         },
       },
-      // Ordre chronologique (dossiers récents en tête) ; clôturés rejetés à la fin.
-      orderBy: [{ closedAt: { sort: "desc", nulls: "first" } }, { createdAt: "desc" }],
+      // Tri par colonne si demandé ; sinon ordre chronologique par défaut
+      // (dossiers récents en tête, clôturés rejetés à la fin) — inchangé.
+      orderBy:
+        params.sort === "status"
+          ? { status: dir }
+          : params.sort === "number"
+            ? { number: dir }
+            : params.sort === "reference"
+              ? { reference: { sort: dir, nulls: "last" } }
+              : params.sort === "client"
+                ? { client: { name: dir } }
+                : params.sort === "docs"
+                  ? { documents: { _count: dir } }
+                  : params.sort === "visit"
+                    ? { visitDate: { sort: dir, nulls: "last" } }
+                    : params.sort === "value"
+                      ? { goodsValue: { sort: dir, nulls: "last" } }
+                      : params.sort === "weight"
+                        ? { goodsWeight: { sort: dir, nulls: "last" } }
+                        : params.sort === "updatedAt"
+                          ? { updatedAt: dir }
+                          : [
+                              { closedAt: { sort: "desc" as const, nulls: "first" as const } },
+                              { createdAt: "desc" as const },
+                            ],
       skip,
       take: size,
     }),
@@ -117,7 +149,14 @@ export default async function DossiersPage({
       };
     });
 
-  const hasFilter = !!q || !!params.status;
+  const hasFilter =
+    !!fNumber || !!fReference || !!fClient || !!fDum || !!params.status;
+
+  // Options de filtre pour la colonne « Statut » (bucket « À traiter » + tous les statuts).
+  const statusOptions = [
+    { value: ACTION_REQUIRED_KEY, label: ACTION_REQUIRED_LABEL },
+    ...Object.entries(STATUS_LABELS).map(([value, label]) => ({ value, label })),
+  ];
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -126,11 +165,6 @@ export default async function DossiersPage({
         subtitle={
           <>
             {total} dossier{total > 1 ? "s" : ""}
-            {q && (
-              <>
-                {" "}· recherche <span className="text-[var(--color-fg)]">« {q} »</span>
-              </>
-            )}
           </>
         }
         actions={
@@ -145,8 +179,6 @@ export default async function DossiersPage({
       />
 
       <Card>
-        <DossiersFilterBar initialQ={q} initialStatus={params.status} />
-
         {enriched.length === 0 ? (
           hasFilter ? (
             <EmptyState
@@ -262,17 +294,22 @@ export default async function DossiersPage({
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-[13px]">
                 <thead>
-                  <tr className="border-b border-[var(--color-border)] text-[12px] font-medium text-[var(--color-fg-3)]">
-                    <th className="text-left px-5 py-2.5 w-[180px]">Statut</th>
-                    <th className="text-left px-5 py-2.5">Dossier</th>
-                    <th className="text-left px-5 py-2.5">Référence</th>
-                    <th className="text-left px-5 py-2.5">Client</th>
-                    <th className="text-left px-5 py-2.5">DUM(s)</th>
-                    <th className="text-center px-3 py-2.5">Docs</th>
-                    <th className="text-left px-3 py-2.5">Visite / Livraison</th>
-                    <th className="text-right px-5 py-2.5 font-normal text-[var(--color-fg-3)]">Valeur</th>
-                    <th className="text-right px-5 py-2.5 font-normal text-[var(--color-fg-3)]">Poids</th>
-                    <th className="text-right px-5 py-2.5">Maj</th>
+                  <tr className="border-b border-[var(--color-border)] text-[12px]">
+                    <ColumnHeader
+                      label="Statut"
+                      className="w-[210px]"
+                      sortKey="status"
+                      filter={{ type: "select", param: "status", options: statusOptions }}
+                    />
+                    <ColumnHeader label="Dossier" sortKey="number" filter={{ type: "text", param: "number" }} />
+                    <ColumnHeader label="Référence" sortKey="reference" filter={{ type: "text", param: "reference" }} />
+                    <ColumnHeader label="Client" sortKey="client" filter={{ type: "text", param: "clientName" }} />
+                    <ColumnHeader label="DUM(s)" filter={{ type: "text", param: "dum" }} />
+                    <ColumnHeader label="Docs" align="center" sortKey="docs" />
+                    <ColumnHeader label="Visite / Livraison" sortKey="visit" />
+                    <ColumnHeader label="Valeur" align="right" sortKey="value" />
+                    <ColumnHeader label="Poids" align="right" sortKey="weight" />
+                    <ColumnHeader label="Maj" align="right" sortKey="updatedAt" />
                   </tr>
                 </thead>
                 <tbody>
@@ -368,7 +405,16 @@ export default async function DossiersPage({
               pageSize={size}
               total={total}
               basePath="/dossiers"
-              extraParams={{ q, status: params.status, client: params.client }}
+              extraParams={{
+                status: params.status,
+                number: params.number,
+                reference: params.reference,
+                clientName: params.clientName,
+                dum: params.dum,
+                client: params.client,
+                sort: params.sort,
+                dir: params.dir,
+              }}
             />
           </>
         )}
