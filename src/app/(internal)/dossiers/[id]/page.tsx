@@ -356,23 +356,6 @@ export default async function DossierDetailPage({
               </>
             );
           })()}
-          {dossier.outgoingMessages.length > 0 && (
-            <OutgoingMessagesPanel
-              messages={dossier.outgoingMessages.map((m) => ({
-                id: m.id,
-                channel: m.channel,
-                subject: m.subject,
-                body: m.body,
-                status: m.status,
-                error: m.error,
-                toAddress: m.toAddress,
-                templateKey: m.templateKey,
-                sentByName: m.sentBy?.name ?? null,
-                createdAt: m.createdAt,
-                sentAt: m.sentAt,
-              }))}
-            />
-          )}
         </div>
 
         <div className="space-y-5">
@@ -513,6 +496,23 @@ export default async function DossierDetailPage({
                 authorName: c.author.name,
               }))}
               readOnly={session.user.role === "COMPTABILITE"}
+            />
+          )}
+          {dossier.outgoingMessages.length > 0 && (
+            <OutgoingMessagesPanel
+              messages={dossier.outgoingMessages.map((m) => ({
+                id: m.id,
+                channel: m.channel,
+                subject: m.subject,
+                body: m.body,
+                status: m.status,
+                error: m.error,
+                toAddress: m.toAddress,
+                templateKey: m.templateKey,
+                sentByName: m.sentBy?.name ?? null,
+                createdAt: m.createdAt,
+                sentAt: m.sentAt,
+              }))}
             />
           )}
         </div>
