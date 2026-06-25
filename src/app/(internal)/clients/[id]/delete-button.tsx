@@ -37,19 +37,25 @@ export function DeleteClientButton({
 
   return (
     <>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setOpen(true)}
-        disabled={hasDossiers}
+      {/* Le <span> capte le survol même quand le bouton est désactivé
+          (un <button disabled> ne déclenche pas l'infobulle). */}
+      <span
+        className="inline-block"
         title={
           hasDossiers
-            ? "Impossible de supprimer : ce client a des dossiers"
-            : "Supprimer ce client"
+            ? "Suppression impossible : ce client a encore des dossiers. Supprimez d'abord tous ses dossiers (ils iront à la corbeille) pour pouvoir le supprimer."
+            : undefined
         }
       >
-        <Trash2 /> Supprimer
-      </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setOpen(true)}
+          disabled={hasDossiers}
+        >
+          <Trash2 /> Supprimer
+        </Button>
+      </span>
       <ConfirmDialog
         open={open}
         onOpenChange={setOpen}
