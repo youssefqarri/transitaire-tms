@@ -44,3 +44,6 @@ next-env.d.ts
 
 # uploads
 /uploads
+
+# local AI tooling — UI/UX Pro Max skill (installed via `uipro init`, kept local)
+/.claude/skills/
