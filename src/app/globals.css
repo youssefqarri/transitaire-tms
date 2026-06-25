@@ -49,7 +49,12 @@
 
   /* ── Typo & rayons ── */
   --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, Menlo, monospace;
+  /* « mono » unifié sur Geist — demande client : UNE seule police visible
+     partout. Les numéros (dossier, DUM, montants) gardent leur alignement
+     vertical grâce aux chiffres tabulaires (tnum), sans l'aspect « machine
+     à écrire ». `font-mono` reste comme alias sémantique « chiffres/codes ». */
+  --font-mono: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono--font-feature-settings: "tnum";
 
   --radius:    6px;
   --radius-sm: 4px;
