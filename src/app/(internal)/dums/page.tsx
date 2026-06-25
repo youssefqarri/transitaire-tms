@@ -170,7 +170,14 @@ export default async function DUMsPage({
                       key={d.id}
                       className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-2)]/50"
                     >
-                      <td className="px-5 py-2.5 font-mono font-medium">{d.number}</td>
+                      <td className="px-5 py-2.5">
+                        <Link
+                          href={`/dums/${d.id}`}
+                          className="font-mono font-medium text-[var(--color-fg)] hover:underline"
+                        >
+                          {d.number}
+                        </Link>
+                      </td>
                       <td className="px-5 py-2.5">
                         <Link
                           className="font-mono text-[var(--color-fg)] hover:underline"

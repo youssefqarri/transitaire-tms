@@ -68,7 +68,7 @@ export async function searchAll(q: string, perGroup = 5): Promise<SearchGroup[]>
         id: d.id,
         title: d.number,
         sub: `Dossier ${d.dossier.number}`,
-        href: `/dossiers/${d.dossier.id}`,
+        href: `/dums/${d.id}`,
       })),
     },
     {
