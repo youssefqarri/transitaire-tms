@@ -47,3 +47,6 @@ next-env.d.ts
 
 # local AI tooling — UI/UX Pro Max skill (installed via `uipro init`, kept local)
 /.claude/skills/
+
+# Playwright MCP (sorties locales : snapshots, captures, logs)
+.playwright-mcp/
