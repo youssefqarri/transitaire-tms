@@ -22,7 +22,7 @@ export default async function EditSupplierPage({
   if (!supplier) notFound();
 
   return (
-    <div className="max-w-2xl space-y-5">
+    <div className="space-y-5">
       <BackLink href={`/fournisseurs/${id}`}>Retour au fournisseur</BackLink>
       <PageHeader title="Modifier le fournisseur" subtitle={supplier.name} />
       <Card>

@@ -49,7 +49,7 @@ export function UserForm({ clients }: { clients: { id: string; label: string }[]
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="name">Nom complet *</Label>
           <Input id="name" value={form.name} onChange={(e) => set("name", e.target.value)} required />

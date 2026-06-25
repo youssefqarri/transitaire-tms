@@ -66,7 +66,7 @@ export function SupplierForm({
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="md:col-span-2 space-y-1.5">
           <Label htmlFor="name">Nom *</Label>
           <Input id="name" value={form.name} onChange={(e) => set("name", e.target.value)} required />

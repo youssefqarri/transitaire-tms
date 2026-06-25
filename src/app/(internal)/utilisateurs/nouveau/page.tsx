@@ -13,7 +13,7 @@ export default async function NewUserPage() {
   const clients = await prisma.client.findMany({ where: { deletedAt: null }, orderBy: { name: "asc" } });
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       <BackLink href="/utilisateurs">Retour</BackLink>
       <PageHeader title="Nouvel utilisateur" />
       <Card className="p-6">
