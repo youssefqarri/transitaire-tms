@@ -2,10 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
 import { Plus, FileText, Pencil } from "lucide-react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -15,7 +16,7 @@ import { DumStatusBadge } from "@/components/dossier/dum-status-badge";
 import { CUSTOMS_REGIME_GROUPS, regimeDisplay, MAX_DUMS_PER_DOSSIER } from "@/lib/reference";
 import { formatMAD } from "@/lib/invoicing";
 import { formatDate } from "@/lib/utils";
-import { LiquidationForm, type DUM } from "@/components/dossier/dum-liquidation-form";
+import { type DUM } from "@/components/dossier/dum-liquidation-form";
 
 const fmt = (n: number | null) => (n == null ? "—" : formatMAD(n));
 
@@ -23,13 +24,10 @@ export function DUMsPanel({
   dossierId,
   dums,
   canCreate,
-  canEditNumber,
 }: {
   dossierId: string;
   dums: DUM[];
   canCreate: boolean;
-  /** Modifier le n° de DUM (correction d'erreur) — réservé exploitation + admin. */
-  canEditNumber: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -41,7 +39,6 @@ export function DUMsPanel({
   const [customsValue, setCustomsValue] = useState("");
   const [estimatedDuties, setEstimatedDuties] = useState("");
   const [articleCount, setArticleCount] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
 
   const atMax = dums.length >= MAX_DUMS_PER_DOSSIER;
   const numOrUndef = (s: string) => (s.trim() === "" ? undefined : Number(s));
@@ -191,20 +188,7 @@ export function DUMsPanel({
             Aucune DUM enregistrée. Elle sera créée après dépôt sur BADR.
           </div>
         )}
-        {dums.map((d) =>
-          editingId === d.id ? (
-            <LiquidationForm
-              key={d.id}
-              dossierId={dossierId}
-              dum={d}
-              canEditNumber={canEditNumber}
-              onDone={() => {
-                setEditingId(null);
-                router.refresh();
-              }}
-              onCancel={() => setEditingId(null)}
-            />
-          ) : (
+        {dums.map((d) => (
             <div key={d.id} className="px-5 py-3">
               <div className="flex items-center gap-3">
                 <FileText className="size-4 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
@@ -221,14 +205,14 @@ export function DUMsPanel({
                 </div>
                 <DumStatusBadge status={d.status} />
                 {canCreate && (
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => setEditingId(d.id)}
-                    aria-label="Saisir la liquidation"
+                  <Link
+                    href={`/dums/${d.id}/modifier`}
+                    aria-label="Modifier la DUM"
+                    title="Modifier la DUM"
+                    className={buttonVariants({ variant: "ghost", size: "icon" })}
                   >
                     <Pencil className="text-[var(--color-fg-mute)]" />
-                  </Button>
+                  </Link>
                 )}
               </div>
               {(d.customsValue != null ||
@@ -247,8 +231,7 @@ export function DUMsPanel({
                 </dl>
               )}
             </div>
-          ),
-        )}
+        ))}
         {canCreate && atMax && (
           <div className="px-5 py-2.5 text-[12px] text-[var(--color-fg-3)] bg-[var(--color-surface-2)]">
             Maximum {MAX_DUMS_PER_DOSSIER} DUM par dossier atteint (un dossier peut cumuler 2 régimes).

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { FileText } from "lucide-react";
+import { FileText, Pencil } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { canCreateDUM } from "@/lib/roles";
@@ -13,7 +13,7 @@ import { DUM_STATUS_LABELS, DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
 import { formatDate } from "@/lib/utils";
 import { formatMAD } from "@/lib/invoicing";
 import { regimeDisplay } from "@/lib/reference";
-import { DumEditModal } from "./dum-edit-modal";
+import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -38,23 +38,6 @@ export default async function DUMDetailPage({
   if (!dum) notFound();
 
   const canEdit = canCreateDUM(session.user.role);
-  const canEditNumber = ["ADMIN", "EXPLOITATION"].includes(session.user.role);
-  // Forme sérialisable pour le formulaire client (Decimals → number).
-  const editableDum = {
-    id: dum.id,
-    number: dum.number,
-    status: dum.status,
-    bureau: dum.bureau,
-    regime: dum.regime,
-    registeredAt: dum.registeredAt,
-    liquidatedAt: dum.liquidatedAt,
-    customsValue: dum.customsValue == null ? null : Number(dum.customsValue),
-    estimatedDuties: dum.estimatedDuties == null ? null : Number(dum.estimatedDuties),
-    liquidatedDuties: dum.liquidatedDuties == null ? null : Number(dum.liquidatedDuties),
-    receiptNumber: dum.receiptNumber,
-    paidAt: dum.paidAt,
-    articleCount: dum.articleCount,
-  };
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -72,11 +55,12 @@ export default async function DUMDetailPage({
         }
         actions={
           canEdit ? (
-            <DumEditModal
-              dum={editableDum}
-              dossierId={dum.dossierId}
-              canEditNumber={canEditNumber}
-            />
+            <Link
+              href={`/dums/${dum.id}/modifier`}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              <Pencil /> Modifier
+            </Link>
           ) : undefined
         }
       />

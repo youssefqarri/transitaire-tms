@@ -316,7 +316,6 @@ export default async function DossierDetailPage({
                     articleCount: d.articleCount ?? null,
                   }))}
                   canCreate={canCreateDUM(session.user.role)}
-                  canEditNumber={["ADMIN", "EXPLOITATION"].includes(session.user.role)}
                 />
                 <DocumentsPanel
                   dossierId={dossier.id}
