@@ -47,7 +47,7 @@ export default async function NewInvoicePage() {
   ]);
 
   return (
-    <div className="max-w-4xl space-y-5">
+    <div className="space-y-5">
       <BackLink href="/factures">Retour aux factures</BackLink>
 
       <PageHeader

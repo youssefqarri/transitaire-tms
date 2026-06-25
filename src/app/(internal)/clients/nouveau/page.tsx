@@ -5,7 +5,7 @@ import { ClientForm } from "./form";
 
 export default function NewClientPage() {
   return (
-    <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       <div>
         <BackLink href="/clients">Retour aux clients</BackLink>
         <PageHeader title="Nouveau client" className="mt-3" />

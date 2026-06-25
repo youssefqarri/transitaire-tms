@@ -23,7 +23,7 @@ export default async function EditClientPage({
   if (!client) notFound();
 
   return (
-    <div className="max-w-2xl space-y-5">
+    <div className="space-y-5">
       <BackLink href={`/clients/${id}`}>Retour au client</BackLink>
       <PageHeader title="Modifier le client" subtitle={client.name} />
       <Card>

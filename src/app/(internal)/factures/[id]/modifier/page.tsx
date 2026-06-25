@@ -60,7 +60,7 @@ export default async function EditInvoicePage({
   ]);
 
   return (
-    <div className="max-w-4xl space-y-5">
+    <div className="space-y-5">
       <BackLink href={`/factures/${id}`}>Retour à la facture</BackLink>
 
       <PageHeader
