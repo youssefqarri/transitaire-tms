@@ -173,7 +173,7 @@ export default async function DUMsPage({
                       <td className="px-5 py-2.5 font-mono font-medium">{d.number}</td>
                       <td className="px-5 py-2.5">
                         <Link
-                          className="font-mono text-[var(--color-accent)] hover:underline"
+                          className="font-mono text-[var(--color-fg)] hover:underline"
                           href={`/dossiers/${d.dossier.id}`}
                         >
                           {d.dossier.number}
@@ -181,7 +181,7 @@ export default async function DUMsPage({
                       </td>
                       <td className="px-5 py-2.5">
                         <Link
-                          className="text-[var(--color-accent)] hover:underline"
+                          className="text-[var(--color-fg-3)] hover:underline"
                           href={`/clients/${d.dossier.client.id}`}
                         >
                           {d.dossier.client.name}
