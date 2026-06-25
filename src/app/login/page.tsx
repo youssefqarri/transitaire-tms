@@ -28,8 +28,8 @@ export default async function LoginPage({
       />
 
       <div className="relative w-full max-w-[400px] animate-fade-in">
-        {/* Logo + slogan */}
-        <div className="mb-8">
+        {/* Logo + slogan (centrés) */}
+        <div className="mb-8 flex flex-col items-center text-center">
           <LogoFull className="h-10 w-auto" />
           <p className="text-[13px] text-[var(--color-fg-3)] mt-2.5">
             Le transit intelligent, du port à la livraison.
