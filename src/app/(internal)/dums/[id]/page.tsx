@@ -12,6 +12,7 @@ import { DumStatusBadge } from "@/components/dossier/dum-status-badge";
 import { DUM_STATUS_LABELS, DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
 import { formatDate } from "@/lib/utils";
 import { formatMAD } from "@/lib/invoicing";
+import { regimeDisplay } from "@/lib/reference";
 import { DumEditModal } from "./dum-edit-modal";
 
 export const dynamic = "force-dynamic";
@@ -64,7 +65,9 @@ export default async function DUMDetailPage({
         subtitle={
           <span className="inline-flex items-center gap-2 flex-wrap">
             <DumStatusBadge status={dum.status} />
-            {dum.regime && <Badge tone="neutral">Régime {dum.regime}</Badge>}
+            {dum.regime && (
+              <Badge tone="neutral" title={regimeDisplay(dum.regime)}>Régime {dum.regime}</Badge>
+            )}
           </span>
         }
         actions={
@@ -86,7 +89,7 @@ export default async function DUMDetailPage({
           </CardHeader>
           <dl className="px-5 py-4 grid grid-cols-2 gap-x-5 gap-y-4">
             <Field label="N° DUM" value={dum.number} mono />
-            <Field label="Régime douanier" value={dum.regime ?? "—"} />
+            <Field label="Régime douanier" value={regimeDisplay(dum.regime)} />
             <Field label="Bureau de douane" value={dum.bureau ?? "—"} />
             <Field label="Statut" value={DUM_STATUS_LABELS[dum.status]} />
             <div className="col-span-2 min-w-0">

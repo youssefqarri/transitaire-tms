@@ -12,7 +12,7 @@ import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { DUM_STATUS_LABELS } from "@/lib/statuses";
 import { DumStatusBadge } from "@/components/dossier/dum-status-badge";
-import { DUM_REGIMES, MAX_DUMS_PER_DOSSIER } from "@/lib/reference";
+import { CUSTOMS_REGIME_GROUPS, regimeDisplay, MAX_DUMS_PER_DOSSIER } from "@/lib/reference";
 import { formatMAD } from "@/lib/invoicing";
 import { formatDate } from "@/lib/utils";
 import { LiquidationForm, type DUM } from "@/components/dossier/dum-liquidation-form";
@@ -112,10 +112,14 @@ export function DUMsPanel({
             <Label htmlFor="dumregime">Régime douanier</Label>
             <Select id="dumregime" value={regime} onChange={(e) => setRegime(e.target.value)}>
               <option value="">— Sélectionner —</option>
-              {DUM_REGIMES.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
+              {CUSTOMS_REGIME_GROUPS.map((g) => (
+                <optgroup key={g.group} label={g.group}>
+                  {g.items.map((r) => (
+                    <option key={r.code} value={r.code}>
+                      {r.code} — {r.label}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </Select>
           </div>
@@ -207,7 +211,9 @@ export function DUMsPanel({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-mono text-[13px] font-medium text-[var(--color-fg)]">{d.number}</span>
-                    {d.regime && <Badge tone="neutral">{d.regime}</Badge>}
+                    {d.regime && (
+                      <Badge tone="neutral" title={regimeDisplay(d.regime)}>{d.regime}</Badge>
+                    )}
                   </div>
                   <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
                     {d.bureau ?? "Bureau ?"} • enregistré le {formatDate(d.registeredAt)}
