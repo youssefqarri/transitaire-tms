@@ -104,7 +104,7 @@ export function StatusChanger({
   return (
     <div className="relative">
       <Button variant="outline" size="sm" onClick={() => setOpen((o) => !o)}>
-        Changer le statut <ChevronDown className="size-3.5" strokeWidth={2} />
+        Changer le statut <ChevronDown className="size-3.5" strokeWidth={1.75} />
       </Button>
       {open && (
         <div className="absolute right-0 top-full mt-1.5 w-[320px] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-[0_12px_32px_-12px_rgba(0,0,0,0.15)] p-4 z-30 animate-fade-in">

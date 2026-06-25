@@ -9,7 +9,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
 import { Badge } from "@/components/ui/badge";
 import { DUM_STATUS_LABELS } from "@/lib/statuses";
 import { DumStatusBadge } from "@/components/dossier/dum-status-badge";
@@ -107,18 +107,21 @@ export function DUMsPanel({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="dumregime">Régime douanier</Label>
-            <Select id="dumregime" value={regime} onChange={(e) => setRegime(e.target.value)}>
-              <option value="">— Sélectionner —</option>
-              {CUSTOMS_REGIME_GROUPS.map((g) => (
-                <optgroup key={g.group} label={g.group}>
-                  {g.items.map((r) => (
-                    <option key={r.code} value={r.code}>
-                      {r.code} — {r.label}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </Select>
+            <Combobox
+              id="dumregime"
+              items={CUSTOMS_REGIME_GROUPS.flatMap((g) =>
+                g.items.map((r) => ({
+                  id: r.code,
+                  label: `${r.code} — ${r.label}`,
+                  sublabel: g.group,
+                })),
+              )}
+              value={regime}
+              onChange={(v) => setRegime(v)}
+              placeholder="— Sélectionner —"
+              searchPlaceholder="Rechercher un régime (code ou libellé)…"
+              emptyText="Aucun régime trouvé"
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="bureau">Bureau douane</Label>
