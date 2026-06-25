@@ -481,7 +481,10 @@ export default async function DossierDetailPage({
                         e.meta
                       ) : (
                         <>
-                          {formatDateTime(e.date)}
+                          {/* Évènements « jour » (visite, contrôle, livraison, DUM) :
+                              date seule — pas d'heure réelle (stockés à minuit). Les
+                              changements de statut (sc-…) gardent l'horodatage. */}
+                          {(/^(visit-|delivered|dum-)/.test(e.key) ? formatDate : formatDateTime)(e.date)}
                           {e.meta && ` • ${e.meta}`}
                         </>
                       )}
