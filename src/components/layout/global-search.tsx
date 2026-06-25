@@ -110,13 +110,13 @@ export function GlobalSearch() {
       {open && (
         <div className="absolute left-0 top-full mt-1.5 w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-pop overflow-hidden z-40 animate-scale-in origin-top-left max-h-[75vh] overflow-y-auto">
           {trimmed.length < 2 ? (
-            <div className="px-4 py-3 text-[12.5px] text-[var(--color-fg-mute)]">
+            <div className="px-4 py-3 text-[12px] text-[var(--color-fg-mute)]">
               Tapez au moins 2 caractères…
             </div>
           ) : loading ? (
-            <div className="px-4 py-3 text-[12.5px] text-[var(--color-fg-mute)]">Recherche…</div>
+            <div className="px-4 py-3 text-[12px] text-[var(--color-fg-mute)]">Recherche…</div>
           ) : !hasResults ? (
-            <div className="px-4 py-3 text-[12.5px] text-[var(--color-fg-mute)]">
+            <div className="px-4 py-3 text-[12px] text-[var(--color-fg-mute)]">
               Aucun résultat pour « {trimmed} ».
             </div>
           ) : (
@@ -139,7 +139,7 @@ export function GlobalSearch() {
                         className="flex items-center gap-2.5 px-3 py-1.5 hover:bg-[var(--color-surface-2)] transition-colors"
                       >
                         <Icon className="size-3.5 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
-                        <span className="font-mono text-[12.5px] font-medium text-[var(--color-fg)] shrink-0">
+                        <span className="font-mono text-[13px] font-medium text-[var(--color-fg)] shrink-0">
                           {it.title}
                         </span>
                         {it.sub && (
@@ -164,7 +164,7 @@ export function GlobalSearch() {
               <button
                 type="button"
                 onClick={goAll}
-                className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 text-[12.5px] font-medium text-[var(--color-fg-2)] hover:bg-[var(--color-surface-2)] border-t border-[var(--color-border)]"
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 text-[12px] font-medium text-[var(--color-fg-2)] hover:bg-[var(--color-surface-2)] border-t border-[var(--color-border)]"
               >
                 Voir tous les résultats <ArrowRight className="size-3.5" strokeWidth={2} />
               </button>

@@ -77,7 +77,7 @@ export default async function RecherchePage({
                         {it.title}
                       </span>
                       {it.sub && (
-                        <span className="text-[12.5px] text-[var(--color-fg-3)] truncate">
+                        <span className="text-[12px] text-[var(--color-fg-3)] truncate">
                           {it.sub}
                         </span>
                       )}

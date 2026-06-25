@@ -231,7 +231,7 @@ export function NewDossierForm({
             id="transportRegistration"
             value={form.transportRegistration}
             onChange={(e) => set("transportRegistration", e.target.value)}
-            placeholder="N° du connaissement / LTA / CMR selon le mode (optionnel)"
+            placeholder="Connaissement / LTA / CMR"
           />
         </div>
         <div className="space-y-2">

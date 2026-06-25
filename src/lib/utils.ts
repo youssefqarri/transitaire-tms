@@ -5,6 +5,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Fuseau de l'application (Maroc). Fixe le formatage des dates/heures pour qu'il
+// soit IDENTIQUE serveur (UTC) et client (navigateur) → évite le hydration
+// mismatch React #418, et garantit l'heure locale correcte (et non l'UTC).
+export const APP_TIMEZONE = "Africa/Casablanca";
+
 export function formatCurrency(
   value: number | string | null | undefined,
   currency = "EUR",
@@ -33,6 +38,7 @@ export function formatDate(d: Date | string | null | undefined) {
     day: "2-digit",
     month: "short",
     year: "numeric",
+    timeZone: APP_TIMEZONE,
   }).format(date);
 }
 
@@ -45,6 +51,7 @@ export function formatDateTime(d: Date | string | null | undefined) {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: APP_TIMEZONE,
   }).format(date);
 }
 

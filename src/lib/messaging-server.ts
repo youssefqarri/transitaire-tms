@@ -79,7 +79,7 @@ export async function notifyClient(opts: {
     "user.name": user?.name ?? "",
     "dum.number": dossier.dums[0]?.number ?? "",
     "visitDate": dossier.visitDate
-      ? new Intl.DateTimeFormat("fr-FR").format(dossier.visitDate)
+      ? new Intl.DateTimeFormat("fr-FR", { timeZone: "Africa/Casablanca" }).format(dossier.visitDate)
       : "",
     missingList: dossier.expectedDocuments.length
       ? dossier.expectedDocuments

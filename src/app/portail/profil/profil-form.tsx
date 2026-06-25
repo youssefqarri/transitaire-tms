@@ -88,7 +88,7 @@ export function ProfilForm({ client, account }: Props) {
           <Avatar name={account.name} size={42} />
           <div className="min-w-0">
             <div className="text-[14px] font-medium text-[var(--color-fg)] truncate">{client.name}</div>
-            <div className="text-[12.5px] text-[var(--color-fg-3)] truncate">
+            <div className="text-[12px] text-[var(--color-fg-3)] truncate">
               {account.email}
               {client.code && ` • ${client.code}`}
             </div>
@@ -154,7 +154,7 @@ export function ProfilForm({ client, account }: Props) {
         </CardHeader>
         <div className="px-5 py-4 space-y-3">
           {client.contacts.length === 0 ? (
-            <p className="text-[12.5px] text-[var(--color-fg-mute)]">
+            <p className="text-[12px] text-[var(--color-fg-mute)]">
               Aucun email additionnel. Ajoutez-en pour que d&apos;autres personnes reçoivent les
               notifications.
             </p>
@@ -163,7 +163,7 @@ export function ProfilForm({ client, account }: Props) {
               {client.contacts.map((c) => (
                 <span
                   key={c.id}
-                  className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full text-[12.5px] bg-[var(--color-surface-2)] border border-[var(--color-border)]"
+                  className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full text-[12px] bg-[var(--color-surface-2)] border border-[var(--color-border)]"
                 >
                   {c.email}
                   <button
