@@ -142,11 +142,13 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
         aria-haspopup="listbox"
         aria-expanded={open}
         className={cn(
-          "group flex h-9 w-full items-center gap-2 pl-3 pr-2 text-[13px] text-left",
+          "relative group flex h-9 w-full items-center pl-3 text-[13px] text-left",
           "bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius-input)]",
-          "transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)]",
-          "disabled:opacity-50 disabled:cursor-not-allowed",
+          "transition-shadow duration-150 hover:border-[var(--color-fg-mute)]",
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)]",
+          "disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[var(--color-surface-2)]",
           open && "border-[var(--color-fg-mute)]",
+          clearable && selected && !disabled ? "pr-14" : "pr-8",
         )}
       >
         <span
@@ -177,14 +179,14 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
               e.stopPropagation();
               onChange("");
             }}
-            className="inline-flex items-center justify-center size-5 rounded-[var(--radius-sm)] hover:bg-[var(--color-surface-2)] text-[var(--color-fg-mute)] hover:text-[var(--color-fg)] cursor-pointer"
+            className="absolute right-7 top-1/2 -translate-y-1/2 inline-flex items-center justify-center size-5 rounded-[var(--radius-sm)] hover:bg-[var(--color-surface-2)] text-[var(--color-fg-mute)] hover:text-[var(--color-fg)] cursor-pointer"
           >
             <X className="size-3" strokeWidth={1.75} />
           </span>
         )}
         <ChevronDown
           className={cn(
-            "size-3.5 text-[var(--color-fg-mute)] shrink-0 transition-transform",
+            "pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 text-[var(--color-fg-mute)] transition-transform",
             open && "rotate-180",
           )}
           strokeWidth={1.75}
