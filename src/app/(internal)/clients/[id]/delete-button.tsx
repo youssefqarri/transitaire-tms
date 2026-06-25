@@ -43,7 +43,7 @@ export function DeleteClientButton({
         className="inline-block"
         title={
           hasDossiers
-            ? "Suppression impossible : ce client a encore des dossiers. Supprimez d'abord tous ses dossiers (ils iront à la corbeille) pour pouvoir le supprimer."
+            ? "Ce client a encore des dossiers. Supprimez-les d'abord (corbeille) pour pouvoir le supprimer."
             : undefined
         }
       >

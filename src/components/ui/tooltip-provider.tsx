@@ -61,8 +61,10 @@ export function TooltipProvider() {
       activeEl.current = el;
       timer.current = setTimeout(() => {
         const r = el.getBoundingClientRect();
-        const below = r.top < 40;
-        const half = 130;
+        // Bascule la bulle EN-DESSOUS si l'élément est dans la partie haute de
+        // l'écran (sinon une bulle longue affichée au-dessus déborde du haut).
+        const below = r.top < 200;
+        const half = 170; // moitié de la largeur max (max-w-[340px]) pour le clamp horizontal
         const x = Math.min(
           Math.max(r.left + r.width / 2, half + 6),
           window.innerWidth - half - 6,
@@ -103,7 +105,7 @@ export function TooltipProvider() {
         zIndex: 9999,
         pointerEvents: "none",
       }}
-      className={`px-2 py-1 rounded-[var(--radius-sm)] bg-[var(--color-fg)] text-[var(--color-surface)] text-[12px] font-medium leading-snug shadow-[0_6px_20px_-6px_rgba(0,0,0,0.35)] max-w-[280px] whitespace-pre-line ${
+      className={`px-2.5 py-1.5 rounded-[var(--radius-sm)] bg-[var(--color-fg)] text-[var(--color-surface)] text-[12px] font-medium leading-snug shadow-[0_6px_20px_-6px_rgba(0,0,0,0.35)] max-w-[340px] whitespace-pre-line ${
         tip.text.includes("\n") ? "text-left" : "text-center"
       }`}
     >
