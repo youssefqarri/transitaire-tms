@@ -190,7 +190,7 @@ export function NewDossierForm({
 
   return (
     <form onSubmit={submit} className="space-y-5">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-3.5">
         <div className="space-y-2">
           <Label htmlFor="number">Numéro de dossier</Label>
           <Input
@@ -420,7 +420,7 @@ export function NewDossierForm({
         <>
           <div className="border-t border-[var(--color-border)] pt-5">
             <div className="text-[14px] font-medium mb-3">Douane & Organismes de contrôle</div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3.5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-3.5">
               <div className="space-y-2">
                 <Label htmlFor="controlOffice">Bureau de contrôle</Label>
                 <Input
@@ -445,7 +445,7 @@ export function NewDossierForm({
                   ))}
                 </Select>
               </div>
-              <div className="space-y-2 md:col-span-2">
+              <div className="space-y-2 md:col-span-2 lg:col-span-3">
                 <Label>Services réglementaires (selon le produit)</Label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {REGULATORY_SERVICES.map((s) => {
@@ -511,7 +511,7 @@ export function NewDossierForm({
             <p className="text-[12px] text-[var(--color-fg-3)] mb-3">
               Cochez tous les drapeaux applicables. Ces informations apparaissent en haut du dossier.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
               <FlagCheckbox
                 label="Facturé"
                 checked={!!form.billed}

@@ -26,7 +26,7 @@ export default async function EditDossierPage({
   if (!dossier) notFound();
 
   return (
-    <div className="max-w-3xl space-y-5">
+    <div className="space-y-5">
       <BackLink href={`/dossiers/${id}`}>Retour au dossier</BackLink>
       <PageHeader
         title="Modifier le dossier"
