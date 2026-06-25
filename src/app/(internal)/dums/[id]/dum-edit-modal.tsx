@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Pencil, X } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
@@ -33,7 +34,7 @@ export function DumEditModal({
         <Pencil /> Modifier
       </button>
 
-      {open && (
+      {open && createPortal(
         <div
           className="fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-8 bg-black/40 animate-fade-in overflow-y-auto"
           onClick={() => setOpen(false)}
@@ -66,7 +67,8 @@ export function DumEditModal({
               onCancel={() => setOpen(false)}
             />
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

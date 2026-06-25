@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Mail, X } from "lucide-react";
@@ -63,7 +64,7 @@ export function SendInvoiceButton({
         <Mail /> Envoyer par email
       </Button>
 
-      {open && (
+      {open && createPortal(
         <div
           className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-6 animate-fade-in"
           onClick={() => !pending && setOpen(false)}
@@ -136,7 +137,8 @@ export function SendInvoiceButton({
               </Button>
             </div>
           </form>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

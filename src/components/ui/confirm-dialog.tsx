@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { AlertTriangle, X } from "lucide-react";
 import { Button } from "./button";
 import { cn } from "@/lib/utils";
@@ -57,7 +58,7 @@ export function ConfirmDialog({
 
   const canConfirm = confirmWord ? typed.trim() === confirmWord : true;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-6 animate-fade-in"
       onClick={() => !pending && onOpenChange(false)}
@@ -76,7 +77,7 @@ export function ConfirmDialog({
                 TONE_ICON_CLASS[tone],
               )}
             >
-              <AlertTriangle className="size-4" strokeWidth={2} />
+              <AlertTriangle className="size-4" strokeWidth={1.75} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-[14px] font-semibold text-[var(--color-fg)]">{title}</div>
@@ -93,7 +94,7 @@ export function ConfirmDialog({
               aria-label="Fermer"
               title="Fermer"
             >
-              <X className="size-4" strokeWidth={2} />
+              <X className="size-4" strokeWidth={1.75} />
             </button>
           </div>
 
@@ -113,7 +114,7 @@ export function ConfirmDialog({
                 value={typed}
                 onChange={(e) => setTyped(e.target.value)}
                 autoFocus
-                className="flex h-9 w-full px-3 text-[13px] bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)]"
+                className="flex h-9 w-full px-3 text-[13px] bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius-input)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)]"
               />
             </div>
           )}
@@ -138,6 +139,7 @@ export function ConfirmDialog({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

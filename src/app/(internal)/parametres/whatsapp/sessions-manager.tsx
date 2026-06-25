@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { RefreshCw, Plus, Play, Square, Trash2, QrCode, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -246,7 +247,7 @@ function QrDialog({
     };
   }, [session.id, onClose, onConnected]);
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-6"
       onClick={onClose}
@@ -275,6 +276,7 @@ function QrDialog({
           WhatsApp → Appareils connectés → Lier un appareil. La fenêtre se ferme dès la connexion.
         </p>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
