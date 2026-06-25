@@ -120,7 +120,7 @@ export default async function DossierDetailPage({
           <p className="text-[13px] text-[var(--color-fg-3)]">
             {dossier.reference ? <>Réf. <span className="font-mono text-[var(--color-fg-2)]">{dossier.reference}</span> • </> : ""}
             Créé le{" "}
-            <span title={formatDateTime(dossier.createdAt)} className="cursor-help">
+            <span title={formatDateTime(dossier.createdAt)}>
               {formatDate(dossier.createdAt)}
             </span>
             {dossier.createdBy && ` par ${dossier.createdBy.name}`}
