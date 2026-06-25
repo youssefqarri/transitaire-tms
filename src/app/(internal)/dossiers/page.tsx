@@ -343,7 +343,7 @@ export default async function DossiersPage({
                       <td className="px-3 py-2.5">
                         <Link
                           href={`/dossiers/${d.id}`}
-                          className="font-mono font-semibold text-[13px] text-[var(--color-fg)] hover:text-[var(--color-accent)]"
+                          className="font-mono font-semibold text-[13px] text-[var(--color-fg)] hover:underline"
                         >
                           {d.number}
                         </Link>
@@ -351,8 +351,13 @@ export default async function DossiersPage({
                       <td className="px-3 py-2.5 font-mono text-[13px] text-[var(--color-fg-2)]">
                         {d.reference ?? <span className="text-[var(--color-fg-mute)] italic">—</span>}
                       </td>
-                      <td className="px-3 py-2.5 truncate max-w-[200px] text-[13px] text-[var(--color-fg-3)]">
-                        {d.client.name}
+                      <td className="px-3 py-2.5 max-w-[200px] text-[13px] text-[var(--color-fg-3)]">
+                        <Link
+                          href={`/clients/${d.clientId}`}
+                          className="block truncate hover:underline"
+                        >
+                          {d.client.name}
+                        </Link>
                       </td>
                       <td className="px-3 py-2.5 font-mono text-[13px] text-[var(--color-fg-3)] hidden 2xl:table-cell">
                         {d.dums.length === 0 ? "—" : d.dums.map((dum) => dum.number).join(", ")}
