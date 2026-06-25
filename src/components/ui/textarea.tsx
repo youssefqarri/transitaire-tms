@@ -9,7 +9,7 @@ export const Textarea = React.forwardRef<
     ref={ref}
     className={cn(
       "flex min-h-[88px] w-full px-3 py-2 text-[13px]",
-      "bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)]",
+      "bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius-input)]",
       "placeholder:text-[var(--color-fg-mute)]",
       "transition-shadow duration-150",
       "hover:border-[var(--color-fg-mute)]",

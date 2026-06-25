@@ -60,6 +60,7 @@
   --radius-sm: 4px;
   --radius-lg: 8px;
   --radius-xl: 12px;
+  --radius-input: 3px; /* champs de saisie (input/select/textarea/combobox) — angle serré */
 
   /* ── Ombres ── */
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);

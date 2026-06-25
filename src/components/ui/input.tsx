@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 const baseCls = [
   "flex h-9 w-full px-3 text-[13px]",
-  "bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)]",
+  "bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius-input)]",
   "placeholder:text-[var(--color-fg-mute)]",
   "transition-shadow duration-150",
   "hover:border-[var(--color-fg-mute)]",

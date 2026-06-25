@@ -116,7 +116,7 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
           <div className="relative flex-1 min-w-[88px]">
             <Search
               className="absolute left-1.5 top-1/2 -translate-y-1/2 size-3 text-[var(--color-fg-mute)] pointer-events-none"
-              strokeWidth={2}
+              strokeWidth={1.75}
             />
             <input
               value={text}
@@ -132,7 +132,7 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
                 aria-label="Effacer le filtre"
                 className="absolute right-1 top-1/2 -translate-y-1/2 size-4 grid place-items-center rounded text-[var(--color-fg-mute)] hover:text-[var(--color-fg)]"
               >
-                <X className="size-3" strokeWidth={2.25} />
+                <X className="size-3" strokeWidth={1.75} />
               </button>
             )}
           </div>
@@ -174,9 +174,9 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
           >
             {sorted ? (
               curDir === "desc" ? (
-                <ArrowDownWideNarrow className="size-3.5" strokeWidth={2.25} />
+                <ArrowDownWideNarrow className="size-3.5" strokeWidth={1.75} />
               ) : (
-                <ArrowUpNarrowWide className="size-3.5" strokeWidth={2.25} />
+                <ArrowUpNarrowWide className="size-3.5" strokeWidth={1.75} />
               )
             ) : (
               <ArrowUpDown className="size-3.5" strokeWidth={1.75} />

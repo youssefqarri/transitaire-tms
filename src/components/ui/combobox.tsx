@@ -143,10 +143,10 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
         aria-expanded={open}
         className={cn(
           "group flex h-9 w-full items-center gap-2 pl-3 pr-2 text-[13px] text-left",
-          "bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)]",
+          "bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius-input)]",
           "transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)]",
           "disabled:opacity-50 disabled:cursor-not-allowed",
-          open && "ring-2 ring-[var(--color-accent-ring)] border-transparent",
+          open && "border-[var(--color-fg-mute)]",
         )}
       >
         <span
@@ -179,7 +179,7 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
             }}
             className="inline-flex items-center justify-center size-5 rounded-[var(--radius-sm)] hover:bg-[var(--color-surface-2)] text-[var(--color-fg-mute)] hover:text-[var(--color-fg)] cursor-pointer"
           >
-            <X className="size-3" strokeWidth={2} />
+            <X className="size-3" strokeWidth={1.75} />
           </span>
         )}
         <ChevronDown
@@ -187,7 +187,7 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
             "size-3.5 text-[var(--color-fg-mute)] shrink-0 transition-transform",
             open && "rotate-180",
           )}
-          strokeWidth={2}
+          strokeWidth={1.75}
         />
       </button>
 
@@ -207,7 +207,7 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
               }}
               onKeyDown={onKey}
               placeholder={searchPlaceholder}
-              className="w-full h-9 pl-8 pr-3 text-[13px] bg-transparent placeholder:text-[var(--color-fg-mute)] focus:outline-none"
+              className="w-full h-9 pl-8 pr-14 text-[13px] bg-transparent placeholder:text-[var(--color-fg-mute)] focus:outline-none"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[var(--color-fg-mute)] tnum">
               {filtered.length}/{items.length}
@@ -261,7 +261,7 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
                         )}
                       </div>
                       {isSelected && (
-                        <Check className="size-3.5 text-[var(--color-accent)] shrink-0" strokeWidth={2} />
+                        <Check className="size-3.5 text-[var(--color-accent)] shrink-0" strokeWidth={1.75} />
                       )}
                     </button>
                   </div>
@@ -278,7 +278,7 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
                 }}
                 className="w-full flex items-center gap-2 px-3 py-1.5 text-[13px] text-left transition-colors text-[var(--color-accent)] hover:bg-[var(--color-surface-2)] border-t border-[var(--color-border)]"
               >
-                <Plus className="size-3.5 shrink-0" strokeWidth={2} />
+                <Plus className="size-3.5 shrink-0" strokeWidth={1.75} />
                 <span className="truncate">Ajouter «&nbsp;{trimmedQuery}&nbsp;»</span>
               </button>
             )}
