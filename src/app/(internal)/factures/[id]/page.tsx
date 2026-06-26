@@ -187,8 +187,8 @@ export default async function InvoiceDetailPage({
             <CardTitle>Récapitulatif</CardTitle>
           </CardHeader>
           <div className="px-5 py-4 space-y-2 text-[13px]">
-            <Row label="Total Non Taxable" value={formatMAD(computed.totalNonTaxable)} />
-            <Row label="Total Taxable" value={formatMAD(computed.totalTaxable)} />
+            <Row label="Total non taxable" value={formatMAD(computed.totalNonTaxable)} />
+            <Row label="Total taxable" value={formatMAD(computed.totalTaxable)} />
             {computed.vatByRate.map((v) => (
               <Row key={v.rate} label={`TVA ${v.rate} %`} value={formatMAD(v.amount)} />
             ))}

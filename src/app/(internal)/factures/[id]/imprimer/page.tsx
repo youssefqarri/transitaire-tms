@@ -83,11 +83,17 @@ export default async function InvoicePrintPage({
         .invoice-page table { width: 100%; border-collapse: collapse; }
         .invoice-page th, .invoice-page td { padding: 8px 6px; border-bottom: 1px solid #e6e6e6; font-size: 11.5px; }
         .invoice-page th { text-align: left; text-transform: uppercase; letter-spacing: 0.06em; font-size: 9.5px; color: #555; font-weight: 600; border-bottom: 1px solid #aaa; }
-        .invoice-page .tnum { font-variant-numeric: tabular-nums; font-family: var(--font-geist-mono), monospace; }
+        .invoice-page .tnum { font-variant-numeric: tabular-nums; }
       `}</style>
 
       <div className="invoice-page">
-        <div className="no-print" style={{ textAlign: "right", marginBottom: 24 }}>
+        <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <a
+            href={`/factures/${invoice.id}`}
+            style={{ fontSize: 13, color: "#555", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
+          >
+            ← Retour à la facture
+          </a>
           <PrintTrigger />
         </div>
 
@@ -118,7 +124,7 @@ export default async function InvoicePrintPage({
             >
               Facture
             </div>
-            <div style={{ fontSize: 24, fontFamily: "var(--font-geist-mono), monospace", fontWeight: 600 }}>
+            <div style={{ fontSize: 24, fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>
               {invoice.number}
             </div>
             <div style={{ fontSize: 11, color: "#555", marginTop: 8, lineHeight: 1.6 }}>
@@ -246,8 +252,8 @@ export default async function InvoicePrintPage({
               <th>Code</th>
               <th>Désignation</th>
               <th style={{ textAlign: "right" }}>TVA %</th>
-              <th style={{ textAlign: "right" }}>Montant Taxable</th>
-              <th style={{ textAlign: "right" }}>Montant Non Taxable</th>
+              <th style={{ textAlign: "right" }}>Montant taxable</th>
+              <th style={{ textAlign: "right" }}>Montant non taxable</th>
             </tr>
           </thead>
           <tbody>
@@ -257,7 +263,7 @@ export default async function InvoicePrintPage({
               const taxable = rate > 0;
               return (
                 <tr key={it.id}>
-                  <td className="tnum" style={{ whiteSpace: "nowrap" }}>{it.code ?? ""}</td>
+                  <td className="tnum" style={{ whiteSpace: "nowrap" }}>{it.code || "—"}</td>
                   <td>
                     {it.description}
                     {Number(it.quantity) !== 1 && (
@@ -287,20 +293,20 @@ export default async function InvoicePrintPage({
           <table style={{ width: 300 }}>
             <tbody>
               <tr>
-                <td style={{ color: "#555" }}>Total Non Taxable</td>
+                <td style={{ color: "#555" }}>Total non taxable</td>
                 <td className="tnum" style={{ textAlign: "right" }}>
                   {formatMAD(computed.totalNonTaxable)}
                 </td>
               </tr>
               <tr>
-                <td style={{ color: "#555" }}>Total Taxable</td>
+                <td style={{ color: "#555" }}>Total taxable</td>
                 <td className="tnum" style={{ textAlign: "right" }}>
                   {formatMAD(computed.totalTaxable)}
                 </td>
               </tr>
               {computed.vatByRate.map((v) => (
                 <tr key={v.rate}>
-                  <td style={{ color: "#555" }}>T.V.A {v.rate} %</td>
+                  <td style={{ color: "#555" }}>TVA {v.rate} %</td>
                   <td className="tnum" style={{ textAlign: "right" }}>
                     {formatMAD(v.amount)}
                   </td>
@@ -308,7 +314,7 @@ export default async function InvoicePrintPage({
               ))}
               <tr>
                 <td style={{ fontWeight: 700, fontSize: 13, borderTop: "2px solid #111" }}>
-                  Montant T.T.C
+                  Total TTC
                 </td>
                 <td
                   className="tnum"

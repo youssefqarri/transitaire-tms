@@ -4,13 +4,14 @@ import { useState, useTransition, useMemo, useEffect, type ComponentType } from 
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Send, X, Mail } from "lucide-react";
+import { Send, X, Mail, Info } from "lucide-react";
 import { WhatsAppIcon } from "@/components/brand/whatsapp-icon";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
+import { useEscapeClose, backdropDismiss } from "@/components/ui/dismiss";
 
 type TemplateInfo = { key: string; label: string };
 const TEMPLATES: TemplateInfo[] = [
@@ -58,6 +59,8 @@ export function NotifyClientButton({
   const [editedBody, setEditedBody] = useState("");
 
   useEffect(() => setMounted(true), []);
+
+  useEscapeClose(open, () => setOpen(false), !pending);
 
   // Canal « principal » pour charger le bon modèle d'aperçu (email prioritaire).
   const primaryChannel: "EMAIL" | "WHATSAPP" = emailOn ? "EMAIL" : "WHATSAPP";
@@ -178,7 +181,7 @@ export function NotifyClientButton({
   const modal = (
     <div
       className="fixed inset-0 bg-black/40 z-[100] flex items-center justify-center p-4 sm:p-6"
-      onClick={() => setOpen(false)}
+      onMouseDown={backdropDismiss(() => setOpen(false))}
     >
       <div
         className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] border border-[var(--color-border)] shadow-[0_24px_64px_-16px_rgba(0,0,0,0.25)] w-full max-w-2xl max-h-[90vh] flex flex-col animate-fade-in"
@@ -322,9 +325,12 @@ export function NotifyClientButton({
               onChange={(e) => setEditedBody(e.target.value)}
               className="min-h-[200px] font-mono text-[13px]"
             />
-            <p className="text-[11px] text-[var(--color-fg-mute)]">
-              Variables remplacées automatiquement depuis le dossier. Le même message part sur les
-              canaux sélectionnés.
+            <p className="flex items-start gap-1.5 text-[11px] text-[var(--color-fg-3)]">
+              <Info className="size-3.5 shrink-0 mt-px text-[var(--color-fg-mute)]" />
+              <span>
+                Variables remplacées automatiquement depuis le dossier. Le même message part sur les
+                canaux sélectionnés.
+              </span>
             </p>
           </div>
 

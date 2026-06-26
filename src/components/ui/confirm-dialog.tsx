@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AlertTriangle, X } from "lucide-react";
 import { Button } from "./button";
+import { backdropDismiss } from "./dismiss";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -61,7 +62,7 @@ export function ConfirmDialog({
   return createPortal(
     <div
       className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-6 animate-fade-in"
-      onClick={() => !pending && onOpenChange(false)}
+      onMouseDown={backdropDismiss(() => !pending && onOpenChange(false))}
     >
       <div
         className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] border border-[var(--color-border)] shadow-[0_24px_64px_-16px_rgba(0,0,0,0.2)] w-full max-w-md"

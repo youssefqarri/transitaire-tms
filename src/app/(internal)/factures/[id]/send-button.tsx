@@ -8,6 +8,7 @@ import { Mail, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useEscapeClose, backdropDismiss } from "@/components/ui/dismiss";
 
 export function SendInvoiceButton({
   invoiceId,
@@ -24,6 +25,8 @@ export function SendInvoiceButton({
   const [to, setTo] = useState(clientEmail ?? "");
   const [subject, setSubject] = useState(`Facture ${invoiceNumber}`);
   const [body, setBody] = useState("");
+
+  useEscapeClose(open, () => setOpen(false), !pending);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -67,7 +70,7 @@ export function SendInvoiceButton({
       {open && createPortal(
         <div
           className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-6 animate-fade-in"
-          onClick={() => !pending && setOpen(false)}
+          onMouseDown={backdropDismiss(() => !pending && setOpen(false))}
         >
           <form
             onSubmit={submit}

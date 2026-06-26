@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
 import { ColumnHeader } from "@/components/ui/column-header";
+import { RowLink, CellLink } from "@/components/ui/clickable-row";
 import { TableMobileFilter } from "@/components/ui/table-mobile-filter";
 import { parsePagination } from "@/lib/pagination";
 import { formatDate } from "@/lib/utils";
@@ -206,7 +207,7 @@ export default async function InvoicesPage({
               <table className="w-full text-[13px]">
                 <thead>
                   <tr className="border-b border-[var(--color-border)]">
-                    <ColumnHeader label="N°" sortKey="number" filter={{ type: "text", param: "number" }} />
+                    <ColumnHeader label="N° de facture" sortKey="number" filter={{ type: "text", param: "number" }} />
                     <ColumnHeader label="Client" sortKey="client" filter={{ type: "text", param: "clientName" }} />
                     <ColumnHeader label="Émise le" sortKey="issued" />
                     <ColumnHeader label="Échéance" sortKey="due" />
@@ -231,20 +232,23 @@ export default async function InvoicesPage({
                       })),
                     );
                     return (
-                      <tr
+                      <RowLink
                         key={inv.id}
+                        href={`/factures/${inv.id}`}
                         className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-2)]/50 transition-colors"
                       >
                         <td className="px-5 py-2.5">
-                          <Link
+                          <CellLink
                             href={`/factures/${inv.id}`}
-                            className="row-link font-mono font-medium text-[var(--color-fg)] hover:text-[var(--color-accent)]"
+                            className="font-mono font-medium text-[var(--color-fg)]"
                           >
                             {inv.number}
-                          </Link>
+                          </CellLink>
                         </td>
-                        <td className="px-5 py-2.5 truncate max-w-[240px] text-[var(--color-fg-2)]">
-                          {inv.client.name}
+                        <td className="px-5 py-2.5 max-w-[240px] text-[var(--color-fg-3)]">
+                          <CellLink newTab href={`/clients/${inv.clientId}`} className="block truncate">
+                            {inv.client.name}
+                          </CellLink>
                         </td>
                         <td className="px-5 py-2.5 text-[var(--color-fg-3)] whitespace-nowrap">
                           {formatDate(inv.issuedAt)}
@@ -260,7 +264,7 @@ export default async function InvoicesPage({
                             {INVOICE_STATUS_LABELS[inv.status]}
                           </Badge>
                         </td>
-                      </tr>
+                      </RowLink>
                     );
                   })}
                 </tbody>

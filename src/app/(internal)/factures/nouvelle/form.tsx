@@ -442,7 +442,7 @@ export function NewInvoiceForm({
         <p className="text-[12px] text-[var(--color-fg-3)]">
           <Badge tone="outline">Note</Badge>{" "}
           Débours = refacturés à l&apos;identique, en principe à 0 % (sauf transport refacturé,
-          à 10 %). Les lignes à 0 % vont en « Montant Non Taxable », les autres en « Montant Taxable ».
+          à 10 %). Les lignes à 0 % vont en « Montant non taxable », les autres en « Montant taxable ».
         </p>
       </div>
 
@@ -468,8 +468,8 @@ export function NewInvoiceForm({
           </div>
         </div>
         <div className="space-y-2 border border-[var(--color-border)] rounded-[var(--radius)] p-4 bg-[var(--color-surface-2)] self-start">
-          <Row label="Total Non Taxable" value={formatMAD(computed.totalNonTaxable)} />
-          <Row label="Total Taxable" value={formatMAD(computed.totalTaxable)} />
+          <Row label="Total non taxable" value={formatMAD(computed.totalNonTaxable)} />
+          <Row label="Total taxable" value={formatMAD(computed.totalTaxable)} />
           {computed.vatByRate.map((v) => (
             <Row key={v.rate} label={`TVA ${v.rate} %`} value={formatMAD(v.amount)} />
           ))}
