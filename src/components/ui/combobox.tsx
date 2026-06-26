@@ -32,6 +32,8 @@ type Props = {
   id?: string;
   /** Taille du bouton déclencheur. "sm" = compact (h-7), "default" = h-9. */
   size?: "sm" | "default";
+  /** Si false, masque le champ de recherche (liste seule). Défaut true. */
+  searchable?: boolean;
   /** Opt-in : si fourni, propose « Ajouter « <saisie> » » quand la saisie ne correspond à aucune entrée. */
   onCreate?: (label: string) => void;
 };
@@ -49,6 +51,7 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
     className,
     id,
     size = "default",
+    searchable = true,
     onCreate,
   },
   ref,
@@ -93,16 +96,28 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
     return () => document.removeEventListener("mousedown", onDoc);
   }, [open]);
 
+  // close on Escape (utile surtout sans champ de recherche pour capter la touche)
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
+
   // focus search when opening, reset state when closing
   useEffect(() => {
     if (open) {
-      const t = setTimeout(() => inputRef.current?.focus(), 0);
+      const t = searchable ? setTimeout(() => inputRef.current?.focus(), 0) : undefined;
       setActiveIdx(0);
-      return () => clearTimeout(t);
+      return () => {
+        if (t) clearTimeout(t);
+      };
     } else {
       setQuery("");
     }
-  }, [open]);
+  }, [open, searchable]);
 
   // keep active item visible
   useEffect(() => {
@@ -194,7 +209,8 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
         )}
         <ChevronDown
           className={cn(
-            "pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 text-[var(--color-fg-mute)] transition-transform",
+            "pointer-events-none absolute top-1/2 -translate-y-1/2 text-[var(--color-fg-mute)] transition-transform",
+            size === "sm" ? "right-2 size-3" : "right-3 size-3.5",
             open && "rotate-180",
           )}
           strokeWidth={1.75}

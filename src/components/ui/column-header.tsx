@@ -5,7 +5,6 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import {
   Search,
   X,
-  ChevronDown,
   CalendarDays,
   ArrowUpDown,
   ArrowDownWideNarrow,
@@ -141,42 +140,18 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
             )}
           </div>
         ) : filter?.type === "select" ? (
-          filter.options.length > 10 ? (
-            <Combobox
-              size="sm"
-              clearable
-              items={filter.options.map((o) => ({ id: o.value, label: o.label }))}
-              value={sp.get(filter.param) ?? ""}
-              onChange={(v) => push((p) => (v ? p.set(filter.param, v) : p.delete(filter.param)))}
-              placeholder={label}
-              searchPlaceholder="Filtrer…"
-              emptyText="Aucun résultat"
-              className="flex-1"
-            />
-          ) : (
-          <div className="relative flex-1">
-            <select
-              value={sp.get(filter.param) ?? ""}
-              onChange={(e) =>
-                push((p) => (e.target.value ? p.set(filter.param, e.target.value) : p.delete(filter.param)))
-              }
-              aria-label={`Filtrer par ${label}`}
-              className={cn(inputCls, "appearance-none pl-1.5 pr-6 font-medium", sp.get(filter.param) ? "text-[var(--color-fg)]" : "text-[var(--color-fg-3)]")}
-            >
-              <option value="">{label}</option>
-              {filter.options.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              aria-hidden
-              className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 size-3.5 text-[var(--color-fg-mute)]"
-              strokeWidth={1.75}
-            />
-          </div>
-          )
+          <Combobox
+            size="sm"
+            clearable
+            searchable={filter.options.length > 10}
+            items={filter.options.map((o) => ({ id: o.value, label: o.label }))}
+            value={sp.get(filter.param) ?? ""}
+            onChange={(v) => push((p) => (v ? p.set(filter.param, v) : p.delete(filter.param)))}
+            placeholder={label}
+            searchPlaceholder="Filtrer…"
+            emptyText="Aucun résultat"
+            className="flex-1"
+          />
         ) : shortLabel ? (
           <span className={cn("flex-1 truncate px-1", labelAlign)}>
             <span className="hidden lg:inline">{label}</span>
