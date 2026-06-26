@@ -12,6 +12,7 @@ import {
   ArrowUpNarrowWide,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Combobox } from "@/components/ui/combobox";
 
 export type ColumnFilter =
   | { type: "text"; param: string }
@@ -140,6 +141,19 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
             )}
           </div>
         ) : filter?.type === "select" ? (
+          filter.options.length > 10 ? (
+            <Combobox
+              size="sm"
+              clearable
+              items={filter.options.map((o) => ({ id: o.value, label: o.label }))}
+              value={sp.get(filter.param) ?? ""}
+              onChange={(v) => push((p) => (v ? p.set(filter.param, v) : p.delete(filter.param)))}
+              placeholder={label}
+              searchPlaceholder="Filtrer…"
+              emptyText="Aucun résultat"
+              className="flex-1"
+            />
+          ) : (
           <div className="relative flex-1">
             <select
               value={sp.get(filter.param) ?? ""}
@@ -162,6 +176,7 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
               strokeWidth={1.75}
             />
           </div>
+          )
         ) : shortLabel ? (
           <span className={cn("flex-1 truncate px-1", labelAlign)}>
             <span className="hidden lg:inline">{label}</span>

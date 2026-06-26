@@ -30,6 +30,8 @@ type Props = {
   clearable?: boolean;
   className?: string;
   id?: string;
+  /** Taille du bouton déclencheur. "sm" = compact (h-7), "default" = h-9. */
+  size?: "sm" | "default";
   /** Opt-in : si fourni, propose « Ajouter « <saisie> » » quand la saisie ne correspond à aucune entrée. */
   onCreate?: (label: string) => void;
 };
@@ -46,6 +48,7 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
     clearable = false,
     className,
     id,
+    size = "default",
     onCreate,
   },
   ref,
@@ -145,7 +148,9 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
         aria-haspopup="listbox"
         aria-expanded={open}
         className={cn(
-          "relative group flex h-9 w-full items-center pl-3 text-[13px] text-left",
+          size === "sm"
+            ? "relative group flex h-7 w-full items-center pl-2 text-[12px] text-left"
+            : "relative group flex h-9 w-full items-center pl-3 text-[13px] text-left",
           "bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius-input)]",
           "transition-shadow duration-150 hover:border-[var(--color-fg-mute)]",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)]",
