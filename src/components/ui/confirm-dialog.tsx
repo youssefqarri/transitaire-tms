@@ -68,13 +68,23 @@ export function ConfirmDialog({
       onMouseDown={backdropDismiss(() => !pending && onOpenChange(false))}
     >
       <div
-        className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] border border-[var(--color-border)] shadow-[0_24px_64px_-16px_rgba(0,0,0,0.2)] w-full max-w-md"
+        className="relative bg-[var(--color-surface)] rounded-[var(--radius-lg)] border border-[var(--color-border)] shadow-[0_24px_64px_-16px_rgba(0,0,0,0.2)] w-full max-w-md"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
       >
+        {/* Croix toujours au-dessus du contenu : ancrée en haut à droite du popup. */}
+        <button
+          type="button"
+          onClick={() => !pending && onOpenChange(false)}
+          className="absolute right-3 top-3 size-7 rounded-[var(--radius-sm)] flex items-center justify-center text-[var(--color-fg-mute)] hover:text-[var(--color-fg)] hover:bg-[var(--color-surface-2)] transition-colors"
+          aria-label="Fermer"
+          title="Fermer"
+        >
+          <X className="size-4" strokeWidth={1.75} />
+        </button>
         <div className="px-5 pt-5">
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-3 pr-6">
             <div
               className={cn(
                 "size-9 rounded-full flex items-center justify-center shrink-0",
@@ -91,15 +101,6 @@ export function ConfirmDialog({
                 </div>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => !pending && onOpenChange(false)}
-              className="size-9 -mr-2 -mt-2 rounded-[var(--radius-sm)] flex items-center justify-center text-[var(--color-fg-mute)] hover:text-[var(--color-fg)] hover:bg-[var(--color-surface-2)] shrink-0 transition-colors"
-              aria-label="Fermer"
-              title="Fermer"
-            >
-              <X className="size-4" strokeWidth={1.75} />
-            </button>
           </div>
 
           {confirmWord && (

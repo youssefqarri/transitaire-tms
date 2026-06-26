@@ -59,20 +59,23 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
 
   const selected = useMemo(() => items.find((it) => it.id === value), [items, value]);
 
+  // Recherche insensible à la casse ET aux accents : « e » matche « é/è/ê/ë », et inversement.
+  const normSearch = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = normSearch(query.trim());
     if (!q) return items;
     return items.filter(
       (it) =>
-        it.label.toLowerCase().includes(q) ||
-        (it.sublabel ? it.sublabel.toLowerCase().includes(q) : false),
+        normSearch(it.label).includes(q) ||
+        (it.sublabel ? normSearch(it.sublabel).includes(q) : false),
     );
   }, [items, query]);
 
   // Création opt-in : on propose d'ajouter la saisie si elle ne matche aucune entrée existante.
   const trimmedQuery = query.trim();
   const hasExact = useMemo(
-    () => items.some((it) => it.label.toLowerCase() === trimmedQuery.toLowerCase()),
+    () => items.some((it) => normSearch(it.label) === normSearch(trimmedQuery)),
     [items, trimmedQuery],
   );
   const showCreate = !!onCreate && trimmedQuery.length > 0 && !hasExact;
