@@ -5,6 +5,7 @@ import { canViewInvoices } from "@/lib/roles";
 import {
   PAYMENT_METHOD_LABELS,
   formatMAD,
+  normalizeDesignation,
   totals,
   montantEnLettres,
 } from "@/lib/invoicing";
@@ -268,7 +269,7 @@ export default async function InvoicePrintPage({
                 <tr key={it.id}>
                   <td className="tnum" style={{ whiteSpace: "nowrap" }}>{it.code || "—"}</td>
                   <td>
-                    {it.description}
+                    {normalizeDesignation(it.description)}
                     {Number(it.quantity) !== 1 && (
                       <span style={{ color: "#888" }}>
                         {" "}

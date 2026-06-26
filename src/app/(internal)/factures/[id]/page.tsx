@@ -14,6 +14,7 @@ import {
   CREDIT_NOTE_STATUS_LABELS,
   PAYMENT_METHOD_LABELS,
   formatMAD,
+  normalizeDesignation,
   totals,
 } from "@/lib/invoicing";
 import { formatDate } from "@/lib/utils";
@@ -155,7 +156,7 @@ export default async function InvoiceDetailPage({
                         </Badge>
                       </td>
                       <td className="px-5 py-2.5 text-[var(--color-fg)]">
-                        {it.description}
+                        {normalizeDesignation(it.description)}
                         {it.dossier && (
                           <span className="ml-2 font-mono text-[11px] text-[var(--color-fg-3)]">
                             • {it.dossier.number}

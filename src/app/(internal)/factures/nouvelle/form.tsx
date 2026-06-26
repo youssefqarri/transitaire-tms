@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   INVOICE_ITEM_KIND_LABELS,
   formatMAD,
+  normalizeDesignation,
   totals,
   type LineItem,
 } from "@/lib/invoicing";
@@ -147,7 +148,7 @@ export function NewInvoiceForm({
     const line: LineItem = {
       kind: "HONORAIRE",
       code: "TAXREG",
-      description: "TAXE REGIONALE (3%)",
+      description: "Taxe régionale (3 %)",
       quantity: 1,
       unitPrice: montant,
       vatRate: 20,
@@ -183,7 +184,7 @@ export function NewInvoiceForm({
         tariffs.map((t) => ({
           kind: t.kind,
           code: t.code ?? "",
-          description: t.description,
+          description: normalizeDesignation(t.description),
           quantity: 1,
           unitPrice: t.unitPrice,
           vatRate: t.vatRate,
@@ -384,6 +385,7 @@ export function NewInvoiceForm({
                 <Input
                   value={it.description}
                   onChange={(e) => updateItem(i, "description", e.target.value)}
+                  onBlur={(e) => updateItem(i, "description", normalizeDesignation(e.target.value))}
                   placeholder="Désignation…"
                 />
                 <Input
@@ -467,7 +469,7 @@ export function NewInvoiceForm({
             />
           </div>
         </div>
-        <div className="space-y-2 border border-[var(--color-border)] rounded-[var(--radius)] p-4 bg-[var(--color-surface-2)] self-start">
+        <div className="space-y-2 border border-[var(--color-border)] rounded-[var(--radius)] p-4 bg-[var(--color-surface-2)] self-end">
           <Row label="Total non taxable" value={formatMAD(computed.totalNonTaxable)} />
           <Row label="Total taxable" value={formatMAD(computed.totalTaxable)} />
           {computed.vatByRate.map((v) => (

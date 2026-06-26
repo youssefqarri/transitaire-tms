@@ -144,6 +144,36 @@ export function formatMAD(n: number): string {
   }).format(n);
 }
 
+// Sigles à garder en MAJUSCULES dans une désignation (sinon « LR » deviendrait « Lr »).
+const DESIGNATION_KEEP_UPPER = new Set([
+  "LR", "TVA", "TTC", "HT", "TC", "CNSS", "ICE", "RC", "IF", "BADR", "DUM",
+  "BAE", "MAD", "DH", "CMR", "BL", "LTA", "FOB", "CIF", "CFR", "THC", "ISPS",
+  "BSC", "VGM", "EUR", "USD", "HON", "TAXREG",
+]);
+
+/**
+ * Uniformise la casse d'une désignation de ligne : casse « phrase » (1re lettre
+ * en majuscule, le reste en minuscules), en préservant les sigles connus
+ * (LR, TVA, CNSS, ICE…). Évite le mélange « FRAIS PORTUAIRES » / « Honoraires… ».
+ */
+export function normalizeDesignation(s: string): string {
+  const text = s.trim();
+  if (!text) return text;
+  let firstLetterDone = false;
+  return text.replace(/[\p{L}\p{N}]+/gu, (word) => {
+    if (DESIGNATION_KEEP_UPPER.has(word.toUpperCase())) {
+      firstLetterDone = true;
+      return word.toUpperCase();
+    }
+    let w = word.toLowerCase();
+    if (!firstLetterDone) {
+      w = w.replace(/\p{L}/u, (c) => c.toUpperCase());
+      firstLetterDone = true;
+    }
+    return w;
+  });
+}
+
 /** Texte « x cent vingt-trois dirhams et quarante-cinq centimes » pour la facture. */
 export function montantEnLettres(amount: number): string {
   // Garde-fou : un montant non fini (NaN/Infinity) ou négatif ferait boucler
