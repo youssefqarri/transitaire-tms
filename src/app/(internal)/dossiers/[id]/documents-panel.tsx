@@ -210,13 +210,13 @@ export function DocumentsPanel({
             key={d.id}
             className={`px-5 py-3 flex items-center gap-3 transition-colors ${
               d.uploadedByIsClient
-                ? "bg-[var(--color-danger-soft)] hover:bg-[var(--color-danger-soft)]/80 border-l-2 border-[var(--color-danger)]"
+                ? "bg-[var(--color-info-soft)] hover:bg-[var(--color-info-soft)]/80 border-l-2 border-[var(--color-info)]"
                 : "hover:bg-[var(--color-surface-2)]"
             }`}
           >
             <FileText
               className={`size-4 shrink-0 ${
-                d.uploadedByIsClient ? "text-[var(--color-danger)]" : "text-[var(--color-fg-mute)]"
+                d.uploadedByIsClient ? "text-[var(--color-info)]" : "text-[var(--color-fg-mute)]"
               }`}
               strokeWidth={1.75}
             />

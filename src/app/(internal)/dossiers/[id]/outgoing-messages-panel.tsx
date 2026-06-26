@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, MessageCircle, ChevronDown } from "lucide-react";
+import { Mail, ChevronDown } from "lucide-react";
+import { WhatsAppIcon } from "@/components/brand/whatsapp-icon";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDateTime } from "@/lib/utils";
@@ -26,6 +27,14 @@ const STATUS_TONE: Record<string, "info" | "ok" | "danger" | "neutral" | "warn">
   DELIVERED: "ok",
   READ: "ok",
   FAILED: "danger",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: "En attente",
+  SENT: "Envoyé",
+  DELIVERED: "Délivré",
+  READ: "Lu",
+  FAILED: "Échec",
 };
 
 export function OutgoingMessagesPanel({ messages }: { messages: Msg[] }) {
@@ -54,14 +63,14 @@ export function OutgoingMessagesPanel({ messages }: { messages: Msg[] }) {
                 {m.channel === "EMAIL" ? (
                   <Mail className="size-4 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
                 ) : (
-                  <MessageCircle className="size-4 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
+                  <WhatsAppIcon className="size-4 text-[var(--color-fg-mute)] shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[13px] font-medium truncate">
                       {m.subject || m.body.split("\n")[0].slice(0, 60)}
                     </span>
-                    <Badge tone={STATUS_TONE[m.status] ?? "neutral"}>{m.status}</Badge>
+                    <Badge tone={STATUS_TONE[m.status] ?? "neutral"}>{STATUS_LABELS[m.status] ?? m.status}</Badge>
                   </div>
                   <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
                     → {m.toAddress} •{" "}

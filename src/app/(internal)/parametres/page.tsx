@@ -5,7 +5,8 @@ import { getSettings } from "@/lib/settings";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
-import { Mail, Cloud, Key, ChevronRight, MessageSquare, MessageCircle, FileText, Hash, Building2 } from "lucide-react";
+import { Mail, Cloud, Key, ChevronRight, MessageSquare, FileText, Hash, Building2 } from "lucide-react";
+import { WhatsAppIcon } from "@/components/brand/whatsapp-icon";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +35,7 @@ export default async function SettingsPage() {
     },
     {
       href: "/parametres/whatsapp",
-      icon: MessageCircle,
+      icon: WhatsAppIcon,
       title: "WhatsApp (OpenWA)",
       description: "Notifications clients par WhatsApp via OpenWA / WAHA",
       status: waConfigured ? (

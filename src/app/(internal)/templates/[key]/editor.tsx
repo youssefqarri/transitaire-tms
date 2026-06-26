@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Mail, MessageCircle, RotateCcw, Trash2 } from "lucide-react";
+import { Mail, RotateCcw, Trash2 } from "lucide-react";
+import { WhatsAppIcon } from "@/components/brand/whatsapp-icon";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -160,7 +161,7 @@ export function TemplateEditor({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <MessageCircle className="size-4 text-[var(--color-fg-mute)]" strokeWidth={1.75} />
+            <WhatsAppIcon className="size-4 text-[var(--color-fg-mute)]" />
             WhatsApp
             <span className={`ml-2 text-[11px] font-medium uppercase tracking-wider ${waIsCustom ? "text-[var(--color-accent)]" : "text-[var(--color-fg-mute)]"}`}>
               {waIsCustom ? "Personnalisé" : "Défaut"}
