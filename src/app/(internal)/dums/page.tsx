@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FileText } from "lucide-react";
+import { RowLink, CellLink } from "@/components/ui/clickable-row";
 import { prisma } from "@/lib/db";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -126,8 +127,8 @@ export default async function DUMsPage({
               {dums.map((d) => (
                 <Link
                   key={d.id}
-                  href={`/dossiers/${d.dossier.id}`}
-                  className="block px-4 py-3 hover:bg-[var(--color-surface-2)] active:bg-[var(--color-surface-2)]"
+                  href={`/dums/${d.id}`}
+                  className="row-link block px-4 py-3 hover:bg-[var(--color-surface-2)] active:bg-[var(--color-surface-2)]"
                 >
                   <div className="flex items-center justify-between gap-3 mb-1">
                     <span className="font-mono font-medium text-[14px] text-[var(--color-fg)]">
@@ -166,33 +167,36 @@ export default async function DUMsPage({
                 </thead>
                 <tbody>
                   {dums.map((d) => (
-                    <tr
+                    <RowLink
                       key={d.id}
+                      href={`/dums/${d.id}`}
                       className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-2)]/50"
                     >
                       <td className="px-5 py-2.5">
-                        <Link
+                        <CellLink
                           href={`/dums/${d.id}`}
-                          className="font-mono font-medium text-[var(--color-fg)] hover:underline"
+                          className="font-mono font-medium text-[var(--color-fg)]"
                         >
                           {d.number}
-                        </Link>
+                        </CellLink>
                       </td>
                       <td className="px-5 py-2.5">
-                        <Link
-                          className="font-mono text-[var(--color-fg)] hover:underline"
+                        <CellLink
+                          newTab
+                          className="font-mono text-[var(--color-fg)]"
                           href={`/dossiers/${d.dossier.id}`}
                         >
                           {d.dossier.number}
-                        </Link>
+                        </CellLink>
                       </td>
                       <td className="px-5 py-2.5">
-                        <Link
-                          className="text-[var(--color-fg-3)] hover:underline"
+                        <CellLink
+                          newTab
+                          className="text-[var(--color-fg-3)]"
                           href={`/clients/${d.dossier.client.id}`}
                         >
                           {d.dossier.client.name}
-                        </Link>
+                        </CellLink>
                       </td>
                       <td className="px-5 py-2.5 text-[var(--color-fg-3)]">{d.bureau ?? "—"}</td>
                       <td className="px-5 py-2.5">
@@ -201,7 +205,7 @@ export default async function DUMsPage({
                       <td className="px-5 py-2.5 text-right text-[13px] text-[var(--color-fg-3)] whitespace-nowrap">
                         {formatDate(d.registeredAt)}
                       </td>
-                    </tr>
+                    </RowLink>
                   ))}
                 </tbody>
               </table>

@@ -18,6 +18,7 @@ import { CUSTOMS_REGIME_GROUPS, regimeDisplay, MAX_DUMS_PER_DOSSIER } from "@/li
 import { formatMAD } from "@/lib/invoicing";
 import { formatDate } from "@/lib/utils";
 import { type DUM } from "@/components/dossier/dum-liquidation-form";
+import { CellLink } from "@/components/ui/clickable-row";
 
 const fmt = (n: number | null) => (n == null ? "—" : formatMAD(n));
 
@@ -198,7 +199,9 @@ export function DUMsPanel({
                 <FileText className="size-4 text-[var(--color-fg-mute)] shrink-0" strokeWidth={1.75} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-[13px] font-medium text-[var(--color-fg)]">{d.number}</span>
+                    <CellLink newTab href={`/dums/${d.id}`} className="font-mono text-[13px] font-medium text-[var(--color-fg)]">
+                      {d.number}
+                    </CellLink>
                     {d.regime && (
                       <Badge tone="neutral" title={regimeDisplay(d.regime)}>{d.regime}</Badge>
                     )}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Folder, Plus, AlertTriangle, FilterX, Check } from "lucide-react";
+import { RowLink, CellLink } from "@/components/ui/clickable-row";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -326,8 +327,9 @@ export default async function DossiersPage({
                 </thead>
                 <tbody>
                   {enriched.map((d) => (
-                    <tr
+                    <RowLink
                       key={d.id}
+                      href={`/dossiers/${d.id}`}
                       className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-2)] transition-colors"
                     >
                       <td className="px-3 py-2.5">
@@ -341,26 +343,40 @@ export default async function DossiersPage({
                         </div>
                       </td>
                       <td className="px-3 py-2.5">
-                        <Link
+                        <CellLink
                           href={`/dossiers/${d.id}`}
-                          className="font-mono font-semibold text-[13px] text-[var(--color-fg)] hover:underline"
+                          className="font-mono font-semibold text-[13px] text-[var(--color-fg)]"
                         >
                           {d.number}
-                        </Link>
+                        </CellLink>
                       </td>
                       <td className="px-3 py-2.5 font-mono text-[13px] text-[var(--color-fg-2)]">
                         {d.reference ?? <span className="text-[var(--color-fg-mute)] italic">—</span>}
                       </td>
                       <td className="px-3 py-2.5 max-w-[200px] text-[13px] text-[var(--color-fg-3)]">
-                        <Link
+                        <CellLink
+                          newTab
                           href={`/clients/${d.clientId}`}
-                          className="block truncate hover:underline"
+                          className="block truncate"
                         >
                           {d.client.name}
-                        </Link>
+                        </CellLink>
                       </td>
                       <td className="px-3 py-2.5 font-mono text-[13px] text-[var(--color-fg-3)] hidden 2xl:table-cell">
-                        {d.dums.length === 0 ? "—" : d.dums.map((dum) => dum.number).join(", ")}
+                        {d.dums.length === 0
+                          ? "—"
+                          : d.dums.map((dum, i) => (
+                              <span key={dum.id}>
+                                {i > 0 && ", "}
+                                <CellLink
+                                  newTab
+                                  href={`/dums/${dum.id}`}
+                                  className="text-[var(--color-fg-3)]"
+                                >
+                                  {dum.number}
+                                </CellLink>
+                              </span>
+                            ))}
                       </td>
                       <td className="px-3 py-2.5 text-right whitespace-nowrap">
                         <div className="inline-flex items-center gap-1 justify-end whitespace-nowrap">
@@ -416,7 +432,7 @@ export default async function DossiersPage({
                       <td className="px-3 py-2.5 text-right text-[13px] text-[var(--color-fg-3)] whitespace-nowrap">
                         {formatDate(d.updatedAt)}
                       </td>
-                    </tr>
+                    </RowLink>
                   ))}
                 </tbody>
               </table>
