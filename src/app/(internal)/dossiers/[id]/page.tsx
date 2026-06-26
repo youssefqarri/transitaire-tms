@@ -16,6 +16,7 @@ import {
   DOCUMENT_CATEGORY_LABELS,
   requiredDocuments,
   statusesForType,
+  statusTiming,
 } from "@/lib/statuses";
 
 const PACKAGING_LABELS = {
@@ -104,7 +105,7 @@ export default async function DossierDetailPage({
             <h1 className="text-[22px] font-mono font-semibold tracking-tight text-[var(--color-fg)]">
               {dossier.number}
             </h1>
-            <StatusBadge status={dossier.status} />
+            <StatusBadge status={dossier.status} title={statusTiming(dossier) ?? undefined} />
             {dossier.secondaryStatus && (
               <span className="inline-flex items-center gap-1.5" title="Statut organismes de contrôle (en parallèle de la douane)">
                 <span className="text-[11px] text-[var(--color-fg-3)]">Organismes&nbsp;:</span>

@@ -1,4 +1,5 @@
 import { DossierStatus, DossierType, DUMStatus, DocumentCategory, TransportMode } from "@/generated/prisma/enums";
+import { formatDate } from "./utils";
 
 export const STATUS_LABELS: Record<DossierStatus, string> = {
   OUVERTURE: "Ouverture",
@@ -127,6 +128,88 @@ export const STATUS_TONE: Record<DossierStatus, "neutral" | "warn" | "info" | "o
   CLOTURE: "ok",
   ANNULE: "danger",
 };
+
+type StatusTimingInput = {
+  status: DossierStatus;
+  receivedAt?: Date | null;
+  docsCompleteAt?: Date | null;
+  bonADelivrerAt?: Date | null;
+  declarationAt?: Date | null;
+  visitDate?: Date | null;
+  visitEffectiveDate?: Date | null;
+  conformityVisitDate?: Date | null;
+  conformityVisitEffectiveDate?: Date | null;
+  liquidationAt?: Date | null;
+  deliveredAt?: Date | null;
+  closedAt?: Date | null;
+  createdAt?: Date | null;
+};
+
+/**
+ * Infobulle « quand » d'un badge de statut : selon le statut, renvoie la date
+ * pertinente + si elle est prévue ou effective (« Visite prévue le … », « Réceptionné
+ * le … »). Renvoie null pour les statuts qui sont un état courant sans date dédiée
+ * (Documents manquants, Bon à enlever…) → pas d'infobulle.
+ */
+export function statusTiming(d: StatusTimingInput): string | null {
+  const f = (date?: Date | null) => (date ? formatDate(date) : null);
+  switch (d.status) {
+    case "OUVERTURE": {
+      const r = f(d.receivedAt);
+      return r ? `Réceptionné le ${r}` : f(d.createdAt) ? `Ouvert le ${f(d.createdAt)}` : null;
+    }
+    case "RECEPTIONNE": {
+      const r = f(d.receivedAt);
+      return r ? `Réceptionné le ${r}` : null;
+    }
+    case "DOCUMENTS_RECUS": {
+      const r = f(d.docsCompleteAt);
+      return r ? `Documents complets le ${r}` : null;
+    }
+    case "BON_A_DELIVRER_RECU": {
+      const r = f(d.bonADelivrerAt);
+      return r ? `Bon à délivrer reçu le ${r}` : null;
+    }
+    case "DECLARATION_EN_COURS":
+    case "VALIDATION_DOUANE": {
+      const r = f(d.declarationAt);
+      return r ? `Déclaration le ${r}` : null;
+    }
+    case "INSTANCE_DATE_VISITE": {
+      const r = f(d.visitDate);
+      return r ? `Visite prévue le ${r}` : "Date de visite à fixer";
+    }
+    case "VISITE": {
+      const eff = f(d.visitEffectiveDate);
+      if (eff) return `Visite effectuée le ${eff}`;
+      const prev = f(d.visitDate);
+      return prev ? `Visite prévue le ${prev}` : null;
+    }
+    case "CONFORME": {
+      const eff = f(d.conformityVisitEffectiveDate);
+      if (eff) return `Visite conformité (MCI) le ${eff}`;
+      const prev = f(d.conformityVisitDate);
+      return prev ? `Visite conformité (MCI) prévue le ${prev}` : null;
+    }
+    case "INSTANCE_FICHE_LIQUIDATION":
+    case "LIQUIDE": {
+      const r = f(d.liquidationAt);
+      return r ? `Liquidation le ${r}` : null;
+    }
+    case "EMBARQUEMENT":
+    case "SORTIE_MARCHANDISE":
+    case "LIVRAISON": {
+      const r = f(d.deliveredAt);
+      return r ? `Livraison le ${r}` : null;
+    }
+    case "CLOTURE": {
+      const r = f(d.closedAt);
+      return r ? `Clôturé le ${r}` : null;
+    }
+    default:
+      return null;
+  }
+}
 
 export const DUM_STATUS_LABELS: Record<DUMStatus, string> = {
   DRAFT: "Brouillon",

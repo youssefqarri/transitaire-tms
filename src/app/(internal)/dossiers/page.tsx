@@ -15,6 +15,7 @@ import {
   ACTION_REQUIRED_STATUSES,
   ACTION_REQUIRED_KEY,
   ACTION_REQUIRED_LABEL,
+  statusTiming,
 } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
 import { ColumnHeader } from "@/components/ui/column-header";
@@ -235,7 +236,7 @@ export default async function DossiersPage({
                   {/* ligne 1 : statut large + numéro */}
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <StatusBadge status={d.status} />
+                      <StatusBadge status={d.status} title={statusTiming(d) ?? undefined} />
                       {d.isNewFromClient && (
                         <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--color-danger)] text-white" title="Nouveau dossier créé par le client">
                           NOUVEAU CLIENT
@@ -334,7 +335,7 @@ export default async function DossiersPage({
                     >
                       <td className="px-3 py-2.5">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <StatusBadge status={d.status} size="sm" />
+                          <StatusBadge status={d.status} size="sm" title={statusTiming(d) ?? undefined} />
                           {d.isNewFromClient && (
                             <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--color-danger)] text-white" title="Nouveau dossier créé par le client">
                               NOUVEAU

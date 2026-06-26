@@ -20,6 +20,7 @@ import {
   DOCUMENT_CATEGORY_LABELS,
   ACTION_REQUIRED_STATUSES,
   ACTION_REQUIRED_KEY,
+  statusTiming,
 } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
 import { KeyDates, KeyDatesLegend } from "@/components/dossier/key-dates";
@@ -211,7 +212,7 @@ export default async function DashboardPage() {
                         </span>
                       )}
                     </div>
-                    <StatusBadge status={d.status} size="sm" wrap className="max-w-[60%]" />
+                    <StatusBadge status={d.status} size="sm" wrap className="max-w-[60%]" title={statusTiming(d) ?? undefined} />
                   </div>
                   {/* Ligne 2 : client + DUM + docs (gauche) • valeur (droite) */}
                   <div className="flex items-center justify-between gap-3 mt-1">
@@ -364,7 +365,7 @@ export default async function DashboardPage() {
                       <span className="hidden sm:block font-mono text-[12px] tnum text-[var(--color-fg-3)] shrink-0 w-[90px] text-right">
                         {d.goodsValue != null ? formatCurrency(Number(d.goodsValue), d.goodsCurrency ?? "EUR") : "—"}
                       </span>
-                      <StatusBadge status={d.status} size="sm" className="shrink-0" />
+                      <StatusBadge status={d.status} size="sm" className="shrink-0" title={statusTiming(d) ?? undefined} />
                     </Link>
                   ))}
                 </div>

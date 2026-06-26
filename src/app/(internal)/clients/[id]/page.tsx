@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { BackLink } from "@/components/ui/back-link";
 import { StatusBadge } from "@/components/dossier/status-badge";
+import { statusTiming } from "@/lib/statuses";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { DeleteClientButton } from "./delete-button";
 import { ContactsPanel } from "./contacts-panel";
@@ -109,7 +110,7 @@ export default async function ClientDetailPage({
                       d.goodsCurrency ?? "EUR",
                     )}
                   </div>
-                  <StatusBadge status={d.status} size="sm" />
+                  <StatusBadge status={d.status} size="sm" title={statusTiming(d) ?? undefined} />
                 </Link>
               ))}
             </div>
