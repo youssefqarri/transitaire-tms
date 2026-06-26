@@ -16,9 +16,11 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   CREATE_DUM: "DUM créée",
   CREATE_INVOICE: "Facture créée",
   CREATE_USER: "Utilisateur créé",
+  DEACTIVATE_USER: "Utilisateur désactivé",
   DELETE_CLIENT_CONTACT: "Contact client supprimé",
   NOTIFY_CLIENT: "Client notifié",
   PASSWORD_RESET: "Mot de passe réinitialisé",
+  REACTIVATE_USER: "Utilisateur réactivé",
   REQUEST_PASSWORD_RESET: "Réinitialisation demandée",
   RESTORE: "Restauration (corbeille)",
   REVOKE_API_TOKEN: "Jeton API révoqué",
@@ -56,9 +58,16 @@ export const AUDIT_ENTITY_LABELS: Record<string, string> = {
   User: "Utilisateur",
 };
 
-/** Libellé FR d'une action d'audit (repli sur le code brut si inconnu). */
+/**
+ * Libellé FR d'une action d'audit. Repli pour un code non mappé (historique ou
+ * nouveau) : rendu lisible (« FOO_BAR » → « Foo bar ») plutôt que laissé brut,
+ * pour ne jamais afficher de code en majuscules à l'écran.
+ */
 export function auditActionLabel(action: string): string {
-  return AUDIT_ACTION_LABELS[action] ?? action;
+  const known = AUDIT_ACTION_LABELS[action];
+  if (known) return known;
+  const s = action.toLowerCase().replace(/_/g, " ").trim();
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : action;
 }
 
 /** Libellé FR d'une entité d'audit (repli sur le code brut si inconnu). */
