@@ -34,6 +34,8 @@ type Props = {
   size?: "sm" | "default";
   /** Si false, masque le champ de recherche (liste seule). Défaut true. */
   searchable?: boolean;
+  /** « bare » : pas de bordure/fond au repos (comme un input texte de filtre), bordure au survol/ouverture. */
+  bare?: boolean;
   /** Opt-in : si fourni, propose « Ajouter « <saisie> » » quand la saisie ne correspond à aucune entrée. */
   onCreate?: (label: string) => void;
 };
@@ -52,6 +54,7 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
     id,
     size = "default",
     searchable = true,
+    bare = false,
     onCreate,
   },
   ref,
@@ -166,11 +169,15 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
           size === "sm"
             ? "relative group flex h-7 w-full items-center pl-2 text-[12px] text-left"
             : "relative group flex h-9 w-full items-center pl-3 text-[13px] text-left",
-          "bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius-input)]",
-          "transition-shadow duration-150 hover:border-[var(--color-fg-mute)]",
+          "rounded-[var(--radius-input)] transition-shadow duration-150",
+          // « bare » (filtres d'en-tête) : transparent au repos comme un input texte ;
+          // bordure au survol, fond + bordure une fois ouvert.
+          bare
+            ? "bg-transparent border border-transparent hover:border-[var(--color-border-2)]"
+            : "bg-[var(--color-surface)] border border-[var(--color-border-2)] hover:border-[var(--color-fg-mute)]",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)]",
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[var(--color-surface-2)]",
-          open && "border-[var(--color-fg-mute)]",
+          open && (bare ? "bg-[var(--color-surface)] border-[var(--color-border-2)]" : "border-[var(--color-fg-mute)]"),
           clearable && selected && !disabled ? "pr-14" : "pr-8",
         )}
       >
@@ -219,23 +226,25 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
 
       {open && (
         <div className="absolute z-40 mt-1 w-full min-w-[18rem] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-[0_12px_32px_-12px_rgba(0,0,0,0.15)] overflow-hidden animate-fade-in">
-          <div className="relative border-b border-[var(--color-border)]">
-            <Search
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-[var(--color-fg-mute)]"
-              strokeWidth={1.75}
-            />
-            <input
-              ref={inputRef}
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setActiveIdx(0);
-              }}
-              onKeyDown={onKey}
-              placeholder={searchPlaceholder}
-              className="w-full h-9 pl-8 pr-3 text-[13px] bg-transparent placeholder:text-[var(--color-fg-mute)] focus:outline-none"
-            />
-          </div>
+          {searchable && (
+            <div className="relative border-b border-[var(--color-border)]">
+              <Search
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-[var(--color-fg-mute)]"
+                strokeWidth={1.75}
+              />
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setActiveIdx(0);
+                }}
+                onKeyDown={onKey}
+                placeholder={searchPlaceholder}
+                className="w-full h-9 pl-8 pr-3 text-[13px] bg-transparent placeholder:text-[var(--color-fg-mute)] focus:outline-none"
+              />
+            </div>
+          )}
 
           <div
             ref={listRef}

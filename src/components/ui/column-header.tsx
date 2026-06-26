@@ -142,6 +142,7 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
         ) : filter?.type === "select" ? (
           <Combobox
             size="sm"
+            bare
             clearable
             searchable={filter.options.length > 10}
             items={filter.options.map((o) => ({ id: o.value, label: o.label }))}
