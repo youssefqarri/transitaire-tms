@@ -88,7 +88,7 @@ export function LiquidationForm({
   }
 
   return (
-    <div className="px-5 py-4 bg-[var(--color-surface-2)] animate-fade-in">
+    <div className="px-5 py-4 bg-[var(--color-surface)] animate-fade-in">
       <div className="flex items-center gap-2 mb-3">
         <FileText className="size-4 text-[var(--color-fg-mute)]" strokeWidth={1.75} />
         <span className="font-mono text-[13px] font-medium text-[var(--color-fg)]">{dum.number}</span>

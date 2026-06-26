@@ -69,7 +69,7 @@ export default async function InvoiceDetailPage({
   const netDue = Math.max(0, computed.totalTTC - Number(invoice.paidAmount) - totalCredits);
 
   return (
-    <div className="space-y-5 max-w-4xl animate-fade-in">
+    <div className="space-y-5 animate-fade-in">
       <BackLink href="/factures">Retour aux factures</BackLink>
 
       <header className="flex items-start justify-between gap-4 flex-wrap">

@@ -194,7 +194,7 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
       </button>
 
       {open && (
-        <div className="absolute z-40 mt-1 w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-[0_12px_32px_-12px_rgba(0,0,0,0.15)] overflow-hidden animate-fade-in">
+        <div className="absolute z-40 mt-1 w-full min-w-[18rem] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-[0_12px_32px_-12px_rgba(0,0,0,0.15)] overflow-hidden animate-fade-in">
           <div className="relative border-b border-[var(--color-border)]">
             <Search
               className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-[var(--color-fg-mute)]"
@@ -209,11 +209,8 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
               }}
               onKeyDown={onKey}
               placeholder={searchPlaceholder}
-              className="w-full h-9 pl-8 pr-14 text-[13px] bg-transparent placeholder:text-[var(--color-fg-mute)] focus:outline-none"
+              className="w-full h-9 pl-8 pr-3 text-[13px] bg-transparent placeholder:text-[var(--color-fg-mute)] focus:outline-none"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[var(--color-fg-mute)] tnum">
-              {filtered.length}/{items.length}
-            </span>
           </div>
 
           <div
@@ -255,7 +252,7 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
                       )}
                     >
                       <div className="flex-1 min-w-0">
-                        <div className="truncate">{it.label}</div>
+                        <div>{it.label}</div>
                         {it.sublabel && (
                           <div className="text-[12px] text-[var(--color-fg-mute)] truncate">
                             {it.sublabel}

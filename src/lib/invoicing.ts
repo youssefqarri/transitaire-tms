@@ -135,7 +135,9 @@ export function round2(n: number): number {
 }
 
 export function formatMAD(n: number): string {
-  return new Intl.NumberFormat("fr-MA", {
+  // fr-FR (et non fr-MA) : séparateur de milliers = ESPACE, comme formatCurrency
+  // → format des montants COHÉRENT partout (« 11 144,42 MAD », pas « 11.144,42 »).
+  return new Intl.NumberFormat("fr-FR", {
     style: "currency",
     currency: "MAD",
     minimumFractionDigits: 2,

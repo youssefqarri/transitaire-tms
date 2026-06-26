@@ -511,7 +511,7 @@ export function NewDossierForm({
             <p className="text-[12px] text-[var(--color-fg-3)] mb-3">
               Cochez tous les drapeaux applicables. Ces informations apparaissent en haut du dossier.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2">
               <FlagCheckbox
                 label="Facturé"
                 checked={!!form.billed}
