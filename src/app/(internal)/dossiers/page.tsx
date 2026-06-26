@@ -350,7 +350,7 @@ export default async function DossiersPage({
                           {d.number}
                         </CellLink>
                       </td>
-                      <td className="px-3 py-2.5 font-mono text-[13px] text-[var(--color-fg-2)]">
+                      <td className="px-3 py-2.5 font-mono text-[13px] text-[var(--color-fg-3)]">
                         {d.reference ?? <span className="text-[var(--color-fg-mute)] italic">—</span>}
                       </td>
                       <td className="px-3 py-2.5 max-w-[200px] text-[13px] text-[var(--color-fg-3)]">

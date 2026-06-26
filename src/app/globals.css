@@ -161,6 +161,11 @@
   /* tabulaire sur les chiffres dans les tableaux */
   table { font-variant-numeric: tabular-nums; }
   .tnum { font-variant-numeric: tabular-nums; }
+
+  /* Strokes d'icônes UNIFIÉS : toutes les icônes lucide à 1.75 partout.
+     Le CSS l'emporte sur l'attribut SVG inline (présentation), donc couvre aussi
+     celles laissées au défaut 2. Le logo et les SVG non-lucide ne sont PAS touchés. */
+  svg.lucide { stroke-width: 1.75; }
 }
 
 @layer utilities {

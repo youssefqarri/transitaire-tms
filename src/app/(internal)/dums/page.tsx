@@ -183,7 +183,7 @@ export default async function DUMsPage({
                       <td className="px-5 py-2.5">
                         <CellLink
                           newTab
-                          className="font-mono text-[var(--color-fg)]"
+                          className="font-mono text-[var(--color-fg-3)]"
                           href={`/dossiers/${d.dossier.id}`}
                         >
                           {d.dossier.number}
