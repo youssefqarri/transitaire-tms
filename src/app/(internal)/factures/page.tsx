@@ -185,7 +185,7 @@ export default async function InvoicesPage({
                         {INVOICE_STATUS_LABELS[inv.status]}
                       </Badge>
                     </div>
-                    <div className="text-[13px] text-[var(--color-fg-2)] truncate">
+                    <div className="text-[13px] text-[var(--color-fg-3)] truncate">
                       {inv.client.name}
                     </div>
                     <div className="flex items-center justify-between mt-1.5">

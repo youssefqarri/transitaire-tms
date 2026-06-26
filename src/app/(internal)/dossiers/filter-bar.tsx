@@ -107,7 +107,7 @@ export function DossiersFilterBar({
         Filtrer
       </Button>
       {hasFilter && (
-        <Button variant="ghost" size="sm" onClick={reset} disabled={pending}>
+        <Button variant="outline" size="sm" onClick={reset} disabled={pending}>
           <X /> Réinitialiser
         </Button>
       )}

@@ -69,7 +69,7 @@ export function NotifRow({
           </span>
           <Badge tone="outline">{kindLabel}</Badge>
           {dossierNumber && (
-            <span className="text-[12px] text-[var(--color-fg-mute)]">
+            <span className="text-[12px] text-[var(--color-fg-3)]">
               Dossier {dossierNumber}
             </span>
           )}
@@ -79,7 +79,7 @@ export function NotifRow({
           <div className="text-[13px] text-[var(--color-fg-3)] mt-1">{body}</div>
         )}
       </div>
-      <div className="text-[12px] text-[var(--color-fg-mute)] whitespace-nowrap">
+      <div className="text-[12px] text-[var(--color-fg-3)] whitespace-nowrap">
         {formatDateTime(createdAt)}
       </div>
     </a>

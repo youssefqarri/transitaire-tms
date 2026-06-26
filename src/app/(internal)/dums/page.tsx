@@ -131,12 +131,12 @@ export default async function DUMsPage({
                   className="row-link block px-4 py-3 hover:bg-[var(--color-surface-2)] active:bg-[var(--color-surface-2)]"
                 >
                   <div className="flex items-center justify-between gap-3 mb-1">
-                    <span className="font-mono font-medium text-[14px] text-[var(--color-fg)]">
+                    <span className="font-mono font-medium text-[13px] text-[var(--color-fg)]">
                       {d.number}
                     </span>
                     <DumStatusBadge status={d.status} />
                   </div>
-                  <div className="text-[13px] text-[var(--color-fg-2)]">
+                  <div className="text-[13px] text-[var(--color-fg-3)]">
                     <span className="font-mono">{d.dossier.number}</span> • {d.dossier.client.name}
                   </div>
                   <div className="flex items-center justify-between text-[11px] text-[var(--color-fg-3)] mt-1">

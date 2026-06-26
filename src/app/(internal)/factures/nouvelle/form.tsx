@@ -326,16 +326,16 @@ export function NewInvoiceForm({
         <div className="flex items-center justify-between">
           <Label>Lignes de facturation</Label>
           <div className="flex gap-2">
-            <Button type="button" size="sm" onClick={() => addItem("HONORAIRE")}>
+            <Button type="button" variant="soft" size="sm" onClick={() => addItem("HONORAIRE")}>
               <Plus /> Ajouter une ligne
             </Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => addItem("DEBOURS")}>
+            <Button type="button" variant="soft" size="sm" onClick={() => addItem("DEBOURS")}>
               <Plus /> Débours (0 %)
             </Button>
             {selectedDossier?.transport === "MARITIME" && (
               <Button
                 type="button"
-                variant="outline"
+                variant="soft"
                 size="sm"
                 onClick={applyTaxeRegionale}
                 title="Conteneurs maritimes : 3 % du total des montants taxables"

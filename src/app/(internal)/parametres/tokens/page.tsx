@@ -32,7 +32,7 @@ export default async function TokensPage() {
           href="/parametres"
           className="inline-flex items-center gap-1.5 text-[14px] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
         >
-          <ArrowLeft className="size-4" /> Retour aux paramètres
+          <ArrowLeft className="size-3.5" /> Retour aux paramètres
         </Link>
         <h1 className="text-[22px] font-semibold tracking-tight mt-3">Tokens API</h1>
         <p className="text-[14px] text-[var(--color-muted-foreground)] mt-1">

@@ -140,7 +140,7 @@ export default async function AuditPage({
                       <Badge tone="outline">{auditActionLabel(l.action)}</Badge>
                       <span className="text-[var(--color-fg-3)]">{auditEntityLabel(l.entity)}</span>
                     </div>
-                    <div className="text-[12px] text-[var(--color-fg-mute)] mt-0.5">
+                    <div className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
                       {l.entityId && <span>• {l.entityId.slice(0, 8)} </span>}
                       {l.ip && <span className="tnum">• {l.ip} </span>}
                       • {formatDateTime(l.createdAt)}
@@ -199,7 +199,7 @@ export default async function AuditPage({
                         {l.entityId && <span>{l.entityId.slice(0, 8)}</span>}
                         {l.ip && <span> • {l.ip}</span>}
                       </td>
-                      <td className="px-5 py-2.5 text-right text-[12px] text-[var(--color-fg-mute)] whitespace-nowrap">
+                      <td className="px-5 py-2.5 text-right text-[12px] text-[var(--color-fg-3)] whitespace-nowrap">
                         {formatDateTime(l.createdAt)}
                       </td>
                     </tr>

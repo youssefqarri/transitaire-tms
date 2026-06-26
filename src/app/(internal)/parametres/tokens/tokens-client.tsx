@@ -87,7 +87,7 @@ export function TokensClient({
   return (
     <div className="space-y-6">
       {createdToken && (
-        <div className="rounded-[var(--radius)] border border-[oklch(80%_0.18_75)] bg-[oklch(98%_0.06_75)] p-4">
+        <div className="rounded-[var(--radius)] border border-[var(--color-warning)]/30 bg-[var(--color-warning-soft)] p-4">
           <div className="font-medium text-[14px] mb-2">Token généré — copiez-le maintenant</div>
           <div className="text-[12px] text-[var(--color-muted-foreground)] mb-3">
             Ce token n'est affiché qu'une seule fois. Stockez-le dans un endroit sûr (gestionnaire
@@ -193,7 +193,7 @@ export function TokensClient({
             </div>
             {!t.revoked && (
               <Button variant="ghost" size="icon" onClick={() => setRevokeTarget(t)} title="Révoquer">
-                <Trash2 className="size-4 text-[var(--color-destructive)]" />
+                <Trash2 className="size-3.5 text-[var(--color-destructive)]" />
               </Button>
             )}
           </div>

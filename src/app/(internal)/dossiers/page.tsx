@@ -251,13 +251,13 @@ export default async function DossiersPage({
                         layout="row"
                       />
                     </div>
-                    <span className="font-mono font-semibold text-[14px] text-[var(--color-fg)]">
+                    <span className="font-mono font-medium text-[13px] text-[var(--color-fg)]">
                       {d.number}
                     </span>
                   </div>
                   {/* ligne 2 : référence (mise en avant) + client */}
                   <div className="mt-2 flex items-center justify-between gap-2">
-                    <span className="font-mono text-[13px] text-[var(--color-fg-2)] truncate">
+                    <span className="font-mono text-[13px] text-[var(--color-fg-3)] truncate">
                       {d.reference ?? <span className="text-[var(--color-fg-mute)] italic">sans réf.</span>}
                     </span>
                     <div className="flex items-center gap-1 shrink-0">
@@ -346,7 +346,7 @@ export default async function DossiersPage({
                       <td className="px-3 py-2.5">
                         <CellLink
                           href={`/dossiers/${d.id}`}
-                          className="font-mono font-semibold text-[13px] text-[var(--color-fg)]"
+                          className="font-mono font-medium text-[13px] text-[var(--color-fg)]"
                         >
                           {d.number}
                         </CellLink>
@@ -421,7 +421,7 @@ export default async function DossiersPage({
                           <span className="text-[12px] text-[var(--color-fg-mute)]">—</span>
                         )}
                       </td>
-                      <td className="px-3 py-2.5 text-right font-mono tnum text-[13px] text-[var(--color-fg-3)] whitespace-nowrap">
+                      <td className="px-3 py-2.5 text-right font-mono tnum text-[13px] text-[var(--color-fg)] whitespace-nowrap">
                         {formatCurrency(
                           d.goodsValue ? Number(d.goodsValue) : null,
                           d.goodsCurrency ?? "EUR",

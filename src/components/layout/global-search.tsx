@@ -125,7 +125,7 @@ export function GlobalSearch() {
                 const Icon = TYPE_ICON[g.type] ?? Folder;
                 return (
                   <div key={g.type} className="border-b border-[var(--color-border)] last:border-b-0">
-                    <div className="px-3 py-1.5 flex items-center justify-between bg-[#f9fafc] border-b border-[var(--color-border)]">
+                    <div className="px-3 py-1.5 flex items-center justify-between bg-[var(--color-surface-2)] border-b border-[var(--color-border)]">
                       <span className="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-fg-3)]">
                         {g.label}
                       </span>
