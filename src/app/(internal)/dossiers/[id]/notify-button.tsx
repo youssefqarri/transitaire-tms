@@ -390,19 +390,22 @@ function ChannelToggle({
   title?: string;
 }) {
   return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={onClick}
-      title={title}
-      aria-pressed={active}
-      className={`flex-1 flex items-center justify-center gap-2 h-9 rounded-[var(--radius)] border text-[13px] transition-colors ${
-        active
-          ? "border-[var(--color-accent)] bg-[var(--color-accent-soft)] text-[var(--color-accent)] font-medium"
-          : "border-[var(--color-border-2)] text-[var(--color-fg-3)] hover:bg-[var(--color-surface-2)]"
-      } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
-    >
-      <Icon className="size-4" strokeWidth={1.75} /> {label}
-    </button>
+    // <span> : capte le survol même désactivé (un <button disabled> n'affiche pas son title).
+    <span className="flex-1 inline-flex" title={disabled ? title : undefined}>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={onClick}
+        title={disabled ? undefined : title}
+        aria-pressed={active}
+        className={`w-full flex items-center justify-center gap-2 h-9 rounded-[var(--radius)] border text-[13px] transition-colors ${
+          active
+            ? "border-[var(--color-accent)] bg-[var(--color-accent-soft)] text-[var(--color-accent)] font-medium"
+            : "border-[var(--color-border-2)] text-[var(--color-fg-3)] hover:bg-[var(--color-surface-2)]"
+        } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
+      >
+        <Icon className="size-4" strokeWidth={1.75} /> {label}
+      </button>
+    </span>
   );
 }

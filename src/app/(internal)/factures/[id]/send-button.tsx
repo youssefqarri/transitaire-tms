@@ -53,19 +53,22 @@ export function SendInvoiceButton({
 
   return (
     <>
-      <Button
-        variant="soft-success"
-        size="sm"
-        onClick={() => setOpen(true)}
-        disabled={!clientEmail}
-        title={
-          clientEmail
-            ? "Envoyer cette facture par email au client"
-            : "Aucun email enregistré pour ce client"
-        }
+      {/* <span> : capte le survol même quand le bouton est désactivé
+          (un <button disabled> ne déclenche pas l'infobulle native). */}
+      <span
+        className="inline-block"
+        title={clientEmail ? undefined : "Aucun email enregistré pour ce client"}
       >
-        <Mail /> Envoyer par email
-      </Button>
+        <Button
+          variant="soft-success"
+          size="sm"
+          onClick={() => setOpen(true)}
+          disabled={!clientEmail}
+          title={clientEmail ? "Envoyer cette facture par email au client" : undefined}
+        >
+          <Mail /> Envoyer par email
+        </Button>
+      </span>
 
       {open && createPortal(
         <div
