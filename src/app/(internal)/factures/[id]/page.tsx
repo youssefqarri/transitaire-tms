@@ -91,7 +91,7 @@ export default async function InvoiceDetailPage({
         <div className="flex items-center gap-2">
           {(invoice.status === "DRAFT" || session.user.role === "ADMIN") && (
             <Link href={`/factures/${invoice.id}/modifier`}>
-              <Button variant="outline" size="sm">
+              <Button variant="soft" size="sm">
                 <Pencil /> Modifier
               </Button>
             </Link>

@@ -27,6 +27,15 @@ const buttonVariants = cva(
           "text-[var(--color-fg-2)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-fg)]",
         success:
           "bg-[var(--color-success)] text-white hover:bg-[var(--color-success-hover)] shadow-[var(--shadow-sm)]",
+        // Variantes « soft » : fond tinté léger + texte/icône coloré, SANS ombre.
+        // Pour donner de la couleur aux actions (édition, suppression, envoi…).
+        soft: "bg-[var(--color-accent-soft)] text-[var(--color-accent)] hover:brightness-95",
+        "soft-danger":
+          "bg-[var(--color-danger-soft)] text-[var(--color-danger)] hover:brightness-95",
+        "soft-success":
+          "bg-[var(--color-success-soft)] text-[var(--color-success)] hover:brightness-95",
+        "soft-warning":
+          "bg-[var(--color-warning-soft)] text-[var(--color-warning)] hover:brightness-95",
         link:
           "text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] underline-offset-4 hover:underline",
       },

@@ -236,29 +236,47 @@ export function NewDossierForm({
         </div>
         <div className="space-y-2">
           <Label htmlFor="type">Type</Label>
-          <Select
-            id="type"
-            value={form.type}
-            onChange={(e) => set("type", e.target.value as "IMPORT" | "EXPORT")}
-            disabled={mode === "edit"}
+          <span
+            className="block"
+            title={
+              mode === "edit"
+                ? "Le type (import/export) est figé après la création : il détermine tout le flux du dossier."
+                : undefined
+            }
           >
-            <option value="IMPORT">Import</option>
-            <option value="EXPORT">Export</option>
-          </Select>
+            <Select
+              id="type"
+              value={form.type}
+              onChange={(e) => set("type", e.target.value as "IMPORT" | "EXPORT")}
+              disabled={mode === "edit"}
+            >
+              <option value="IMPORT">Import</option>
+              <option value="EXPORT">Export</option>
+            </Select>
+          </span>
         </div>
         <div className="space-y-2">
           <Label htmlFor="paymentMode">Mode de paiement</Label>
-          <Select
-            id="paymentMode"
-            value={form.paymentMode}
-            onChange={(e) =>
-              set("paymentMode", e.target.value as "WITH_PAYMENT" | "WITHOUT_PAYMENT")
+          <span
+            className="block"
+            title={
+              mode === "edit"
+                ? "Le mode de paiement est figé après la création : il conditionne le régime et l'engagement."
+                : undefined
             }
-            disabled={mode === "edit"}
           >
-            <option value="WITH_PAYMENT">Avec paiement (engagement requis)</option>
-            <option value="WITHOUT_PAYMENT">Sans paiement</option>
-          </Select>
+            <Select
+              id="paymentMode"
+              value={form.paymentMode}
+              onChange={(e) =>
+                set("paymentMode", e.target.value as "WITH_PAYMENT" | "WITHOUT_PAYMENT")
+              }
+              disabled={mode === "edit"}
+            >
+              <option value="WITH_PAYMENT">Avec paiement (engagement requis)</option>
+              <option value="WITHOUT_PAYMENT">Sans paiement</option>
+            </Select>
+          </span>
         </div>
         <div className="space-y-2">
           <Label htmlFor="transport">
