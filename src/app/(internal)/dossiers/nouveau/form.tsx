@@ -89,7 +89,7 @@ export function NewDossierForm({
     type: "IMPORT",
     paymentMode: "WITH_PAYMENT",
     transport: "",
-    clientId: clients[0]?.id ?? "",
+    clientId: "",
     clientName: "",
     supplierId: "",
     supplierName: "",
@@ -244,15 +244,15 @@ export function NewDossierForm({
                 : undefined
             }
           >
-            <Select
-              id="type"
+            <RadioPills
               value={form.type}
-              onChange={(e) => set("type", e.target.value as "IMPORT" | "EXPORT")}
+              onChange={(v) => set("type", v as "IMPORT" | "EXPORT")}
+              options={[
+                { value: "IMPORT", label: "Import" },
+                { value: "EXPORT", label: "Export" },
+              ]}
               disabled={mode === "edit"}
-            >
-              <option value="IMPORT">Import</option>
-              <option value="EXPORT">Export</option>
-            </Select>
+            />
           </span>
         </div>
         <div className="space-y-2">
@@ -265,17 +265,15 @@ export function NewDossierForm({
                 : undefined
             }
           >
-            <Select
-              id="paymentMode"
+            <RadioPills
               value={form.paymentMode}
-              onChange={(e) =>
-                set("paymentMode", e.target.value as "WITH_PAYMENT" | "WITHOUT_PAYMENT")
-              }
+              onChange={(v) => set("paymentMode", v as "WITH_PAYMENT" | "WITHOUT_PAYMENT")}
+              options={[
+                { value: "WITH_PAYMENT", label: "Avec paiement" },
+                { value: "WITHOUT_PAYMENT", label: "Sans paiement" },
+              ]}
               disabled={mode === "edit"}
-            >
-              <option value="WITH_PAYMENT">Avec paiement (engagement requis)</option>
-              <option value="WITHOUT_PAYMENT">Sans paiement</option>
-            </Select>
+            />
           </span>
         </div>
         <div className="space-y-2">
@@ -283,19 +281,18 @@ export function NewDossierForm({
             Mode de transport
             {mode !== "edit" && <span className="text-[var(--color-danger)]"> *</span>}
           </Label>
-          <Select
-            id="transport"
+          <RadioPills
             value={form.transport}
-            onChange={(e) => set("transport", e.target.value as FormState["transport"])}
-          >
-            <option value="">— Sélectionner —</option>
-            <option value="MARITIME">Maritime (connaissement / BL)</option>
-            <option value="AERIEN">Aérien (LTA)</option>
-            <option value="ROUTIER">Routier (CMR)</option>
-          </Select>
+            onChange={(v) => set("transport", v as FormState["transport"])}
+            options={[
+              { value: "MARITIME", label: "Maritime" },
+              { value: "AERIEN", label: "Aérien" },
+              { value: "ROUTIER", label: "Routier" },
+            ]}
+          />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="clientId">Client *</Label>
+          <Label htmlFor="clientId">Client<span className="text-[var(--color-danger)]"> *</span></Label>
           <Combobox
             id="clientId"
             items={[
@@ -367,6 +364,7 @@ export function NewDossierForm({
                 id="goodsValue"
                 type="number"
                 step="0.01"
+                min="0"
                 value={form.goodsValue}
                 onChange={(e) => set("goodsValue", e.target.value)}
                 placeholder="0.00"
@@ -393,6 +391,7 @@ export function NewDossierForm({
               id="goodsWeight"
               type="number"
               step="0.001"
+              min="0"
               value={form.goodsWeight}
               onChange={(e) => set("goodsWeight", e.target.value)}
             />
@@ -402,11 +401,12 @@ export function NewDossierForm({
             <div className="flex gap-2">
               <Input
                 id="goodsPackages"
-                type="text"
-                inputMode="numeric"
+                type="number"
+                step="1"
+                min="0"
                 placeholder="Nombre"
                 value={form.goodsPackages}
-                onChange={(e) => set("goodsPackages", e.target.value.replace(/\D/g, ""))}
+                onChange={(e) => set("goodsPackages", e.target.value)}
                 className="flex-1"
               />
               <Select
@@ -584,6 +584,42 @@ export function NewDossierForm({
         </Button>
       </div>
     </form>
+  );
+}
+
+function RadioPills({
+  value,
+  onChange,
+  options,
+  disabled,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+  disabled?: boolean;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((o) => {
+        const active = value === o.value;
+        return (
+          <button
+            key={o.value}
+            type="button"
+            disabled={disabled}
+            onClick={() => onChange(o.value)}
+            aria-pressed={active}
+            className={`h-9 px-3.5 rounded-[var(--radius-input)] border text-[13px] transition-colors ${
+              active
+                ? "border-[var(--color-accent)] bg-[var(--color-accent-soft)] text-[var(--color-accent)] font-medium"
+                : "border-[var(--color-border-2)] text-[var(--color-fg-2)] hover:bg-[var(--color-surface-2)]"
+            } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+          >
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
