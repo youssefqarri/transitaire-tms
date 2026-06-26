@@ -51,19 +51,19 @@ export function UserForm({ clients }: { clients: { id: string; label: string }[]
     <form onSubmit={submit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="name">Nom complet *</Label>
+          <Label htmlFor="name">Nom complet<span className="text-[var(--color-danger)]"> *</span></Label>
           <Input id="name" value={form.name} onChange={(e) => set("name", e.target.value)} required />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email">Email *</Label>
+          <Label htmlFor="email">Email<span className="text-[var(--color-danger)]"> *</span></Label>
           <Input id="email" type="email" value={form.email} onChange={(e) => set("email", e.target.value)} required />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Mot de passe *</Label>
+          <Label htmlFor="password">Mot de passe<span className="text-[var(--color-danger)]"> *</span></Label>
           <Input id="password" type="password" value={form.password} onChange={(e) => set("password", e.target.value)} required minLength={8} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="role">Rôle *</Label>
+          <Label htmlFor="role">Rôle<span className="text-[var(--color-danger)]"> *</span></Label>
           <Select id="role" value={form.role} onChange={(e) => set("role", e.target.value as UserRole)}>
             {Object.entries(ROLE_LABELS).map(([k, l]) => (
               <option key={k} value={k}>
@@ -74,7 +74,7 @@ export function UserForm({ clients }: { clients: { id: string; label: string }[]
         </div>
         {form.role === "CLIENT" && (
           <div className="md:col-span-2 space-y-2">
-            <Label htmlFor="clientId">Client associé *</Label>
+            <Label htmlFor="clientId">Client associé<span className="text-[var(--color-danger)]"> *</span></Label>
             <Combobox
               id="clientId"
               items={clients.map((c) => ({ id: c.id, label: c.label }))}
