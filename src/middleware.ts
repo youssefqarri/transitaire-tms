@@ -10,6 +10,8 @@ const PUBLIC_PATHS = [
   "/reset-password",
   "/confidentialite",
   "/conditions",
+  // vitrine publique (apex escale.ma) — accessible sans authentification
+  "/accueil",
   "/api/auth",
   "/api/v1",
   // la route /api/files fait elle-même son auth + contrôle d'accès (ownership clientId) ;
@@ -19,8 +21,40 @@ const PUBLIC_PATHS = [
   "/api/health",
 ];
 
+// Hôtes de l'apex (site vitrine), par opposition à l'application (app.escale.ma).
+// Cloudflare proxifie l'apex ET le sous-domaine vers la MÊME app Next sur :80 ;
+// on distingue donc les deux par l'en-tête Host. L'app (app.escale.ma) garde son
+// comportement d'origine À L'IDENTIQUE — seul l'apex sert la vitrine.
+const APEX_HOSTS = new Set(["escale.ma", "www.escale.ma"]);
+
 export default auth((req) => {
   const { pathname } = req.nextUrl;
+
+  // Host sans port, insensible à la casse (derrière Cloudflare le Host d'origine
+  // est conservé ; on retombe sur nextUrl.host si l'en-tête manque).
+  const host = (req.headers.get("host") ?? req.nextUrl.host)
+    .split(":")[0]
+    .toLowerCase();
+  const isApex = APEX_HOSTS.has(host);
+
+  // ── Apex (escale.ma) : on ne sert QUE la vitrine + les pages légales, sans
+  //    aucune authentification. La racine est réécrite vers /accueil ; l'app TMS
+  //    n'est jamais exposée sur l'apex.
+  if (isApex) {
+    if (pathname === "/" || pathname === "/accueil") {
+      return NextResponse.rewrite(new URL("/accueil", req.url));
+    }
+    // pages légales (réutilisées telles quelles) + ressources publiques
+    if (
+      pathname.startsWith("/confidentialite") ||
+      pathname.startsWith("/conditions")
+    ) {
+      return NextResponse.next();
+    }
+    // toute autre URL sur l'apex renvoie vers la vitrine (pas d'accès TMS ici)
+    return NextResponse.rewrite(new URL("/accueil", req.url));
+  }
+
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
   const isLoggedIn = !!req.auth;
 
