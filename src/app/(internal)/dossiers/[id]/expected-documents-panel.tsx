@@ -13,7 +13,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { Textarea } from "@/components/ui/textarea";
 import { DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
 import type { DocumentCategory } from "@/generated/prisma/enums";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatDateTime } from "@/lib/utils";
 import { NotifyClientButton } from "./notify-button";
 
 type Contact = { id: string; name: string | null; email: string };
@@ -226,7 +226,7 @@ export function ExpectedDocumentsPanel({
               <div className="text-[11px] text-[var(--color-fg-mute)] mt-1">
                 Demandé{" "}
                 {e.requestedByName && <span>par {e.requestedByName} </span>}
-                • {formatDate(e.createdAt)}
+                • {formatDateTime(e.createdAt)}
               </div>
             </div>
             {!readOnly && (
