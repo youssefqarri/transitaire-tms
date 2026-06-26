@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { toast } from "sonner";
-import { Plus, FileText, Pencil } from "lucide-react";
+import { Plus, FileText, Pencil, X } from "lucide-react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,8 +17,9 @@ import { DumStatusBadge } from "@/components/dossier/dum-status-badge";
 import { CUSTOMS_REGIME_GROUPS, regimeDisplay, MAX_DUMS_PER_DOSSIER } from "@/lib/reference";
 import { formatMAD } from "@/lib/invoicing";
 import { formatDate } from "@/lib/utils";
-import { type DUM } from "@/components/dossier/dum-liquidation-form";
+import { LiquidationForm, type DUM } from "@/components/dossier/dum-liquidation-form";
 import { CellLink } from "@/components/ui/clickable-row";
+import { useEscapeClose, backdropDismiss } from "@/components/ui/dismiss";
 
 const fmt = (n: number | null) => (n == null ? "—" : formatMAD(n));
 
@@ -26,13 +27,17 @@ export function DUMsPanel({
   dossierId,
   dums,
   canCreate,
+  canEditNumber,
 }: {
   dossierId: string;
   dums: DUM[];
   canCreate: boolean;
+  canEditNumber: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [editingDum, setEditingDum] = useState<DUM | null>(null);
+  useEscapeClose(!!editingDum, () => setEditingDum(null));
   const [pending, start] = useTransition();
   const [number, setNumber] = useState("");
   const [bureau, setBureau] = useState("");
@@ -212,14 +217,15 @@ export function DUMsPanel({
                 </div>
                 <DumStatusBadge status={d.status} />
                 {canCreate && (
-                  <Link
-                    href={`/dums/${d.id}/modifier`}
+                  <button
+                    type="button"
+                    onClick={() => setEditingDum(d)}
                     aria-label="Modifier la DUM"
                     title="Modifier la DUM"
                     className={buttonVariants({ variant: "soft", size: "icon" })}
                   >
                     <Pencil />
-                  </Link>
+                  </button>
                 )}
               </div>
               {(d.customsValue != null ||
@@ -245,6 +251,42 @@ export function DUMsPanel({
           </div>
         )}
       </div>
+
+      {/* Édition DUM en popup : on reste dans le dossier (pas de navigation). */}
+      {editingDum &&
+        createPortal(
+          <div
+            className="fixed inset-0 bg-black/40 z-[100] flex items-center justify-center p-4 sm:p-6"
+            onMouseDown={backdropDismiss(() => setEditingDum(null))}
+          >
+            <div
+              className="relative bg-[var(--color-surface)] rounded-[var(--radius-lg)] border border-[var(--color-border)] shadow-[0_24px_64px_-16px_rgba(0,0,0,0.25)] w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-fade-in"
+              role="dialog"
+              aria-modal="true"
+            >
+              <button
+                type="button"
+                onClick={() => setEditingDum(null)}
+                aria-label="Fermer"
+                title="Fermer"
+                className="absolute right-3 top-3 z-10 size-7 rounded-[var(--radius-sm)] flex items-center justify-center text-[var(--color-fg-mute)] hover:text-[var(--color-fg)] hover:bg-[var(--color-surface-2)] transition-colors"
+              >
+                <X className="size-4" strokeWidth={1.75} />
+              </button>
+              <LiquidationForm
+                dossierId={dossierId}
+                dum={editingDum}
+                canEditNumber={canEditNumber}
+                onDone={() => {
+                  setEditingDum(null);
+                  router.refresh();
+                }}
+                onCancel={() => setEditingDum(null)}
+              />
+            </div>
+          </div>,
+          document.body,
+        )}
     </Card>
   );
 }
