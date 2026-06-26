@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import {
   Search,
   X,
+  ChevronDown,
   ArrowUpDown,
   ArrowDownWideNarrow,
   ArrowUpNarrowWide,
@@ -91,7 +92,7 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
   }
 
   const inputCls =
-    "w-full h-7 text-[12px] rounded-[var(--radius)] bg-transparent border border-transparent " +
+    "w-full h-7 text-[12px] rounded-[var(--radius-input)] bg-transparent border border-transparent " +
     "hover:border-[var(--color-border-2)] focus:bg-[var(--color-surface)] " +
     "focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-ring)] transition-colors " +
     "placeholder:text-[var(--color-fg-3)] placeholder:font-medium";
@@ -137,21 +138,28 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
             )}
           </div>
         ) : filter?.type === "select" ? (
-          <select
-            value={sp.get(filter.param) ?? ""}
-            onChange={(e) =>
-              push((p) => (e.target.value ? p.set(filter.param, e.target.value) : p.delete(filter.param)))
-            }
-            aria-label={`Filtrer par ${label}`}
-            className={cn(inputCls, "flex-1 px-1.5 font-medium", sp.get(filter.param) ? "text-[var(--color-fg)]" : "text-[var(--color-fg-3)]")}
-          >
-            <option value="">{label}</option>
-            {filter.options.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+          <div className="relative flex-1">
+            <select
+              value={sp.get(filter.param) ?? ""}
+              onChange={(e) =>
+                push((p) => (e.target.value ? p.set(filter.param, e.target.value) : p.delete(filter.param)))
+              }
+              aria-label={`Filtrer par ${label}`}
+              className={cn(inputCls, "appearance-none pl-1.5 pr-6 font-medium", sp.get(filter.param) ? "text-[var(--color-fg)]" : "text-[var(--color-fg-3)]")}
+            >
+              <option value="">{label}</option>
+              {filter.options.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              aria-hidden
+              className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 size-3.5 text-[var(--color-fg-mute)]"
+              strokeWidth={1.75}
+            />
+          </div>
         ) : shortLabel ? (
           <span className={cn("flex-1 truncate px-1", labelAlign)}>
             <span className="hidden lg:inline">{label}</span>

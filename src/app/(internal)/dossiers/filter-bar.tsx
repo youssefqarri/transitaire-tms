@@ -62,7 +62,7 @@ export function DossiersFilterBar({
           onChange={(e) => setQ(e.target.value)}
           placeholder="N° dossier, DUM, client, référence…"
           aria-label="Rechercher un dossier"
-          className="w-full h-9 pl-8 pr-9 text-[13px] bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)] placeholder:text-[var(--color-fg-mute)] hover:border-[var(--color-fg-mute)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-ring)] focus:border-transparent transition-shadow"
+          className="w-full h-9 pl-8 pr-9 text-[13px] bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius-input)] placeholder:text-[var(--color-fg-mute)] hover:border-[var(--color-fg-mute)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-ring)] focus:border-transparent transition-shadow"
         />
         {q && (
           <button

@@ -102,7 +102,7 @@ export function GlobalSearch() {
             onFocus={() => trimmed.length > 0 && setOpen(true)}
             placeholder="Rechercher dossiers, DUM, factures, clients…"
             aria-label="Rechercher"
-            className="w-full h-9 pl-8 pr-3 text-[13px] bg-[var(--color-surface-2)] border border-transparent rounded-[var(--radius)] placeholder:text-[var(--color-fg-mute)] focus:outline-none focus:bg-[var(--color-surface)] focus:border-[var(--color-border-2)] transition-colors"
+            className="w-full h-9 pl-8 pr-3 text-[13px] bg-[var(--color-surface-2)] border border-transparent rounded-[var(--radius-input)] placeholder:text-[var(--color-fg-mute)] focus:outline-none focus:bg-[var(--color-surface)] focus:border-[var(--color-border-2)] transition-colors"
           />
         </label>
       </form>

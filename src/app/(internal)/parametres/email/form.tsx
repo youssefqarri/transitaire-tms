@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { CheckCircle2, AlertCircle, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -161,15 +162,14 @@ export function EmailSettingsForm({
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="smtpSecure">Sécurité</Label>
-          <select
+          <Select
             id="smtpSecure"
             value={form.smtpSecure ? "ssl" : "starttls"}
             onChange={(e) => set("smtpSecure", e.target.value === "ssl")}
-            className="flex h-9 w-full pl-3 pr-8 text-[13px] appearance-none bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-ring)] focus:border-transparent"
           >
             <option value="starttls">STARTTLS (port 587 — recommandé)</option>
             <option value="ssl">SSL direct (port 465)</option>
-          </select>
+          </Select>
         </div>
         <div className="md:col-span-2 space-y-1.5">
           <Label htmlFor="smtpUser">Utilisateur / email</Label>

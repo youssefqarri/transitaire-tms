@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Search, X, ExternalLink, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { RestoreButton } from "./restore-button";
@@ -40,7 +41,7 @@ export function CorbeilleClient({
   );
 
   const field =
-    "h-9 bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)] " +
+    "h-9 bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius-input)] " +
     "hover:border-[var(--color-fg-mute)] focus-visible:outline-none focus-visible:ring-2 " +
     "focus-visible:ring-[var(--color-accent-ring)] transition-colors";
 
@@ -70,11 +71,11 @@ export function CorbeilleClient({
             </button>
           )}
         </div>
-        <select
+        <Select
           value={type}
           onChange={(e) => setType(e.target.value)}
           aria-label="Filtrer par type"
-          className={`px-2 text-[13px] ${field} ${type ? "text-[var(--color-fg)]" : "text-[var(--color-fg-3)]"}`}
+          className={`min-w-[150px] ${type ? "text-[var(--color-fg)]" : "text-[var(--color-fg-3)]"}`}
         >
           <option value="">Tous les types</option>
           {typeOptions.map((o) => (
@@ -82,7 +83,7 @@ export function CorbeilleClient({
               {o.label}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       {filtered.length === 0 ? (

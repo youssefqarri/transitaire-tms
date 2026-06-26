@@ -318,7 +318,7 @@ export default async function DashboardPage() {
                     {g.dossiers.length} dossier{g.dossiers.length > 1 ? "s" : ""}
                   </span>
                   <span className="hidden sm:inline font-mono text-[12px] tnum text-[var(--color-fg-3)] shrink-0 w-[110px] text-right">
-                    {g.totalValue > 0 ? formatCurrency(g.totalValue, "EUR") : ""}
+                    {g.totalValue > 0 ? formatCurrency(g.totalValue, "EUR") : "—"}
                   </span>
                 </summary>
                 <div className="bg-[var(--color-surface-2)]/40 divide-y divide-[var(--color-border)]">
@@ -361,11 +361,9 @@ export default async function DashboardPage() {
                           layout="row"
                         />
                       </div>
-                      {d.goodsValue != null && (
-                        <span className="hidden sm:block font-mono text-[12px] tnum text-[var(--color-fg-3)] shrink-0">
-                          {formatCurrency(Number(d.goodsValue), d.goodsCurrency ?? "EUR")}
-                        </span>
-                      )}
+                      <span className="hidden sm:block font-mono text-[12px] tnum text-[var(--color-fg-3)] shrink-0 w-[90px] text-right">
+                        {d.goodsValue != null ? formatCurrency(Number(d.goodsValue), d.goodsCurrency ?? "EUR") : "—"}
+                      </span>
                       <StatusBadge status={d.status} size="sm" className="shrink-0" />
                     </Link>
                   ))}

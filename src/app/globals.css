@@ -54,7 +54,6 @@
      vertical grâce aux chiffres tabulaires (tnum), sans l'aspect « machine
      à écrire ». `font-mono` reste comme alias sémantique « chiffres/codes ». */
   --font-mono: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
-  --font-mono--font-feature-settings: "tnum";
 
   --radius:    6px;
   --radius-sm: 4px;
@@ -169,7 +168,10 @@
 }
 
 @layer utilities {
-  .font-mono { font-family: var(--font-mono); }
+  /* `font-mono` = même police + mêmes ligatures (cv11/ss01 héritées du body) que
+     tout le reste ; on ajoute seulement les chiffres tabulaires. Un seul rendu de
+     chiffres partout (plus de mélange « tnum » / « cv11,ss01 »). */
+  .font-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
   /* scrollbar discrète */
   .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }

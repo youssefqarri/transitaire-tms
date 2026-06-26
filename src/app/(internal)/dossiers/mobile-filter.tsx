@@ -46,7 +46,7 @@ export function DossiersMobileFilter({
   }
 
   const field =
-    "h-9 bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)] " +
+    "h-9 bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius-input)] " +
     "hover:border-[var(--color-fg-mute)] focus-visible:outline-none focus-visible:ring-2 " +
     "focus-visible:ring-[var(--color-accent-ring)] transition-colors";
 
