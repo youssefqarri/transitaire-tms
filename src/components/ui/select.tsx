@@ -1,32 +1,88 @@
 import * as React from "react";
-import { ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Combobox } from "./combobox";
 
-export const Select = React.forwardRef<
-  HTMLSelectElement,
-  React.SelectHTMLAttributes<HTMLSelectElement>
->(({ className, children, ...props }, ref) => (
-  <div className="relative">
-    <select
-      ref={ref}
-      className={cn(
-        "flex h-9 w-full pl-3 pr-8 text-[13px] appearance-none",
-        "bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius-input)]",
-        "transition-shadow duration-150",
-        "hover:border-[var(--color-fg-mute)]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-ring)]",
-        "disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[var(--color-surface-2)]",
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </select>
-    <ChevronDown
-      aria-hidden
-      className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 text-[var(--color-fg-mute)]"
-      strokeWidth={1.75}
+/**
+ * Select — façade sur <Combobox>.
+ *
+ * Anciennement un <select> natif ; désormais rendu via <Combobox> pour que TOUTES
+ * les listes déroulantes desktop de l'application partagent le même déclencheur, le
+ * même panneau et le même comportement (recherche auto au-delà de 10 options).
+ *
+ * On garde l'API native (<option> en enfants + onChange recevant un event) afin de
+ * ne pas toucher les formulaires appelants : on lit les <option> pour construire
+ * les items et on rejoue un ChangeEvent minimal ({ target: { value } }) sur onChange.
+ *
+ * NB : les filtres mobiles (md:hidden) restent des <select> natifs — sur tactile le
+ * picker natif iOS/Android est la meilleure UX et n'apparaît jamais sur desktop.
+ */
+
+function nodeToText(node: React.ReactNode): string {
+  if (node == null || node === false || node === true) return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(nodeToText).join("");
+  return "";
+}
+
+function readOptions(children: React.ReactNode): {
+  items: { id: string; label: string }[];
+  placeholder?: string;
+  hadEmpty: boolean;
+} {
+  const items: { id: string; label: string }[] = [];
+  let placeholder: string | undefined;
+  let hadEmpty = false;
+  const walk = (nodes: React.ReactNode) => {
+    React.Children.forEach(nodes, (child) => {
+      if (!React.isValidElement(child)) return;
+      const el = child as React.ReactElement<{
+        value?: unknown;
+        children?: React.ReactNode;
+      }>;
+      if (el.type === "optgroup") {
+        walk(el.props.children);
+        return;
+      }
+      if (el.type !== "option") return;
+      const value = el.props.value == null ? "" : String(el.props.value);
+      const label = nodeToText(el.props.children) || value;
+      if (value === "") {
+        // Option vide = placeholder + champ effaçable, jamais un item sélectionnable.
+        hadEmpty = true;
+        if (label) placeholder = label;
+        return;
+      }
+      items.push({ id: value, label });
+    });
+  };
+  walk(children);
+  return { items, placeholder, hadEmpty };
+}
+
+export function Select({
+  className,
+  children,
+  value,
+  onChange,
+  disabled,
+  id,
+}: React.SelectHTMLAttributes<HTMLSelectElement>) {
+  const { items, placeholder, hadEmpty } = readOptions(children);
+  return (
+    <Combobox
+      id={id}
+      items={items}
+      value={value == null ? "" : String(value)}
+      onChange={(v) =>
+        onChange?.({
+          target: { value: v },
+          currentTarget: { value: v },
+        } as unknown as React.ChangeEvent<HTMLSelectElement>)
+      }
+      placeholder={placeholder ?? "Sélectionner…"}
+      searchable={items.length > 10}
+      clearable={hadEmpty}
+      disabled={disabled}
+      className={className}
     />
-  </div>
-));
-Select.displayName = "Select";
+  );
+}
