@@ -6,6 +6,7 @@ import {
   Search,
   X,
   ChevronDown,
+  CalendarDays,
   ArrowUpDown,
   ArrowDownWideNarrow,
   ArrowUpNarrowWide,
@@ -14,7 +15,8 @@ import { cn } from "@/lib/utils";
 
 export type ColumnFilter =
   | { type: "text"; param: string }
-  | { type: "select"; param: string; options: { value: string; label: string }[] };
+  | { type: "select"; param: string; options: { value: string; label: string }[] }
+  | { type: "date"; fromParam: string; toParam: string };
 
 type Props = {
   label: string;
@@ -169,6 +171,10 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
           <span className={cn("flex-1 truncate px-1", labelAlign)}>{label}</span>
         )}
 
+        {filter?.type === "date" && (
+          <DateRangeFilter fromParam={filter.fromParam} toParam={filter.toParam} />
+        )}
+
         {sortKey && (
           <button
             type="button"
@@ -193,5 +199,104 @@ export function ColumnHeader({ label, shortLabel, align = "left", className, sor
         )}
       </div>
     </th>
+  );
+}
+
+/** Filtre période « Du / Au » (heure optionnelle) porté par l'URL (?from=&to=). */
+function DateRangeFilter({ fromParam, toParam }: { fromParam: string; toParam: string }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const sp = useSearchParams();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const curFrom = sp.get(fromParam) ?? "";
+  const curTo = sp.get(toParam) ?? "";
+  const [fromDate, setFromDate] = useState(curFrom.slice(0, 10));
+  const [fromTime, setFromTime] = useState(curFrom.slice(11, 16));
+  const [toDate, setToDate] = useState(curTo.slice(0, 10));
+  const [toTime, setToTime] = useState(curTo.slice(11, 16));
+  const active = !!curFrom || !!curTo;
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+
+  function commit(next: URLSearchParams) {
+    next.delete("page");
+    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+    setOpen(false);
+  }
+  function apply() {
+    const p = new URLSearchParams(sp.toString());
+    const from = fromDate ? `${fromDate}T${fromTime || "00:00"}` : "";
+    const to = toDate ? `${toDate}T${toTime || "23:59"}` : "";
+    if (from) p.set(fromParam, from);
+    else p.delete(fromParam);
+    if (to) p.set(toParam, to);
+    else p.delete(toParam);
+    commit(p);
+  }
+  function clear() {
+    setFromDate("");
+    setFromTime("");
+    setToDate("");
+    setToTime("");
+    const p = new URLSearchParams(sp.toString());
+    p.delete(fromParam);
+    p.delete(toParam);
+    commit(p);
+  }
+
+  const fieldCls =
+    "h-8 px-2 text-[12px] bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius-input)] [color-scheme:light] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-ring)]";
+
+  return (
+    <div ref={ref} className="relative shrink-0">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-label="Filtrer par date"
+        title="Filtrer par date"
+        className={cn(
+          "size-6 grid place-items-center rounded hover:bg-[var(--color-surface-2)] transition-colors",
+          active ? "text-[var(--color-accent)]" : "text-[var(--color-fg-mute)]",
+        )}
+      >
+        <CalendarDays className="size-3.5" strokeWidth={1.75} />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1.5 z-30 w-[248px] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-[0_12px_32px_-12px_rgba(0,0,0,0.15)] p-3 space-y-2.5 text-left font-normal animate-fade-in">
+          <div className="space-y-1">
+            <div className="text-[11px] font-medium text-[var(--color-fg-3)] uppercase tracking-wide">Du</div>
+            <div className="flex gap-1.5">
+              <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className={cn(fieldCls, "flex-1 min-w-0")} />
+              <input type="time" value={fromTime} onChange={(e) => setFromTime(e.target.value)} className={cn(fieldCls, "w-[82px]")} />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <div className="text-[11px] font-medium text-[var(--color-fg-3)] uppercase tracking-wide">Au</div>
+            <div className="flex gap-1.5">
+              <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className={cn(fieldCls, "flex-1 min-w-0")} />
+              <input type="time" value={toTime} onChange={(e) => setToTime(e.target.value)} className={cn(fieldCls, "w-[82px]")} />
+            </div>
+          </div>
+          <p className="text-[11px] text-[var(--color-fg-mute)]">L&apos;heure est optionnelle.</p>
+          <div className="flex items-center justify-between pt-0.5">
+            <button type="button" onClick={clear} className="text-[12px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)]">
+              Effacer
+            </button>
+            <button type="button" onClick={apply} className="h-7 px-3 text-[12px] font-medium rounded-[var(--radius-input)] bg-[var(--color-accent-soft)] text-[var(--color-accent)] hover:brightness-95">
+              Appliquer
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

@@ -15,6 +15,7 @@ import { TableMobileFilter } from "@/components/ui/table-mobile-filter";
 import { parsePagination } from "@/lib/pagination";
 import { formatDateTime } from "@/lib/utils";
 import { canManageUsers } from "@/lib/roles";
+import { auditActionLabel, auditEntityLabel } from "@/lib/audit-labels";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,8 @@ export default async function AuditPage({
     user?: string;
     action?: string;
     entity?: string;
+    from?: string;
+    to?: string;
     sort?: string;
     dir?: string;
     page?: string;
@@ -40,6 +43,10 @@ export default async function AuditPage({
   const fUser = params.user?.trim();
   const action = params.action?.trim() || undefined;
   const entity = params.entity?.trim() || undefined;
+  const fromD = params.from ? new Date(params.from) : undefined;
+  const toD = params.to ? new Date(params.to) : undefined;
+  const from = fromD && !Number.isNaN(fromD.getTime()) ? fromD : undefined;
+  const to = toD && !Number.isNaN(toD.getTime()) ? toD : undefined;
   const dir = params.dir === "asc" ? ("asc" as const) : ("desc" as const);
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
 
@@ -54,6 +61,12 @@ export default async function AuditPage({
     ...(fUser && { user: { name: { contains: fUser, mode: "insensitive" as const } } }),
     ...(action && { action }),
     ...(entity && { entity }),
+    ...((from || to) && {
+      createdAt: {
+        ...(from && { gte: from }),
+        ...(to && { lte: to }),
+      },
+    }),
   };
 
   const [total, logs, actionGroups, entityGroups] = await Promise.all([
@@ -77,9 +90,9 @@ export default async function AuditPage({
     prisma.auditLog.groupBy({ by: ["entity"], orderBy: { entity: "asc" } }),
   ]);
 
-  const actionOptions = actionGroups.map((g) => ({ value: g.action, label: g.action }));
-  const entityOptions = entityGroups.map((g) => ({ value: g.entity, label: g.entity }));
-  const hasFilter = !!q || !!fUser || !!action || !!entity;
+  const actionOptions = actionGroups.map((g) => ({ value: g.action, label: auditActionLabel(g.action) }));
+  const entityOptions = entityGroups.map((g) => ({ value: g.entity, label: auditEntityLabel(g.entity) }));
+  const hasFilter = !!q || !!fUser || !!action || !!entity || !!from || !!to;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -124,8 +137,8 @@ export default async function AuditPage({
                       <span className="font-medium text-[var(--color-fg)]">
                         {l.user?.name ?? "Système"}
                       </span>
-                      <Badge tone="outline">{l.action}</Badge>
-                      <span className="text-[var(--color-fg-3)]">{l.entity}</span>
+                      <Badge tone="outline">{auditActionLabel(l.action)}</Badge>
+                      <span className="text-[var(--color-fg-3)]">{auditEntityLabel(l.entity)}</span>
                     </div>
                     <div className="text-[12px] text-[var(--color-fg-mute)] mt-0.5">
                       {l.entityId && <span>• {l.entityId.slice(0, 8)} </span>}
@@ -156,7 +169,12 @@ export default async function AuditPage({
                       filter={{ type: "select", param: "entity", options: entityOptions }}
                     />
                     <ColumnHeader label="Détail" />
-                    <ColumnHeader label="Date" align="right" sortKey="date" />
+                    <ColumnHeader
+                      label="Date"
+                      align="right"
+                      sortKey="date"
+                      filter={{ type: "date", fromParam: "from", toParam: "to" }}
+                    />
                   </tr>
                 </thead>
                 <tbody>
@@ -174,9 +192,9 @@ export default async function AuditPage({
                         </div>
                       </td>
                       <td className="px-5 py-2.5">
-                        <Badge tone="outline">{l.action}</Badge>
+                        <Badge tone="outline">{auditActionLabel(l.action)}</Badge>
                       </td>
-                      <td className="px-5 py-2.5 text-[var(--color-fg-3)]">{l.entity}</td>
+                      <td className="px-5 py-2.5 text-[var(--color-fg-3)]">{auditEntityLabel(l.entity)}</td>
                       <td className="px-5 py-2.5 text-[12px] text-[var(--color-fg-mute)] tnum">
                         {l.entityId && <span>{l.entityId.slice(0, 8)}</span>}
                         {l.ip && <span> • {l.ip}</span>}
@@ -201,6 +219,8 @@ export default async function AuditPage({
             user: params.user,
             action: params.action,
             entity: params.entity,
+            from: params.from,
+            to: params.to,
             sort: params.sort,
             dir: params.dir,
           }}
