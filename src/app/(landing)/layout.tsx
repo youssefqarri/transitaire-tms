@@ -8,7 +8,9 @@ import type { Metadata } from "next";
 // n'est jamais affectée.
 
 export const metadata: Metadata = {
-  title: "Escale — le transit intelligent, du port à la livraison",
+  // `absolute` court-circuite le template du RootLayout (« %s • … ») pour éviter
+  // un titre dupliqué sur la vitrine.
+  title: { absolute: "Escale — le transit intelligent, du port à la livraison" },
   description:
     "Escale est le logiciel des transitaires et commissionnaires en douane au Maroc : gestion des dossiers de dédouanement, déclarations DUM, documents, facturation TVA et notifications clients par e-mail et WhatsApp. Du port à la livraison, en une seule plateforme.",
   applicationName: "Escale",
