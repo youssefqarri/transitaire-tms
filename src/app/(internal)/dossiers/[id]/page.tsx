@@ -211,13 +211,13 @@ export default async function DossierDetailPage({
               strokeWidth={1.75}
             />
             <div className="flex-1">
-              <div className="text-[13px] font-medium text-[var(--color-fg)]">
+              <div className="text-[14px] font-medium text-[var(--color-fg)]">
                 {missing.length} document{missing.length > 1 ? "s" : ""} manquant
                 {missing.length > 1 ? "s" : ""}
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {missing.map((c) => (
-                  <Badge tone="warn" key={c}>
+                  <Badge tone="warn" size="lg" key={c}>
                     {DOCUMENT_CATEGORY_LABELS[c]}
                   </Badge>
                 ))}

@@ -77,7 +77,7 @@ export function ContactsPanel({
       </div>
 
       {contacts.length === 0 && !open && (
-        <div className="text-[13px] text-[var(--color-fg-3)]">
+        <div className="text-[13px] text-center text-[var(--color-fg-3)]">
           Aucun contact secondaire. Le contact principal est l&apos;email du client.
         </div>
       )}

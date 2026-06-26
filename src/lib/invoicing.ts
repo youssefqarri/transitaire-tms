@@ -160,7 +160,7 @@ export function normalizeDesignation(s: string): string {
   const text = s.trim();
   if (!text) return text;
   let firstLetterDone = false;
-  return text.replace(/[\p{L}\p{N}]+/gu, (word) => {
+  let result = text.replace(/[\p{L}\p{N}]+/gu, (word) => {
     if (DESIGNATION_KEEP_UPPER.has(word.toUpperCase())) {
       firstLetterDone = true;
       return word.toUpperCase();
@@ -172,6 +172,9 @@ export function normalizeDesignation(s: string): string {
     }
     return w;
   });
+  // Sigles métier explicités entre parenthèses (« LR » → « LR (Lettre de Réserve) »).
+  result = result.replace(/\bLR\b(?! \(Lettre)/g, "LR (Lettre de Réserve)");
+  return result;
 }
 
 /** Texte « x cent vingt-trois dirhams et quarante-cinq centimes » pour la facture. */

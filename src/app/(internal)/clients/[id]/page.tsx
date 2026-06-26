@@ -148,7 +148,7 @@ export default async function ClientDetailPage({
               </div>
             )}
             {!client.email && !client.phone && !client.address && !client.contactName && (
-              <div className="text-[var(--color-fg-3)]">Aucune coordonnée renseignée.</div>
+              <div className="text-center text-[var(--color-fg-3)]">Aucune coordonnée renseignée.</div>
             )}
           </dl>
           <div className="px-5 py-4 border-t border-[var(--color-border)]">
@@ -161,7 +161,7 @@ export default async function ClientDetailPage({
               </span>
             </div>
             {client.users.length === 0 ? (
-              <div className="text-[13px] text-[var(--color-fg-3)]">
+              <div className="text-[13px] text-center text-[var(--color-fg-3)]">
                 Aucun accès configuré.
               </div>
             ) : (

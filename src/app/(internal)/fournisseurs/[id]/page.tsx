@@ -109,7 +109,7 @@ export default async function SupplierDetailPage({
               !supplier.phone &&
               !supplier.address &&
               !supplier.notes && (
-                <div className="text-[var(--color-fg-mute)]">
+                <div className="text-center text-[var(--color-fg-3)]">
                   Aucune coordonnée renseignée — utilisez « Modifier » pour en ajouter.
                 </div>
               )}
