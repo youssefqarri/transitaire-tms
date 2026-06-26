@@ -57,7 +57,10 @@ export function ConfirmDialog({
 
   if (!open) return null;
 
-  const canConfirm = confirmWord ? typed.trim() === confirmWord : true;
+  // Confirmation insensible à la casse : « supprimer » == « SUPPRIMER ».
+  const canConfirm = confirmWord
+    ? typed.trim().toLowerCase() === confirmWord.toLowerCase()
+    : true;
 
   return createPortal(
     <div
@@ -91,7 +94,7 @@ export function ConfirmDialog({
             <button
               type="button"
               onClick={() => !pending && onOpenChange(false)}
-              className="size-9 -mr-2 -mt-1 rounded-[var(--radius-sm)] flex items-center justify-center text-[var(--color-fg-mute)] hover:text-[var(--color-fg)] hover:bg-[var(--color-surface-2)] shrink-0 transition-colors"
+              className="size-9 -mr-2 -mt-2 rounded-[var(--radius-sm)] flex items-center justify-center text-[var(--color-fg-mute)] hover:text-[var(--color-fg)] hover:bg-[var(--color-surface-2)] shrink-0 transition-colors"
               aria-label="Fermer"
               title="Fermer"
             >
@@ -100,7 +103,7 @@ export function ConfirmDialog({
           </div>
 
           {confirmWord && (
-            <div className="mt-4 ml-12 space-y-1.5">
+            <div className="mt-4 space-y-1.5">
               <label
                 htmlFor="confirm-word"
                 className="text-[12px] text-[var(--color-fg-3)]"
