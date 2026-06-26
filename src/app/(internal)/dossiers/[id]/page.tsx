@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth";
 import { canCreateDUM } from "@/lib/roles";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Field } from "@/components/ui/field";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import { formatCurrency, formatDate, formatDateTime, formatNumber } from "@/lib/utils";
 import {
@@ -515,31 +516,6 @@ export default async function DossierDetailPage({
             />
           )}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  value,
-  mono = false,
-}: {
-  label: string;
-  value: React.ReactNode;
-  mono?: boolean;
-}) {
-  return (
-    <div>
-      <div className="text-[12px] font-medium text-[var(--color-fg-3)] mb-1">{label}</div>
-      <div
-        className={
-          mono
-            ? "font-mono text-[13px] tnum text-[var(--color-fg)]"
-            : "text-[13px] text-[var(--color-fg)]"
-        }
-      >
-        {value}
       </div>
     </div>
   );

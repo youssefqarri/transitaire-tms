@@ -8,6 +8,7 @@ import { BackLink } from "@/components/ui/back-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Field } from "@/components/ui/field";
 import { DumStatusBadge } from "@/components/dossier/dum-status-badge";
 import { DUM_STATUS_LABELS, DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
 import { formatDate } from "@/lib/utils";
@@ -176,31 +177,6 @@ export default async function DUMDetailPage({
           </p>
         </Card>
       )}
-    </div>
-  );
-}
-
-function Field({
-  label,
-  value,
-  mono,
-  strong,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-  strong?: boolean;
-}) {
-  return (
-    <div className="min-w-0">
-      <dt className="text-[12px] text-[var(--color-fg-3)]">{label}</dt>
-      <dd
-        className={`mt-0.5 text-[13px] ${mono ? "font-mono tnum" : ""} ${
-          strong ? "text-[var(--color-fg)] font-medium" : "text-[var(--color-fg-2)]"
-        }`}
-      >
-        {value}
-      </dd>
     </div>
   );
 }

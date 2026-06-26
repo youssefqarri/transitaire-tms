@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Combobox } from "@/components/ui/combobox";
 import { Badge } from "@/components/ui/badge";
+import { Field } from "@/components/ui/field";
 import { DUM_STATUS_LABELS } from "@/lib/statuses";
 import { DumStatusBadge } from "@/components/dossier/dum-status-badge";
 import { CUSTOMS_REGIME_GROUPS, regimeDisplay, MAX_DUMS_PER_DOSSIER } from "@/lib/reference";
@@ -242,17 +243,6 @@ export function DUMsPanel({
         )}
       </div>
     </Card>
-  );
-}
-
-function Field({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
-  return (
-    <div className="min-w-0">
-      <dt className="text-[var(--color-fg-3)]">{label}</dt>
-      <dd className={`font-mono tnum ${strong ? "text-[var(--color-fg)] font-medium" : "text-[var(--color-fg-2)]"}`}>
-        {value}
-      </dd>
-    </div>
   );
 }
 
