@@ -103,7 +103,7 @@ export function StatusChanger({
 
   return (
     <div className="relative">
-      <Button variant="outline" size="sm" onClick={() => setOpen((o) => !o)}>
+      <Button variant="soft" size="sm" onClick={() => setOpen((o) => !o)}>
         Changer le statut <ChevronDown className="size-3.5" strokeWidth={1.75} />
       </Button>
       {open && (

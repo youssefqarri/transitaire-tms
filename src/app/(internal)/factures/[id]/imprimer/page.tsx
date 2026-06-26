@@ -86,17 +86,20 @@ export default async function InvoicePrintPage({
         .invoice-page .tnum { font-variant-numeric: tabular-nums; }
       `}</style>
 
-      <div className="invoice-page">
-        <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-          <a
-            href={`/factures/${invoice.id}`}
-            style={{ fontSize: 13, color: "#555", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
-          >
-            ← Retour à la facture
-          </a>
-          <PrintTrigger />
-        </div>
+      <div
+        className="no-print"
+        style={{ width: "210mm", maxWidth: "100%", margin: "24px auto 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+      >
+        <a
+          href={`/factures/${invoice.id}`}
+          style={{ fontSize: 13, color: "#555", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
+        >
+          ← Retour à la facture
+        </a>
+        <PrintTrigger />
+      </div>
 
+      <div className="invoice-page">
         {/* En-tête */}
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 28 }}>
           <div>

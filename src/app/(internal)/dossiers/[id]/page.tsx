@@ -144,7 +144,7 @@ export default async function DossierDetailPage({
             {/* Comptable : pas de modif des champs du dossier */}
             {session.user.role !== "COMPTABILITE" && (
               <Link href={`/dossiers/${dossier.id}/modifier`}>
-                <Button variant="outline" size="sm">
+                <Button variant="soft" size="sm">
                   <Pencil /> Modifier
                 </Button>
               </Link>

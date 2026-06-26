@@ -48,7 +48,7 @@ export function CreditNoteButton({
 
   return (
     <div className="relative">
-      <Button variant="outline" size="sm" onClick={() => setOpen((o) => !o)}>
+      <Button variant="soft-warning" size="sm" onClick={() => setOpen((o) => !o)}>
         <Receipt /> Avoir
       </Button>
       {open && (

@@ -130,7 +130,7 @@ export function ExpectedDocumentsPanel({
                 label="Envoyer au client"
               />
             )}
-            <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
+            <Button size="sm" variant="soft" onClick={() => setOpen((o) => !o)}>
               <Plus /> Demander
             </Button>
           </div>

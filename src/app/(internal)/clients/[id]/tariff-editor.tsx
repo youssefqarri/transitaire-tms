@@ -172,10 +172,10 @@ export function ClientTariffEditor({
 
       <div className="flex items-center justify-between gap-2 pt-1">
         <div className="flex gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={() => add("HONORAIRE")}>
+          <Button type="button" variant="soft" size="sm" onClick={() => add("HONORAIRE")}>
             <Plus /> Ajouter une ligne
           </Button>
-          <Button type="button" variant="outline" size="sm" onClick={() => add("DEBOURS")}>
+          <Button type="button" variant="soft" size="sm" onClick={() => add("DEBOURS")}>
             <Plus /> Débours (0 %)
           </Button>
         </div>

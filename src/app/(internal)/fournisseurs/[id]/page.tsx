@@ -48,7 +48,7 @@ export default async function SupplierDetailPage({
         }
         actions={
           <Link href={`/fournisseurs/${id}/modifier`}>
-            <Button variant="outline" size="sm">
+            <Button variant="soft" size="sm">
               <Pencil /> Modifier
             </Button>
           </Link>

@@ -35,7 +35,7 @@ export function DeleteDossierButton({
 
   return (
     <>
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)} title="Supprimer ce dossier">
+      <Button variant="soft-danger" size="sm" onClick={() => setOpen(true)} title="Supprimer ce dossier">
         <Trash2 /> Supprimer
       </Button>
       <ConfirmDialog

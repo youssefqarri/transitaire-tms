@@ -366,7 +366,7 @@ export function NotifyClientButton({
 
   return (
     <>
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+      <Button variant="soft-success" size="sm" onClick={() => setOpen(true)}>
         <Send /> {label}
       </Button>
       {mounted && open && createPortal(modal, document.body)}

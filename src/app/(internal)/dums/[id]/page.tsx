@@ -58,7 +58,7 @@ export default async function DUMDetailPage({
           canEdit ? (
             <Link
               href={`/dums/${dum.id}/modifier`}
-              className={buttonVariants({ variant: "outline", size: "sm" })}
+              className={buttonVariants({ variant: "soft", size: "sm" })}
             >
               <Pencil /> Modifier
             </Link>

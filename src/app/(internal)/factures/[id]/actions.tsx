@@ -79,7 +79,7 @@ export function InvoiceActions({
 
   return (
     <div className="relative">
-      <Button variant="outline" size="sm" onClick={() => setOpen((o) => !o)}>
+      <Button variant="soft" size="sm" onClick={() => setOpen((o) => !o)}>
         Actions <ChevronDown className="size-3.5" />
       </Button>
       {open && (

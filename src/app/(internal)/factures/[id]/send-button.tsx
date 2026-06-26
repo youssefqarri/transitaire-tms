@@ -54,7 +54,7 @@ export function SendInvoiceButton({
   return (
     <>
       <Button
-        variant="outline"
+        variant="soft-success"
         size="sm"
         onClick={() => setOpen(true)}
         disabled={!clientEmail}

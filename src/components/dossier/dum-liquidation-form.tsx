@@ -94,17 +94,33 @@ export function LiquidationForm({
         <span className="font-mono text-[13px] font-medium text-[var(--color-fg)]">{dum.number}</span>
         <span className="text-[12px] text-[var(--color-fg-3)]">— liquidation des droits &amp; taxes</span>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {canEditNumber && (
-          <div className="space-y-1.5 md:col-span-2">
-            <Label>Numéro DUM (correction)</Label>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {/* Ligne 1 : N° DUM · Nombre d'articles · Statut */}
+        <div className="space-y-1.5">
+          <Label>N° DUM</Label>
+          <span
+            className="block"
+            title={canEditNumber ? undefined : "Le numéro DUM ne se modifie pas à ce stade"}
+          >
             <Input
               value={number}
               onChange={(e) => setNumber(e.target.value)}
-              className="font-mono"
+              disabled={!canEditNumber}
+              className="font-mono w-full"
             />
-          </div>
-        )}
+          </span>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Nombre d&apos;articles</Label>
+          <Input
+            type="number"
+            min="0"
+            step="1"
+            value={articleCount}
+            onChange={(e) => setArticleCount(e.target.value)}
+            className="font-mono"
+          />
+        </div>
         <div className="space-y-1.5">
           <Label>Statut DUM</Label>
           <Select value={status} onChange={(e) => setStatus(e.target.value as DUMStatus)}>
@@ -115,6 +131,7 @@ export function LiquidationForm({
             ))}
           </Select>
         </div>
+        {/* Ligne 2 : Valeur en douane · Droits estimés · Droits liquidés */}
         <div className="space-y-1.5">
           <Label>Valeur en douane (MAD)</Label>
           <Input type="number" step="0.01" min="0" value={customsValue} onChange={(e) => setCustomsValue(e.target.value)} className="font-mono" />
@@ -127,6 +144,7 @@ export function LiquidationForm({
           <Label>Droits &amp; taxes liquidés (MAD)</Label>
           <Input type="number" step="0.01" min="0" value={liquidatedDuties} onChange={(e) => setLiquidatedDuties(e.target.value)} className="font-mono" />
         </div>
+        {/* Ligne 3 : N° de quittance · Date de paiement */}
         <div className="space-y-1.5">
           <Label>N° de quittance</Label>
           <Input value={receiptNumber} onChange={(e) => setReceiptNumber(e.target.value)} />
@@ -134,17 +152,6 @@ export function LiquidationForm({
         <div className="space-y-1.5">
           <Label>Date de paiement</Label>
           <Input type="date" value={paidAt} onChange={(e) => setPaidAt(e.target.value)} />
-        </div>
-        <div className="space-y-1.5">
-          <Label>Nombre d&apos;articles</Label>
-          <Input
-            type="number"
-            min="0"
-            step="1"
-            value={articleCount}
-            onChange={(e) => setArticleCount(e.target.value)}
-            className="font-mono"
-          />
         </div>
       </div>
       <div className="flex justify-end gap-2 mt-3">

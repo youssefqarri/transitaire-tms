@@ -48,7 +48,7 @@ export function DeleteClientButton({
         }
       >
         <Button
-          variant="outline"
+          variant="soft-danger"
           size="sm"
           onClick={() => setOpen(true)}
           disabled={hasDossiers}

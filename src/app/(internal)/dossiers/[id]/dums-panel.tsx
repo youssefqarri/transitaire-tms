@@ -95,7 +95,7 @@ export function DUMsPanel({
           </span>
         </CardTitle>
         {canCreate && !atMax && (
-          <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
+          <Button size="sm" variant="soft" onClick={() => setOpen((o) => !o)}>
             <Plus /> Nouvelle DUM
           </Button>
         )}
@@ -216,9 +216,9 @@ export function DUMsPanel({
                     href={`/dums/${d.id}/modifier`}
                     aria-label="Modifier la DUM"
                     title="Modifier la DUM"
-                    className={buttonVariants({ variant: "ghost", size: "icon" })}
+                    className={buttonVariants({ variant: "soft", size: "icon" })}
                   >
-                    <Pencil className="text-[var(--color-fg-mute)]" />
+                    <Pencil />
                   </Link>
                 )}
               </div>

@@ -102,7 +102,7 @@ export function DocumentsPanel({
           </span>
         </CardTitle>
         {!readOnly && (
-          <Button size="sm" variant="outline" onClick={() => setOpen((o) => !o)}>
+          <Button size="sm" variant="soft" onClick={() => setOpen((o) => !o)}>
             <Plus /> Ajouter
           </Button>
         )}
