@@ -40,8 +40,16 @@ const badgeVariants = cva(
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof badgeVariants> {}
+    VariantProps<typeof badgeVariants> {
+  /** Puce ronde (couleur = celle du tone) à gauche du libellé, comme les statuts dossier. */
+  dot?: boolean;
+}
 
-export function Badge({ className, tone, size, ...props }: BadgeProps) {
-  return <span className={cn(badgeVariants({ tone, size }), className)} {...props} />;
+export function Badge({ className, tone, size, dot, children, ...props }: BadgeProps) {
+  return (
+    <span className={cn(badgeVariants({ tone, size }), dot && "gap-1.5", className)} {...props}>
+      {dot && <span aria-hidden className="size-1.5 rounded-full bg-current shrink-0" />}
+      {children}
+    </span>
+  );
 }

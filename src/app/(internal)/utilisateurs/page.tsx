@@ -142,7 +142,7 @@ export default async function UsersPage({
                     </div>
                     <div className="mt-1 flex items-center gap-1.5">
                       <Badge tone={ROLE_TONE[u.role]}>{ROLE_LABELS[u.role]}</Badge>
-                      {!u.active && <Badge tone="danger">Inactif</Badge>}
+                      {!u.active && <Badge tone="danger" dot>Inactif</Badge>}
                     </div>
                   </div>
                   <UserActiveToggle userId={u.id} active={u.active} self={u.id === session.user.id} />
@@ -201,9 +201,9 @@ export default async function UsersPage({
                       </td>
                       <td className="px-5 py-2.5">
                         {u.active ? (
-                          <Badge tone="ok">Actif</Badge>
+                          <Badge tone="ok" dot>Actif</Badge>
                         ) : (
-                          <Badge tone="danger">Inactif</Badge>
+                          <Badge tone="danger" dot>Inactif</Badge>
                         )}
                       </td>
                       <td className="px-5 py-2.5 text-right">
