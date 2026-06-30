@@ -55,9 +55,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token.sub) {
         const db = await prisma.user.findUnique({
           where: { id: token.sub },
-          select: { active: true, role: true, clientId: true, orgId: true, tokenVersion: true },
+          select: {
+            active: true,
+            role: true,
+            clientId: true,
+            orgId: true,
+            tokenVersion: true,
+            organization: { select: { active: true } },
+          },
         });
         if (!db || !db.active) return null; // compte supprimé/désactivé
+        if (db.organization && !db.organization.active) return null; // cabinet suspendu
         // tokenVersion : n'invalide que les jetons qui en portent un (évite la
         // déconnexion de masse des sessions émises avant ce déploiement)
         const tv = (token as { tv?: number }).tv;
