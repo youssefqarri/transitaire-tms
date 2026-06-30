@@ -25,46 +25,89 @@ enum UserRole {
   CLIENT
 }
 
+// ============================================================
+// ORGANISATION (multi-tenant) — chaque cabinet = une Organization
+// ============================================================
+
+model Organization {
+  id       String  @id @default(cuid())
+  name     String
+  slug     String  @unique // identifiant court (sous-domaine futur)
+  // mentions légales (émetteur de facture) — par cabinet
+  ice      String?
+  rc       String?
+  taxId    String?
+  patente  String?
+  cnss     String?
+  agrement String?
+  address  String?
+  city     String?
+  phone    String?
+  email    String?
+  logoUrl  String?
+  active   Boolean @default(true)
+
+  users            User[]
+  clients          Client[]
+  suppliers        Supplier[]
+  dossiers         Dossier[]
+  invoices         Invoice[]
+  creditNotes      CreditNote[]
+  templates        MessageTemplate[]
+  emailAccounts    EmailAccount[]
+  notifications    Notification[]
+  auditLogs        AuditLog[]
+  outgoingMessages OutgoingMessage[]
+  settings         AppSetting[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  emailVerified DateTime?
-  name          String
-  image         String?
-  password      String?   // hashed (credentials provider)
-  role          UserRole  @default(EXPLOITATION)
-  active        Boolean   @default(true)
-  phone         String?
+  id                String        @id @default(cuid())
+  email             String        @unique
+  emailVerified     DateTime?
+  name              String
+  image             String?
+  password          String? // hashed (credentials provider)
+  role              UserRole      @default(EXPLOITATION)
+  active            Boolean       @default(true)
+  phone             String?
+  // multi-tenant : cabinet (organisation) propriétaire — nullable le temps de la fondation
+  orgId             String?
+  organization      Organization? @relation(fields: [orgId], references: [id], onDelete: SetNull)
   // sécurité : incrémenté à chaque reset/désactivation pour invalider les JWT existants
-  tokenVersion  Int       @default(0)
+  tokenVersion      Int           @default(0)
   passwordChangedAt DateTime?
 
   // si role = CLIENT, relié à un Client (le compte porte le portail)
-  clientId      String?
-  client        Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
 
-  accounts          Account[]
-  sessions          Session[]
-  apiTokens         ApiToken[]
-  emailAccounts     EmailAccount[]
-  notifications     Notification[]
-  notificationReceipts NotificationReceipt[]
-  auditLogs         AuditLog[]
-  dossierComments   DossierComment[]
-  statusChanges     DossierStatusChange[]
-  uploadedDocs      Document[]            @relation("UploadedBy")
-  expectedDocumentsRequested ExpectedDocument[] @relation("ExpectedDocumentsRequested")
-  createdDossiers   Dossier[]             @relation("CreatedBy")
-  assignedDossiers  Dossier[]             @relation("AssignedTo")
-  invoicesCreated   Invoice[]             @relation("InvoicesCreated")
-  messagesSent      OutgoingMessage[]     @relation("MessagesSent")
-  settingsUpdates   AppSetting[]
+  accounts                   Account[]
+  sessions                   Session[]
+  apiTokens                  ApiToken[]
+  emailAccounts              EmailAccount[]
+  notifications              Notification[]
+  notificationReceipts       NotificationReceipt[]
+  auditLogs                  AuditLog[]
+  dossierComments            DossierComment[]
+  statusChanges              DossierStatusChange[]
+  uploadedDocs               Document[]            @relation("UploadedBy")
+  expectedDocumentsRequested ExpectedDocument[]    @relation("ExpectedDocumentsRequested")
+  createdDossiers            Dossier[]             @relation("CreatedBy")
+  assignedDossiers           Dossier[]             @relation("AssignedTo")
+  invoicesCreated            Invoice[]             @relation("InvoicesCreated")
+  messagesSent               OutgoingMessage[]     @relation("MessagesSent")
+  settingsUpdates            AppSetting[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([role])
   @@index([clientId])
+  @@index([orgId])
 }
 
 model Account {
@@ -73,12 +116,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?  @db.Text
-  access_token      String?  @db.Text
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?  @db.Text
+  id_token          String? @db.Text
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -104,15 +147,15 @@ model VerificationToken {
 
 // Token d'accès API (pour intégrations externes, ex: Claude)
 model ApiToken {
-  id          String    @id @default(cuid())
-  label       String                          // étiquette (ex: "Claude - Karim")
-  tokenHash   String    @unique               // hash bcrypt du token
-  prefix      String                          // 8 premiers chars du token (affichage)
-  userId      String                          // hérite des permissions de cet user
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expiresAt   DateTime?
-  lastUsedAt  DateTime?
-  revokedAt   DateTime?
+  id         String    @id @default(cuid())
+  label      String // étiquette (ex: "Claude - Karim")
+  tokenHash  String    @unique // hash bcrypt du token
+  prefix     String // 8 premiers chars du token (affichage)
+  userId     String // hérite des permissions de cet user
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime?
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
 
   createdAt DateTime @default(now())
 
@@ -124,36 +167,40 @@ model ApiToken {
 // ============================================================
 
 model Client {
-  id           String   @id @default(cuid())
-  name         String
-  code         String?  @unique   // code client interne
-  ice          String?  // identifiant commun de l'entreprise (Maroc)
-  rc           String?  // registre de commerce
-  taxId        String?  // identifiant fiscal
-  email        String?
-  phone        String?
-  whatsapp     String?  // n° WhatsApp si différent du téléphone
-  address      String?
-  city         String?
-  contactName  String?
-  notes        String?  @db.Text
-  active       Boolean  @default(true)
+  id              String        @id @default(cuid())
+  // multi-tenant : cabinet (organisation) propriétaire — nullable le temps de la fondation
+  orgId           String?
+  organization    Organization? @relation(fields: [orgId], references: [id], onDelete: SetNull)
+  name            String
+  code            String?       @unique // code client interne
+  ice             String? // identifiant commun de l'entreprise (Maroc)
+  rc              String? // registre de commerce
+  taxId           String? // identifiant fiscal
+  email           String?
+  phone           String?
+  whatsapp        String? // n° WhatsApp si différent du téléphone
+  address         String?
+  city            String?
+  contactName     String?
+  notes           String?       @db.Text
+  active          Boolean       @default(true)
   // ce client veut ses débours facturés à part (décidé à la saisie, cf. cliente)
-  separateDebours Boolean @default(false)
+  separateDebours Boolean       @default(false)
 
-  dossiers Dossier[]
-  users    User[]   // utilisateurs portail client
-  invoices Invoice[]
+  dossiers         Dossier[]
+  users            User[] // utilisateurs portail client
+  invoices         Invoice[]
   outgoingMessages OutgoingMessage[]
-  contacts ClientContact[]   // carnet d'adresses (destinataires des notifications)
-  tariffs  ClientTariff[]    // fiche tarifaire récurrente (lignes pré-remplies en facture)
+  contacts         ClientContact[] // carnet d'adresses (destinataires des notifications)
+  tariffs          ClientTariff[] // fiche tarifaire récurrente (lignes pré-remplies en facture)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?   // soft-delete
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // soft-delete
 
   @@index([name])
   @@index([deletedAt])
+  @@index([orgId])
 }
 
 // Fiche tarifaire par client : lignes récurrentes (honoraires, visite portuaire,
@@ -165,7 +212,7 @@ model ClientTariff {
   clientId    String
   client      Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
   kind        InvoiceItemKind @default(HONORAIRE)
-  code        String?         // code de ligne (ex. V002, H001)
+  code        String? // code de ligne (ex. V002, H001)
   description String
   unitPrice   Decimal         @db.Decimal(12, 2)
   vatRate     Decimal         @default(20) @db.Decimal(5, 2)
@@ -180,13 +227,13 @@ model ClientTariff {
 // Carnet d'adresses d'un client : plusieurs destinataires possibles selon le
 // dossier (personne/service différent). `Client.email` reste le contact principal.
 model ClientContact {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   clientId  String
-  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  name      String?  // nom ou libellé, ex: "Service logistique", "M. Alami"
+  client    Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name      String? // nom ou libellé, ex: "Service logistique", "M. Alami"
   email     String
-  createdAt DateTime @default(now())
-  deletedAt DateTime?   // soft-delete
+  createdAt DateTime  @default(now())
+  deletedAt DateTime? // soft-delete
 
   @@unique([clientId, email])
   @@index([clientId])
@@ -194,13 +241,16 @@ model ClientContact {
 }
 
 model Supplier {
-  id          String   @id @default(cuid())
-  name        String
-  country     String?
-  email       String?
-  phone       String?
-  address     String?
-  notes       String?  @db.Text
+  id           String        @id @default(cuid())
+  // multi-tenant : cabinet (organisation) propriétaire — nullable le temps de la fondation
+  orgId        String?
+  organization Organization? @relation(fields: [orgId], references: [id], onDelete: SetNull)
+  name         String
+  country      String?
+  email        String?
+  phone        String?
+  address      String?
+  notes        String?       @db.Text
 
   dossiers Dossier[]
 
@@ -208,6 +258,7 @@ model Supplier {
   updatedAt DateTime @updatedAt
 
   @@index([name])
+  @@index([orgId])
 }
 
 // ============================================================
@@ -220,8 +271,8 @@ enum DossierType {
 }
 
 enum PaymentMode {
-  WITH_PAYMENT      // avec paiement (engagement d'importation obligatoire)
-  WITHOUT_PAYMENT   // sans paiement
+  WITH_PAYMENT // avec paiement (engagement d'importation obligatoire)
+  WITHOUT_PAYMENT // sans paiement
 }
 
 enum PackagingUnit {
@@ -232,97 +283,100 @@ enum PackagingUnit {
 }
 
 enum DossierStatus {
-  OUVERTURE                       // ouverture dossier
-  RECEPTIONNE                     // réceptionné
-  DOCUMENTS_MANQUANTS             // documents manquants
-  DOCUMENTS_RECUS                 // réception des documents manquants
-  BON_A_DELIVRER_RECU             // réception bon à délivrer
-  DECLARATION_EN_COURS            // déclaration en cours
-  VALIDATION_DOUANE               // validation en douane
-  INSTANCE_DATE_VISITE            // en instance de date de visite (créneau pas encore fixé par la douane)
-  VISITE                          // date de visite
-  CONFORME                        // conforme (sans visite)
-  BUREAU_VALEUR                   // soumis au bureau de valeur
-  DEMANDE_ACCEPTATION_VALEUR      // demande d'acceptation de la nouvelle valeur en douane
-  DEMANDE_DOCUMENTS               // demande de documents douane / MCI
-  INSTANCE_FICHE_LIQUIDATION      // en instance de fiche de liquidation
-  LIQUIDE                         // liquidé
-  DEMANDE_PESAGE                  // demande de pesage (avant mainlevée)
-  BON_A_ENLEVER_RESERVE           // bon à enlever sous réserve
-  MAIN_LEVEE_RESERVE_CONFORMITE   // main levée sous réserve de conformité
-  MAIN_LEVEE_RESERVE_DOCUMENTS    // main levée sous réserve de production des documents
-  VALIDATION_MCA                  // validation MCA
-  BON_A_ENLEVER                   // bon à enlever (générique)
-  BON_A_ENLEVER_DEFINITIF         // bon à enlever définitif
-  EMBARQUEMENT                    // (export) marchandise au port, embarquement programmé
-  SORTIE_MARCHANDISE              // (export) marchandise sortie / embarquée
-  LIVRAISON                       // livraison en cours
-  FACTURATION                     // facturation en cours
-  FACTURE                         // facturé (émis au client)
-  CLOTURE                         // dossier clôturé
-  ANNULE                          // annulé (hors outil / système externe)
+  OUVERTURE // ouverture dossier
+  RECEPTIONNE // réceptionné
+  DOCUMENTS_MANQUANTS // documents manquants
+  DOCUMENTS_RECUS // réception des documents manquants
+  BON_A_DELIVRER_RECU // réception bon à délivrer
+  DECLARATION_EN_COURS // déclaration en cours
+  VALIDATION_DOUANE // validation en douane
+  INSTANCE_DATE_VISITE // en instance de date de visite (créneau pas encore fixé par la douane)
+  VISITE // date de visite
+  CONFORME // conforme (sans visite)
+  BUREAU_VALEUR // soumis au bureau de valeur
+  DEMANDE_ACCEPTATION_VALEUR // demande d'acceptation de la nouvelle valeur en douane
+  DEMANDE_DOCUMENTS // demande de documents douane / MCI
+  INSTANCE_FICHE_LIQUIDATION // en instance de fiche de liquidation
+  LIQUIDE // liquidé
+  DEMANDE_PESAGE // demande de pesage (avant mainlevée)
+  BON_A_ENLEVER_RESERVE // bon à enlever sous réserve
+  MAIN_LEVEE_RESERVE_CONFORMITE // main levée sous réserve de conformité
+  MAIN_LEVEE_RESERVE_DOCUMENTS // main levée sous réserve de production des documents
+  VALIDATION_MCA // validation MCA
+  BON_A_ENLEVER // bon à enlever (générique)
+  BON_A_ENLEVER_DEFINITIF // bon à enlever définitif
+  EMBARQUEMENT // (export) marchandise au port, embarquement programmé
+  SORTIE_MARCHANDISE // (export) marchandise sortie / embarquée
+  LIVRAISON // livraison en cours
+  FACTURATION // facturation en cours
+  FACTURE // facturé (émis au client)
+  CLOTURE // dossier clôturé
+  ANNULE // annulé (hors outil / système externe)
 }
 
 enum TransportMode {
   MARITIME // connaissement (BL)
-  AERIEN   // LTA
-  ROUTIER  // CMR
+  AERIEN // LTA
+  ROUTIER // CMR
 }
 
 model Dossier {
-  id            String        @id @default(cuid())
-  number        String        @unique          // numéro de dossier (saisi ou repris du système de déclaration)
-  reference     String?                        // référence fournisseur (objet mail)
-  clientReference String?                      // V/Réf : référence / PO du client (reportée sur la facture)
-  transportRegistration String?                // immatriculation camion / n° conteneur (reporté sur la facture)
-  type          DossierType   @default(IMPORT)
-  paymentMode   PaymentMode   @default(WITH_PAYMENT)
+  id                    String         @id @default(cuid())
+  // multi-tenant : cabinet (organisation) propriétaire — nullable le temps de la fondation
+  orgId                 String?
+  organization          Organization?  @relation(fields: [orgId], references: [id], onDelete: SetNull)
+  number                String         @unique // numéro de dossier (saisi ou repris du système de déclaration)
+  reference             String? // référence fournisseur (objet mail)
+  clientReference       String? // V/Réf : référence / PO du client (reportée sur la facture)
+  transportRegistration String? // immatriculation camion / n° conteneur (reporté sur la facture)
+  type                  DossierType    @default(IMPORT)
+  paymentMode           PaymentMode    @default(WITH_PAYMENT)
   // mode de transport → détermine le titre de transport requis (BL / LTA / CMR)
-  transport     TransportMode?
-  status        DossierStatus @default(OUVERTURE)
+  transport             TransportMode?
+  status                DossierStatus  @default(OUVERTURE)
   // 2ᵉ statut parallèle « organismes de contrôle », en plus du statut douane
   // (un dossier peut être à une étape côté douane et une autre côté organismes).
-  secondaryStatus DossierStatus?
+  secondaryStatus       DossierStatus?
 
-  clientId      String
-  client        Client        @relation(fields: [clientId], references: [id])
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id])
 
-  supplierId    String?
-  supplier      Supplier?     @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  supplierId String?
+  supplier   Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
 
   // marchandise
-  goodsValue       Decimal? @db.Decimal(14, 2)
-  goodsCurrency    String?  @default("EUR")
-  goodsWeight      Decimal? @db.Decimal(12, 3)  // en kg
-  goodsPackages    Int?     // quantité
+  goodsValue         Decimal?      @db.Decimal(14, 2)
+  goodsCurrency      String?       @default("EUR")
+  goodsWeight        Decimal?      @db.Decimal(12, 3) // en kg
+  goodsPackages      Int? // quantité
   goodsPackagingUnit PackagingUnit @default(COLIS)
-  goodsDescription String?  @db.Text
+  goodsDescription   String?       @db.Text
 
   // dates clés
-  receivedAt           DateTime?  // date de réception du dossier
-  docsCompleteAt       DateTime?
-  bonADelivrerAt       DateTime?
-  declarationAt        DateTime?
-  visitDate                    DateTime?  // visite douane prévue
-  visitEffectiveDate           DateTime?  // visite douane effective
-  conformityVisitDate          DateTime?  // visite MCI prévue
-  conformityVisitEffectiveDate DateTime?  // visite MCI effective
+  receivedAt                   DateTime? // date de réception du dossier
+  docsCompleteAt               DateTime?
+  bonADelivrerAt               DateTime?
+  declarationAt                DateTime?
+  visitDate                    DateTime? // visite douane prévue
+  visitEffectiveDate           DateTime? // visite douane effective
+  conformityVisitDate          DateTime? // visite MCI prévue
+  conformityVisitEffectiveDate DateTime? // visite MCI effective
   liquidationAt                DateTime?
-  deliveredAt                  DateTime?  // date de livraison
+  deliveredAt                  DateTime? // date de livraison
   closedAt                     DateTime?
-  deletedAt                    DateTime?  // soft-delete (conservation des pièces)
+  deletedAt                    DateTime? // soft-delete (conservation des pièces)
 
   // destinataire des notifications pour CE dossier (mémorisé pour pré-sélection)
-  contactEmail    String?
+  contactEmail       String?
   // contrôle
-  controlOffice   String?      // bureau de contrôle (bureau douanier)
+  controlOffice      String? // bureau de contrôle (bureau douanier)
   // organisme de contrôle de conformité (1 seul) : Bureau Veritas, SGS, Applus (A+), TÜV Rheinland
-  controlOrganism String?
+  controlOrganism    String?
   // services réglementaires sectoriels selon le produit : ONSSA, ANRT, IMANOR, DMP (0..N)
-  regulatoryServices String[]  @default([])
-  hasVisit        Boolean      @default(false)
-  hasConformityVisit Boolean    @default(false)
-  hasBureauValeur Boolean      @default(false)
+  regulatoryServices String[] @default([])
+  hasVisit           Boolean  @default(false)
+  hasConformityVisit Boolean  @default(false)
+  hasBureauValeur    Boolean  @default(false)
 
   // drapeaux parallèles (cases à cocher multiples)
   billed                       Boolean @default(false)
@@ -333,22 +387,22 @@ model Dossier {
   customNote                   String? @db.Text
 
   // staff
-  createdById   String?
-  createdBy     User?    @relation("CreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
-  assignedToId  String?
-  assignedTo    User?    @relation("AssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdById  String?
+  createdBy    User?   @relation("CreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  assignedToId String?
+  assignedTo   User?   @relation("AssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
 
   // relations
-  dums            DUM[]
-  documents       Document[]
+  dums              DUM[]
+  documents         Document[]
   expectedDocuments ExpectedDocument[]
-  statusChanges   DossierStatusChange[]
-  comments        DossierComment[]
-  emails          EmailLink[]
-  notifications   Notification[]
-  invoiceItems    InvoiceItem[]
-  invoices        Invoice[]
-  outgoingMessages OutgoingMessage[]
+  statusChanges     DossierStatusChange[]
+  comments          DossierComment[]
+  emails            EmailLink[]
+  notifications     Notification[]
+  invoiceItems      InvoiceItem[]
+  invoices          Invoice[]
+  outgoingMessages  OutgoingMessage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -357,20 +411,21 @@ model Dossier {
   @@index([clientId])
   @@index([reference])
   @@index([number])
+  @@index([orgId])
 }
 
 model DossierStatusChange {
-  id          String        @id @default(cuid())
+  id          String         @id @default(cuid())
   dossierId   String
-  dossier     Dossier       @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  dossier     Dossier        @relation(fields: [dossierId], references: [id], onDelete: Cascade)
   fromStatus  DossierStatus?
   toStatus    DossierStatus
   // voie concernée : "DOUANE" (défaut) ou "CONTROLE" (organismes de contrôle)
-  track       String        @default("DOUANE")
-  note        String?       @db.Text
+  track       String         @default("DOUANE")
+  note        String?        @db.Text
   changedById String?
-  changedBy   User?         @relation(fields: [changedById], references: [id], onDelete: SetNull)
-  createdAt   DateTime      @default(now())
+  changedBy   User?          @relation(fields: [changedById], references: [id], onDelete: SetNull)
+  createdAt   DateTime       @default(now())
 
   @@index([dossierId])
 }
@@ -395,20 +450,20 @@ model DossierComment {
 
 enum DUMStatus {
   DRAFT
-  ENREGISTRE       // enregistré dans BADR
+  ENREGISTRE // enregistré dans BADR
   VALIDE
   LIQUIDE
   CLOTURE
 }
 
 model DUM {
-  id          String     @id @default(cuid())
-  number      String     @unique          // numéro DUM officiel
-  dossierId   String
-  dossier     Dossier    @relation(fields: [dossierId], references: [id], onDelete: Cascade)
-  status      DUMStatus  @default(DRAFT)
-  bureau      String?    // bureau douane
-  regime      String?    // régime douanier de la DUM (un dossier peut cumuler 2 régimes via 2 DUM)
+  id           String    @id @default(cuid())
+  number       String    @unique // numéro DUM officiel
+  dossierId    String
+  dossier      Dossier   @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  status       DUMStatus @default(DRAFT)
+  bureau       String? // bureau douane
+  regime       String? // régime douanier de la DUM (un dossier peut cumuler 2 régimes via 2 DUM)
   registeredAt DateTime?
   liquidatedAt DateTime?
 
@@ -417,14 +472,14 @@ model DUM {
   customsValue     Decimal?  @db.Decimal(14, 2) // valeur en douane (assiette des droits)
   estimatedDuties  Decimal?  @db.Decimal(12, 2) // droits & taxes estimés (avant validation BADR)
   liquidatedDuties Decimal?  @db.Decimal(12, 2) // droits & taxes liquidés par la douane
-  receiptNumber    String?   // n° de quittance / ticket de paiement douane
+  receiptNumber    String? // n° de quittance / ticket de paiement douane
   paidAt           DateTime? // date de paiement des droits & taxes
-  articleCount     Int?      // nombre d'articles de la déclaration (supplément feuillet du tarif syndical)
+  articleCount     Int? // nombre d'articles de la déclaration (supplément feuillet du tarif syndical)
 
-  notes       String?    @db.Text
+  notes String? @db.Text
 
   // une DUM peut référencer plusieurs documents
-  documents   Document[]
+  documents Document[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -443,10 +498,10 @@ enum DocumentCategory {
   FACTURE_ORIGINALE
   COLISAGE
   FACTURE_FRET
-  CONNAISSEMENT          // BL
-  LTA_ORIGINALE          // Lettre de Transport Aérien
-  CMR                    // Convention Marchandises Route
-  DMP                    // Déclaration mode paiement
+  CONNAISSEMENT // BL
+  LTA_ORIGINALE // Lettre de Transport Aérien
+  CMR // Convention Marchandises Route
+  DMP // Déclaration mode paiement
   ENGAGEMENT_IMPORTATION
   BON_A_DELIVRER
   CERTIFICAT_ORIGINE
@@ -474,51 +529,51 @@ enum DocumentCategory {
 // Documents qu'un déclarant identifie comme manquants à demander au client.
 // Indépendant des documents obligatoires standards. Visible par tous les rôles internes.
 model ExpectedDocument {
-  id            String           @id @default(cuid())
-  dossierId     String
-  dossier       Dossier          @relation(fields: [dossierId], references: [id], onDelete: Cascade)
-  category      DocumentCategory
-  name          String?          // nom libre, ex: "Certificat halal", "Licence import"
-  note          String?          @db.Text
-  fulfilledAt   DateTime?        // marqué comme reçu manuellement (sans upload)
+  id          String           @id @default(cuid())
+  dossierId   String
+  dossier     Dossier          @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  category    DocumentCategory
+  name        String? // nom libre, ex: "Certificat halal", "Licence import"
+  note        String?          @db.Text
+  fulfilledAt DateTime? // marqué comme reçu manuellement (sans upload)
 
   requestedById String?
-  requestedBy   User?            @relation("ExpectedDocumentsRequested", fields: [requestedById], references: [id], onDelete: SetNull)
+  requestedBy   User?   @relation("ExpectedDocumentsRequested", fields: [requestedById], references: [id], onDelete: SetNull)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?   // soft-delete
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // soft-delete
 
   @@index([dossierId])
   @@index([deletedAt])
 }
 
 model Document {
-  id          String           @id @default(cuid())
-  dossierId   String
-  dossier     Dossier          @relation(fields: [dossierId], references: [id], onDelete: Cascade)
-  dumId       String?
-  dum         DUM?             @relation(fields: [dumId], references: [id], onDelete: SetNull)
-  category    DocumentCategory
-  name        String
-  fileUrl     String?          // chemin local ou S3
-  fileSize    Int?
-  mimeType    String?
-  version     Int              @default(1)
+  id         String           @id @default(cuid())
+  dossierId  String
+  dossier    Dossier          @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  dumId      String?
+  dum        DUM?             @relation(fields: [dumId], references: [id], onDelete: SetNull)
+  category   DocumentCategory
+  name       String
+  fileUrl    String? // chemin local ou S3
+  fileSize   Int?
+  mimeType   String?
+  version    Int              @default(1)
   // si version > 1, remplace un document précédent
-  replacesId  String?          @unique
-  replaces    Document?        @relation("DocumentVersions", fields: [replacesId], references: [id], onDelete: SetNull)
-  replacedBy  Document?        @relation("DocumentVersions")
+  replacesId String?          @unique
+  replaces   Document?        @relation("DocumentVersions", fields: [replacesId], references: [id], onDelete: SetNull)
+  replacedBy Document?        @relation("DocumentVersions")
 
   uploadedById String?
-  uploadedBy   User?    @relation("UploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
+  uploadedBy   User?   @relation("UploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
 
   receivedAt DateTime @default(now())
   notes      String?  @db.Text
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?   // soft-delete
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // soft-delete
 
   @@index([dossierId, category])
   @@index([deletedAt])
@@ -544,16 +599,19 @@ enum EmailDirection {
 }
 
 model EmailAccount {
-  id            String   @id @default(cuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  provider      String   @default("gmail")  // gmail, outlook, imap
-  emailAddress  String
-  accessToken   String?  @db.Text
-  refreshToken  String?  @db.Text
+  id             String        @id @default(cuid())
+  // multi-tenant : cabinet (organisation) propriétaire — nullable le temps de la fondation
+  orgId          String?
+  organization   Organization? @relation(fields: [orgId], references: [id], onDelete: SetNull)
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider       String        @default("gmail") // gmail, outlook, imap
+  emailAddress   String
+  accessToken    String?       @db.Text
+  refreshToken   String?       @db.Text
   tokenExpiresAt DateTime?
-  historyId     String?  // dernier history Gmail synced
-  active        Boolean  @default(true)
+  historyId      String? // dernier history Gmail synced
+  active         Boolean       @default(true)
 
   messages EmailMessage[]
 
@@ -561,29 +619,30 @@ model EmailAccount {
   updatedAt DateTime @updatedAt
 
   @@unique([emailAddress])
+  @@index([orgId])
 }
 
 model EmailMessage {
-  id           String         @id @default(cuid())
-  accountId    String
-  account      EmailAccount   @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  externalId   String         // gmail id
-  threadId     String?
-  direction    EmailDirection @default(INCOMING)
-  fromAddress  String
-  fromName     String?
-  toAddresses  String[]       // array
-  cc           String[]
-  subject      String?
-  snippet      String?        @db.Text
-  bodyText     String?        @db.Text
-  bodyHtml     String?        @db.Text
-  receivedAt   DateTime
-  source       EmailSource    @default(AUTRE)
+  id          String         @id @default(cuid())
+  accountId   String
+  account     EmailAccount   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  externalId  String // gmail id
+  threadId    String?
+  direction   EmailDirection @default(INCOMING)
+  fromAddress String
+  fromName    String?
+  toAddresses String[] // array
+  cc          String[]
+  subject     String?
+  snippet     String?        @db.Text
+  bodyText    String?        @db.Text
+  bodyHtml    String?        @db.Text
+  receivedAt  DateTime
+  source      EmailSource    @default(AUTRE)
   // classification IA
-  category     String?
-  isRead       Boolean        @default(false)
-  isImportant  Boolean        @default(false)
+  category    String?
+  isRead      Boolean        @default(false)
+  isImportant Boolean        @default(false)
 
   attachments EmailAttachment[]
   links       EmailLink[]
@@ -596,27 +655,27 @@ model EmailMessage {
 }
 
 model EmailAttachment {
-  id         String        @id @default(cuid())
-  messageId  String
-  message    EmailMessage  @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  filename   String
-  mimeType   String?
-  size       Int?
-  fileUrl    String?
+  id        String       @id @default(cuid())
+  messageId String
+  message   EmailMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  filename  String
+  mimeType  String?
+  size      Int?
+  fileUrl   String?
 
   createdAt DateTime @default(now())
 }
 
 // lien email <-> dossier (auto par DUM number ou reference)
 model EmailLink {
-  id        String        @id @default(cuid())
+  id        String       @id @default(cuid())
   messageId String
-  message   EmailMessage  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  message   EmailMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
   dossierId String
-  dossier   Dossier       @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  dossier   Dossier      @relation(fields: [dossierId], references: [id], onDelete: Cascade)
   // automatique ou manuel
-  auto      Boolean       @default(true)
-  matchedOn String?       // "DUM:1234567" ou "REF:ABC"
+  auto      Boolean      @default(true)
+  matchedOn String? // "DUM:1234567" ou "REF:ABC"
 
   createdAt DateTime @default(now())
 
@@ -637,27 +696,30 @@ enum NotificationKind {
   SUIVI_LIQUIDATION
   STATUS_CHANGE
   EMAIL_NEW
-  CLIENT_INFO          // notification à envoyer au client
-  CLIENT_DOC_UPLOAD    // le client a déposé un document via le portail
-  CLIENT_NEW_DOSSIER   // le client a ouvert un nouveau dossier via le portail
+  CLIENT_INFO // notification à envoyer au client
+  CLIENT_DOC_UPLOAD // le client a déposé un document via le portail
+  CLIENT_NEW_DOSSIER // le client a ouvert un nouveau dossier via le portail
   AUTRE
 }
 
 model Notification {
-  id        String           @id @default(cuid())
-  userId    String?
-  user      User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String           @id @default(cuid())
+  // multi-tenant : cabinet (organisation) propriétaire — nullable le temps de la fondation
+  orgId        String?
+  organization Organization?    @relation(fields: [orgId], references: [id], onDelete: SetNull)
+  userId       String?
+  user         User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
   // ou diffusion à un rôle
-  role      UserRole?
-  dossierId String?
-  dossier   Dossier?         @relation(fields: [dossierId], references: [id], onDelete: Cascade)
-  kind      NotificationKind
-  title     String
-  body      String?          @db.Text
-  link      String?
-  read      Boolean          @default(false)
+  role         UserRole?
+  dossierId    String?
+  dossier      Dossier?         @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  kind         NotificationKind
+  title        String
+  body         String?          @db.Text
+  link         String?
+  read         Boolean          @default(false)
   // envoyé au client par mail ?
-  emailSent Boolean          @default(false)
+  emailSent    Boolean          @default(false)
 
   receipts NotificationReceipt[]
 
@@ -665,6 +727,7 @@ model Notification {
 
   @@index([userId, read])
   @@index([role, read])
+  @@index([orgId])
 }
 
 // Accusé de lecture par utilisateur — permet aux notifications de RÔLE d'être
@@ -683,7 +746,7 @@ model NotificationReceipt {
 
 // Compteur de rate-limiting (login/forgot/reset) — fenêtre glissante simple en DB.
 model RateLimit {
-  key     String   @id          // ex: "login:ip:1.2.3.4" ou "forgot:email@x.ma"
+  key     String   @id // ex: "login:ip:1.2.3.4" ou "forgot:email@x.ma"
   count   Int      @default(0)
   resetAt DateTime
 }
@@ -706,8 +769,8 @@ enum InvoiceStatus {
 }
 
 enum InvoiceItemKind {
-  HONORAIRE       // honoraires soumis à TVA (20% au Maroc)
-  DEBOURS         // débours sans TVA (avance de frais douane, fret, etc.)
+  HONORAIRE // honoraires soumis à TVA (20% au Maroc)
+  DEBOURS // débours sans TVA (avance de frais douane, fret, etc.)
   AUTRE
 }
 
@@ -721,42 +784,46 @@ enum PaymentMethod {
 }
 
 model Invoice {
-  id            String         @id @default(cuid())
-  number        String         @unique           // ex: F-2026-0001
-  year          Int                              // pour numérotation annuelle
-  sequence      Int                              // séquence dans l'année
+  id           String        @id @default(cuid())
+  // multi-tenant : cabinet (organisation) propriétaire — nullable le temps de la fondation
+  orgId        String?
+  organization Organization? @relation(fields: [orgId], references: [id], onDelete: SetNull)
+  number       String        @unique // ex: F-2026-0001
+  year         Int // pour numérotation annuelle
+  sequence     Int // séquence dans l'année
 
-  clientId      String
-  client        Client         @relation(fields: [clientId], references: [id])
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id])
 
   // dossier de référence (bloc en-tête de la facture)
-  dossierId     String?
-  dossier       Dossier?       @relation(fields: [dossierId], references: [id], onDelete: SetNull)
+  dossierId String?
+  dossier   Dossier? @relation(fields: [dossierId], references: [id], onDelete: SetNull)
 
-  status        InvoiceStatus  @default(DRAFT)
+  status InvoiceStatus @default(DRAFT)
 
-  issuedAt      DateTime?
-  dueAt         DateTime?
-  paidAt        DateTime?
-  paidAmount    Decimal        @default(0) @db.Decimal(12, 2)
+  issuedAt   DateTime?
+  dueAt      DateTime?
+  paidAt     DateTime?
+  paidAmount Decimal   @default(0) @db.Decimal(12, 2)
 
-  notes         String?        @db.Text
+  notes          String?        @db.Text
   termsOfPayment String?
-  paymentMethod PaymentMethod?
-  paymentRef    String?
+  paymentMethod  PaymentMethod?
+  paymentRef     String?
 
-  items         InvoiceItem[]
-  creditNotes   CreditNote[]
+  items       InvoiceItem[]
+  creditNotes CreditNote[]
 
-  createdById   String?
-  createdBy     User?          @relation("InvoicesCreated", fields: [createdById], references: [id], onDelete: SetNull)
+  createdById String?
+  createdBy   User?   @relation("InvoicesCreated", fields: [createdById], references: [id], onDelete: SetNull)
 
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([year, sequence])
   @@index([clientId, status])
   @@index([status])
+  @@index([orgId])
 }
 
 model InvoiceItem {
@@ -768,7 +835,7 @@ model InvoiceItem {
   quantity    Decimal         @default(1) @db.Decimal(10, 2)
   unitPrice   Decimal         @db.Decimal(12, 2)
   vatRate     Decimal         @default(20) @db.Decimal(5, 2)
-  code        String?         // code de ligne (ex. D234, D0270, V002)
+  code        String? // code de ligne (ex. D234, D0270, V002)
   dossierId   String?
   dossier     Dossier?        @relation(fields: [dossierId], references: [id], onDelete: SetNull)
   order       Int             @default(0)
@@ -778,30 +845,34 @@ model InvoiceItem {
 }
 
 enum CreditNoteStatus {
-  ISSUED    // émis
-  APPLIED   // imputé / utilisé
+  ISSUED // émis
+  APPLIED // imputé / utilisé
   CANCELLED // annulé
 }
 
 // Avoir (note de crédit) rattaché à une facture. Numérotation propre AV{AA}{NNNN}.
 model CreditNote {
-  id          String           @id @default(cuid())
-  number      String           @unique // ex: AV260001
-  year        Int
-  sequence    Int
-  invoiceId   String
-  invoice     Invoice          @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  amount      Decimal          @db.Decimal(12, 2)
-  reason      String?          @db.Text
-  status      CreditNoteStatus @default(ISSUED)
-  createdById String?          // auteur (id brut, sans relation, pour limiter le couplage)
-  issuedAt    DateTime?        @default(now())
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  deletedAt   DateTime?
+  id           String           @id @default(cuid())
+  // multi-tenant : cabinet (organisation) propriétaire — nullable le temps de la fondation
+  orgId        String?
+  organization Organization?    @relation(fields: [orgId], references: [id], onDelete: SetNull)
+  number       String           @unique // ex: AV260001
+  year         Int
+  sequence     Int
+  invoiceId    String
+  invoice      Invoice          @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount       Decimal          @db.Decimal(12, 2)
+  reason       String?          @db.Text
+  status       CreditNoteStatus @default(ISSUED)
+  createdById  String? // auteur (id brut, sans relation, pour limiter le couplage)
+  issuedAt     DateTime?        @default(now())
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  deletedAt    DateTime?
 
   @@unique([year, sequence])
   @@index([invoiceId])
+  @@index([orgId])
 }
 
 // ============================================================
@@ -820,48 +891,56 @@ enum MessageLang {
 }
 
 model MessageTemplate {
-  id        String          @id @default(cuid())
-  key       String                                // ex: "docs_manquants", "bae_pret", "fiche_liquidation"
-  channel   MessageChannel
-  lang      MessageLang     @default(FR)
-  subject   String?                               // email uniquement
-  body      String          @db.Text              // peut contenir {{client.name}}, {{dossier.number}}, etc.
-  active    Boolean         @default(true)
-  notes     String?         @db.Text
+  id           String         @id @default(cuid())
+  // multi-tenant : cabinet (organisation) propriétaire — nullable le temps de la fondation
+  orgId        String?
+  organization Organization?  @relation(fields: [orgId], references: [id], onDelete: SetNull)
+  key          String // ex: "docs_manquants", "bae_pret", "fiche_liquidation"
+  channel      MessageChannel
+  lang         MessageLang    @default(FR)
+  subject      String? // email uniquement
+  body         String         @db.Text // peut contenir {{client.name}}, {{dossier.number}}, etc.
+  active       Boolean        @default(true)
+  notes        String?        @db.Text
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?   // soft-delete
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // soft-delete
 
   @@unique([key, channel, lang])
   @@index([deletedAt])
+  @@index([orgId])
 }
 
 model OutgoingMessage {
-  id          String         @id @default(cuid())
-  channel     MessageChannel
-  lang        MessageLang
-  templateKey String?
-  toAddress   String                             // email ou +212XXXXXXXXX
-  subject     String?
-  body        String         @db.Text
-  status      String         @default("PENDING") // PENDING, SENT, FAILED, DELIVERED, READ
-  error       String?        @db.Text
-  externalId  String?                            // ID Meta/SMTP
+  id           String         @id @default(cuid())
+  // multi-tenant : cabinet (organisation) propriétaire — nullable le temps de la fondation
+  orgId        String?
+  organization Organization?  @relation(fields: [orgId], references: [id], onDelete: SetNull)
+  channel      MessageChannel
+  lang         MessageLang
+  templateKey  String?
+  toAddress    String // email ou +212XXXXXXXXX
+  subject      String?
+  body         String         @db.Text
+  status       String         @default("PENDING") // PENDING, SENT, FAILED, DELIVERED, READ
+  error        String?        @db.Text
+  externalId   String? // ID Meta/SMTP
 
-  dossierId   String?
-  dossier     Dossier?       @relation(fields: [dossierId], references: [id], onDelete: SetNull)
-  clientId    String?
-  client      Client?        @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  sentById    String?
-  sentBy      User?          @relation("MessagesSent", fields: [sentById], references: [id], onDelete: SetNull)
+  dossierId String?
+  dossier   Dossier? @relation(fields: [dossierId], references: [id], onDelete: SetNull)
+  clientId  String?
+  client    Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  sentById  String?
+  sentBy    User?    @relation("MessagesSent", fields: [sentById], references: [id], onDelete: SetNull)
 
-  sentAt      DateTime?
-  createdAt   DateTime       @default(now())
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
 
   @@index([dossierId])
   @@index([clientId])
   @@index([channel, status])
+  @@index([orgId])
 }
 
 // ============================================================
@@ -872,34 +951,37 @@ model OutgoingMessage {
 // Permet à l'admin de configurer SMTP/S3 depuis l'interface
 // sans toucher au .env / sans redéploiement.
 model AppSetting {
-  id              Int      @id @default(1)
+  id           Int           @id @default(1)
+  // multi-tenant : cabinet (organisation) propriétaire — nullable le temps de la fondation
+  orgId        String?
+  organization Organization? @relation(fields: [orgId], references: [id], onDelete: SetNull)
 
   // ─── SMTP (emails sortants vers clients) ─────────────────
-  smtpHost        String?
-  smtpPort        Int?     @default(587)
-  smtpUser        String?
-  smtpPass        String?      // ⚠ stocké en clair — DB Supabase privée
-  smtpFrom        String?
-  smtpSecure      Boolean      @default(false)
+  smtpHost   String?
+  smtpPort   Int?    @default(587)
+  smtpUser   String?
+  smtpPass   String? // ⚠ stocké en clair — DB Supabase privée
+  smtpFrom   String?
+  smtpSecure Boolean @default(false)
 
   // ─── WhatsApp (OpenWA / WAHA — notifications sortantes) ───
-  waApiUrl        String?      // base de l'API, ex. http://host:2785
-  waApiKey        String?      // clé X-API-Key (chiffrée via encryptSecret)
-  waSession       String?  @default("default") // nom de session WhatsApp
+  waApiUrl  String? // base de l'API, ex. http://host:2785
+  waApiKey  String? // clé X-API-Key (chiffrée via encryptSecret)
+  waSession String? @default("default") // nom de session WhatsApp
 
   // ─── Stockage fichiers ───────────────────────────────────
-  storageDriver   String   @default("local")     // "local" | "s3"
+  storageDriver   String  @default("local") // "local" | "s3"
   s3Endpoint      String?
   s3Region        String?
   s3Bucket        String?
   s3AccessKeyId   String?
-  s3SecretKey     String?      // ⚠ stocké en clair
+  s3SecretKey     String? // ⚠ stocké en clair
   s3PublicBaseUrl String?
 
   // ─── Facturation ─────────────────────────────────────────
   // Numéro de reprise de la série FA (démarrage de l'outil).
-  invoiceSeqYear  Int?         // année concernée (ex. 2026)
-  invoiceSeqFloor Int?         // prochaine séquence à utiliser (ex. 1242)
+  invoiceSeqYear  Int? // année concernée (ex. 2026)
+  invoiceSeqFloor Int? // prochaine séquence à utiliser (ex. 1242)
 
   // ─── Émetteur de facture (coordonnées légales) — éditables sans redéploiement ───
   issuerName      String?
@@ -917,9 +999,11 @@ model AppSetting {
   issuerRib       String?
   issuerSwift     String?
 
-  updatedAt       DateTime @updatedAt
-  updatedById     String?
-  updatedBy       User?    @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+  updatedById String?
+  updatedBy   User?    @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([orgId])
 }
 
 // ============================================================
@@ -927,18 +1011,22 @@ model AppSetting {
 // ============================================================
 
 model AuditLog {
-  id        String   @id @default(cuid())
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  action    String   // CREATE_DOSSIER, UPDATE_STATUS, ...
-  entity    String   // Dossier, DUM, Document, ...
-  entityId  String?
-  metadata  Json?
-  ip        String?
-  userAgent String?
+  id           String        @id @default(cuid())
+  // multi-tenant : cabinet (organisation) propriétaire — nullable le temps de la fondation
+  orgId        String?
+  organization Organization? @relation(fields: [orgId], references: [id], onDelete: SetNull)
+  userId       String?
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action       String // CREATE_DOSSIER, UPDATE_STATUS, ...
+  entity       String // Dossier, DUM, Document, ...
+  entityId     String?
+  metadata     Json?
+  ip           String?
+  userAgent    String?
 
   createdAt DateTime @default(now())
 
   @@index([userId])
   @@index([entity, entityId])
+  @@index([orgId])
 }

@@ -31,6 +31,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: user.name,
           role: user.role,
           clientId: user.clientId,
+          orgId: user.orgId,
           image: user.image,
           tokenVersion: user.tokenVersion,
         };
@@ -44,16 +45,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        const u = user as { role: UserRole; clientId?: string | null; tokenVersion?: number };
+        const u = user as { role: UserRole; clientId?: string | null; orgId?: string | null; tokenVersion?: number };
         (token as Record<string, unknown>).role = u.role;
         (token as Record<string, unknown>).clientId = u.clientId;
+        (token as Record<string, unknown>).orgId = u.orgId;
         (token as Record<string, unknown>).tv = u.tokenVersion ?? 0;
         return token;
       }
       if (token.sub) {
         const db = await prisma.user.findUnique({
           where: { id: token.sub },
-          select: { active: true, role: true, clientId: true, tokenVersion: true },
+          select: { active: true, role: true, clientId: true, orgId: true, tokenVersion: true },
         });
         if (!db || !db.active) return null; // compte supprimé/désactivé
         // tokenVersion : n'invalide que les jetons qui en portent un (évite la
@@ -62,6 +64,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (typeof tv === "number" && db.tokenVersion !== tv) return null;
         (token as Record<string, unknown>).role = db.role;
         (token as Record<string, unknown>).clientId = db.clientId;
+        (token as Record<string, unknown>).orgId = db.orgId;
       }
       return token;
     },
@@ -70,6 +73,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.sub;
         session.user.role = (token as { role: UserRole }).role;
         session.user.clientId = (token as { clientId?: string | null }).clientId;
+        session.user.orgId = (token as { orgId?: string | null }).orgId;
       }
       return session;
     },

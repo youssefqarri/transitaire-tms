@@ -9,12 +9,14 @@ declare module "next-auth" {
       name: string;
       role: UserRole;
       clientId?: string | null;
+      orgId?: string | null;
       image?: string | null;
     };
   }
   interface User {
     role: UserRole;
     clientId?: string | null;
+    orgId?: string | null;
     tokenVersion?: number;
   }
 }
@@ -32,6 +34,7 @@ export const authConfig: NextAuthConfig = {
       if (user) {
         (token as Record<string, unknown>).role = user.role;
         (token as Record<string, unknown>).clientId = user.clientId;
+        (token as Record<string, unknown>).orgId = user.orgId;
       }
       return token;
     },
@@ -40,6 +43,7 @@ export const authConfig: NextAuthConfig = {
         session.user.id = token.sub;
         session.user.role = (token as { role: UserRole }).role;
         session.user.clientId = (token as { clientId?: string | null }).clientId;
+        session.user.orgId = (token as { orgId?: string | null }).orgId;
       }
       return session;
     },

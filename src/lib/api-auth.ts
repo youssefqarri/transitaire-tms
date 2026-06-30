@@ -10,6 +10,7 @@ export type AuthContext = {
   name: string;
   role: UserRole;
   clientId: string | null;
+  orgId: string | null;
   via: "session" | "token";
 };
 
@@ -49,6 +50,7 @@ export async function authenticate(req?: Request): Promise<AuthContext | null> {
             name: cand.user.name,
             role: cand.user.role,
             clientId: cand.user.clientId,
+            orgId: cand.user.orgId,
             via: "token",
           };
         }
@@ -64,6 +66,7 @@ export async function authenticate(req?: Request): Promise<AuthContext | null> {
       name: session.user.name,
       role: session.user.role,
       clientId: session.user.clientId ?? null,
+      orgId: session.user.orgId ?? null,
       via: "session",
     };
   }
