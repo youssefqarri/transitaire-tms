@@ -3,6 +3,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
+import { orgScope, orgData } from "@/lib/tenant";
 import { nextProvisionalDossierNumber } from "@/lib/dossier-numbering";
 
 const createSchema = z.object({
@@ -32,25 +33,28 @@ export async function POST(req: Request) {
   }
   const data = parsed.data;
 
+  const orgId = session.user.orgId;
+
   // Fournisseur : si renseigné, on tente de le trouver/créer
   let supplierId: string | null = null;
   if (data.supplierName?.trim()) {
     const name = data.supplierName.trim();
-    const existing = await prisma.supplier.findFirst({ where: { name } });
+    const existing = await prisma.supplier.findFirst({ where: { ...orgScope(orgId), name } });
     if (existing) {
       supplierId = existing.id;
     } else {
-      const created = await prisma.supplier.create({ data: { name } });
+      const created = await prisma.supplier.create({ data: { ...orgData(orgId), name } });
       supplierId = created.id;
     }
   }
 
-  let number = await nextProvisionalDossierNumber();
+  let number = await nextProvisionalDossierNumber(undefined, orgId);
 
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
       const dossier = await prisma.dossier.create({
         data: {
+          ...orgData(orgId),
           number,
           reference: data.reference?.trim() || null,
           type: data.type,
@@ -76,14 +80,15 @@ export async function POST(req: Request) {
       });
 
       // Notification interne (Admin + Exploitation + Déclarant + Bureau)
-      const client = await prisma.client.findUnique({
-        where: { id: session.user.clientId },
+      const client = await prisma.client.findFirst({
+        where: { ...orgScope(orgId), id: session.user.clientId },
         select: { name: true },
       });
       const title = `Nouveau dossier — ${client?.name ?? "client"}`;
       const body = `${client?.name ?? "Le client"} vient d'ouvrir le dossier ${dossier.number}${data.reference ? ` (réf. ${data.reference})` : ""}.`;
       await prisma.notification.createMany({
         data: (["ADMIN", "EXPLOITATION", "DECLARANT", "BUREAU"] as const).map((role) => ({
+          ...orgData(orgId),
           role,
           dossierId: dossier.id,
           kind: "CLIENT_NEW_DOSSIER",
@@ -99,13 +104,14 @@ export async function POST(req: Request) {
         entity: "Dossier",
         entityId: dossier.id,
         metadata: { number: dossier.number, reference: data.reference },
+        orgId,
       });
 
       return NextResponse.json({ id: dossier.id, number: dossier.number });
     } catch (e: unknown) {
       const err = e as { code?: string; message?: string };
       if (err.code === "P2002") {
-        number = await nextProvisionalDossierNumber();
+        number = await nextProvisionalDossierNumber(undefined, orgId);
         continue;
       }
       return NextResponse.json({ error: err.message || "Erreur" }, { status: 500 });

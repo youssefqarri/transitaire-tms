@@ -4,15 +4,18 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { Footer } from "@/components/layout/footer";
 import { prisma } from "@/lib/db";
+import { orgScope } from "@/lib/tenant";
 import { TooltipProvider } from "@/components/ui/tooltip-provider";
 
 export default async function InternalLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session) redirect("/login");
   if (session.user.role === "CLIENT") redirect("/portail");
+  const orgId = session.user.orgId;
 
   const unreadCount = await prisma.notification.count({
     where: {
+      ...orgScope(orgId),
       read: false,
       OR: [{ userId: session.user.id }, { role: session.user.role }],
     },

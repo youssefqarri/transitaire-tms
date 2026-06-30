@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canManageRegistry } from "@/lib/roles";
 import { audit } from "@/lib/audit";
+import { orgScope } from "@/lib/tenant";
 
 const patchSchema = z.object({
   name: z.string().min(1).optional(),
@@ -28,6 +29,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     data[k] = typeof v === "string" ? (v.trim() || null) : v;
   }
 
+  // Isolation multi-tenant : ne modifier qu'un fournisseur de son org (no-op mono-tenant).
+  const owned = await prisma.supplier.findFirst({
+    where: { id, ...orgScope(session.user.orgId) },
+    select: { id: true },
+  });
+  if (!owned) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   try {
     const s = await prisma.supplier.update({ where: { id }, data });
     await audit({
@@ -35,6 +43,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       action: "UPDATE_SUPPLIER",
       entity: "Supplier",
       entityId: id,
+      orgId: session.user.orgId,
     });
     return NextResponse.json(s);
   } catch (e: unknown) {

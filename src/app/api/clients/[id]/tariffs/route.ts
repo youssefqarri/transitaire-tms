@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canManageInvoices, canViewInvoices } from "@/lib/roles";
 import { audit } from "@/lib/audit";
+import { orgScope } from "@/lib/tenant";
 
 const itemSchema = z.object({
   kind: z.enum(["HONORAIRE", "DEBOURS", "AUTRE"]).default("HONORAIRE"),
@@ -21,6 +22,13 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const session = await auth();
   if (!session || !canViewInvoices(session.user.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  // Isolation multi-tenant : le client (parent) doit appartenir à l'org (no-op mono-tenant).
+  const owned = await prisma.client.findFirst({
+    where: { id, ...orgScope(session.user.orgId) },
+    select: { id: true },
+  });
+  if (!owned) return NextResponse.json({ items: [] });
 
   const rows = await prisma.clientTariff.findMany({
     where: { clientId: id },
@@ -44,7 +52,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   if (!session || !canManageInvoices(session.user.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const client = await prisma.client.findFirst({ where: { id, deletedAt: null } });
+  const client = await prisma.client.findFirst({ where: { ...orgScope(session.user.orgId), id, deletedAt: null } });
   if (!client) return NextResponse.json({ error: "Client introuvable" }, { status: 404 });
 
   const parsed = schema.safeParse(await req.json().catch(() => null));
@@ -72,6 +80,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     entity: "Client",
     entityId: id,
     metadata: { count: parsed.data.items.length },
+    orgId: session.user.orgId,
   });
 
   return NextResponse.json({ ok: true, count: parsed.data.items.length });

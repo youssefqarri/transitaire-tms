@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
+import { orgScope, orgData } from "@/lib/tenant";
 import { storage } from "@/lib/storage";
 import { validateUpload } from "@/lib/uploads";
 import { isClientUploadableCategory } from "@/lib/statuses";
@@ -15,9 +16,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (session.user.role !== "CLIENT" || !session.user.clientId)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+  const orgId = session.user.orgId;
+
   // Vérifie que le dossier appartient bien au client connecté
   const dossier = await prisma.dossier.findFirst({
-    where: { deletedAt: null, id, clientId: session.user.clientId },
+    where: { ...orgScope(orgId), deletedAt: null, id, clientId: session.user.clientId },
     select: { id: true, number: true, clientId: true },
   });
   if (!dossier) return NextResponse.json({ error: "Dossier introuvable" }, { status: 404 });
@@ -77,6 +80,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const body = `Le client a déposé : ${name}`;
   await prisma.notification.createMany({
     data: (["ADMIN", "EXPLOITATION", "DECLARANT", "BUREAU"] as const).map((role) => ({
+      ...orgData(orgId),
       role,
       dossierId: id,
       kind: "CLIENT_DOC_UPLOAD",
@@ -92,6 +96,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     entity: "Document",
     entityId: doc.id,
     metadata: { name, category, dossierId: id, fileKey: storedKey },
+    orgId,
   });
 
   return NextResponse.json(doc);

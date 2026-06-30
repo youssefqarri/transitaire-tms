@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Truck, Pencil } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { orgScope } from "@/lib/tenant";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
@@ -22,8 +23,8 @@ export default async function SupplierDetailPage({
   const session = await auth();
   if (!session) return null;
 
-  const supplier = await prisma.supplier.findUnique({
-    where: { id },
+  const supplier = await prisma.supplier.findFirst({
+    where: { ...orgScope(session.user.orgId), id },
     include: {
       dossiers: {
         where: { deletedAt: null },

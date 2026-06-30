@@ -27,7 +27,7 @@ export default async function RecherchePage({
   if (!session || session.user.role === "CLIENT") redirect("/dashboard");
   const params = await searchParams;
   const q = (params.q ?? "").trim();
-  const groups = q.length >= 2 ? await searchAll(q, 25) : [];
+  const groups = q.length >= 2 ? await searchAll(q, 25, session.user.orgId) : [];
   const total = groups.reduce((n, g) => n + g.total, 0);
 
   return (

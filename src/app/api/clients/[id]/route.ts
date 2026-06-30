@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canManageRegistry } from "@/lib/roles";
 import { audit } from "@/lib/audit";
+import { orgScope } from "@/lib/tenant";
 
 const patchSchema = z.object({
   name: z.string().min(1).optional(),
@@ -39,6 +40,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "Nom requis" }, { status: 400 });
   }
 
+  // Isolation multi-tenant : ne modifier qu'un client de son org (no-op mono-tenant).
+  const owned = await prisma.client.findFirst({
+    where: { id, ...orgScope(session.user.orgId) },
+    select: { id: true },
+  });
+  if (!owned) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   try {
     const c = await prisma.client.update({ where: { id }, data });
     await audit({
@@ -47,6 +55,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       entity: "Client",
       entityId: id,
       metadata: { fields: Object.keys(data) },
+      orgId: session.user.orgId,
     });
     return NextResponse.json(c);
   } catch (e: unknown) {
@@ -63,8 +72,8 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   if (!session || !canManageRegistry(session.user.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const client = await prisma.client.findUnique({
-    where: { id },
+  const client = await prisma.client.findFirst({
+    where: { id, ...orgScope(session.user.orgId) },
     include: { _count: { select: { dossiers: { where: { deletedAt: null } } } } },
   });
   if (!client) return NextResponse.json({ error: "Client introuvable" }, { status: 404 });
@@ -87,6 +96,7 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     entity: "Client",
     entityId: id,
     metadata: { name: client.name },
+    orgId: session.user.orgId,
   });
   return NextResponse.json({ ok: true });
 }

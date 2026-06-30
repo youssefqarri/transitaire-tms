@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { orgScope } from "@/lib/tenant";
 import { canViewInvoices } from "@/lib/roles";
 import {
   PAYMENT_METHOD_LABELS,
@@ -33,8 +34,8 @@ export default async function InvoicePrintPage({
   if (!session) return null;
   if (!canViewInvoices(session.user.role)) redirect("/dashboard");
 
-  const invoice = await prisma.invoice.findUnique({
-    where: { id },
+  const invoice = await prisma.invoice.findFirst({
+    where: { ...orgScope(session.user.orgId), id },
     include: {
       client: true,
       items: { orderBy: { order: "asc" } },

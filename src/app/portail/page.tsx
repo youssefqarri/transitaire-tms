@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Folder, ChevronRight, Plus } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { orgScope } from "@/lib/tenant";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
@@ -25,6 +26,7 @@ export default async function PortalHomePage({
   if (!session?.user.clientId) return null;
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
   const where = {
+    ...orgScope(session.user.orgId),
     deletedAt: null,
     clientId: session.user.clientId,
     // les dossiers clôturés / annulés ne sont plus affichés au client

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { orgScope } from "@/lib/tenant";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -15,10 +16,11 @@ export default async function CorbeillePage() {
   const session = await auth();
   if (!session || session.user.role !== "ADMIN") redirect("/dashboard");
 
+  const orgId = session.user.orgId;
   const del = { deletedAt: { not: null } } as const;
   const [dossiers, clients, documents, contacts] = await Promise.all([
-    prisma.dossier.findMany({ where: del, orderBy: { deletedAt: "desc" }, take: 100, select: { id: true, number: true, deletedAt: true } }),
-    prisma.client.findMany({ where: del, orderBy: { deletedAt: "desc" }, take: 100, select: { id: true, name: true, deletedAt: true } }),
+    prisma.dossier.findMany({ where: { ...orgScope(orgId), ...del }, orderBy: { deletedAt: "desc" }, take: 100, select: { id: true, number: true, deletedAt: true } }),
+    prisma.client.findMany({ where: { ...orgScope(orgId), ...del }, orderBy: { deletedAt: "desc" }, take: 100, select: { id: true, name: true, deletedAt: true } }),
     prisma.document.findMany({ where: del, orderBy: { deletedAt: "desc" }, take: 100, select: { id: true, name: true, category: true, deletedAt: true } }),
     prisma.clientContact.findMany({ where: del, orderBy: { deletedAt: "desc" }, take: 100, select: { id: true, name: true, email: true, deletedAt: true } }),
   ]);

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ROLE_LABELS, ROLE_TONE } from "@/lib/roles";
 import { ChangePasswordForm } from "./change-password-form";
 import { prisma } from "@/lib/db";
+import { orgScope } from "@/lib/tenant";
 import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -14,8 +15,8 @@ export default async function ProfilePage() {
   const session = await auth();
   if (!session) redirect("/login");
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+  const user = await prisma.user.findFirst({
+    where: { ...orgScope(session.user.orgId), id: session.user.id },
     include: { client: { select: { name: true } } },
   });
   if (!user) redirect("/login");

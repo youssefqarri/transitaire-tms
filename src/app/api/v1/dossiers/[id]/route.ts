@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { authenticate, resolveDossierForCtx } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
+import { orgScope } from "@/lib/tenant";
 import { isClientVisibleCategory } from "@/lib/statuses";
 
 // GET /api/v1/dossiers/:id
@@ -15,8 +16,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const isClient = ctx.role === "CLIENT";
 
-  const dossier = await prisma.dossier.findUnique({
-    where: { id: access.id },
+  const dossier = await prisma.dossier.findFirst({
+    where: { ...orgScope(ctx.orgId), id: access.id },
     include: {
       // Un CLIENT ne voit que des coordonnées limitées (pas ICE/RC/IF/notes du portefeuille)
       client: isClient

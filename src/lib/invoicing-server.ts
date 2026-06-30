@@ -1,6 +1,7 @@
 import "server-only";
 import { prisma } from "./db";
 import { getSettings } from "./settings";
+import { orgScope } from "./tenant";
 import { ISSUER, type Issuer } from "./invoicing";
 
 /**
@@ -38,13 +39,16 @@ export async function getIssuer(): Promise<Issuer> {
  * première facture avec la séquence voulue ou ajuster la séquence de départ en base ;
  * la comptable doit confirmer le numéro de reprise.
  */
-export async function nextInvoiceNumber(year = new Date().getFullYear()): Promise<{
+export async function nextInvoiceNumber(
+  year = new Date().getFullYear(),
+  orgId?: string | null,
+): Promise<{
   year: number;
   sequence: number;
   number: string;
 }> {
   const last = await prisma.invoice.findFirst({
-    where: { year },
+    where: { ...orgScope(orgId), year },
     orderBy: { sequence: "desc" },
     select: { sequence: true },
   });
@@ -61,13 +65,16 @@ export async function nextInvoiceNumber(year = new Date().getFullYear()): Promis
  * Prochain numéro d'avoir (note de crédit). Format : AV{AA}{NNNN}.
  * Séquence propre par année, atomique via @@unique([year, sequence]) sur CreditNote.
  */
-export async function nextCreditNoteNumber(year = new Date().getFullYear()): Promise<{
+export async function nextCreditNoteNumber(
+  year = new Date().getFullYear(),
+  orgId?: string | null,
+): Promise<{
   year: number;
   sequence: number;
   number: string;
 }> {
   const last = await prisma.creditNote.findFirst({
-    where: { year },
+    where: { ...orgScope(orgId), year },
     orderBy: { sequence: "desc" },
     select: { sequence: true },
   });

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Inbox } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { orgScope } from "@/lib/tenant";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
@@ -68,7 +69,7 @@ export default async function EmailsPage({
     }),
   ]);
 
-  const account = await prisma.emailAccount.findFirst({ where: { active: true } });
+  const account = await prisma.emailAccount.findFirst({ where: { ...orgScope(session.user.orgId), active: true } });
 
   return (
     <div className="space-y-6 animate-fade-in">

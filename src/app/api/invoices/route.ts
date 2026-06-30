@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { canManageInvoices } from "@/lib/roles";
+import { orgData } from "@/lib/tenant";
 import { nextInvoiceNumber } from "@/lib/invoicing-server";
 
 const itemSchema = z.object({
@@ -44,15 +45,16 @@ export async function POST(req: Request) {
   // Numéro : repris de l'ancien système si fourni (format FA{AA}{série}), sinon auto-généré.
   const provided = data.number?.trim();
   const providedIsFA = !!provided && /^FA\d{2}\d+$/i.test(provided);
+  const orgId = session.user.orgId;
   async function resolveNumbering() {
     if (provided) {
       const m = /^FA(\d{2})(\d+)$/i.exec(provided);
       if (m) return { number: provided, year: 2000 + parseInt(m[1], 10), sequence: parseInt(m[2], 10) };
       // numéro libre (hors format FA) : année courante + séquence auto (unicité year/sequence)
-      const auto = await nextInvoiceNumber();
+      const auto = await nextInvoiceNumber(undefined, orgId);
       return { number: provided, year: auto.year, sequence: auto.sequence };
     }
-    return nextInvoiceNumber();
+    return nextInvoiceNumber(undefined, orgId);
   }
 
   let invoiceId: string | null = null;
@@ -62,6 +64,7 @@ export async function POST(req: Request) {
     try {
       const created = await prisma.invoice.create({
         data: {
+          ...orgData(orgId),
           number: next.number,
           year: next.year,
           sequence: next.sequence,
@@ -114,6 +117,7 @@ export async function POST(req: Request) {
     entity: "Invoice",
     entityId: invoiceId,
     metadata: { number: lastNumber },
+    orgId,
   });
   return NextResponse.json({ id: invoiceId, number: lastNumber });
 }

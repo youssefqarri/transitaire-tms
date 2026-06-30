@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { authenticate } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
+import { orgScope } from "@/lib/tenant";
 import type { DossierStatus, DossierType } from "@/generated/prisma/enums";
 
 // GET /api/v1/dossiers?q=&status=&clientId=&take=&skip=
@@ -18,6 +19,7 @@ export async function GET(req: Request) {
   const skip = Number(url.searchParams.get("skip") ?? 0);
 
   const where = {
+    ...orgScope(ctx.orgId),
     deletedAt: null,
     ...(q && {
       OR: [

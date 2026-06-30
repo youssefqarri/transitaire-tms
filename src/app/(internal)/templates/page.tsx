@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { orgScope } from "@/lib/tenant";
 import { canManageUsers } from "@/lib/roles";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,7 @@ export default async function TemplatesPage() {
   if (!session || !canManageUsers(session.user.role)) redirect("/dashboard");
 
   const templates = await prisma.messageTemplate.findMany({
-    where: { deletedAt: null },
+    where: { ...orgScope(session.user.orgId), deletedAt: null },
     orderBy: [{ key: "asc" }, { channel: "asc" }, { lang: "asc" }],
   });
 

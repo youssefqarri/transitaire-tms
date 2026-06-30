@@ -1,6 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { orgScope } from "@/lib/tenant";
 import { canManageInvoices } from "@/lib/roles";
 import { BackLink } from "@/components/ui/back-link";
 import { PageHeader } from "@/components/ui/page-header";
@@ -18,8 +19,9 @@ export default async function EditInvoicePage({
   const session = await auth();
   if (!session || !canManageInvoices(session.user.role)) redirect("/dashboard");
 
-  const invoice = await prisma.invoice.findUnique({
-    where: { id },
+  const orgId = session.user.orgId;
+  const invoice = await prisma.invoice.findFirst({
+    where: { ...orgScope(orgId), id },
     include: { items: { orderBy: { order: "asc" } } },
   });
   if (!invoice) notFound();
@@ -31,12 +33,12 @@ export default async function EditInvoicePage({
 
   const [clients, dossiers] = await Promise.all([
     prisma.client.findMany({
-      where: { deletedAt: null, active: true },
+      where: { ...orgScope(orgId), deletedAt: null, active: true },
       orderBy: { name: "asc" },
       select: { id: true, name: true, code: true, city: true, separateDebours: true },
     }),
     prisma.dossier.findMany({
-      where: { deletedAt: null },
+      where: { ...orgScope(orgId), deletedAt: null },
       orderBy: { createdAt: "desc" },
       take: 300,
       select: {

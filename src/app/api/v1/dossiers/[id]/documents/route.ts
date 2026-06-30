@@ -26,6 +26,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   // Accès objet : interne, ou CLIENT propriétaire du dossier (sinon 404 sans oracle)
   const dossier = await resolveDossierForCtx(ctx, id);
   if (!dossier) return NextResponse.json({ error: "Dossier not found" }, { status: 404 });
+  // Isolation multi-tenant : le dossier doit appartenir à l'org du caller (no-op mono-tenant)
+  if (ctx.orgId && dossier.orgId !== ctx.orgId)
+    return NextResponse.json({ error: "Dossier not found" }, { status: 404 });
 
   // Droits d'écriture
   if (ctx.role !== "CLIENT" && !canUploadDocument(ctx.role))
@@ -56,6 +59,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     entity: "Document",
     entityId: doc.id,
     metadata: { dossierId: dossier.id, category: doc.category, via: ctx.via },
+    orgId: ctx.orgId,
   });
   return NextResponse.json(doc);
 }

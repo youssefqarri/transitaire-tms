@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Folder, Pencil, Receipt } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { orgScope } from "@/lib/tenant";
 import { canManageInvoices } from "@/lib/roles";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,8 +25,8 @@ export default async function ClientDetailPage({
 }) {
   const { id } = await params;
   const session = await auth();
-  const client = await prisma.client.findUnique({
-    where: { id },
+  const client = await prisma.client.findFirst({
+    where: { ...orgScope(session?.user.orgId), id },
     include: {
       dossiers: {
         where: { deletedAt: null },

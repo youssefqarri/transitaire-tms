@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { orgScope } from "@/lib/tenant";
 import { canModifyDossier } from "@/lib/roles";
 import { BackLink } from "@/components/ui/back-link";
 import { PageHeader } from "@/components/ui/page-header";
@@ -17,11 +18,12 @@ export default async function EditDossierPage({
   const { id } = await params;
   const session = await auth();
   if (!session || !canModifyDossier(session.user.role)) redirect("/dossiers");
+  const orgId = session.user.orgId;
 
   const [dossier, clients, suppliers] = await Promise.all([
-    prisma.dossier.findUnique({ where: { id } }),
-    prisma.client.findMany({ where: { deletedAt: null, active: true }, orderBy: { name: "asc" } }),
-    prisma.supplier.findMany({ orderBy: { name: "asc" } }),
+    prisma.dossier.findFirst({ where: { ...orgScope(orgId), id } }),
+    prisma.client.findMany({ where: { ...orgScope(orgId), deletedAt: null, active: true }, orderBy: { name: "asc" } }),
+    prisma.supplier.findMany({ where: { ...orgScope(orgId) }, orderBy: { name: "asc" } }),
   ]);
   if (!dossier) notFound();
 

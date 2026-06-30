@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { orgScope } from "@/lib/tenant";
 import { BackLink } from "@/components/ui/back-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
@@ -19,7 +20,7 @@ export default async function EditClientPage({
   const session = await auth();
   if (!session || !isInternal(session.user.role)) redirect("/clients");
 
-  const client = await prisma.client.findUnique({ where: { id } });
+  const client = await prisma.client.findFirst({ where: { ...orgScope(session.user.orgId), id } });
   if (!client) notFound();
 
   return (

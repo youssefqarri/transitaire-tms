@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { canManageInvoices } from "@/lib/roles";
 import { nextCreditNoteNumber } from "@/lib/invoicing-server";
 import { audit } from "@/lib/audit";
+import { orgScope, orgData } from "@/lib/tenant";
 
 const schema = z.object({
   amount: z.number().positive(),

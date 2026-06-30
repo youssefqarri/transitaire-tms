@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { BackLink } from "@/components/ui/back-link";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { orgScope } from "@/lib/tenant";
 import { canCreateDUM } from "@/lib/roles";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -55,8 +56,8 @@ export default async function DossierDetailPage({
   const session = await auth();
   if (!session) return null;
 
-  const dossier = await prisma.dossier.findUnique({
-    where: { id },
+  const dossier = await prisma.dossier.findFirst({
+    where: { ...orgScope(session.user.orgId), id },
     include: {
       client: { include: { contacts: { where: { deletedAt: null }, orderBy: { createdAt: "asc" } } } },
       supplier: true,

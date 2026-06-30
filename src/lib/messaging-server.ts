@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "./db";
+import { orgScope, orgData } from "./tenant";
 import { loadTemplate, renderTemplate, type TemplateKey } from "./messaging";
 import { sendMail, textToHtml } from "./mail";
 import { sendWhatsApp, isWhatsAppConfigured } from "./whatsapp";
@@ -30,9 +31,11 @@ export async function notifyClient(opts: {
   extraVars?: Record<string, string>;
   /** Destinataire explicite (sinon : email/téléphone principal du client). */
   toAddress?: string;
+  /** Org propriétaire (isolation multi-tenant). Source : ctx.orgId / session.user.orgId. */
+  orgId?: string | null;
 }): Promise<NotifyResult> {
-  const dossier = await prisma.dossier.findUnique({
-    where: { id: opts.dossierId },
+  const dossier = await prisma.dossier.findFirst({
+    where: { ...orgScope(opts.orgId), id: opts.dossierId },
     include: {
       client: true,
       dums: true,
@@ -51,8 +54,8 @@ export async function notifyClient(opts: {
     return { ok: false, error: "Aucun destinataire : renseigne un email pour ce client." };
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: opts.userId },
+  const user = await prisma.user.findFirst({
+    where: { ...orgScope(opts.orgId), id: opts.userId },
     select: { name: true },
   });
 
@@ -61,6 +64,7 @@ export async function notifyClient(opts: {
     opts.templateKey,
     opts.channel,
     opts.lang ?? "FR",
+    opts.orgId,
   );
   // Référence(s) que le CLIENT reconnaît — suffixe « (réf. X — votre réf. Y) »,
   // vide si aucune référence. Indispensable pour qu'il sache de quel dossier il s'agit.
@@ -98,6 +102,7 @@ export async function notifyClient(opts: {
   // 2. Crée le OutgoingMessage en PENDING d'abord
   const msg = await prisma.outgoingMessage.create({
     data: {
+      ...orgData(opts.orgId),
       channel: opts.channel,
       lang: opts.lang ?? "FR",
       templateKey: opts.templateKey,

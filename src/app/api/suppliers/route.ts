@@ -3,6 +3,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canManageRegistry } from "@/lib/roles";
+import { orgData } from "@/lib/tenant";
 
 const schema = z.object({
   name: z.string().min(1),
@@ -21,6 +22,6 @@ export async function POST(req: Request) {
   const data: Record<string, string | null> = {};
   for (const [k, v] of Object.entries(parsed.data)) data[k] = (v ?? "").trim() || null;
   data.name = parsed.data.name.trim();
-  const s = await prisma.supplier.create({ data: data as never });
+  const s = await prisma.supplier.create({ data: { ...data, ...orgData(session.user.orgId) } as never });
   return NextResponse.json(s);
 }

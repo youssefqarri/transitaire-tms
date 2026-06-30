@@ -1,10 +1,12 @@
 import { prisma } from "./db";
+import { orgScope, orgData } from "./tenant";
 import { extractIdentifiers } from "./email-classifier";
 
 // rattache un email à des dossiers selon les règles :
 //   - cas 1 : DUM validée -> match par numéro de DUM
 //   - cas 2 : dossier non validé -> match par référence dossier
-export async function linkEmailToDossiers(emailId: string) {
+// `orgId` : isolation multi-tenant — ne rattache qu'aux dossiers de l'org.
+export async function linkEmailToDossiers(emailId: string, orgId?: string | null) {
   const email = await prisma.emailMessage.findUnique({ where: { id: emailId } });
   if (!email) return [];
 
@@ -14,12 +16,14 @@ export async function linkEmailToDossiers(emailId: string) {
   const matched: { dossierId: string; matchedOn: string }[] = [];
 
   for (const num of dums) {
-    const dum = await prisma.dUM.findFirst({ where: { number: num } });
+    // DUM = table enfant : on filtre par le dossier parent (scopé org).
+    const dum = await prisma.dUM.findFirst({ where: { number: num, dossier: orgScope(orgId) } });
     if (dum) matched.push({ dossierId: dum.dossierId, matchedOn: `DUM:${num}` });
   }
   for (const ref of refs) {
     const ds = await prisma.dossier.findMany({
       where: {
+        ...orgScope(orgId),
         deletedAt: null,
         OR: [
           { reference: { equals: ref, mode: "insensitive" } },
@@ -45,6 +49,7 @@ export async function linkEmailToDossiers(emailId: string) {
       // créer notif interne
       await prisma.notification.create({
         data: {
+          ...orgData(orgId),
           role: "EXPLOITATION",
           dossierId: m.dossierId,
           kind: "EMAIL_NEW",

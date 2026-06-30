@@ -1,5 +1,6 @@
 import type { MessageChannel, MessageLang } from "@/generated/prisma/enums";
 import { prisma } from "./db";
+import { orgScope } from "./tenant";
 
 export const CHANNEL_LABELS: Record<MessageChannel, string> = {
   EMAIL: "Email",
@@ -42,9 +43,12 @@ export async function loadTemplate(
   key: TemplateKey,
   channel: MessageChannel,
   lang: MessageLang = "FR",
+  orgId?: string | null,
 ): Promise<{ subject: string | null; body: string }> {
-  const t = await prisma.messageTemplate.findUnique({
-    where: { key_channel_lang: { key, channel, lang } },
+  // findFirst (et non findUnique sur la clé composite) pour pouvoir filtrer par org :
+  // chaque org a son propre jeu de templates (isolation multi-tenant).
+  const t = await prisma.messageTemplate.findFirst({
+    where: { ...orgScope(orgId), key, channel, lang },
   });
   if (t && t.active && !t.deletedAt) {
     return { subject: t.subject, body: t.body };

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Plus, Building2 } from "lucide-react";
 import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
+import { orgScope } from "@/lib/tenant";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
@@ -29,6 +31,8 @@ export default async function ClientsPage({
   }>;
 }) {
   const params = await searchParams;
+  const session = await auth();
+  const orgId = session?.user.orgId;
   const q = params.q?.trim();
   const fName = params.name?.trim();
   const fCode = params.code?.trim();
@@ -38,6 +42,7 @@ export default async function ClientsPage({
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
 
   const where = {
+    ...orgScope(orgId),
     deletedAt: null,
     ...(q && {
       OR: [

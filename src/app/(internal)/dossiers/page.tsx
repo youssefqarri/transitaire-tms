@@ -3,6 +3,7 @@ import { Folder, Plus, AlertTriangle, FilterX, Check } from "lucide-react";
 import { RowLink, CellLink } from "@/components/ui/clickable-row";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { orgScope } from "@/lib/tenant";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/dossier/status-badge";
@@ -48,6 +49,7 @@ export default async function DossiersPage({
   const params = await searchParams;
   const session = await auth();
   if (!session) return null;
+  const orgId = session.user.orgId;
 
   // « A_TRAITER » est un bucket synthétique (plusieurs statuts), pas un vrai statut.
   const isActionBucket = params.status === ACTION_REQUIRED_KEY;
@@ -78,6 +80,7 @@ export default async function DossiersPage({
             : undefined;
 
   const where = {
+    ...orgScope(orgId),
     deletedAt: null,
     ...(q && {
       OR: [

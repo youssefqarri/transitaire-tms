@@ -48,6 +48,7 @@ model Organization {
   active   Boolean @default(true)
 
   users            User[]
+  profiles         Profile[]
   clients          Client[]
   suppliers        Supplier[]
   dossiers         Dossier[]
@@ -62,6 +63,21 @@ model Organization {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Profil de permissions partagé (ensemble nommé de permissions granulaires).
+// Rattaché à une organisation (cabinet) ; assignable à plusieurs utilisateurs.
+model Profile {
+  id           String        @id @default(cuid())
+  orgId        String?
+  organization Organization? @relation(fields: [orgId], references: [id], onDelete: SetNull)
+  name         String
+  permissions  String[]      @default([])
+  users        User[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([orgId])
 }
 
 model User {
@@ -84,6 +100,11 @@ model User {
   // si role = CLIENT, relié à un Client (le compte porte le portail)
   clientId String?
   client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  // permissions granulaires (fondation) : profils partagés + overrides individuels
+  profiles    Profile[]
+  permGrants  String[]  @default([])
+  permRevokes String[]  @default([])
 
   accounts                   Account[]
   sessions                   Session[]

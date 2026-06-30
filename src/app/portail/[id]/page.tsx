@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, FileText, AlertCircle, Download } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { orgScope } from "@/lib/tenant";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/dossier/status-badge";
 import {
@@ -25,7 +26,7 @@ export default async function PortalDossierPage({ params }: { params: Promise<{ 
 
   const dossier = await prisma.dossier.findFirst({
     // un dossier clôturé / annulé n'est plus accessible au client, même par URL directe
-    where: { deletedAt: null, id, clientId: session.user.clientId, status: { notIn: ["CLOTURE", "ANNULE"] } },
+    where: { ...orgScope(session.user.orgId), deletedAt: null, id, clientId: session.user.clientId, status: { notIn: ["CLOTURE", "ANNULE"] } },
     include: {
       dums: true,
       // le client ne voit pas les documents internes (fiche liquidation, ticket paiement…)

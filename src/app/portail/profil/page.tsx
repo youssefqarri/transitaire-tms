@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { orgScope } from "@/lib/tenant";
 import { ProfilForm } from "./profil-form";
 
 export const dynamic = "force-dynamic";
@@ -9,8 +10,8 @@ export default async function PortailProfilPage() {
   const session = await auth();
   if (!session || session.user.role !== "CLIENT" || !session.user.clientId) redirect("/portail");
 
-  const client = await prisma.client.findUnique({
-    where: { id: session.user.clientId },
+  const client = await prisma.client.findFirst({
+    where: { ...orgScope(session.user.orgId), id: session.user.clientId },
     select: {
       id: true,
       name: true,

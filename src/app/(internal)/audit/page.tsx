@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FileText } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { orgScope } from "@/lib/tenant";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,7 +51,9 @@ export default async function AuditPage({
   const dir = params.dir === "asc" ? ("asc" as const) : ("desc" as const);
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
 
+  const orgId = session.user.orgId;
   const where = {
+    ...orgScope(orgId),
     ...(q && {
       OR: [
         { user: { name: { contains: q, mode: "insensitive" as const } } },
@@ -86,8 +89,8 @@ export default async function AuditPage({
       include: { user: { select: { name: true } } },
     }),
     // Options de filtre : toutes les valeurs existantes (indépendamment du filtre courant).
-    prisma.auditLog.groupBy({ by: ["action"], orderBy: { action: "asc" } }),
-    prisma.auditLog.groupBy({ by: ["entity"], orderBy: { entity: "asc" } }),
+    prisma.auditLog.groupBy({ by: ["action"], where: { ...orgScope(orgId) }, orderBy: { action: "asc" } }),
+    prisma.auditLog.groupBy({ by: ["entity"], where: { ...orgScope(orgId) }, orderBy: { entity: "asc" } }),
   ]);
 
   const actionOptions = actionGroups.map((g) => ({ value: g.action, label: auditActionLabel(g.action) }));

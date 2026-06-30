@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { orgScope } from "@/lib/tenant";
 
 export const dynamic = "force-dynamic";
 
-// Récupère le clientId du client connecté (rôle CLIENT uniquement).
+// Récupère le clientId + orgId du client connecté (rôle CLIENT uniquement).
 async function clientScope() {
   const session = await auth();
   if (!session || session.user.role !== "CLIENT" || !session.user.clientId) return null;
-  return session.user.clientId;
+  return { clientId: session.user.clientId, orgId: session.user.orgId ?? null };
 }
 
 const contact = z.string().trim().max(40);
@@ -21,15 +22,17 @@ const patchSchema = z.object({
 
 // PATCH : met à jour les coordonnées principales du client.
 export async function PATCH(req: NextRequest) {
-  const clientId = await clientScope();
-  if (!clientId) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const scope = await clientScope();
+  if (!scope) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const { clientId, orgId } = scope;
 
   const parsed = patchSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Données invalides" }, { status: 400 });
   const { email, phone, whatsapp } = parsed.data;
 
-  await prisma.client.update({
-    where: { id: clientId },
+  // updateMany (et non update) pour pouvoir filtrer par org en plus de l'id (isolation).
+  await prisma.client.updateMany({
+    where: { id: clientId, ...orgScope(orgId) },
     data: {
       ...(email !== undefined && { email: email || null }),
       ...(phone !== undefined && { phone: phone.trim() || null }),
@@ -41,8 +44,9 @@ export async function PATCH(req: NextRequest) {
 
 // POST : ajoute un email au carnet (ClientContact) du client.
 export async function POST(req: NextRequest) {
-  const clientId = await clientScope();
-  if (!clientId) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const scope = await clientScope();
+  if (!scope) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const { clientId } = scope;
 
   const parsed = z.object({ email: z.string().trim().email() }).safeParse(
     await req.json().catch(() => null),
@@ -61,8 +65,9 @@ export async function POST(req: NextRequest) {
 
 // DELETE : retire un email du carnet (uniquement ceux de SON client).
 export async function DELETE(req: NextRequest) {
-  const clientId = await clientScope();
-  if (!clientId) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const scope = await clientScope();
+  if (!scope) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const { clientId } = scope;
 
   const parsed = z.object({ id: z.string().min(1) }).safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Invalide" }, { status: 400 });

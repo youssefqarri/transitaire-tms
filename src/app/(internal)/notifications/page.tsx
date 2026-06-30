@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Bell } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { orgScope } from "@/lib/tenant";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -39,6 +40,7 @@ export default async function NotificationsPage({
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
   const onlyUnread = params.unread === "1";
   const baseWhere = {
+    ...orgScope(session.user.orgId),
     OR: [{ userId: session.user.id }, { role: session.user.role }],
   };
   const unreadCond = { read: false, receipts: { none: { userId: session.user.id } } };

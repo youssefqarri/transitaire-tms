@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { orgScope } from "@/lib/tenant";
 
 export type SearchItem = { id: string; title: string; sub: string; href: string };
 export type SearchGroup = { type: string; label: string; total: number; items: SearchItem[] };
@@ -7,18 +8,22 @@ export type SearchGroup = { type: string; label: string; total: number; items: S
  * Recherche universelle multi-entités (Dossiers, DUM, Factures, Clients,
  * Fournisseurs). Retourne, par groupe, les `perGroup` premiers résultats + le
  * total. Utilisée par l'API de recherche (header) et la page /recherche.
+ *
+ * `orgId` : isolation multi-tenant — chaque entité racine est filtrée par org.
+ * Les DUM (table enfant) sont filtrées via leur dossier parent.
  */
-export async function searchAll(q: string, perGroup = 5): Promise<SearchGroup[]> {
+export async function searchAll(q: string, perGroup = 5, orgId?: string | null): Promise<SearchGroup[]> {
   const ci = { contains: q, mode: "insensitive" as const };
 
   const dossierWhere = {
+    ...orgScope(orgId),
     deletedAt: null,
     OR: [{ number: ci }, { reference: ci }, { client: { name: ci } }],
   };
-  const dumWhere = { dossier: { deletedAt: null }, number: ci };
-  const invoiceWhere = { OR: [{ number: ci }, { client: { name: ci } }] };
-  const clientWhere = { deletedAt: null, OR: [{ name: ci }, { code: ci }, { ice: ci }] };
-  const supplierWhere = { name: ci };
+  const dumWhere = { dossier: { ...orgScope(orgId), deletedAt: null }, number: ci };
+  const invoiceWhere = { ...orgScope(orgId), OR: [{ number: ci }, { client: { name: ci } }] };
+  const clientWhere = { ...orgScope(orgId), deletedAt: null, OR: [{ name: ci }, { code: ci }, { ice: ci }] };
+  const supplierWhere = { ...orgScope(orgId), name: ci };
 
   const [dossiers, dossierC, dums, dumC, invoices, invoiceC, clients, clientC, suppliers, supplierC] =
     await Promise.all([

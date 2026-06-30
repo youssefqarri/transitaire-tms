@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { canModifyDossier } from "@/lib/roles";
 import { statusRequiresDum, DOSSIER_STATUS_VALUES } from "@/lib/statuses";
 import { audit } from "@/lib/audit";
+import { orgScope, orgData } from "@/lib/tenant";
 
 const schema = z.object({
   status: z.enum(DOSSIER_STATUS_VALUES),
@@ -22,7 +23,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!parsed.success) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
 
   const dossier = await prisma.dossier.findFirst({
-    where: { deletedAt: null, OR: [{ id }, { number: id }] },
+    where: { ...orgScope(ctx.orgId), deletedAt: null, OR: [{ id }, { number: id }] },
   });
   if (!dossier) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
@@ -58,6 +59,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   await prisma.notification.create({
     data: {
+      ...orgData(ctx.orgId),
       role: "EXPLOITATION",
       dossierId: dossier.id,
       kind: "STATUS_CHANGE",
@@ -71,6 +73,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (isLiquidating) {
     await prisma.notification.create({
       data: {
+        ...orgData(ctx.orgId),
         role: "EXPLOITATION",
         dossierId: dossier.id,
         kind: "SUIVI_LIQUIDATION",
@@ -87,6 +90,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     entity: "Dossier",
     entityId: dossier.id,
     metadata: { from: dossier.status, to: parsed.data.status, via: ctx.via },
+    orgId: ctx.orgId,
   });
   return NextResponse.json(updated);
 }

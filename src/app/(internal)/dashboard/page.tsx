@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { orgScope } from "@/lib/tenant";
 import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/dossier/status-badge";
@@ -32,6 +33,7 @@ export const dynamic = "force-dynamic";
 export default async function DashboardPage() {
   const session = await auth();
   if (!session) return null;
+  const orgId = session.user.orgId;
 
   const [
     totalDossiers,
@@ -43,13 +45,14 @@ export default async function DashboardPage() {
     statusGroups,
     activeDossiers,
   ] = await Promise.all([
-    prisma.dossier.count({ where: { deletedAt: null } }),
-    prisma.dossier.count({ where: { deletedAt: null, status: { notIn: ["CLOTURE", "ANNULE"] } } }),
+    prisma.dossier.count({ where: { ...orgScope(orgId), deletedAt: null } }),
+    prisma.dossier.count({ where: { ...orgScope(orgId), deletedAt: null, status: { notIn: ["CLOTURE", "ANNULE"] } } }),
     prisma.dossier.count({
-      where: { deletedAt: null, status: { in: ACTION_REQUIRED_STATUSES } },
+      where: { ...orgScope(orgId), deletedAt: null, status: { in: ACTION_REQUIRED_STATUSES } },
     }),
     prisma.dossier.count({
       where: {
+        ...orgScope(orgId),
         deletedAt: null,
         status: "CLOTURE",
         closedAt: { gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) },
@@ -58,7 +61,7 @@ export default async function DashboardPage() {
     prisma.emailMessage.count({ where: { isRead: false } }),
     prisma.dossier.findMany({
       // Tableau de bord : on ne montre que les dossiers actifs (pas les clôturés/annulés).
-      where: { deletedAt: null, status: { notIn: ["CLOTURE", "ANNULE"] } },
+      where: { ...orgScope(orgId), deletedAt: null, status: { notIn: ["CLOTURE", "ANNULE"] } },
       take: 6,
       orderBy: { updatedAt: "desc" },
       include: {
@@ -70,11 +73,11 @@ export default async function DashboardPage() {
     prisma.dossier.groupBy({
       by: ["status"],
       _count: { _all: true },
-      where: { deletedAt: null, status: { notIn: ["CLOTURE", "ANNULE"] } },
+      where: { ...orgScope(orgId), deletedAt: null, status: { notIn: ["CLOTURE", "ANNULE"] } },
     }),
     // Vue groupée par client : tous les dossiers actifs (tri côté JS)
     prisma.dossier.findMany({
-      where: { deletedAt: null, status: { notIn: ["CLOTURE", "ANNULE"] } },
+      where: { ...orgScope(orgId), deletedAt: null, status: { notIn: ["CLOTURE", "ANNULE"] } },
       orderBy: { updatedAt: "desc" },
       include: {
         client: true,

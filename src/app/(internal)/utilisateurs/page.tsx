@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Plus, Users } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { orgScope } from "@/lib/tenant";
 import { canManageUsers, ROLE_LABELS, ROLE_TONE } from "@/lib/roles";
 import type { UserRole } from "@/generated/prisma/enums";
 import { Card } from "@/components/ui/card";
@@ -46,7 +47,9 @@ export default async function UsersPage({
   const dir = params.dir === "asc" ? ("asc" as const) : ("desc" as const);
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
 
+  const orgId = session.user.orgId;
   const where = {
+    ...orgScope(orgId),
     ...(q && {
       OR: [
         { name: { contains: q, mode: "insensitive" as const } },

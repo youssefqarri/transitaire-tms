@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { orgScope } from "@/lib/tenant";
 import { isInternal } from "@/lib/roles";
 import { BackLink } from "@/components/ui/back-link";
 import { PageHeader } from "@/components/ui/page-header";
@@ -18,7 +19,7 @@ export default async function EditSupplierPage({
   const session = await auth();
   if (!session || !isInternal(session.user.role)) redirect("/fournisseurs");
 
-  const supplier = await prisma.supplier.findUnique({ where: { id } });
+  const supplier = await prisma.supplier.findFirst({ where: { ...orgScope(session.user.orgId), id } });
   if (!supplier) notFound();
 
   return (

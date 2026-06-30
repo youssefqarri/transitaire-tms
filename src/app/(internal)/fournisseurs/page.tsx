@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Plus, Truck } from "lucide-react";
 import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
+import { orgScope } from "@/lib/tenant";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
@@ -16,10 +18,13 @@ export default async function SuppliersPage({
   searchParams: Promise<{ page?: string; size?: string }>;
 }) {
   const params = await searchParams;
+  const session = await auth();
+  const orgId = session?.user.orgId;
   const { page, size, skip } = parsePagination(params, { page: 1, size: 25, maxSize: 200 });
   const [total, suppliers] = await Promise.all([
-    prisma.supplier.count(),
+    prisma.supplier.count({ where: { ...orgScope(orgId) } }),
     prisma.supplier.findMany({
+      where: { ...orgScope(orgId) },
       orderBy: { name: "asc" },
       include: { _count: { select: { dossiers: { where: { deletedAt: null } } } } },
       skip,

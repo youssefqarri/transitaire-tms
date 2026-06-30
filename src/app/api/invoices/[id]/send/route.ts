@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { sendMail, textToHtml } from "@/lib/mail";
 import { audit } from "@/lib/audit";
+import { orgScope, orgData } from "@/lib/tenant";
 import { formatMAD, totals } from "@/lib/invoicing";
 import { getIssuer } from "@/lib/invoicing-server";
 
@@ -21,8 +22,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!["ADMIN", "COMPTABILITE"].includes(session.user.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const invoice = await prisma.invoice.findUnique({
-    where: { id },
+  const invoice = await prisma.invoice.findFirst({
+    where: { ...orgScope(session.user.orgId), id },
     include: {
       client: true,
       items: { orderBy: { order: "asc" } },
@@ -101,6 +102,7 @@ ${issuer.name}`;
       if (firstDossierId) {
         await tx.outgoingMessage.create({
           data: {
+            ...orgData(session.user.orgId),
             dossierId: firstDossierId,
             channel: "EMAIL",
             lang: "FR",
@@ -126,6 +128,7 @@ ${issuer.name}`;
     entity: "Invoice",
     entityId: id,
     metadata: { to, subject, messageId: result.messageId },
+    orgId: session.user.orgId,
   });
 
   return NextResponse.json({ ok: true, messageId: result.messageId });

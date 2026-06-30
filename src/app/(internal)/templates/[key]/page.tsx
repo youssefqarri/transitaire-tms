@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { orgScope } from "@/lib/tenant";
 import { canManageUsers } from "@/lib/roles";
 import { loadTemplate, TEMPLATE_KEYS, type TemplateKey } from "@/lib/messaging";
 import { Card } from "@/components/ui/card";
@@ -36,10 +37,11 @@ export default async function TemplateEditPage({
   }
 
   // Charger les valeurs effectives (DB > défauts) pour les 2 canaux FR
+  const orgId = session.user.orgId;
   const [emailEffective, whatsappEffective, dbRows] = await Promise.all([
-    loadTemplate(key as TemplateKey, "EMAIL", "FR"),
-    loadTemplate(key as TemplateKey, "WHATSAPP", "FR"),
-    prisma.messageTemplate.findMany({ where: { deletedAt: null, key } }),
+    loadTemplate(key as TemplateKey, "EMAIL", "FR", orgId),
+    loadTemplate(key as TemplateKey, "WHATSAPP", "FR", orgId),
+    prisma.messageTemplate.findMany({ where: { ...orgScope(orgId), deletedAt: null, key } }),
   ]);
 
   const emailDb = dbRows.find((r) => r.channel === "EMAIL" && r.lang === "FR");

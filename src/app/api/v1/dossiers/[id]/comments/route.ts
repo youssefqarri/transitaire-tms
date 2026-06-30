@@ -19,6 +19,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   // Accès objet (CLIENT limité à ses dossiers, sinon 404 sans oracle)
   const dossier = await resolveDossierForCtx(ctx, id);
   if (!dossier) return NextResponse.json({ error: "Dossier not found" }, { status: 404 });
+  // Isolation multi-tenant : le dossier doit appartenir à l'org du caller (no-op mono-tenant)
+  if (ctx.orgId && dossier.orgId !== ctx.orgId)
+    return NextResponse.json({ error: "Dossier not found" }, { status: 404 });
 
   // COMMIS_DOUANE = consultation seule
   if (ctx.role === "COMMIS_DOUANE")
