@@ -61,11 +61,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             clientId: true,
             orgId: true,
             tokenVersion: true,
-            organization: { select: { active: true } },
+            organization: {
+              select: {
+                active: true,
+                subscription: { select: { status: true, currentPeriodEnd: true } },
+              },
+            },
           },
         });
         if (!db || !db.active) return null; // compte supprimé/désactivé
-        if (db.organization && !db.organization.active) return null; // cabinet suspendu
+        if (db.organization) {
+          if (!db.organization.active) return null; // cabinet suspendu
+          const sub = db.organization.subscription;
+          if (sub) {
+            // abonnement suspendu/résilié, ou période expirée (hors essai) → accès coupé
+            if (sub.status === "SUSPENDED" || sub.status === "CANCELLED") return null;
+            if (sub.currentPeriodEnd && sub.currentPeriodEnd < new Date() && sub.status !== "TRIAL")
+              return null;
+          }
+        }
         // tokenVersion : n'invalide que les jetons qui en portent un (évite la
         // déconnexion de masse des sessions émises avant ce déploiement)
         const tv = (token as { tv?: number }).tv;

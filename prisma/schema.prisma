@@ -60,6 +60,7 @@ model Organization {
   auditLogs        AuditLog[]
   outgoingMessages OutgoingMessage[]
   settings         AppSetting[]
+  subscription     Subscription?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1050,4 +1051,85 @@ model AuditLog {
   @@index([userId])
   @@index([entity, entityId])
   @@index([orgId])
+}
+
+// ============================================================
+// ABONNEMENT / FACTURATION DES CABINETS (SaaS — encaissement HORS-LIGNE, cf. D2)
+// ============================================================
+
+enum BillingPeriod {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  SUSPENDED
+  CANCELLED
+}
+
+enum SubscriptionInvoiceStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+// Offre commerciale (globale, gérée par la plateforme).
+model Plan {
+  id                  String        @id @default(cuid())
+  name                String
+  price               Decimal       @db.Decimal(10, 2) // en MAD
+  period              BillingPeriod @default(MONTHLY)
+  maxSeats            Int? // null = illimité
+  maxDossiersPerMonth Int? // null = illimité
+  active              Boolean       @default(true)
+
+  subscriptions Subscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Abonnement d'un cabinet (1 par organisation).
+model Subscription {
+  id               String             @id @default(cuid())
+  orgId            String             @unique
+  organization     Organization       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  planId           String?
+  plan             Plan?              @relation(fields: [planId], references: [id], onDelete: SetNull)
+  status           SubscriptionStatus @default(TRIAL)
+  startedAt        DateTime           @default(now())
+  currentPeriodEnd DateTime? // échéance / expiration de la période en cours
+  trialEndsAt      DateTime?
+  canceledAt       DateTime?
+
+  invoices SubscriptionInvoice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Facture d'abonnement émise par la plateforme au cabinet (encaissement hors-ligne).
+model SubscriptionInvoice {
+  id             String                    @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription              @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  orgId          String
+  amount         Decimal                   @db.Decimal(10, 2)
+  periodStart    DateTime
+  periodEnd      DateTime
+  dueAt          DateTime
+  status         SubscriptionInvoiceStatus @default(PENDING)
+  paidAt         DateTime?
+  method         String? // virement / chèque / espèces
+  reference      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
+  @@index([subscriptionId])
 }
