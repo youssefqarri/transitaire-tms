@@ -19,6 +19,9 @@ const PUBLIC_PATHS = [
   "/api/files",
   // sonde de monitoring publique
   "/api/health",
+  // PWA : le manifest et le service worker doivent être servis sans authentification
+  "/manifest.webmanifest",
+  "/sw.js",
 ];
 
 // Hôtes de l'apex (site vitrine), par opposition à l'application (app.escale.ma).
