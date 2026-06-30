@@ -55,6 +55,19 @@ export default async function InvoiceDetailPage({
   });
   if (!invoice) notFound();
 
+  // Documents du dossier lié — proposés en pièces jointes à l'envoi (demande cliente).
+  const linkedDocuments = invoice.dossierId
+    ? await prisma.document.findMany({
+        where: {
+          dossierId: invoice.dossierId,
+          deletedAt: null,
+          dossier: { ...orgScope(session.user.orgId) },
+        },
+        select: { id: true, name: true, category: true },
+        orderBy: { createdAt: "desc" },
+      })
+    : [];
+
   const computed = totals(
     invoice.items.map((it) => ({
       kind: it.kind,
@@ -113,6 +126,7 @@ export default async function InvoiceDetailPage({
               invoiceId={invoice.id}
               invoiceNumber={invoice.number}
               clientEmail={invoice.client.email}
+              documents={linkedDocuments}
             />
           )}
           {["ADMIN", "COMPTABILITE"].includes(session.user.role) &&

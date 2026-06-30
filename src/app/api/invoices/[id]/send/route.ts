@@ -7,11 +7,14 @@ import { audit } from "@/lib/audit";
 import { orgScope, orgData } from "@/lib/tenant";
 import { formatMAD, totals } from "@/lib/invoicing";
 import { getIssuer } from "@/lib/invoicing-server";
+import { storage } from "@/lib/storage";
 
 const schema = z.object({
   to: z.string().email().optional(),
   subject: z.string().optional(),
   body: z.string().optional(),
+  // ids des documents (du dossier lié) à joindre à l'email — demande cliente
+  documentIds: z.array(z.string()).optional(),
 });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -77,11 +80,37 @@ ${issuer.name}`;
 
   const body = parsed.data.body?.trim() || defaultBody;
 
+  // Pièces jointes : documents du dossier lié, sélectionnés par l'utilisateur (demande
+  // cliente). Strictement bornés au dossier de CETTE facture ET à l'organisation.
+  const attachments: Array<{ filename: string; content: Buffer; contentType?: string }> = [];
+  if (parsed.data.documentIds?.length && invoice.dossierId) {
+    const docs = await prisma.document.findMany({
+      where: {
+        id: { in: parsed.data.documentIds },
+        dossierId: invoice.dossierId,
+        deletedAt: null,
+        dossier: { ...orgScope(session.user.orgId) },
+      },
+      select: { name: true, fileUrl: true, mimeType: true, dossierId: true },
+    });
+    const driver = await storage();
+    for (const d of docs) {
+      const orig = d.fileUrl?.split("/").pop();
+      if (!orig) continue;
+      const obj = await driver.get(`${d.dossierId}/${orig}`).catch(() => null);
+      if (!obj) continue;
+      const ext = orig.includes(".") ? orig.slice(orig.lastIndexOf(".")) : "";
+      const filename =
+        ext && !d.name.toLowerCase().endsWith(ext.toLowerCase()) ? `${d.name}${ext}` : d.name;
+      attachments.push({ filename, content: obj.body, contentType: d.mimeType ?? undefined });
+    }
+  }
+
   // 1) Envoi de l'e-mail. S'il échoue, l'e-mail n'est pas parti → vrai échec :
   //    l'utilisateur peut réessayer sans risque de doublon.
   let result: { messageId: string };
   try {
-    result = await sendMail({ to, subject, text: body, html: textToHtml(body) });
+    result = await sendMail({ to, subject, text: body, html: textToHtml(body), attachments });
   } catch (e: unknown) {
     const err = e as Error;
     return NextResponse.json({ error: err.message || "Échec de l'envoi" }, { status: 500 });

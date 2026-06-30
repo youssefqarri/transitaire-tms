@@ -8,6 +8,7 @@ export type SendMailOptions = {
   text?: string;
   html?: string;
   replyTo?: string;
+  attachments?: Array<{ filename: string; content: Buffer; contentType?: string }>;
 };
 
 async function buildTransporter(): Promise<nodemailer.Transporter> {
@@ -39,6 +40,7 @@ export async function sendMail(opts: SendMailOptions): Promise<{ messageId: stri
     text: opts.text,
     html: opts.html,
     replyTo: opts.replyTo,
+    attachments: opts.attachments,
   });
   return { messageId: info.messageId };
 }

@@ -14,10 +14,12 @@ export function SendInvoiceButton({
   invoiceId,
   invoiceNumber,
   clientEmail,
+  documents = [],
 }: {
   invoiceId: string;
   invoiceNumber: string;
   clientEmail: string | null;
+  documents?: { id: string; name: string; category: string }[];
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -25,6 +27,7 @@ export function SendInvoiceButton({
   const [to, setTo] = useState(clientEmail ?? "");
   const [subject, setSubject] = useState(`Facture ${invoiceNumber}`);
   const [body, setBody] = useState("");
+  const [docIds, setDocIds] = useState<string[]>([]);
 
   useEscapeClose(open, () => setOpen(false), !pending);
 
@@ -38,7 +41,7 @@ export function SendInvoiceButton({
       const res = await fetch(`/api/invoices/${invoiceId}/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ to, subject, body: body || undefined }),
+        body: JSON.stringify({ to, subject, body: body || undefined, documentIds: docIds }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -133,6 +136,38 @@ export function SendInvoiceButton({
                 className="w-full px-3 py-2 text-[13px] bg-[var(--color-surface)] border border-[var(--color-border-2)] rounded-[var(--radius)] placeholder:text-[var(--color-fg-mute)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-ring)] focus:border-transparent resize-y"
               />
             </div>
+
+            {documents.length > 0 && (
+              <div className="space-y-1.5">
+                <Label>
+                  Joindre des documents{" "}
+                  <span className="text-[var(--color-fg-mute)] font-normal">(du dossier lié)</span>
+                </Label>
+                <div className="max-h-44 overflow-y-auto rounded-[var(--radius)] border border-[var(--color-border-2)] divide-y divide-[var(--color-border)]">
+                  {documents.map((d) => {
+                    const checked = docIds.includes(d.id);
+                    return (
+                      <label
+                        key={d.id}
+                        className="flex items-center gap-2.5 px-3 py-2 text-[13px] cursor-pointer hover:bg-[var(--color-surface-2)]"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={(e) =>
+                            setDocIds((prev) =>
+                              e.target.checked ? [...prev, d.id] : prev.filter((x) => x !== d.id),
+                            )
+                          }
+                          className="size-4 accent-[var(--color-accent)]"
+                        />
+                        <span className="flex-1 truncate text-[var(--color-fg)]">{d.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="flex justify-end gap-2 pt-1">
               <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
