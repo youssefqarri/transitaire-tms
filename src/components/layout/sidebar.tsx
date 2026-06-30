@@ -8,9 +8,17 @@ import { visibleSections } from "./nav-items";
 import { UnreadBadge } from "./unread-badge";
 import { LogoFull } from "@/components/brand/logo";
 
-export function Sidebar({ role, unreadCount = 0 }: { role: UserRole; unreadCount?: number }) {
+export function Sidebar({
+  role,
+  unreadCount = 0,
+  isPlatform = false,
+}: {
+  role: UserRole;
+  unreadCount?: number;
+  isPlatform?: boolean;
+}) {
   const pathname = usePathname();
-  const sections = visibleSections(role);
+  const sections = visibleSections(role, isPlatform);
 
   return (
     <aside

@@ -12,6 +12,7 @@ import {
   Receipt,
   MessageSquare,
   Trash2,
+  ShieldCheck,
 } from "lucide-react";
 import type { UserRole } from "@/generated/prisma/enums";
 
@@ -20,6 +21,8 @@ export type NavItem = {
   label: string;
   icon: typeof LayoutDashboard;
   roles?: UserRole[];
+  // visible uniquement pour les admins PLATEFORME (Evead), indépendamment du rôle cabinet
+  platformOnly?: boolean;
 };
 
 export type NavSection = {
@@ -72,13 +75,19 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: "/parametres", label: "Paramètres", icon: Settings, roles: ["ADMIN"] },
     ],
   },
+  {
+    title: "Plateforme",
+    items: [{ href: "/admin", label: "Cabinets", icon: ShieldCheck, platformOnly: true }],
+  },
 ];
 
-export function visibleSections(role: UserRole): NavSection[] {
+export function visibleSections(role: UserRole, isPlatform = false): NavSection[] {
   return NAV_SECTIONS
     .map((s) => ({
       ...s,
-      items: s.items.filter((it) => !it.roles || it.roles.includes(role)),
+      items: s.items.filter((it) =>
+        it.platformOnly ? isPlatform : !it.roles || it.roles.includes(role),
+      ),
     }))
     .filter((s) => s.items.length > 0);
 }
