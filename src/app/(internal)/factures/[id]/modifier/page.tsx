@@ -45,10 +45,13 @@ export default async function EditInvoicePage({
         reference: true,
         clientId: true,
         transport: true,
+        // Toutes les DUM du dossier : la plus récente (dums[0]) alimente les
+        // champs du tarif syndical ; l'ensemble des `bureau` sert à décider de
+        // l'affichage du bouton « Taxe régionale » (bureaux 309/411).
         dums: {
           orderBy: { createdAt: "desc" },
-          take: 1,
           select: {
+            bureau: true,
             customsValue: true,
             articleCount: true,
             estimatedDuties: true,
@@ -96,6 +99,7 @@ export default async function EditInvoicePage({
                   ? Number(d.dums[0].estimatedDuties)
                   : null,
               articleCount: d.dums[0]?.articleCount ?? null,
+              bureaux: d.dums.map((du) => du.bureau).filter((b): b is string => !!b),
             }))}
             suggestedNumber={invoice.number}
             edit={{

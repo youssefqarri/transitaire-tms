@@ -38,12 +38,31 @@ type DossierOpt = {
   customsDuties: number | null;
   articleCount: number | null;
   transport: string | null;
+  // Bureaux de douane des DUM du dossier (champ libre DUM.bureau). Un dossier
+  // peut avoir plusieurs DUM → on remonte TOUS les bureaux et le dossier est
+  // éligible à la taxe régionale dès qu'AU MOINS UN bureau est 309 ou 411.
+  bureaux: string[];
 };
+
+// Règle cliente : la taxe régionale est déclenchée par le BUREAU DE DOUANE,
+// pas par le mode de transport — bureaux 309 (Casa Port) et 411 (Tanger).
+// DUM.bureau est un champ libre : la valeur stockée peut être un code nu
+// (« 309 »), un libellé (« 309 - Casa Port », « Casablanca-Port », « Tanger »)…
+// On matche donc (a) le code (309/411) en tant que token isolé — les bornes \b
+// évitent les faux positifs « 3090 » / « 4110 » — et, en repli, (b) les
+// libellés connus (seed : « Casablanca-Port »).
+const TAXE_REGIONALE_BUREAU_RE = /\b(?:309|411)\b/;
+const TAXE_REGIONALE_LABEL_RE = /casa[\s-]*port|casablanca[\s-]*port|tanger/i;
+
+function bureauTriggersTaxeRegionale(bureau: string | null | undefined): boolean {
+  if (!bureau) return false;
+  return TAXE_REGIONALE_BUREAU_RE.test(bureau) || TAXE_REGIONALE_LABEL_RE.test(bureau);
+}
 
 // Barème TVA proposé : 0 % (débours refacturé à l'identique), 10 % (transport
 // refacturé), 14 %, 20 % (honoraires & frais). NB : la taxe régionale (3 % du
-// total taxable, conteneurs maritimes) n'est PAS un taux de TVA — elle a son
-// propre bouton et s'ajoute en ligne à 20 %.
+// total taxable, déclenchée par les bureaux de douane 309/411) n'est PAS un
+// taux de TVA — elle a son propre bouton et s'ajoute en ligne à 20 %.
 const VAT_RATES = [0, 10, 14, 20] as const;
 
 export type InvoiceEditInit = {
@@ -132,10 +151,12 @@ export function NewInvoiceForm({
     setItems((arr) => arr.filter((_, idx) => idx !== i));
   }
 
-  // Taxe régionale (conteneurs maritimes au port) = 3 % du total des montants
-  // TAXABLES (lignes à TVA > 0), hors la taxe elle-même ; ajoutée à 20 % de TVA.
-  // Affichée uniquement pour les dossiers maritimes (cf. règle cliente : pas
-  // d'aérien). Action manuelle → gère naturellement le cas « maritime en colis ».
+  // Taxe régionale = 3 % du total des montants TAXABLES (lignes à TVA > 0),
+  // hors la taxe elle-même ; ajoutée à 20 % de TVA.
+  // Déclenchée par le BUREAU DE DOUANE (bureaux 309 Casa Port / 411 Tanger),
+  // cf. bouton conditionnel plus bas. Action MANUELLE (ajout au clic, jamais
+  // automatique). Taux laissé à 3 % en attendant la reconfirmation cliente de
+  // la mention « 0,3 % » (3 % vérifié empiriquement sur FA260009 : 29,25 = 3 % × 975).
   function applyTaxeRegionale() {
     const base = items
       .filter((it) => it.code !== "TAXREG" && Number(it.vatRate) > 0)
@@ -332,13 +353,15 @@ export function NewInvoiceForm({
             <Button type="button" variant="soft" size="sm" onClick={() => addItem("DEBOURS")}>
               <Plus /> Débours (0 %)
             </Button>
-            {selectedDossier?.transport === "MARITIME" && (
+            {/* Nouvelle règle : bouton affiché si AU MOINS UN bureau de douane
+                du dossier est 309 (Casa Port) ou 411 (Tanger). */}
+            {(selectedDossier?.bureaux ?? []).some(bureauTriggersTaxeRegionale) && (
               <Button
                 type="button"
                 variant="soft"
                 size="sm"
                 onClick={applyTaxeRegionale}
-                title="Conteneurs maritimes : 3 % du total des montants taxables"
+                title="Bureaux 309 Casa Port / 411 Tanger : 3 % du total des montants taxables"
               >
                 <Plus /> Taxe régionale (3 %)
               </Button>
