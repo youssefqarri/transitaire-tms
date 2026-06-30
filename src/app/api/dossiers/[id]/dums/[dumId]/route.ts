@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canCreateDUM } from "@/lib/roles";
 import { DUM_STATUS_VALUES } from "@/lib/statuses";
+import { orgScope } from "@/lib/tenant";
 import { audit } from "@/lib/audit";
 
 const patchSchema = z.object({
@@ -42,7 +43,9 @@ export async function PATCH(
   if (!parsed.success) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   const d = parsed.data;
 
-  const dum = await prisma.dUM.findFirst({ where: { id: dumId, dossierId: id } });
+  const dum = await prisma.dUM.findFirst({
+    where: { id: dumId, dossierId: id, dossier: { ...orgScope(session.user.orgId) } },
+  });
   if (!dum) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   // Numéro de DUM : modifiable uniquement en cas d'erreur, et seulement par

@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { isInternal } from "@/lib/roles";
 import { audit } from "@/lib/audit";
+import { orgScope } from "@/lib/tenant";
 
 const patchSchema = z.object({
   fulfilled: z.boolean().optional(),
@@ -26,6 +27,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (parsed.data.note !== undefined) data.note = parsed.data.note?.trim() || null;
   if (parsed.data.name !== undefined) data.name = parsed.data.name?.trim() || null;
 
+  const owns = await prisma.expectedDocument.findFirst({
+    where: { id, dossier: { ...orgScope(session.user.orgId) } },
+    select: { id: true },
+  });
+  if (!owns) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const exp = await prisma.expectedDocument.update({ where: { id }, data });
   await audit({
     userId: session.user.id,
@@ -42,6 +48,11 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   const session = await auth();
   if (!session || !isInternal(session.user.role) || session.user.role === "COMMIS_DOUANE")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const owns = await prisma.expectedDocument.findFirst({
+    where: { id, dossier: { ...orgScope(session.user.orgId) } },
+    select: { id: true },
+  });
+  if (!owns) return NextResponse.json({ error: "Not found" }, { status: 404 });
   await prisma.expectedDocument.update({ where: { id }, data: { deletedAt: new Date() } });
   await audit({
     userId: session.user.id,

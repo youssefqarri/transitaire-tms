@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { canUploadDocument } from "@/lib/roles";
+import { orgScope } from "@/lib/tenant";
 
 export async function DELETE(
   _req: Request,
@@ -14,7 +15,9 @@ export async function DELETE(
   if (!canUploadDocument(session.user.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const doc = await prisma.document.findUnique({ where: { id } });
+  const doc = await prisma.document.findFirst({
+    where: { id, dossier: { ...orgScope(session.user.orgId) } },
+  });
   if (!doc) return NextResponse.json({ error: "Document introuvable" }, { status: 404 });
   if (doc.deletedAt) return NextResponse.json({ ok: true });
 

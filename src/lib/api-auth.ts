@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { auth } from "./auth";
 import { prisma } from "./db";
 import { checkRateLimit, clientIp } from "./ratelimit";
+import { orgScope } from "./tenant";
 import type { UserRole } from "@/generated/prisma/enums";
 
 export type AuthContext = {
@@ -78,7 +79,11 @@ export async function authenticate(req?: Request): Promise<AuthContext | null> {
 // le dossier n'existe pas que si l'accès est refusé (pas d'oracle 404 vs 403).
 export async function resolveDossierForCtx(ctx: AuthContext, idOrNumber: string) {
   const dossier = await prisma.dossier.findFirst({
-    where: { deletedAt: null, OR: [{ id: idOrNumber }, { number: idOrNumber }] },
+    where: {
+      deletedAt: null,
+      ...orgScope(ctx.orgId),
+      OR: [{ id: idOrNumber }, { number: idOrNumber }],
+    },
   });
   if (!dossier) return null;
   if (ctx.role === "CLIENT" && dossier.clientId !== ctx.clientId) return null;

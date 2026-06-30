@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { isInternal } from "@/lib/roles";
+import { orgScope } from "@/lib/tenant";
 import { loadTemplate, renderTemplate, type TemplateKey } from "@/lib/messaging";
 import { DOCUMENT_CATEGORY_LABELS } from "@/lib/statuses";
 import type { MessageChannel, MessageLang } from "@/generated/prisma/enums";
@@ -17,8 +18,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const channel = (url.searchParams.get("channel") || "EMAIL") as MessageChannel;
   const lang = (url.searchParams.get("lang") || "FR") as MessageLang;
 
-  const dossier = await prisma.dossier.findUnique({
-    where: { id },
+  const dossier = await prisma.dossier.findFirst({
+    where: { id, ...orgScope(session.user.orgId) },
     include: {
       client: true,
       dums: true,

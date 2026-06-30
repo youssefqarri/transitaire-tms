@@ -160,8 +160,8 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   if (session.user.role !== "ADMIN")
     return NextResponse.json({ error: "Seul un admin peut supprimer un dossier" }, { status: 403 });
 
-  const dossier = await prisma.dossier.findUnique({
-    where: { id },
+  const dossier = await prisma.dossier.findFirst({
+    where: { id, ...orgScope(session.user.orgId) },
     select: { id: true, number: true, clientId: true, deletedAt: true },
   });
   if (!dossier) return NextResponse.json({ error: "Dossier introuvable" }, { status: 404 });

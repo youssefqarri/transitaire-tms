@@ -5,6 +5,7 @@ import { audit } from "@/lib/audit";
 import { storage } from "@/lib/storage";
 import { canUploadDocument } from "@/lib/roles";
 import { validateUpload } from "@/lib/uploads";
+import { orgScope } from "@/lib/tenant";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -12,6 +13,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!canUploadDocument(session.user.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  // Isolation : le dossier doit appartenir à l'organisation de l'utilisateur.
+  const owns = await prisma.dossier.findFirst({
+    where: { id, ...orgScope(session.user.orgId) },
+    select: { id: true },
+  });
+  if (!owns) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const form = await req.formData();
   let name = String(form.get("name") ?? "").trim();

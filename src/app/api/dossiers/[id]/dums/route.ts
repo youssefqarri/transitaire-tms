@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { canCreateDUM } from "@/lib/roles";
 import { audit } from "@/lib/audit";
 import { MAX_DUMS_PER_DOSSIER } from "@/lib/reference";
+import { orgScope } from "@/lib/tenant";
 
 const schema = z.object({
   number: z.string().min(1),
@@ -25,6 +26,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: "Invalid" }, { status: 400 });
+
+  // Isolation : le dossier doit appartenir à l'organisation de l'utilisateur.
+  const owns = await prisma.dossier.findFirst({
+    where: { id, ...orgScope(session.user.orgId) },
+    select: { id: true },
+  });
+  if (!owns) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   // Un dossier peut cumuler plusieurs régimes douaniers, mais au maximum 2 DUM.
   const existing = await prisma.dUM.count({ where: { dossierId: id } });
@@ -50,7 +58,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     });
 
     // si le dossier était en "DECLARATION_EN_COURS", passer à VALIDATION_DOUANE
-    const dossier = await prisma.dossier.findUnique({ where: { id } });
+    const dossier = await prisma.dossier.findFirst({ where: { id, ...orgScope(session.user.orgId) } });
     if (dossier && dossier.status === "DECLARATION_EN_COURS") {
       await prisma.dossier.update({
         where: { id },

@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canNotifyClient } from "@/lib/roles";
 import { notifyClient } from "@/lib/messaging-server";
+import { orgScope } from "@/lib/tenant";
 import { audit } from "@/lib/audit";
 import type { TemplateKey } from "@/lib/messaging";
 
@@ -70,8 +71,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const to = parsed.data.toAddress;
   if (parsed.data.channel === "EMAIL" && to) {
     const emails = to.split(/[,;]/).map((s) => s.trim()).filter(Boolean);
-    const dossier = await prisma.dossier.findUnique({
-      where: { id },
+    const dossier = await prisma.dossier.findFirst({
+      where: { id, ...orgScope(session.user.orgId) },
       select: { clientId: true },
     });
     if (emails[0])

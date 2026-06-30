@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { storage } from "@/lib/storage";
+import { orgScope } from "@/lib/tenant";
 import { getSettings } from "@/lib/settings";
 import { isClientVisibleCategory } from "@/lib/statuses";
 import { safeServeContentType } from "@/lib/uploads";
@@ -18,9 +19,16 @@ export async function GET(
     return NextResponse.json({ error: "Bad" }, { status: 400 });
   }
 
+  // Isolation : le fichier doit relever d'un dossier de l'organisation de l'utilisateur.
+  const inOrg = await prisma.dossier.findFirst({
+    where: { id, ...orgScope(session.user.orgId) },
+    select: { id: true },
+  });
+  if (!inOrg) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
   if (session.user.role === "CLIENT") {
     const dossier = await prisma.dossier.findFirst({
-      where: { id, clientId: session.user.clientId ?? "" },
+      where: { id, clientId: session.user.clientId ?? "", ...orgScope(session.user.orgId) },
       select: { id: true },
     });
     if (!dossier) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
