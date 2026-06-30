@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { canCreateDossier } from "@/lib/roles";
 import { audit } from "@/lib/audit";
 import { nextProvisionalDossierNumber } from "@/lib/dossier-numbering";
+import { orgScope, orgData } from "@/lib/tenant";
 
 const createSchema = z.object({
   number: z.string().optional(),
@@ -40,6 +41,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid payload", details: parsed.error.flatten() }, { status: 400 });
   }
   const data = parsed.data;
+  const orgId = session.user.orgId;
 
   // Client : si un nom est saisi sans id (nouveau client à la création), on le
   // retrouve (insensible à la casse) ou on le crée, puis on rattache le dossier.
@@ -47,9 +49,9 @@ export async function POST(req: Request) {
   if (!clientId && data.clientName?.trim()) {
     const name = data.clientName.trim();
     const existing = await prisma.client.findFirst({
-      where: { name: { equals: name, mode: "insensitive" }, deletedAt: null },
+      where: { name: { equals: name, mode: "insensitive" }, deletedAt: null, ...orgScope(orgId) },
     });
-    clientId = existing ? existing.id : (await prisma.client.create({ data: { name } })).id;
+    clientId = existing ? existing.id : (await prisma.client.create({ data: { name, ...orgData(orgId) } })).id;
   }
   if (!clientId) return NextResponse.json({ error: "Client requis" }, { status: 400 });
 
@@ -59,14 +61,14 @@ export async function POST(req: Request) {
   if (!supplierId && data.supplierName?.trim()) {
     const name = data.supplierName.trim();
     const existing = await prisma.supplier.findFirst({
-      where: { name: { equals: name, mode: "insensitive" } },
+      where: { name: { equals: name, mode: "insensitive" }, ...orgScope(orgId) },
     });
-    supplierId = existing ? existing.id : (await prisma.supplier.create({ data: { name } })).id;
+    supplierId = existing ? existing.id : (await prisma.supplier.create({ data: { name, ...orgData(orgId) } })).id;
   }
 
   // Numéro : utiliser celui fourni OU générer un provisoire PROV-YYYY-NNNN
   const providedNumber = data.number?.trim();
-  let number = providedNumber || (await nextProvisionalDossierNumber());
+  let number = providedNumber || (await nextProvisionalDossierNumber(undefined, orgId));
 
   try {
     // Boucle de retry au cas où le PROV-XXXX entrerait en collision (rare)
@@ -74,6 +76,7 @@ export async function POST(req: Request) {
       try {
         const dossier = await prisma.dossier.create({
           data: {
+            ...orgData(orgId),
             number,
             reference: data.reference?.trim() || null,
             clientReference: data.clientReference?.trim() || null,

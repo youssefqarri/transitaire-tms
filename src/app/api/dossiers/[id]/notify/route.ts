@@ -55,6 +55,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     channel: parsed.data.channel,
     lang: parsed.data.lang,
     userId: session.user.id,
+    orgId: session.user.orgId,
     customSubject: parsed.data.customSubject,
     customBody: parsed.data.customBody,
     toAddress: parsed.data.toAddress,

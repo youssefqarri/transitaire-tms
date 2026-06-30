@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canModifyDossier } from "@/lib/roles";
 import { statusRequiresDum, DOSSIER_STATUS_VALUES } from "@/lib/statuses";
+import { orgScope, orgData } from "@/lib/tenant";
 import { audit } from "@/lib/audit";
 
 const schema = z.object({
@@ -34,7 +35,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     );
   }
 
-  const dossier = await prisma.dossier.findUnique({ where: { id } });
+  const orgId = session.user.orgId;
+  const dossier = await prisma.dossier.findFirst({ where: { id, ...orgScope(orgId) } });
   if (!dossier) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   // ───── Voie « organismes de contrôle » : 2ᵉ statut parallèle, indépendant de la
@@ -62,6 +64,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     });
     await prisma.notification.create({
       data: {
+        ...orgData(orgId),
         role: "EXPLOITATION",
         dossierId: id,
         kind: "STATUS_CHANGE",
@@ -116,6 +119,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   // notification interne
   await prisma.notification.create({
     data: {
+      ...orgData(orgId),
       role: "EXPLOITATION",
       dossierId: id,
       kind: "STATUS_CHANGE",
@@ -130,6 +134,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (isLiquidating) {
     await prisma.notification.create({
       data: {
+        ...orgData(orgId),
         role: "EXPLOITATION",
         dossierId: id,
         kind: "SUIVI_LIQUIDATION",

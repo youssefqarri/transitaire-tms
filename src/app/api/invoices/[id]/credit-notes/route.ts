@@ -22,7 +22,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!parsed.success)
     return NextResponse.json({ error: "Montant invalide" }, { status: 400 });
 
-  const invoice = await prisma.invoice.findUnique({ where: { id }, select: { id: true } });
+  const invoice = await prisma.invoice.findFirst({
+    where: { id, ...orgScope(session.user.orgId) },
+    select: { id: true },
+  });
   if (!invoice) return NextResponse.json({ error: "Facture introuvable" }, { status: 404 });
 
   // Numérotation atomique avec retry en cas de collision @@unique([year, sequence]).
@@ -33,6 +36,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     try {
       const cn = await prisma.creditNote.create({
         data: {
+          ...orgData(session.user.orgId),
           number: next.number,
           year: next.year,
           sequence: next.sequence,

@@ -5,6 +5,7 @@ import { google } from "googleapis";
 import { prisma } from "@/lib/db";
 import { isInternal } from "@/lib/roles";
 import { encryptSecret } from "@/lib/crypto";
+import { orgData } from "@/lib/tenant";
 
 export async function GET(req: Request) {
   const session = await auth();
@@ -31,6 +32,7 @@ export async function GET(req: Request) {
   await prisma.emailAccount.upsert({
     where: { emailAddress },
     create: {
+      ...orgData(session.user.orgId),
       userId: session.user.id,
       provider: "gmail",
       emailAddress,

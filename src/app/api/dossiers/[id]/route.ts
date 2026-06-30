@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canModifyDossier } from "@/lib/roles";
 import { audit } from "@/lib/audit";
+import { orgScope, orgData } from "@/lib/tenant";
 
 const patchSchema = z.object({
   number: z.string().nullable().optional(),
@@ -53,8 +54,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const parsed = patchSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
 
+  const orgId = session.user.orgId;
   // On ne modifie pas un dossier en corbeille (soft-delete).
-  const dossier = await prisma.dossier.findFirst({ where: { id, deletedAt: null } });
+  const dossier = await prisma.dossier.findFirst({ where: { id, deletedAt: null, ...orgScope(orgId) } });
   if (!dossier) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   // Client et fournisseur saisis à la volée : on les retire de `patch` (ce ne sont
@@ -65,9 +67,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!clientIdResolved && clientName?.trim()) {
     const name = clientName.trim();
     const existing = await prisma.client.findFirst({
-      where: { name: { equals: name, mode: "insensitive" }, deletedAt: null },
+      where: { name: { equals: name, mode: "insensitive" }, deletedAt: null, ...orgScope(orgId) },
     });
-    clientIdResolved = existing ? existing.id : (await prisma.client.create({ data: { name } })).id;
+    clientIdResolved = existing ? existing.id : (await prisma.client.create({ data: { name, ...orgData(orgId) } })).id;
   }
 
   // règle: client modifiable uniquement avant validation de DUM
@@ -87,9 +89,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (supplierName?.trim() && !patch.supplierId) {
     const name = supplierName.trim();
     const existing = await prisma.supplier.findFirst({
-      where: { name: { equals: name, mode: "insensitive" } },
+      where: { name: { equals: name, mode: "insensitive" }, ...orgScope(orgId) },
     });
-    supplierIdResolved = existing ? existing.id : (await prisma.supplier.create({ data: { name } })).id;
+    supplierIdResolved = existing ? existing.id : (await prisma.supplier.create({ data: { name, ...orgData(orgId) } })).id;
   }
 
   try {

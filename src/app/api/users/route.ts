@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canManageUsers } from "@/lib/roles";
 import { audit } from "@/lib/audit";
+import { orgData } from "@/lib/tenant";
 
 const schema = z.object({
   name: z.string().min(1),
@@ -33,6 +34,7 @@ export async function POST(req: Request) {
   try {
     const u = await prisma.user.create({
       data: {
+        ...orgData(session.user.orgId),
         name: parsed.data.name.trim(),
         email: parsed.data.email.toLowerCase().trim(),
         password: hashed,
