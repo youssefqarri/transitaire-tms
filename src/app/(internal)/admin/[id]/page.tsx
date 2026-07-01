@@ -1,4 +1,5 @@
 import { redirect, notFound } from "next/navigation";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowLeft, Users, Folder, Building2, Receipt, HardDrive, Download } from "lucide-react";
 import { auth } from "@/lib/auth";
@@ -178,37 +179,44 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Abonnement (à gauche) */}
-        <Card>
-          <div className="p-5 space-y-2">
+        <Card className="h-full">
+          <div className="p-5 h-full flex flex-col space-y-3">
             <div className="text-[13px] font-semibold">Abonnement</div>
             {sub ? (
-              <div className="flex flex-wrap items-center gap-4 text-[13px]">
-                <Badge tone={SUB_TONE[sub.status]} dot>
-                  {SUB_LABEL[sub.status]}
-                </Badge>
-                <span className="text-[var(--color-fg-3)]">
-                  Plan : <span className="text-[var(--color-fg)]">{sub.plan?.name ?? "—"}</span>
-                </span>
-                <span className="text-[var(--color-fg-3)]">
-                  Échéance :{" "}
-                  <span className="text-[var(--color-fg)] tnum">
-                    {sub.currentPeriodEnd ? formatDate(sub.currentPeriodEnd) : "—"}
-                  </span>
-                </span>
+              <div className="flex-1 flex items-center">
+                <div className="grid grid-cols-3 gap-4 w-full">
+                  <Field label="Statut">
+                    <Badge tone={SUB_TONE[sub.status]} dot>
+                      {SUB_LABEL[sub.status]}
+                    </Badge>
+                  </Field>
+                  <Field label="Plan">
+                    <span className="text-[13px] font-medium text-[var(--color-fg)]">
+                      {sub.plan?.name ?? "—"}
+                    </span>
+                  </Field>
+                  <Field label="Échéance">
+                    <span className="text-[13px] font-medium text-[var(--color-fg)] tnum">
+                      {sub.currentPeriodEnd ? formatDate(sub.currentPeriodEnd) : "—"}
+                    </span>
+                  </Field>
+                </div>
               </div>
             ) : (
-              <p className="text-[13px] text-[var(--color-fg-mute)]">
-                Aucun abonnement — clique « Abonnement » pour en définir un.
-              </p>
+              <div className="flex-1 flex items-center">
+                <p className="text-[13px] text-[var(--color-fg-mute)]">
+                  Aucun abonnement — clique « Abonnement » pour en définir un.
+                </p>
+              </div>
             )}
           </div>
         </Card>
 
         {/* Consommation vs quotas (à droite) */}
-        <Card>
-          <div className="p-5 space-y-3">
+        <Card className="h-full">
+          <div className="p-5 h-full flex flex-col space-y-3">
             <div className="flex items-center justify-between">
               <div className="text-[13px] font-semibold">Consommation vs quotas</div>
               {hasOverage && plan && <OverageButton orgId={org.id} />}
@@ -367,6 +375,15 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
           </table>
         </div>
       </Card>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="space-y-1.5 min-w-0">
+      <div className="text-[11px] uppercase tracking-wide text-[var(--color-fg-mute)]">{label}</div>
+      <div className="flex items-center">{children}</div>
     </div>
   );
 }
