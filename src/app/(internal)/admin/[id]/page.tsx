@@ -178,54 +178,58 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
         />
       </div>
 
-      <Card>
-        <div className="p-5 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="text-[13px] font-semibold">Consommation vs quotas</div>
-            {hasOverage && plan && <OverageButton orgId={org.id} />}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Usage label="Dossiers créés (ce mois)" value={dossiersThisMonth} quota={dossierQuota} over={dossierOver} />
-            <Usage
-              label="Stockage total (Go)"
-              value={Number(storageGb.toFixed(2))}
-              quota={quotaGb}
-              over={storageOver}
-            />
-          </div>
-          {!plan && (
-            <p className="text-[12px] text-[var(--color-fg-mute)]">
-              Aucun plan associé — associe un plan pour suivre les quotas et facturer les dépassements.
-            </p>
-          )}
-        </div>
-      </Card>
-
-      <Card>
-        <div className="p-5 space-y-2">
-          <div className="text-[13px] font-semibold">Abonnement</div>
-          {sub ? (
-            <div className="flex flex-wrap items-center gap-4 text-[13px]">
-              <Badge tone={SUB_TONE[sub.status]} dot>
-                {SUB_LABEL[sub.status]}
-              </Badge>
-              <span className="text-[var(--color-fg-3)]">
-                Plan : <span className="text-[var(--color-fg)]">{sub.plan?.name ?? "—"}</span>
-              </span>
-              <span className="text-[var(--color-fg-3)]">
-                Échéance :{" "}
-                <span className="text-[var(--color-fg)] tnum">
-                  {sub.currentPeriodEnd ? formatDate(sub.currentPeriodEnd) : "—"}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        {/* Abonnement (à gauche) */}
+        <Card>
+          <div className="p-5 space-y-2">
+            <div className="text-[13px] font-semibold">Abonnement</div>
+            {sub ? (
+              <div className="flex flex-wrap items-center gap-4 text-[13px]">
+                <Badge tone={SUB_TONE[sub.status]} dot>
+                  {SUB_LABEL[sub.status]}
+                </Badge>
+                <span className="text-[var(--color-fg-3)]">
+                  Plan : <span className="text-[var(--color-fg)]">{sub.plan?.name ?? "—"}</span>
                 </span>
-              </span>
+                <span className="text-[var(--color-fg-3)]">
+                  Échéance :{" "}
+                  <span className="text-[var(--color-fg)] tnum">
+                    {sub.currentPeriodEnd ? formatDate(sub.currentPeriodEnd) : "—"}
+                  </span>
+                </span>
+              </div>
+            ) : (
+              <p className="text-[13px] text-[var(--color-fg-mute)]">
+                Aucun abonnement — clique « Abonnement » pour en définir un.
+              </p>
+            )}
+          </div>
+        </Card>
+
+        {/* Consommation vs quotas (à droite) */}
+        <Card>
+          <div className="p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="text-[13px] font-semibold">Consommation vs quotas</div>
+              {hasOverage && plan && <OverageButton orgId={org.id} />}
             </div>
-          ) : (
-            <p className="text-[13px] text-[var(--color-fg-mute)]">
-              Aucun abonnement — clique « Abonnement » pour en définir un.
-            </p>
-          )}
-        </div>
-      </Card>
+            <div className="grid grid-cols-1 gap-3">
+              <Usage label="Dossiers créés (ce mois)" value={dossiersThisMonth} quota={dossierQuota} over={dossierOver} />
+              <Usage
+                label="Stockage total (Go)"
+                value={Number(storageGb.toFixed(2))}
+                quota={quotaGb}
+                over={storageOver}
+              />
+            </div>
+            {!plan && (
+              <p className="text-[12px] text-[var(--color-fg-mute)]">
+                Aucun plan associé — associe un plan pour suivre les quotas et facturer les dépassements.
+              </p>
+            )}
+          </div>
+        </Card>
+      </div>
 
       <Card>
         <div className="px-5 py-3 border-b border-[var(--color-border)] flex items-center justify-between gap-3">
