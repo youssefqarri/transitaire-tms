@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { BarChart3, TrendingUp, ListChecks, Users, Landmark } from "lucide-react";
+import { TrendingUp, ListChecks, Users, Landmark, Wallet } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { orgScope } from "@/lib/tenant";
@@ -7,7 +7,7 @@ import { canViewInvoices } from "@/lib/roles";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
-import { formatMAD } from "@/lib/invoicing";
+import { formatMAD, totals, round2 } from "@/lib/invoicing";
 import { STATUS_LABELS } from "@/lib/statuses";
 import type { DossierStatus } from "@/generated/prisma/enums";
 
@@ -142,12 +142,125 @@ export default async function RapportsPage() {
     { count: 0, customsValue: 0, liquidatedDuties: 0 },
   );
 
+  // ────────────────────────────────────────────────────────────────────────
+  // 5) Recouvrement — encaissé vs reste à encaisser, à partir des factures
+  //    ÉMISES (hors brouillon/annulée). Le TTC est recalculé par facture via
+  //    `totals(items)` (cohérent avec l'affichage des factures) ; l'encaissé
+  //    vient de `paidAmount`. Reste à encaisser = max(0, TTC − payé). « En
+  //    retard » = statut OVERDUE ou échéance dépassée. Scope org via Invoice.orgId.
+  const invoices = await prisma.invoice.findMany({
+    where: { ...orgScope(orgId), status: { notIn: ["DRAFT", "CANCELLED"] } },
+    select: {
+      status: true,
+      paidAmount: true,
+      dueAt: true,
+      clientId: true,
+      client: { select: { name: true } },
+      items: { select: { quantity: true, unitPrice: true, vatRate: true } },
+    },
+  });
+
+  let encaisse = 0;
+  let resteAEncaisser = 0;
+  let enRetard = 0;
+  const outstandingByClient = new Map<string, { name: string; amount: number }>();
+  for (const inv of invoices) {
+    const ttc = totals(
+      inv.items.map((it) => ({
+        kind: "AUTRE" as const, // sans effet sur le TTC : `totals` ne discrimine que sur vatRate
+        description: "",
+        quantity: num(it.quantity),
+        unitPrice: num(it.unitPrice),
+        vatRate: num(it.vatRate),
+      })),
+    ).totalTTC;
+    const paid = num(inv.paidAmount);
+    const outstanding = Math.max(0, round2(ttc - paid));
+    encaisse += paid;
+    if (outstanding > 0) {
+      resteAEncaisser += outstanding;
+      const overdue = inv.status === "OVERDUE" || (inv.dueAt != null && inv.dueAt < now);
+      if (overdue) enRetard += outstanding;
+      const cur = outstandingByClient.get(inv.clientId) ?? { name: inv.client.name, amount: 0 };
+      cur.amount += outstanding;
+      outstandingByClient.set(inv.clientId, cur);
+    }
+  }
+  encaisse = round2(encaisse);
+  resteAEncaisser = round2(resteAEncaisser);
+  enRetard = round2(enRetard);
+  const relancer = [...outstandingByClient.entries()]
+    .map(([id, v]) => ({ id, name: v.name, amount: round2(v.amount) }))
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 5);
+
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
         title="Rapports"
-        subtitle="Vue d'ensemble de l'activité — chiffre d'affaires, dossiers et volume douane"
+        subtitle="Vue d'ensemble de l'activité — recouvrement, chiffre d'affaires, dossiers et volume douane"
       />
+
+      {/* 5) Recouvrement — encaissé vs reste à encaisser */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Wallet className="size-4 text-[var(--color-accent)]" strokeWidth={1.75} />
+            Recouvrement
+          </CardTitle>
+          <span className="text-[13px] text-[var(--color-fg-3)]">Factures émises (hors brouillon/annulée)</span>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-2)]/40 p-4">
+              <div className="text-[12px] text-[var(--color-fg-3)]">Encaissé</div>
+              <div className="mt-1 text-[22px] font-semibold tnum text-[var(--color-success)]">
+                {formatMAD(encaisse)}
+              </div>
+            </div>
+            <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-2)]/40 p-4">
+              <div className="text-[12px] text-[var(--color-fg-3)]">Reste à encaisser</div>
+              <div className="mt-1 text-[22px] font-semibold tnum text-[var(--color-fg)]">
+                {formatMAD(resteAEncaisser)}
+              </div>
+            </div>
+            <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-2)]/40 p-4">
+              <div className="text-[12px] text-[var(--color-fg-3)]">Dont en retard</div>
+              <div
+                className={`mt-1 text-[22px] font-semibold tnum ${
+                  enRetard > 0 ? "text-[var(--color-danger)]" : "text-[var(--color-fg)]"
+                }`}
+              >
+                {formatMAD(enRetard)}
+              </div>
+            </div>
+          </div>
+
+          {relancer.length > 0 && (
+            <div className="mt-4">
+              <div className="text-[12px] text-[var(--color-fg-3)] mb-2">Clients à relancer</div>
+              <table className="w-full text-[13px]">
+                <thead>
+                  <tr className="border-b border-[var(--color-border)] text-[var(--color-fg-3)]">
+                    <th className="py-2 text-left font-medium">Client</th>
+                    <th className="py-2 text-right font-medium">Reste à encaisser</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {relancer.map((c) => (
+                    <tr key={c.id} className="border-b border-[var(--color-border)] last:border-0">
+                      <td className="py-2 text-[var(--color-fg)] truncate max-w-[320px]">{c.name}</td>
+                      <td className="py-2 text-right tnum font-medium text-[var(--color-fg)]">
+                        {formatMAD(c.amount)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* 1) Chiffre d'affaires (honoraires) — 12 derniers mois */}
       <Card>
