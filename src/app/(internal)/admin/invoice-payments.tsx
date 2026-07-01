@@ -168,10 +168,10 @@ export function InvoicePayments({
                   <table className="w-full text-[13px]">
                     <thead>
                       <tr className="border-b border-[var(--color-border)] text-[12px] text-[var(--color-fg-3)]">
-                        <th className="py-2 text-left font-medium">Date</th>
-                        <th className="py-2 text-right font-medium">Montant</th>
-                        <th className="py-2 text-left font-medium">Méthode</th>
-                        <th className="py-2 text-left font-medium">Réf.</th>
+                        <th className="py-2 pr-3 text-left font-medium">Date</th>
+                        <th className="py-2 pr-4 text-right font-medium">Montant</th>
+                        <th className="py-2 pl-3 pr-3 text-left font-medium">Méthode</th>
+                        <th className="py-2 pr-3 text-left font-medium">Réf.</th>
                         <th className="py-2" />
                       </tr>
                     </thead>
@@ -202,10 +202,10 @@ export function InvoicePayments({
                           </tr>
                         ) : (
                           <tr key={p.id} className="border-b border-[var(--color-border)] last:border-0">
-                            <td className="py-2 text-[var(--color-fg-3)] tnum">{fmtDate(p.paidAt)}</td>
-                            <td className="py-2 text-right tnum font-medium text-[var(--color-fg)]">{fmt(p.amount)}</td>
-                            <td className="py-2 text-[var(--color-fg-2)]">{methodLabel(p.method)}</td>
-                            <td className="py-2 text-[var(--color-fg-3)] truncate max-w-[120px]">{p.reference || "—"}</td>
+                            <td className="py-2 pr-3 text-[var(--color-fg-3)] tnum">{fmtDate(p.paidAt)}</td>
+                            <td className="py-2 pr-4 text-right tnum font-medium text-[var(--color-fg)]">{fmt(p.amount)}</td>
+                            <td className="py-2 pl-3 pr-3 text-[var(--color-fg-2)]">{methodLabel(p.method)}</td>
+                            <td className="py-2 pr-3 text-[var(--color-fg-3)] truncate max-w-[120px]">{p.reference || "—"}</td>
                             <td className="py-2 text-right whitespace-nowrap">
                               <button type="button" onClick={() => startEdit(p)} className="text-[var(--color-fg-mute)] hover:text-[var(--color-fg)] mr-2" title="Éditer">
                                 <Pencil className="size-3.5" />
