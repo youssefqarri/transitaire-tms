@@ -47,6 +47,7 @@ export default async function PlansPage() {
                   <th className="px-5 py-2 text-left font-medium">Période</th>
                   <th className="px-5 py-2 text-right font-medium">Sièges</th>
                   <th className="px-5 py-2 text-right font-medium">Dossiers/mois</th>
+                  <th className="px-5 py-2 text-right font-medium">Stockage</th>
                   <th className="px-5 py-2 text-left font-medium">Statut</th>
                 </tr>
               </thead>
@@ -60,6 +61,7 @@ export default async function PlansPage() {
                     <td className="px-5 py-2.5">{PERIOD[p.period] ?? p.period}</td>
                     <td className="px-5 py-2.5 text-right tnum">{p.maxSeats ?? "∞"}</td>
                     <td className="px-5 py-2.5 text-right tnum">{p.maxDossiersPerMonth ?? "∞"}</td>
+                    <td className="px-5 py-2.5 text-right tnum">{p.maxStorageGb ? `${p.maxStorageGb} Go` : "∞"}</td>
                     <td className="px-5 py-2.5">
                       {p.active ? (
                         <Badge tone="ok" dot>

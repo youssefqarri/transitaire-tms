@@ -16,6 +16,7 @@ export function PlanForm() {
   const [period, setPeriod] = useState("MONTHLY");
   const [maxSeats, setMaxSeats] = useState("");
   const [maxDossiers, setMaxDossiers] = useState("");
+  const [maxStorage, setMaxStorage] = useState("");
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -33,6 +34,7 @@ export function PlanForm() {
           period,
           maxSeats: maxSeats ? Number(maxSeats) : null,
           maxDossiersPerMonth: maxDossiers ? Number(maxDossiers) : null,
+          maxStorageGb: maxStorage ? Number(maxStorage) : null,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -46,6 +48,7 @@ export function PlanForm() {
       setPeriod("MONTHLY");
       setMaxSeats("");
       setMaxDossiers("");
+      setMaxStorage("");
       router.refresh();
     });
   }
@@ -83,6 +86,16 @@ export function PlanForm() {
           min="1"
           value={maxDossiers}
           onChange={(e) => setMaxDossiers(e.target.value)}
+          placeholder="∞"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label>Stockage (Go)</Label>
+        <Input
+          type="number"
+          min="1"
+          value={maxStorage}
+          onChange={(e) => setMaxStorage(e.target.value)}
           placeholder="∞"
         />
       </div>

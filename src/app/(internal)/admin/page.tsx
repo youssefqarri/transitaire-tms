@@ -94,8 +94,10 @@ export default async function AdminOrgsPage() {
                       key={o.id}
                       className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-2)] transition-colors"
                     >
-                      <td className="px-5 py-2.5 font-medium text-[var(--color-fg)]">
-                        {o.name}
+                      <td className="px-5 py-2.5 font-medium">
+                        <Link href={`/admin/${o.id}`} className="text-[var(--color-fg)] hover:underline">
+                          {o.name}
+                        </Link>
                         {!o.active && (
                           <span className="ml-2 text-[11px] text-[var(--color-danger)]">(accès coupé)</span>
                         )}

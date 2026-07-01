@@ -36,9 +36,15 @@ export function SubscriptionManager({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
+  // Essai : par défaut on prérempli l'échéance à +1 mois quand rien n'est encore fixé.
+  const defaultEnd = () => {
+    const d = new Date();
+    d.setMonth(d.getMonth() + 1);
+    return d.toISOString().slice(0, 10);
+  };
   const [planId, setPlanId] = useState(subscription?.planId ?? "");
   const [status, setStatus] = useState(subscription?.status ?? "TRIAL");
-  const [periodEnd, setPeriodEnd] = useState(subscription?.currentPeriodEnd?.slice(0, 10) ?? "");
+  const [periodEnd, setPeriodEnd] = useState(subscription?.currentPeriodEnd?.slice(0, 10) ?? defaultEnd());
   useEscapeClose(open, () => setOpen(false), !pending);
 
   function save() {

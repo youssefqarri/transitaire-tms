@@ -10,6 +10,7 @@ const schema = z.object({
   period: z.enum(["MONTHLY", "YEARLY"]).default("MONTHLY"),
   maxSeats: z.number().int().positive().nullable().optional(),
   maxDossiersPerMonth: z.number().int().positive().nullable().optional(),
+  maxStorageGb: z.number().int().positive().nullable().optional(),
 });
 
 export async function POST(req: Request) {
@@ -27,6 +28,7 @@ export async function POST(req: Request) {
       period: d.period,
       maxSeats: d.maxSeats ?? null,
       maxDossiersPerMonth: d.maxDossiersPerMonth ?? null,
+      maxStorageGb: d.maxStorageGb ?? null,
     },
   });
   return NextResponse.json({ id: plan.id });

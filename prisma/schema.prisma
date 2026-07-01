@@ -1085,6 +1085,7 @@ model Plan {
   period              BillingPeriod @default(MONTHLY)
   maxSeats            Int? // null = illimité
   maxDossiersPerMonth Int? // null = illimité
+  maxStorageGb        Int? // quota de stockage S3 (Go) — null = illimité
   active              Boolean       @default(true)
 
   subscriptions Subscription[]
