@@ -25,7 +25,7 @@ export default async function PlatformBillingPage() {
       </Link>
       <PageHeader
         title="Identité de facturation"
-        subtitle="Émetteur des factures d'abonnement adressées aux cabinets (Evead / Escale)"
+        subtitle="Émetteur des factures d'abonnement adressées aux cabinets (la société éditrice d'Escale)"
       />
       <PlatformBillingForm billing={billing} />
     </div>

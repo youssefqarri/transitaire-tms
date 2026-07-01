@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "./db";
-import { sendMail, textToHtml } from "./mail";
+import { sendPlatformMail, textToHtml } from "./mail";
 import { sendWhatsApp, isWhatsAppConfigured } from "./whatsapp";
 import { getPlatformBilling, subTotals } from "./subscription-billing";
 import { formatMAD } from "./invoicing";
@@ -85,7 +85,7 @@ export async function deliverSubscriptionInvoice(opts: {
   const to = org.email || org.users[0]?.email || null;
   if (to) {
     try {
-      await sendMail({
+      await sendPlatformMail({
         to,
         subject,
         text,

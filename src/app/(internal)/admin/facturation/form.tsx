@@ -26,6 +26,12 @@ type Billing = {
   swift: string | null;
   invoicePrefix: string;
   invoiceFooter: string | null;
+  smtpHost: string | null;
+  smtpPort: number | null;
+  smtpSecure: boolean;
+  smtpUser: string | null;
+  smtpFrom: string | null;
+  hasSmtpPass: boolean;
 };
 
 const FIELDS: { key: keyof Billing; label: string; wide?: boolean }[] = [
@@ -64,13 +70,29 @@ export function PlatformBillingForm({ billing }: { billing: Billing }) {
   );
   const set = (k: string, v: string) => setF((p) => ({ ...p, [k]: v }));
 
+  // SMTP plateforme (états dédiés : booléen + mot de passe non prérempli).
+  const [smtpHost, setSmtpHost] = useState(billing.smtpHost ?? "");
+  const [smtpPort, setSmtpPort] = useState(billing.smtpPort ? String(billing.smtpPort) : "");
+  const [smtpUser, setSmtpUser] = useState(billing.smtpUser ?? "");
+  const [smtpFrom, setSmtpFrom] = useState(billing.smtpFrom ?? "");
+  const [smtpSecure, setSmtpSecure] = useState(billing.smtpSecure);
+  const [smtpPass, setSmtpPass] = useState("");
+
   function submit(e: React.FormEvent) {
     e.preventDefault();
     start(async () => {
       const res = await fetch("/api/admin/platform-billing", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(f),
+        body: JSON.stringify({
+          ...f,
+          smtpHost,
+          smtpUser,
+          smtpFrom,
+          smtpPort: smtpPort ? Number(smtpPort) : null,
+          smtpSecure,
+          ...(smtpPass ? { smtpPass } : {}),
+        }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -109,6 +131,58 @@ export function PlatformBillingForm({ billing }: { billing: Billing }) {
         <div className="space-y-1.5">
           <Label>Mention de pied de facture (conditions de paiement…)</Label>
           <Input value={f.invoiceFooter ?? ""} onChange={(e) => set("invoiceFooter", e.target.value)} />
+        </div>
+      </div>
+
+      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 space-y-3">
+        <div>
+          <div className="text-[13px] font-semibold text-[var(--color-fg)]">
+            Email sortant (SMTP plateforme)
+          </div>
+          <p className="text-[12px] text-[var(--color-fg-3)] mt-0.5">
+            Les factures d'abonnement partent de cette adresse (ex. @escale.ma), indépendamment du SMTP
+            des cabinets. Laissé vide, l'envoi retombe sur le SMTP courant.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label>Serveur SMTP (hôte)</Label>
+            <Input value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)} placeholder="mail.escale.ma" />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Port</Label>
+            <Input type="number" value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)} placeholder="587" />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Utilisateur</Label>
+            <Input value={smtpUser} onChange={(e) => setSmtpUser(e.target.value)} placeholder="facturation@escale.ma" />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Mot de passe {billing.hasSmtpPass && <span className="text-[var(--color-fg-mute)]">(défini — laisser vide pour conserver)</span>}</Label>
+            <Input
+              type="password"
+              value={smtpPass}
+              onChange={(e) => setSmtpPass(e.target.value)}
+              placeholder={billing.hasSmtpPass ? "••••••••" : ""}
+            />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label>Adresse d'expédition (From)</Label>
+            <Input
+              value={smtpFrom}
+              onChange={(e) => setSmtpFrom(e.target.value)}
+              placeholder="Escale <facturation@escale.ma>"
+            />
+          </div>
+          <label className="flex items-center gap-2.5 text-[13px] cursor-pointer md:col-span-2">
+            <input
+              type="checkbox"
+              checked={smtpSecure}
+              onChange={(e) => setSmtpSecure(e.target.checked)}
+              className="size-4 accent-[var(--color-accent)]"
+            />
+            <span className="text-[var(--color-fg)]">Connexion sécurisée (SSL/TLS — port 465)</span>
+          </label>
         </div>
       </div>
 

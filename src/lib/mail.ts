@@ -45,6 +45,36 @@ export async function sendMail(opts: SendMailOptions): Promise<{ messageId: stri
   return { messageId: info.messageId };
 }
 
+/**
+ * Envoi via le SMTP DÉDIÉ de la plateforme (Escale) — pour les factures
+ * d'abonnement, qui doivent partir d'@escale.ma et non du SMTP d'un cabinet.
+ * Si le SMTP plateforme n'est pas configuré, repli sur `sendMail` (SMTP courant).
+ */
+export async function sendPlatformMail(opts: SendMailOptions): Promise<{ messageId: string }> {
+  const { getPlatformSmtp } = await import("./subscription-billing");
+  const smtp = await getPlatformSmtp();
+  if (!smtp) return sendMail(opts); // pas encore configuré → repli
+  const transporter = nodemailer.createTransport({
+    host: smtp.host,
+    port: smtp.port,
+    secure: smtp.secure,
+    auth: { user: smtp.user, pass: smtp.pass },
+    connectionTimeout: 15_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 20_000,
+  });
+  const info = await transporter.sendMail({
+    from: smtp.from,
+    to: opts.to,
+    subject: opts.subject,
+    text: opts.text,
+    html: opts.html,
+    replyTo: opts.replyTo,
+    attachments: opts.attachments,
+  });
+  return { messageId: info.messageId };
+}
+
 /** Vérifie juste la connexion SMTP (login). */
 export async function verifySmtp(): Promise<{ ok: boolean; error?: string }> {
   try {

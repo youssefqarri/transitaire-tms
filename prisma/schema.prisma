@@ -1168,6 +1168,15 @@ model PlatformBilling {
   invoicePrefix String  @default("ESC") // préfixe de numérotation (ESC-2026-0001)
   invoiceFooter String? // mention de pied de facture (conditions de paiement…)
 
+  // SMTP dédié de la plateforme (les factures d'abonnement partent d'@escale.ma,
+  // PAS du SMTP d'un cabinet). smtpPass chiffré au repos (encryptSecret).
+  smtpHost   String?
+  smtpPort   Int?
+  smtpSecure Boolean @default(false)
+  smtpUser   String?
+  smtpPass   String?
+  smtpFrom   String? // ex. "Escale <facturation@escale.ma>"
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
