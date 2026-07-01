@@ -18,8 +18,26 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!inv) return NextResponse.json({ error: "Facture introuvable" }, { status: 404 });
 
   const reminder = new URL(req.url).searchParams.get("reminder") === "1";
-  const pdf = await renderSubscriptionInvoicePdf(id, req.headers.get("cookie") ?? "");
-  const result = await deliverSubscriptionInvoice({ invoiceId: id, reminder, pdf });
+  const body = (await req.json().catch(() => ({}))) as {
+    subject?: string;
+    body?: string;
+    to?: string;
+    channels?: { email?: boolean; whatsapp?: boolean; notif?: boolean };
+  };
+  const channels = body.channels ?? { email: true, whatsapp: true, notif: true };
+  // On ne rend le PDF que si l'email part (rendu Puppeteer coûteux).
+  const pdf = channels.email
+    ? await renderSubscriptionInvoicePdf(id, req.headers.get("cookie") ?? "")
+    : null;
+  const result = await deliverSubscriptionInvoice({
+    invoiceId: id,
+    reminder,
+    pdf,
+    subject: body.subject,
+    body: body.body,
+    to: body.to,
+    channels,
+  });
 
   if (reminder) {
     await prisma.subscriptionInvoice.update({

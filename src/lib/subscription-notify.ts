@@ -60,13 +60,37 @@ function buildMessage(inv: LoadedInvoice, issuerName: string, ttc: number, remin
   return { subject, text };
 }
 
+// Aperçu (sans envoi) : destinataire + objet + corps calculés, dispo WhatsApp.
+// Sert à alimenter la modale de validation avant envoi.
+export async function previewSubscriptionInvoice(invoiceId: string, reminder: boolean) {
+  const inv = await loadInvoice(invoiceId);
+  if (!inv) return null;
+  const org = inv.subscription.organization;
+  const issuer = await getPlatformBilling();
+  const { ttc } = subTotals(Number(inv.amount), Number(inv.vatRate));
+  const { subject, text } = buildMessage(inv, issuer.name ?? "Escale", ttc, reminder);
+  return {
+    to: org.email || org.users[0]?.email || "",
+    subject,
+    body: text,
+    phone: org.phone ?? null,
+    whatsappConfigured: await isWhatsAppConfigured(),
+    number: inv.number,
+  };
+}
+
 // Envoie/relance une facture d'abonnement au cabinet : email (+ PDF si fourni),
 // WhatsApp, et notification in-app aux administrateurs du cabinet. Chaque canal est
-// indépendant : un échec n'empêche pas les autres.
+// indépendant. L'objet/corps/destinataire/canaux peuvent être surchargés (validation
+// depuis la modale d'aperçu) ; sinon on utilise le message calculé et les 3 canaux.
 export async function deliverSubscriptionInvoice(opts: {
   invoiceId: string;
   reminder: boolean;
   pdf?: Buffer | null;
+  subject?: string;
+  body?: string;
+  to?: string;
+  channels?: { email?: boolean; whatsapp?: boolean; notif?: boolean };
 }): Promise<DeliverResult> {
   const inv = await loadInvoice(opts.invoiceId);
   const res: DeliverResult = { email: false, whatsapp: false, notif: false, errors: [] };
@@ -79,32 +103,41 @@ export async function deliverSubscriptionInvoice(opts: {
   const issuer = await getPlatformBilling();
   const issuerName = issuer.name ?? "Escale";
   const { ttc } = subTotals(Number(inv.amount), Number(inv.vatRate));
-  const { subject, text } = buildMessage(inv, issuerName, ttc, opts.reminder);
+  const built = buildMessage(inv, issuerName, ttc, opts.reminder);
+  const subject = opts.subject?.trim() || built.subject;
+  const text = opts.body?.trim() || built.text;
+  const ch = {
+    email: opts.channels?.email ?? true,
+    whatsapp: opts.channels?.whatsapp ?? true,
+    notif: opts.channels?.notif ?? true,
+  };
 
-  // 1) Email → email du cabinet, sinon 1er admin actif.
-  const to = org.email || org.users[0]?.email || null;
-  if (to) {
-    try {
-      await sendPlatformMail({
-        to,
-        subject,
-        text,
-        html: textToHtml(text),
-        replyTo: issuer.email ?? undefined,
-        attachments: opts.pdf
-          ? [{ filename: `facture-${inv.number ?? inv.id}.pdf`, content: opts.pdf, contentType: "application/pdf" }]
-          : undefined,
-      });
-      res.email = true;
-    } catch (e) {
-      res.errors.push(`Email : ${(e as Error).message}`);
+  // 1) Email → destinataire fourni, sinon email du cabinet, sinon 1er admin actif.
+  const to = opts.to?.trim() || org.email || org.users[0]?.email || null;
+  if (ch.email) {
+    if (to) {
+      try {
+        await sendPlatformMail({
+          to,
+          subject,
+          text,
+          html: textToHtml(text),
+          replyTo: issuer.email ?? undefined,
+          attachments: opts.pdf
+            ? [{ filename: `facture-${inv.number ?? inv.id}.pdf`, content: opts.pdf, contentType: "application/pdf" }]
+            : undefined,
+        });
+        res.email = true;
+      } catch (e) {
+        res.errors.push(`Email : ${(e as Error).message}`);
+      }
+    } else {
+      res.errors.push("Email : aucun destinataire (renseigne l'email du cabinet)");
     }
-  } else {
-    res.errors.push("Email : aucun destinataire (renseigne l'email du cabinet)");
   }
 
   // 2) WhatsApp → téléphone du cabinet (si configuré).
-  if (org.phone && (await isWhatsAppConfigured())) {
+  if (ch.whatsapp && org.phone && (await isWhatsAppConfigured())) {
     try {
       await sendWhatsApp({ to: org.phone, text });
       res.whatsapp = true;
@@ -114,20 +147,22 @@ export async function deliverSubscriptionInvoice(opts: {
   }
 
   // 3) Notification in-app → administrateurs du cabinet.
-  try {
-    await prisma.notification.create({
-      data: {
-        orgId: org.id,
-        role: "ADMIN",
-        kind: "AUTRE",
-        title: opts.reminder ? `Rappel — facture ${inv.number} impayée` : `Facture ${inv.number}`,
-        body: `${inv.label ?? "Abonnement"} — ${formatMAD(ttc)} TTC, échéance ${fmtDate(inv.dueAt)}.`,
-        emailSent: res.email,
-      },
-    });
-    res.notif = true;
-  } catch (e) {
-    res.errors.push(`Notification : ${(e as Error).message}`);
+  if (ch.notif) {
+    try {
+      await prisma.notification.create({
+        data: {
+          orgId: org.id,
+          role: "ADMIN",
+          kind: "AUTRE",
+          title: opts.reminder ? `Rappel — facture ${inv.number} impayée` : `Facture ${inv.number}`,
+          body: `${inv.label ?? "Abonnement"} — ${formatMAD(ttc)} TTC, échéance ${fmtDate(inv.dueAt)}.`,
+          emailSent: res.email,
+        },
+      });
+      res.notif = true;
+    } catch (e) {
+      res.errors.push(`Notification : ${(e as Error).message}`);
+    }
   }
 
   return res;
