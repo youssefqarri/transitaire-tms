@@ -9,8 +9,15 @@ const schema = z.object({
   planId: z.string().nullable().optional(),
   status: z.enum(["TRIAL", "ACTIVE", "PAST_DUE", "SUSPENDED", "CANCELLED"]).optional(),
   currentPeriodEnd: z.string().nullable().optional(), // ISO yyyy-mm-dd
+  graceUntil: z.string().nullable().optional(), // rallonge exceptionnelle (ISO yyyy-mm-dd)
   addons: z.array(z.string()).optional(),
 });
+
+// Convertit "yyyy-mm-dd" | null | undefined en Date | null | undefined (pour un update conditionnel).
+function toDate(v: string | null | undefined): Date | null | undefined {
+  if (v === undefined) return undefined;
+  return v ? new Date(v) : null;
+}
 
 // Gère l'abonnement d'un cabinet : plan, statut, échéance. Le statut SUSPENDED/CANCELLED
 // coupe l'accès (reflété sur Organization.active, gate de la revalidation JWT).
@@ -23,12 +30,19 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: "Invalide" }, { status: 400 });
   const d = parsed.data;
-  const periodEnd =
-    d.currentPeriodEnd !== undefined
-      ? d.currentPeriodEnd
-        ? new Date(d.currentPeriodEnd)
-        : null
-      : undefined;
+  const periodEnd = toDate(d.currentPeriodEnd);
+  const graceUntil = toDate(d.graceUntil);
+
+  // Les add-ons inclus d'office dans le forfait sont toujours actifs : on les
+  // fusionne dans les add-ons effectifs (l'enforcement lit `addons`).
+  let effectiveAddons = d.addons;
+  if (d.addons !== undefined && d.planId) {
+    const plan = await prisma.plan.findUnique({
+      where: { id: d.planId },
+      select: { includedAddons: true },
+    });
+    effectiveAddons = [...new Set([...(plan?.includedAddons ?? []), ...d.addons])];
+  }
 
   const sub = await prisma.subscription.upsert({
     where: { orgId },
@@ -37,13 +51,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       planId: d.planId ?? null,
       status: d.status ?? "TRIAL",
       currentPeriodEnd: periodEnd ?? null,
-      addons: d.addons ?? [],
+      graceUntil: graceUntil ?? null,
+      addons: effectiveAddons ?? [],
     },
     update: {
       ...(d.planId !== undefined ? { planId: d.planId } : {}),
       ...(d.status !== undefined ? { status: d.status } : {}),
       ...(periodEnd !== undefined ? { currentPeriodEnd: periodEnd } : {}),
-      ...(d.addons !== undefined ? { addons: d.addons } : {}),
+      ...(graceUntil !== undefined ? { graceUntil } : {}),
+      ...(effectiveAddons !== undefined ? { addons: effectiveAddons } : {}),
     },
   });
 

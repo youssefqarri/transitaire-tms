@@ -1087,6 +1087,7 @@ model Plan {
   maxSeats            Int? // null = illimité
   maxDossiersPerMonth Int? // null = illimité
   maxStorageGb        Int? // quota de stockage S3 (Go) — null = illimité
+  includedAddons      String[]      @default([]) // add-ons inclus d'office : WHATSAPP, API, REPORTING
   active              Boolean       @default(true)
 
   subscriptions Subscription[]
@@ -1105,6 +1106,7 @@ model Subscription {
   status           SubscriptionStatus @default(TRIAL)
   startedAt        DateTime           @default(now())
   currentPeriodEnd DateTime? // échéance / expiration de la période en cours
+  graceUntil       DateTime? // rallonge exceptionnelle : accès maintenu jusqu'à cette date même si échu/impayé (pas de suspension auto)
   trialEndsAt      DateTime?
   canceledAt       DateTime?
   addons           String[]           @default([]) // modules optionnels : WHATSAPP, API, REPORTING
@@ -1127,6 +1129,7 @@ model SubscriptionInvoice {
   dueAt          DateTime
   status         SubscriptionInvoiceStatus @default(PENDING)
   paidAt         DateTime?
+  paidAmount     Decimal                   @default(0) @db.Decimal(10, 2) // encaissé (suivi hors-ligne, paiement partiel possible)
   method         String? // virement / chèque / espèces
   reference      String?
 

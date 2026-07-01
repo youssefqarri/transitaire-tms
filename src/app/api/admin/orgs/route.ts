@@ -22,6 +22,11 @@ const schema = z.object({
   adminName: z.string().min(1),
   adminEmail: z.string().email(),
   adminPassword: z.string().min(8),
+  // Abonnement optionnel à la création.
+  planId: z.string().nullable().optional(),
+  status: z.enum(["TRIAL", "ACTIVE", "PAST_DUE"]).optional(),
+  currentPeriodEnd: z.string().nullable().optional(),
+  addons: z.array(z.string()).optional(),
 });
 
 // Crée un nouveau cabinet (Organization) + son 1er compte administrateur.
@@ -63,6 +68,28 @@ export async function POST(req: Request) {
           orgId: o.id,
         },
       });
+
+      // Abonnement à la création (si un forfait ou un statut est fourni).
+      if (d.planId || d.status || d.currentPeriodEnd || (d.addons && d.addons.length)) {
+        // Les add-ons inclus au forfait sont toujours actifs → fusion.
+        let addons = d.addons ?? [];
+        if (d.planId) {
+          const plan = await tx.plan.findUnique({
+            where: { id: d.planId },
+            select: { includedAddons: true },
+          });
+          addons = [...new Set([...(plan?.includedAddons ?? []), ...addons])];
+        }
+        await tx.subscription.create({
+          data: {
+            orgId: o.id,
+            planId: d.planId ?? null,
+            status: d.status ?? "TRIAL",
+            currentPeriodEnd: d.currentPeriodEnd ? new Date(d.currentPeriodEnd) : null,
+            addons,
+          },
+        });
+      }
       return o;
     });
 

@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { SubscriptionManager } from "../subscription-manager";
 import { OverageButton } from "../overage-button";
-import { InvoiceMarkPaidButton } from "../invoice-row";
+import { InvoicePaymentButton } from "../invoice-row";
 
 export const dynamic = "force-dynamic";
 
@@ -84,6 +84,7 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
       maxSeats: true,
       maxDossiersPerMonth: true,
       maxStorageGb: true,
+      includedAddons: true,
     },
   });
   // Decimal → number (sérialisable vers le composant client SubscriptionManager).
@@ -95,6 +96,7 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
     maxSeats: p.maxSeats,
     maxDossiersPerMonth: p.maxDossiersPerMonth,
     maxStorageGb: p.maxStorageGb,
+    includedAddons: p.includedAddons,
   }));
 
   // Monitoring stockage S3 par cabinet : somme des tailles des pièces (documents +
@@ -145,6 +147,7 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
                     status: sub.status,
                     planId: sub.planId,
                     currentPeriodEnd: sub.currentPeriodEnd ? sub.currentPeriodEnd.toISOString() : null,
+                    graceUntil: sub.graceUntil ? sub.graceUntil.toISOString() : null,
                     addons: sub.addons,
                   }
                 : null
@@ -230,33 +233,44 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
                 <tr className="border-b border-[var(--color-border)] text-[12px] text-[var(--color-fg-3)]">
                   <th className="px-5 py-2 text-left font-medium">Période</th>
                   <th className="px-5 py-2 text-right font-medium">Montant HT</th>
+                  <th className="px-5 py-2 text-right font-medium">Encaissé</th>
                   <th className="px-5 py-2 text-left font-medium">Échéance</th>
                   <th className="px-5 py-2 text-left font-medium">Statut</th>
                   <th className="px-5 py-2" />
                 </tr>
               </thead>
               <tbody>
-                {invoices.map((inv) => (
+                {invoices.map((inv) => {
+                  const total = Number(inv.amount);
+                  const paid = Number(inv.paidAmount);
+                  const partial = inv.status === "PENDING" && paid > 0;
+                  return (
                   <tr key={inv.id} className="border-b border-[var(--color-border)] last:border-0">
                     <td className="px-5 py-2.5 text-[var(--color-fg-3)] tnum">
                       {formatDate(inv.periodStart)} – {formatDate(inv.periodEnd)}
                     </td>
                     <td className="px-5 py-2.5 text-right font-medium text-[var(--color-fg)] tnum">
-                      {formatCurrency(Number(inv.amount), "MAD")}
+                      {formatCurrency(total, "MAD")}
+                    </td>
+                    <td className="px-5 py-2.5 text-right tnum text-[var(--color-fg-3)]">
+                      {paid > 0 ? formatCurrency(paid, "MAD") : "—"}
                     </td>
                     <td className="px-5 py-2.5 text-[var(--color-fg-3)] tnum">
                       {formatDate(inv.dueAt)}
                     </td>
                     <td className="px-5 py-2.5">
-                      <Badge tone={INV_TONE[inv.status]} dot>
-                        {INV_LABEL[inv.status]}
+                      <Badge tone={partial ? "info" : INV_TONE[inv.status]} dot>
+                        {partial ? "Partiel" : INV_LABEL[inv.status]}
                       </Badge>
                     </td>
                     <td className="px-5 py-2.5 text-right">
-                      {inv.status === "PENDING" && <InvoiceMarkPaidButton invoiceId={inv.id} />}
+                      {(inv.status === "PENDING" || inv.status === "OVERDUE") && (
+                        <InvoicePaymentButton invoiceId={inv.id} amount={total} paidAmount={paid} />
+                      )}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

@@ -64,7 +64,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             organization: {
               select: {
                 active: true,
-                subscription: { select: { status: true, currentPeriodEnd: true } },
+                subscription: {
+                  select: { status: true, currentPeriodEnd: true, graceUntil: true },
+                },
               },
             },
           },
@@ -74,10 +76,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (!db.organization.active) return null; // cabinet suspendu
           const sub = db.organization.subscription;
           if (sub) {
-            // abonnement suspendu/résilié, ou période expirée (hors essai) → accès coupé
+            const now = new Date();
+            // Suspension/résiliation manuelle → accès coupé sans condition.
             if (sub.status === "SUSPENDED" || sub.status === "CANCELLED") return null;
-            if (sub.currentPeriodEnd && sub.currentPeriodEnd < new Date() && sub.status !== "TRIAL")
-              return null;
+            // Période expirée (hors essai) → accès coupé, SAUF rallonge exceptionnelle
+            // en cours (graceUntil dans le futur) : pas de suspension automatique.
+            if (sub.currentPeriodEnd && sub.currentPeriodEnd < now && sub.status !== "TRIAL") {
+              const graceActive = sub.graceUntil != null && sub.graceUntil >= now;
+              if (!graceActive) return null;
+            }
           }
         }
         // tokenVersion : n'invalide que les jetons qui en portent un (évite la

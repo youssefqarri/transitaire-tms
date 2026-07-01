@@ -35,6 +35,7 @@ export default async function AdminOrgsPage() {
         maxSeats: true,
         maxDossiersPerMonth: true,
         maxStorageGb: true,
+        includedAddons: true,
       },
     }),
   ]);
@@ -47,6 +48,7 @@ export default async function AdminOrgsPage() {
     maxSeats: p.maxSeats,
     maxDossiersPerMonth: p.maxDossiersPerMonth,
     maxStorageGb: p.maxStorageGb,
+    includedAddons: p.includedAddons,
   }));
 
   return (
@@ -110,6 +112,9 @@ export default async function AdminOrgsPage() {
                             planName: o.subscription.plan?.name ?? null,
                             currentPeriodEnd: o.subscription.currentPeriodEnd
                               ? o.subscription.currentPeriodEnd.toISOString()
+                              : null,
+                            graceUntil: o.subscription.graceUntil
+                              ? o.subscription.graceUntil.toISOString()
                               : null,
                             addons: o.subscription.addons,
                           }

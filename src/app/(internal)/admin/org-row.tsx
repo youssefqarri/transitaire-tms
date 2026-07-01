@@ -24,6 +24,7 @@ type Sub = {
   planId: string | null;
   planName: string | null;
   currentPeriodEnd: string | null;
+  graceUntil: string | null;
   addons: string[];
 } | null;
 
@@ -87,6 +88,7 @@ export function OrgRow({
                   status: sub.status,
                   planId: sub.planId,
                   currentPeriodEnd: sub.currentPeriodEnd,
+                  graceUntil: sub.graceUntil,
                   addons: sub.addons,
                 }
               : null
