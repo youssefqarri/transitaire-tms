@@ -151,13 +151,13 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
       <Card>
         <div className="p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="text-[13px] font-semibold">Consommation ce mois</div>
+            <div className="text-[13px] font-semibold">Consommation vs quotas</div>
             {hasOverage && plan && <OverageButton orgId={org.id} />}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Usage label="Dossiers créés" value={dossiersThisMonth} quota={dossierQuota} over={dossierOver} />
+            <Usage label="Dossiers créés (ce mois)" value={dossiersThisMonth} quota={dossierQuota} over={dossierOver} />
             <Usage
-              label="Stockage (Go)"
+              label="Stockage total (Go)"
               value={Number(storageGb.toFixed(2))}
               quota={quotaGb}
               over={storageOver}
