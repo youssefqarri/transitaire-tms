@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { SubscriptionManager } from "../subscription-manager";
+import { OverageButton } from "../overage-button";
 
 export const dynamic = "force-dynamic";
 
@@ -64,7 +65,8 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
 
   // Monitoring stockage S3 par cabinet : somme des tailles des pièces (documents +
   // pièces jointes d'emails), scopée à l'organisation.
-  const [docAgg, mailAgg] = await Promise.all([
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const [docAgg, mailAgg, dossiersThisMonth] = await Promise.all([
     prisma.document.aggregate({
       _sum: { fileSize: true },
       where: { deletedAt: null, dossier: { orgId: id } },
@@ -73,11 +75,18 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
       _sum: { size: true },
       where: { message: { account: { orgId: id } } },
     }),
+    prisma.dossier.count({ where: { orgId: id, createdAt: { gte: monthStart } } }),
   ]);
   const storageBytes = (docAgg._sum.fileSize ?? 0) + (mailAgg._sum.size ?? 0);
+  const storageGb = storageBytes / 1024 ** 3;
 
   const sub = org.subscription;
-  const quotaGb = sub?.plan?.maxStorageGb ?? null;
+  const plan = sub?.plan ?? null;
+  const quotaGb = plan?.maxStorageGb ?? null;
+  const dossierQuota = plan?.maxDossiersPerMonth ?? null;
+  const dossierOver = dossierQuota != null && dossiersThisMonth > dossierQuota;
+  const storageOver = quotaGb != null && storageGb > quotaGb;
+  const hasOverage = dossierOver || storageOver;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -101,6 +110,7 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
                     status: sub.status,
                     planId: sub.planId,
                     currentPeriodEnd: sub.currentPeriodEnd ? sub.currentPeriodEnd.toISOString() : null,
+                    addons: sub.addons,
                   }
                 : null
             }
@@ -120,6 +130,29 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
           hint={quotaGb ? `quota ${quotaGb} Go` : undefined}
         />
       </div>
+
+      <Card>
+        <div className="p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="text-[13px] font-semibold">Consommation ce mois</div>
+            {hasOverage && plan && <OverageButton orgId={org.id} />}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Usage label="Dossiers créés" value={dossiersThisMonth} quota={dossierQuota} over={dossierOver} />
+            <Usage
+              label="Stockage (Go)"
+              value={Number(storageGb.toFixed(2))}
+              quota={quotaGb}
+              over={storageOver}
+            />
+          </div>
+          {!plan && (
+            <p className="text-[12px] text-[var(--color-fg-mute)]">
+              Aucun plan associé — associe un plan pour suivre les quotas et facturer les dépassements.
+            </p>
+          )}
+        </div>
+      </Card>
 
       <Card>
         <div className="p-5 space-y-2">
@@ -186,6 +219,28 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
           </table>
         </div>
       </Card>
+    </div>
+  );
+}
+
+function Usage({
+  label,
+  value,
+  quota,
+  over,
+}: {
+  label: string;
+  value: number;
+  quota: number | null;
+  over: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between rounded-[var(--radius-md)] bg-[var(--color-surface-2)] px-3 py-2 text-[13px]">
+      <span className="text-[var(--color-fg-3)]">{label}</span>
+      <span className={over ? "text-[var(--color-danger)] font-medium tnum" : "text-[var(--color-fg)] tnum"}>
+        {value} <span className="text-[var(--color-fg-mute)]">/ {quota ?? "∞"}</span>
+        {over && <span className="ml-1 text-[11px] font-normal">⚠ dépassement</span>}
+      </span>
     </div>
   );
 }

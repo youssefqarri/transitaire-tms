@@ -12,7 +12,18 @@ import { Combobox } from "@/components/ui/combobox";
 import { useEscapeClose, backdropDismiss } from "@/components/ui/dismiss";
 
 type Plan = { id: string; name: string };
-type Sub = { status: string; planId: string | null; currentPeriodEnd: string | null } | null;
+type Sub = {
+  status: string;
+  planId: string | null;
+  currentPeriodEnd: string | null;
+  addons: string[];
+} | null;
+
+const ADDONS = [
+  { id: "WHATSAPP", label: "Notifications WhatsApp" },
+  { id: "API", label: "Accès API v1" },
+  { id: "REPORTING", label: "Reporting avancé" },
+];
 
 const STATUSES = [
   { id: "TRIAL", label: "Essai" },
@@ -45,6 +56,7 @@ export function SubscriptionManager({
   const [planId, setPlanId] = useState(subscription?.planId ?? "");
   const [status, setStatus] = useState(subscription?.status ?? "TRIAL");
   const [periodEnd, setPeriodEnd] = useState(subscription?.currentPeriodEnd?.slice(0, 10) ?? defaultEnd());
+  const [addons, setAddons] = useState<string[]>(subscription?.addons ?? []);
   useEscapeClose(open, () => setOpen(false), !pending);
 
   function save() {
@@ -52,7 +64,7 @@ export function SubscriptionManager({
       const res = await fetch(`/api/admin/orgs/${orgId}/subscription`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId: planId || null, status, currentPeriodEnd: periodEnd || null }),
+        body: JSON.stringify({ planId: planId || null, status, currentPeriodEnd: periodEnd || null, addons }),
       });
       if (!res.ok) {
         toast.error("Échec de la mise à jour");
@@ -116,6 +128,27 @@ export function SubscriptionManager({
                 « Suspendu » / « Résilié » coupent l'accès des utilisateurs du cabinet. Une échéance
                 dépassée (hors essai) coupe aussi l'accès.
               </p>
+
+              <div className="space-y-1.5">
+                <Label>Modules optionnels (add-ons)</Label>
+                <div className="space-y-1">
+                  {ADDONS.map((a) => (
+                    <label key={a.id} className="flex items-center gap-2.5 text-[13px] cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={addons.includes(a.id)}
+                        onChange={(e) =>
+                          setAddons((prev) =>
+                            e.target.checked ? [...prev, a.id] : prev.filter((x) => x !== a.id),
+                          )
+                        }
+                        className="size-4 accent-[var(--color-accent)]"
+                      />
+                      <span className="text-[var(--color-fg)]">{a.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
 
               <div className="flex justify-end gap-2 pt-1">
                 <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>

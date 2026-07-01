@@ -1106,6 +1106,7 @@ model Subscription {
   currentPeriodEnd DateTime? // échéance / expiration de la période en cours
   trialEndsAt      DateTime?
   canceledAt       DateTime?
+  addons           String[]           @default([]) // modules optionnels : WHATSAPP, API, REPORTING
 
   invoices SubscriptionInvoice[]
 

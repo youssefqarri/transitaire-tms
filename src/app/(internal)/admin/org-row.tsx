@@ -24,6 +24,7 @@ type Sub = {
   planId: string | null;
   planName: string | null;
   currentPeriodEnd: string | null;
+  addons: string[];
 } | null;
 
 function fmtDate(iso: string | null): string {
@@ -81,7 +82,14 @@ export function OrgRow({
           orgName={org.name}
           plans={plans}
           subscription={
-            sub ? { status: sub.status, planId: sub.planId, currentPeriodEnd: sub.currentPeriodEnd } : null
+            sub
+              ? {
+                  status: sub.status,
+                  planId: sub.planId,
+                  currentPeriodEnd: sub.currentPeriodEnd,
+                  addons: sub.addons,
+                }
+              : null
           }
         />
       </td>

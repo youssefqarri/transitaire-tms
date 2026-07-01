@@ -88,6 +88,7 @@ export default async function AdminOrgsPage() {
                             currentPeriodEnd: o.subscription.currentPeriodEnd
                               ? o.subscription.currentPeriodEnd.toISOString()
                               : null,
+                            addons: o.subscription.addons,
                           }
                         : null,
                     }}

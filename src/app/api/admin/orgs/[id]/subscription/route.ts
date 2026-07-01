@@ -9,6 +9,7 @@ const schema = z.object({
   planId: z.string().nullable().optional(),
   status: z.enum(["TRIAL", "ACTIVE", "PAST_DUE", "SUSPENDED", "CANCELLED"]).optional(),
   currentPeriodEnd: z.string().nullable().optional(), // ISO yyyy-mm-dd
+  addons: z.array(z.string()).optional(),
 });
 
 // Gère l'abonnement d'un cabinet : plan, statut, échéance. Le statut SUSPENDED/CANCELLED
@@ -36,11 +37,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       planId: d.planId ?? null,
       status: d.status ?? "TRIAL",
       currentPeriodEnd: periodEnd ?? null,
+      addons: d.addons ?? [],
     },
     update: {
       ...(d.planId !== undefined ? { planId: d.planId } : {}),
       ...(d.status !== undefined ? { status: d.status } : {}),
       ...(periodEnd !== undefined ? { currentPeriodEnd: periodEnd } : {}),
+      ...(d.addons !== undefined ? { addons: d.addons } : {}),
     },
   });
 
