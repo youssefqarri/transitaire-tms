@@ -44,6 +44,8 @@ services:
       UPLOAD_DIR: /app/uploads
       # Admins PLATEFORME (console /admin) — emails séparés par virgule, lus depuis .env
       ESCALE_PLATFORM_ADMINS: ${ESCALE_PLATFORM_ADMINS:-}
+      # Secret du cron de facturation des dépassements (POST /api/cron/overages via x-cron-secret)
+      CRON_SECRET: ${CRON_SECRET:-}
       # SMTP / S3 / Gmail : configurables ici OU via l'écran /parametres (stockés en base).
     volumes:
       - uploads:/app/uploads
