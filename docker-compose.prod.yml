@@ -42,6 +42,8 @@ services:
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       STORAGE_DRIVER: ${STORAGE_DRIVER:-local}
       UPLOAD_DIR: /app/uploads
+      # Admins PLATEFORME (console /admin) — emails séparés par virgule, lus depuis .env
+      ESCALE_PLATFORM_ADMINS: ${ESCALE_PLATFORM_ADMINS:-}
       # SMTP / S3 / Gmail : configurables ici OU via l'écran /parametres (stockés en base).
     volumes:
       - uploads:/app/uploads
