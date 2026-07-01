@@ -5,7 +5,7 @@ import type { ElementType } from "react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { isPlatformAdmin } from "@/lib/platform";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { ROLE_LABELS, ROLE_TONE } from "@/lib/roles";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -234,13 +234,27 @@ function Usage({
   quota: number | null;
   over: boolean;
 }) {
+  const pct = quota != null && quota > 0 ? Math.min(100, Math.round((value / quota) * 100)) : null;
   return (
-    <div className="flex items-center justify-between rounded-[var(--radius-md)] bg-[var(--color-surface-2)] px-3 py-2 text-[13px]">
-      <span className="text-[var(--color-fg-3)]">{label}</span>
-      <span className={over ? "text-[var(--color-danger)] font-medium tnum" : "text-[var(--color-fg)] tnum"}>
-        {value} <span className="text-[var(--color-fg-mute)]">/ {quota ?? "∞"}</span>
-        {over && <span className="ml-1 text-[11px] font-normal">⚠ dépassement</span>}
-      </span>
+    <div className="rounded-[var(--radius-md)] bg-[var(--color-surface-2)] px-3 py-2.5 space-y-1.5">
+      <div className="flex items-center justify-between text-[13px]">
+        <span className="text-[var(--color-fg-3)]">{label}</span>
+        <span className={over ? "text-[var(--color-danger)] font-medium tnum" : "text-[var(--color-fg)] tnum"}>
+          {value} <span className="text-[var(--color-fg-mute)]">/ {quota ?? "∞"}</span>
+          {over && <span className="ml-1.5 text-[11px] font-normal">dépassement</span>}
+        </span>
+      </div>
+      {pct != null && (
+        <div className="h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden">
+          <div
+            className={cn(
+              "h-full rounded-full transition-all",
+              over ? "bg-[var(--color-danger)]" : "bg-[var(--color-accent)]",
+            )}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      )}
     </div>
   );
 }

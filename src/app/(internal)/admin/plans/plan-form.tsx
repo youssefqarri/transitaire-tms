@@ -6,14 +6,13 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Combobox } from "@/components/ui/combobox";
 
 export function PlanForm() {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [period, setPeriod] = useState("MONTHLY");
+  const [priceYearly, setPriceYearly] = useState("");
   const [maxSeats, setMaxSeats] = useState("");
   const [maxDossiers, setMaxDossiers] = useState("");
   const [maxStorage, setMaxStorage] = useState("");
@@ -21,7 +20,7 @@ export function PlanForm() {
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!name || !price) {
-      toast.error("Nom et prix requis");
+      toast.error("Nom et prix mensuel requis");
       return;
     }
     start(async () => {
@@ -31,7 +30,7 @@ export function PlanForm() {
         body: JSON.stringify({
           name,
           price: Number(price),
-          period,
+          priceYearly: priceYearly ? Number(priceYearly) : null,
           maxSeats: maxSeats ? Number(maxSeats) : null,
           maxDossiersPerMonth: maxDossiers ? Number(maxDossiers) : null,
           maxStorageGb: maxStorage ? Number(maxStorage) : null,
@@ -45,7 +44,7 @@ export function PlanForm() {
       toast.success("Plan créé");
       setName("");
       setPrice("");
-      setPeriod("MONTHLY");
+      setPriceYearly("");
       setMaxSeats("");
       setMaxDossiers("");
       setMaxStorage("");
@@ -55,32 +54,26 @@ export function PlanForm() {
 
   return (
     <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
-      <div className="space-y-1.5 md:col-span-2">
-        <Label>Nom *</Label>
+      <Field className="md:col-span-2" label="Nom *">
         <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Essentiel, Pro…" />
-      </div>
-      <div className="space-y-1.5">
-        <Label>Prix (MAD) *</Label>
+      </Field>
+      <Field label="Prix mensuel (MAD HT) *">
         <Input type="number" min="0" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} />
-      </div>
-      <div className="space-y-1.5">
-        <Label>Période</Label>
-        <Combobox
-          items={[
-            { id: "MONTHLY", label: "Mensuel" },
-            { id: "YEARLY", label: "Annuel" },
-          ]}
-          value={period}
-          onChange={setPeriod}
-          searchable={false}
+      </Field>
+      <Field label="Prix annuel (MAD HT)">
+        <Input
+          type="number"
+          min="0"
+          step="0.01"
+          value={priceYearly}
+          onChange={(e) => setPriceYearly(e.target.value)}
+          placeholder="2 mois offerts"
         />
-      </div>
-      <div className="space-y-1.5">
-        <Label>Sièges</Label>
+      </Field>
+      <Field label="Sièges">
         <Input type="number" min="1" value={maxSeats} onChange={(e) => setMaxSeats(e.target.value)} placeholder="∞" />
-      </div>
-      <div className="space-y-1.5">
-        <Label>Dossiers/mois</Label>
+      </Field>
+      <Field label="Dossiers/mois">
         <Input
           type="number"
           min="1"
@@ -88,20 +81,30 @@ export function PlanForm() {
           onChange={(e) => setMaxDossiers(e.target.value)}
           placeholder="∞"
         />
-      </div>
-      <div className="space-y-1.5">
-        <Label>Stockage (Go)</Label>
-        <Input
-          type="number"
-          min="1"
-          value={maxStorage}
-          onChange={(e) => setMaxStorage(e.target.value)}
-          placeholder="∞"
-        />
-      </div>
+      </Field>
+      <Field className="md:col-span-2" label="Stockage (Go)">
+        <Input type="number" min="1" value={maxStorage} onChange={(e) => setMaxStorage(e.target.value)} placeholder="∞" />
+      </Field>
       <div className="md:col-span-6 flex justify-end">
         <Button disabled={pending}>{pending ? "…" : "Ajouter le plan"}</Button>
       </div>
     </form>
+  );
+}
+
+function Field({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`space-y-1.5 ${className ?? ""}`}>
+      <Label>{label}</Label>
+      {children}
+    </div>
   );
 }

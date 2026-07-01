@@ -1081,7 +1081,8 @@ enum SubscriptionInvoiceStatus {
 model Plan {
   id                  String        @id @default(cuid())
   name                String
-  price               Decimal       @db.Decimal(10, 2) // en MAD
+  price               Decimal       @db.Decimal(10, 2) // prix MENSUEL HT (MAD)
+  priceYearly         Decimal?      @db.Decimal(10, 2) // prix ANNUEL HT (MAD) — null si non proposé
   period              BillingPeriod @default(MONTHLY)
   maxSeats            Int? // null = illimité
   maxDossiersPerMonth Int? // null = illimité

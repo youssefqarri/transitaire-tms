@@ -7,6 +7,7 @@ import { isPlatformAdmin } from "@/lib/platform";
 const schema = z.object({
   name: z.string().min(1),
   price: z.number().nonnegative(),
+  priceYearly: z.number().nonnegative().nullable().optional(),
   period: z.enum(["MONTHLY", "YEARLY"]).default("MONTHLY"),
   maxSeats: z.number().int().positive().nullable().optional(),
   maxDossiersPerMonth: z.number().int().positive().nullable().optional(),
@@ -25,6 +26,7 @@ export async function POST(req: Request) {
     data: {
       name: d.name.trim(),
       price: d.price,
+      priceYearly: d.priceYearly ?? null,
       period: d.period,
       maxSeats: d.maxSeats ?? null,
       maxDossiersPerMonth: d.maxDossiersPerMonth ?? null,
