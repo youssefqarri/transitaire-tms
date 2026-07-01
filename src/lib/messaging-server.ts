@@ -4,6 +4,7 @@ import { orgScope, orgData } from "./tenant";
 import { loadTemplate, renderTemplate, type TemplateKey } from "./messaging";
 import { sendMail, textToHtml } from "./mail";
 import { sendWhatsApp, isWhatsAppConfigured } from "./whatsapp";
+import { orgHasAddon } from "./entitlements";
 import { DOCUMENT_CATEGORY_LABELS } from "./statuses";
 import type { MessageChannel, MessageLang } from "@/generated/prisma/enums";
 
@@ -134,6 +135,19 @@ export async function notifyClient(opts: {
         },
       });
       return { ok: true, messageId: result.messageId };
+    }
+
+    // Gating add-on WHATSAPP : si l'org possède un abonnement SANS le module
+    // WhatsApp, on n'envoie pas (grandfather = org sans abonnement passe).
+    if (!(await orgHasAddon(opts.orgId, "WHATSAPP"))) {
+      await prisma.outgoingMessage.update({
+        where: { id: msg.id },
+        data: { status: "FAILED", error: "Module WhatsApp non inclus dans l'abonnement" },
+      });
+      return {
+        ok: false,
+        error: "Le module WhatsApp n'est pas inclus dans votre abonnement.",
+      };
     }
 
     // WhatsApp : envoi réel via l'API OpenWA/WAHA si configurée, sinon repli manuel (wa.me).

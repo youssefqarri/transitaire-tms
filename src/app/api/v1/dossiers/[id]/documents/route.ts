@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { authenticate, resolveDossierForCtx } from "@/lib/api-auth";
+import { authenticate, resolveDossierForCtx, requireApiAddon } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { canUploadDocument } from "@/lib/roles";
@@ -18,6 +18,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params;
   const ctx = await authenticate(req);
   if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  { const _deny = await requireApiAddon(ctx); if (_deny) return _deny; }
 
   const parsed = schema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: "Invalid" }, { status: 400 });

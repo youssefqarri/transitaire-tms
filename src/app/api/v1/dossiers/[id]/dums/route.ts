@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { authenticate } from "@/lib/api-auth";
+import { authenticate, requireApiAddon } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { canCreateDUM } from "@/lib/roles";
 import { audit } from "@/lib/audit";
@@ -18,6 +18,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params;
   const ctx = await authenticate(req);
   if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  { const _deny = await requireApiAddon(ctx); if (_deny) return _deny; }
   if (!canCreateDUM(ctx.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 

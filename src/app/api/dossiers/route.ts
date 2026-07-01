@@ -6,6 +6,7 @@ import { canCreateDossier } from "@/lib/roles";
 import { audit } from "@/lib/audit";
 import { nextProvisionalDossierNumber } from "@/lib/dossier-numbering";
 import { orgScope, orgData } from "@/lib/tenant";
+import { orgDossierQuota } from "@/lib/entitlements";
 
 const createSchema = z.object({
   number: z.string().optional(),
@@ -113,7 +114,14 @@ export async function POST(req: Request) {
           entityId: dossier.id,
           metadata: { number: dossier.number, auto: !providedNumber },
         });
-        return NextResponse.json({ id: dossier.id, number: dossier.number });
+        // Quota SOUPLE : on ne bloque pas (le dépassement est facturable) ; on
+        // signale seulement pour un toast côté UI. org_default (quota null) → jamais.
+        const quota = await orgDossierQuota(orgId);
+        return NextResponse.json({
+          id: dossier.id,
+          number: dossier.number,
+          quotaWarning: quota.over,
+        });
       } catch (e: unknown) {
         const err = e as { code?: string };
         // Conflit numéro : si auto-généré on retente avec un nouveau

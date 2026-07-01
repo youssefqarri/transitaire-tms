@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { authenticate } from "@/lib/api-auth";
+import { authenticate, requireApiAddon } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { canCreateDossier } from "@/lib/roles";
 import { audit } from "@/lib/audit";
 import { orgData } from "@/lib/tenant";
+import { orgDossierQuota } from "@/lib/entitlements";
 
 const schema = z.object({
   number: z.string().min(1),
@@ -25,6 +26,7 @@ const schema = z.object({
 export async function POST(req: Request) {
   const ctx = await authenticate(req);
   if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  { const _deny = await requireApiAddon(ctx); if (_deny) return _deny; }
   if (!canCreateDossier(ctx.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
@@ -75,7 +77,9 @@ export async function POST(req: Request) {
       metadata: { number: dossier.number, via: ctx.via },
       orgId: ctx.orgId,
     });
-    return NextResponse.json(dossier);
+    // Quota SOUPLE : indicateur seulement (le dépassement est facturable, pas bloquant).
+    const quota = await orgDossierQuota(ctx.orgId);
+    return NextResponse.json({ ...dossier, quotaWarning: quota.over });
   } catch (e: unknown) {
     const err = e as { code?: string; message?: string };
     if (err.code === "P2002")

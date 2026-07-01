@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { orgScope, orgData } from "@/lib/tenant";
+import { orgDossierQuota } from "@/lib/entitlements";
 import { nextProvisionalDossierNumber } from "@/lib/dossier-numbering";
 
 const createSchema = z.object({
@@ -107,7 +108,13 @@ export async function POST(req: Request) {
         orgId,
       });
 
-      return NextResponse.json({ id: dossier.id, number: dossier.number });
+      // Quota SOUPLE : indicateur seulement (dépassement facturable, non bloquant).
+      const quota = await orgDossierQuota(orgId);
+      return NextResponse.json({
+        id: dossier.id,
+        number: dossier.number,
+        quotaWarning: quota.over,
+      });
     } catch (e: unknown) {
       const err = e as { code?: string; message?: string };
       if (err.code === "P2002") {

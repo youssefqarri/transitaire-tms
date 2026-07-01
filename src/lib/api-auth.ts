@@ -1,8 +1,10 @@
 import bcrypt from "bcryptjs";
+import { NextResponse } from "next/server";
 import { auth } from "./auth";
 import { prisma } from "./db";
 import { checkRateLimit, clientIp } from "./ratelimit";
 import { orgScope } from "./tenant";
+import { orgHasAddon } from "./entitlements";
 import type { UserRole } from "@/generated/prisma/enums";
 
 export type AuthContext = {
@@ -72,6 +74,19 @@ export async function authenticate(req?: Request): Promise<AuthContext | null> {
     };
   }
   return null;
+}
+
+// Gating add-on API : l'accès par TOKEN (API publique v1) exige le module "API"
+// dès qu'un abonnement existe. L'accès par SESSION (UI interne) n'est jamais bridé.
+// org_default (aucun abonnement) est grandfathered → orgHasAddon renvoie true.
+// Retourne une réponse 403 prête à renvoyer si l'accès est refusé, sinon null.
+export async function requireApiAddon(ctx: AuthContext): Promise<NextResponse | null> {
+  if (ctx.via !== "token") return null; // UI interne : non concernée
+  if (await orgHasAddon(ctx.orgId, "API")) return null;
+  return NextResponse.json(
+    { error: "Le module API n'est pas inclus dans l'abonnement de ce cabinet." },
+    { status: 403 },
+  );
 }
 
 // Résout un dossier par id OU numéro, en appliquant l'isolation client :

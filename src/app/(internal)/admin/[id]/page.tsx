@@ -5,13 +5,14 @@ import type { ElementType } from "react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { isPlatformAdmin } from "@/lib/platform";
-import { cn, formatDate } from "@/lib/utils";
+import { cn, formatDate, formatCurrency } from "@/lib/utils";
 import { ROLE_LABELS, ROLE_TONE } from "@/lib/roles";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { SubscriptionManager } from "../subscription-manager";
 import { OverageButton } from "../overage-button";
+import { InvoiceMarkPaidButton } from "../invoice-row";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,19 @@ const SUB_LABEL = {
   PAST_DUE: "Impayé",
   SUSPENDED: "Suspendu",
   CANCELLED: "Résilié",
+} as const;
+
+const INV_TONE = {
+  PENDING: "warn",
+  PAID: "ok",
+  OVERDUE: "danger",
+  CANCELLED: "neutral",
+} as const;
+const INV_LABEL = {
+  PENDING: "En attente",
+  PAID: "Payée",
+  OVERDUE: "En retard",
+  CANCELLED: "Annulée",
 } as const;
 
 function fmtBytes(n: number): string {
@@ -48,7 +62,9 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
     where: { id },
     include: {
       _count: { select: { users: true, dossiers: true, clients: true, invoices: true } },
-      subscription: { include: { plan: true } },
+      subscription: {
+        include: { plan: true, invoices: { orderBy: { createdAt: "desc" } } },
+      },
       users: {
         orderBy: { createdAt: "asc" },
         select: { id: true, name: true, email: true, role: true, active: true },
@@ -82,6 +98,7 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
 
   const sub = org.subscription;
   const plan = sub?.plan ?? null;
+  const invoices = sub?.invoices ?? [];
   const quotaGb = plan?.maxStorageGb ?? null;
   const dossierQuota = plan?.maxDossiersPerMonth ?? null;
   const dossierOver = dossierQuota != null && dossiersThisMonth > dossierQuota;
@@ -178,6 +195,54 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
             </p>
           )}
         </div>
+      </Card>
+
+      <Card>
+        <div className="px-5 py-3 border-b border-[var(--color-border)] text-[13px] font-semibold">
+          Factures d&apos;abonnement ({invoices.length})
+        </div>
+        {invoices.length === 0 ? (
+          <div className="px-5 py-6 text-[13px] text-[var(--color-fg-mute)]">
+            Aucune facture d&apos;abonnement émise.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-[13px]">
+              <thead>
+                <tr className="border-b border-[var(--color-border)] text-[12px] text-[var(--color-fg-3)]">
+                  <th className="px-5 py-2 text-left font-medium">Période</th>
+                  <th className="px-5 py-2 text-right font-medium">Montant HT</th>
+                  <th className="px-5 py-2 text-left font-medium">Échéance</th>
+                  <th className="px-5 py-2 text-left font-medium">Statut</th>
+                  <th className="px-5 py-2" />
+                </tr>
+              </thead>
+              <tbody>
+                {invoices.map((inv) => (
+                  <tr key={inv.id} className="border-b border-[var(--color-border)] last:border-0">
+                    <td className="px-5 py-2.5 text-[var(--color-fg-3)] tnum">
+                      {formatDate(inv.periodStart)} – {formatDate(inv.periodEnd)}
+                    </td>
+                    <td className="px-5 py-2.5 text-right font-medium text-[var(--color-fg)] tnum">
+                      {formatCurrency(Number(inv.amount), "MAD")}
+                    </td>
+                    <td className="px-5 py-2.5 text-[var(--color-fg-3)] tnum">
+                      {formatDate(inv.dueAt)}
+                    </td>
+                    <td className="px-5 py-2.5">
+                      <Badge tone={INV_TONE[inv.status]} dot>
+                        {INV_LABEL[inv.status]}
+                      </Badge>
+                    </td>
+                    <td className="px-5 py-2.5 text-right">
+                      {inv.status === "PENDING" && <InvoiceMarkPaidButton invoiceId={inv.id} />}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Card>
 
       <Card>

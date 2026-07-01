@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { authenticate } from "@/lib/api-auth";
+import { authenticate, requireApiAddon } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { orgScope } from "@/lib/tenant";
 import type { DossierStatus, DossierType } from "@/generated/prisma/enums";
@@ -8,6 +8,7 @@ import type { DossierStatus, DossierType } from "@/generated/prisma/enums";
 export async function GET(req: Request) {
   const ctx = await authenticate(req);
   if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  { const _deny = await requireApiAddon(ctx); if (_deny) return _deny; }
   if (ctx.role === "CLIENT") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const url = new URL(req.url);

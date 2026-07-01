@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Trash2,
   ShieldCheck,
+  BarChart3,
 } from "lucide-react";
 import type { UserRole } from "@/generated/prisma/enums";
 
@@ -55,6 +56,7 @@ export const NAV_SECTIONS: NavSection[] = [
     title: "Facturation",
     items: [
       { href: "/factures", label: "Factures", icon: Receipt, roles: FACTURATION_ACCESS },
+      { href: "/rapports", label: "Rapports", icon: BarChart3, roles: ["ADMIN", "COMPTABILITE"] },
     ],
   },
   {

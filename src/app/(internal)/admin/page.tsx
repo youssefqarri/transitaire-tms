@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Plus, Building2, CreditCard } from "lucide-react";
+import { Plus, Building2, CreditCard, TrendingUp } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { isPlatformAdmin } from "@/lib/platform";
@@ -38,6 +38,11 @@ export default async function AdminOrgsPage() {
         subtitle={`${orgs.length} organisation${orgs.length > 1 ? "s" : ""} sur la plateforme`}
         actions={
           <div className="flex items-center gap-2">
+            <Link href="/admin/revenus">
+              <Button variant="outline">
+                <TrendingUp className="size-4" /> Revenus
+              </Button>
+            </Link>
             <Link href="/admin/plans">
               <Button variant="outline">
                 <CreditCard className="size-4" /> Plans

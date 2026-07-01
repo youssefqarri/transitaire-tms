@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { authenticate } from "@/lib/api-auth";
+import { authenticate, requireApiAddon } from "@/lib/api-auth";
 import { STATUS_LABELS, DOCUMENT_CATEGORY_LABELS, DUM_STATUS_LABELS } from "@/lib/statuses";
 import { ROLE_LABELS } from "@/lib/roles";
 
@@ -7,6 +7,7 @@ import { ROLE_LABELS } from "@/lib/roles";
 export async function GET(req: Request) {
   const ctx = await authenticate(req);
   if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  { const _deny = await requireApiAddon(ctx); if (_deny) return _deny; }
   return NextResponse.json({
     dossierStatuses: STATUS_LABELS,
     dossierTypes: { IMPORT: "Import", EXPORT: "Export" },

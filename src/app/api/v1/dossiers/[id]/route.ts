@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { authenticate, resolveDossierForCtx } from "@/lib/api-auth";
+import { authenticate, resolveDossierForCtx, requireApiAddon } from "@/lib/api-auth";
 import { prisma } from "@/lib/db";
 import { orgScope } from "@/lib/tenant";
 import { isClientVisibleCategory } from "@/lib/statuses";
@@ -9,6 +9,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const { id } = await params;
   const ctx = await authenticate(req);
   if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  { const _deny = await requireApiAddon(ctx); if (_deny) return _deny; }
 
   // Accès objet (CLIENT limité à ses dossiers, sinon 404 sans oracle)
   const access = await resolveDossierForCtx(ctx, id);
