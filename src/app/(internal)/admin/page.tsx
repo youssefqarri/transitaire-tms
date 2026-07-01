@@ -9,30 +9,49 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatCard } from "@/components/ui/stat-card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ColumnHeader } from "@/components/ui/column-header";
 import { OrgRow } from "./org-row";
-import { OrgSearch } from "./org-search";
+import type { Prisma } from "@/generated/prisma/client";
 
 export const dynamic = "force-dynamic";
 
 const fmtMAD = (n: number) => `${Math.round(n).toLocaleString("fr-FR")} MAD`;
 
+const SUB_OPTIONS = [
+  { value: "NONE", label: "Sans abonnement" },
+  { value: "TRIAL", label: "Essai" },
+  { value: "ACTIVE", label: "Actif" },
+  { value: "PAST_DUE", label: "Impayé" },
+  { value: "SUSPENDED", label: "Suspendu" },
+  { value: "CANCELLED", label: "Résilié" },
+];
+const SUB_STATUSES = ["TRIAL", "ACTIVE", "PAST_DUE", "SUSPENDED", "CANCELLED"] as const;
+
 export default async function AdminOrgsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; sub?: string }>;
 }) {
   const session = await auth();
   if (!session || !isPlatformAdmin(session.user.email)) redirect("/dashboard");
 
-  const query = ((await searchParams).q ?? "").trim();
-  const orgWhere = query
-    ? {
-        OR: [
-          { name: { contains: query, mode: "insensitive" as const } },
-          { slug: { contains: query, mode: "insensitive" as const } },
-        ],
-      }
-    : {};
+  const params = await searchParams;
+  const query = (params.q ?? "").trim();
+  const sub = params.sub ?? "";
+  const hasFilter = !!query || !!sub;
+
+  const and: Prisma.OrganizationWhereInput[] = [];
+  if (query)
+    and.push({
+      OR: [
+        { name: { contains: query, mode: "insensitive" } },
+        { slug: { contains: query, mode: "insensitive" } },
+      ],
+    });
+  if (sub === "NONE") and.push({ subscription: { is: null } });
+  else if ((SUB_STATUSES as readonly string[]).includes(sub))
+    and.push({ subscription: { status: sub as (typeof SUB_STATUSES)[number] } });
+  const orgWhere: Prisma.OrganizationWhereInput = and.length ? { AND: and } : {};
 
   const [orgs, plansRaw, totalCabinets, activeCabinets, activeSubs, paymentsAgg, unpaidInvoices] =
     await Promise.all([
@@ -140,27 +159,37 @@ export default async function AdminOrgsPage({
       </div>
 
       <Card>
-        <div className="px-5 py-3 border-b border-[var(--color-border)]">
-          <OrgSearch initial={query} />
-        </div>
         {orgs.length === 0 ? (
           <EmptyState
             icon={Building2}
-            title={query ? "Aucun cabinet ne correspond" : "Aucun cabinet"}
-            hint={query ? `Recherche : « ${query} »` : undefined}
+            title={hasFilter ? "Aucun cabinet ne correspond" : "Aucun cabinet"}
+            hint={hasFilter ? "Aucun cabinet ne correspond à votre recherche." : undefined}
+            cta={
+              hasFilter ? (
+                <Link href="/admin">
+                  <Button variant="outline" size="sm">
+                    Réinitialiser
+                  </Button>
+                </Link>
+              ) : undefined
+            }
           />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
               <thead>
-                <tr className="border-b border-[var(--color-border)] text-[12px] text-[var(--color-fg-3)]">
-                  <th className="px-5 py-2 text-left font-medium">Cabinet</th>
-                  <th className="px-5 py-2 text-left font-medium">Slug</th>
-                  <th className="px-5 py-2 text-right font-medium">Utilisateurs</th>
-                  <th className="px-5 py-2 text-right font-medium">Dossiers</th>
-                  <th className="px-5 py-2 text-left font-medium">Abonnement</th>
-                  <th className="px-5 py-2 text-left font-medium">Échéance</th>
-                  <th className="px-5 py-2" />
+                <tr className="border-b border-[var(--color-border)] text-[12px]">
+                  <ColumnHeader label="Cabinet" className="px-5" filter={{ type: "text", param: "q" }} />
+                  <ColumnHeader label="Slug" className="px-5" />
+                  <ColumnHeader label="Utilisateurs" align="right" className="px-5" />
+                  <ColumnHeader label="Dossiers" align="right" className="px-5" />
+                  <ColumnHeader
+                    label="Abonnement"
+                    className="px-5"
+                    filter={{ type: "select", param: "sub", options: SUB_OPTIONS }}
+                  />
+                  <ColumnHeader label="Échéance" className="px-5" />
+                  <ColumnHeader label="" className="px-5" />
                 </tr>
               </thead>
               <tbody>
