@@ -11,6 +11,7 @@ const schema = z.object({
   label: z.string().trim().max(200).optional(),
   periodStart: z.string().optional(), // yyyy-mm-dd ; défaut = 1er du mois
   periodEnd: z.string().optional(),
+  dueAt: z.string().optional(), // yyyy-mm-dd ; prioritaire sur dueInDays
   dueInDays: z.number().int().min(0).max(120).optional(), // défaut 15
   vatRate: z.number().min(0).max(100).optional(), // défaut 20
 });
@@ -49,7 +50,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const periodEnd = d.periodEnd
     ? new Date(d.periodEnd)
     : new Date(periodStart.getFullYear(), periodStart.getMonth() + 1, 0);
-  const dueAt = new Date(now.getTime() + (d.dueInDays ?? 15) * 86400000);
+  const dueAt = d.dueAt ? new Date(d.dueAt) : new Date(now.getTime() + (d.dueInDays ?? 15) * 86400000);
   const label =
     d.label ??
     `Abonnement ${sub.plan?.name ?? ""} — ${MONTHS[periodStart.getMonth()]} ${periodStart.getFullYear()}`.trim();

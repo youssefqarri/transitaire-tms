@@ -230,7 +230,13 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
       <Card>
         <div className="px-5 py-3 border-b border-[var(--color-border)] flex items-center justify-between gap-3">
           <div className="text-[13px] font-semibold">Factures d&apos;abonnement ({invoices.length})</div>
-          {sub && <GenerateInvoiceButton orgId={org.id} />}
+          {sub && (
+            <GenerateInvoiceButton
+              orgId={org.id}
+              planName={plan?.name ?? null}
+              planPrice={plan ? Number(plan.price) : null}
+            />
+          )}
         </div>
         {invoices.length === 0 ? (
           <div className="px-5 py-6 text-[13px] text-[var(--color-fg-mute)]">
