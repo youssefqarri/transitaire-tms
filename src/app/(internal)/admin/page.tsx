@@ -171,7 +171,9 @@ export default async function AdminOrgsPage({
             }
           />
         ) : (
-          <div className="overflow-x-auto">
+          // overflow-x-auto sur mobile (scroll horizontal), mais visible sur desktop
+          // pour ne jamais rogner le menu déroulant des filtres d'en-tête (table courte).
+          <div className="overflow-x-auto md:overflow-visible">
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="border-b border-[var(--color-border)] text-[12px]">
