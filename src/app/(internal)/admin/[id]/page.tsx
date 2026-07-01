@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { SubscriptionManager } from "../subscription-manager";
 import { OverageButton } from "../overage-button";
-import { InvoicePaymentButton } from "../invoice-row";
+import { InvoicePayments } from "../invoice-payments";
 import { GenerateInvoiceButton } from "../generate-invoice-button";
 import { InvoiceSendButtons } from "../invoice-send";
 
@@ -65,7 +65,13 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
     include: {
       _count: { select: { users: true, dossiers: true, clients: true, invoices: true } },
       subscription: {
-        include: { plan: true, invoices: { orderBy: { createdAt: "desc" } } },
+        include: {
+          plan: true,
+          invoices: {
+            orderBy: { createdAt: "desc" },
+            include: { payments: { where: { deletedAt: null }, orderBy: { paidAt: "desc" } } },
+          },
+        },
       },
       users: {
         orderBy: { createdAt: "asc" },
@@ -286,9 +292,20 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
                         >
                           <Download className="size-3.5" /> PDF
                         </a>
-                        {(inv.status === "PENDING" || inv.status === "OVERDUE") && (
-                          <InvoicePaymentButton invoiceId={inv.id} amount={ttc} paidAmount={paid} />
-                        )}
+                        <InvoicePayments
+                          invoiceId={inv.id}
+                          ttc={ttc}
+                          paidAmount={paid}
+                          unpaid={inv.status === "PENDING" || inv.status === "OVERDUE"}
+                          payments={inv.payments.map((pm) => ({
+                            id: pm.id,
+                            amount: Number(pm.amount),
+                            method: pm.method,
+                            reference: pm.reference,
+                            paidAt: pm.paidAt.toISOString(),
+                            note: pm.note,
+                          }))}
+                        />
                       </div>
                     </td>
                   </tr>

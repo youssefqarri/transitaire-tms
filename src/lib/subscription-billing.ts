@@ -117,6 +117,41 @@ export function subTotals(amountHT: number, vatRate: number): {
   return { ht, vat, ttc: round2(ht + vat) };
 }
 
+/** Recalcule paidAmount + statut d'une facture à partir de ses encaissements NON
+ *  supprimés. Ne touche pas une facture CANCELLED. À appeler après tout
+ *  ajout/édition/suppression d'encaissement. */
+export async function recomputeInvoicePaid(invoiceId: string): Promise<void> {
+  const inv = await prisma.subscriptionInvoice.findUnique({
+    where: { id: invoiceId },
+    select: { amount: true, vatRate: true, dueAt: true, status: true },
+  });
+  if (!inv || inv.status === "CANCELLED") return;
+
+  const agg = await prisma.subscriptionPayment.aggregate({
+    _sum: { amount: true },
+    where: { invoiceId, deletedAt: null },
+  });
+  const paid = round2(Number(agg._sum.amount ?? 0));
+  const { ttc } = subTotals(Number(inv.amount), Number(inv.vatRate));
+  const fullyPaid = ttc > 0 && paid >= ttc;
+
+  let paidAt: Date | null = null;
+  if (fullyPaid) {
+    const last = await prisma.subscriptionPayment.findFirst({
+      where: { invoiceId, deletedAt: null },
+      orderBy: { paidAt: "desc" },
+      select: { paidAt: true },
+    });
+    paidAt = last?.paidAt ?? new Date();
+  }
+  const status = fullyPaid ? "PAID" : inv.dueAt < new Date() ? "OVERDUE" : "PENDING";
+
+  await prisma.subscriptionInvoice.update({
+    where: { id: invoiceId },
+    data: { paidAmount: paid, status, paidAt },
+  });
+}
+
 /** Prochain numéro de facture d'abonnement de l'année (ex. ESC-2026-0001). */
 export async function nextSubInvoiceNumber(
   tx: Prisma.TransactionClient,

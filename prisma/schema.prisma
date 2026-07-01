@@ -1138,11 +1138,32 @@ model SubscriptionInvoice {
   remindersSent  Int                       @default(0) // nb de relances envoyées
   lastReminderAt DateTime?
 
+  payments SubscriptionPayment[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([orgId])
   @@index([subscriptionId])
+}
+
+// Registre des encaissements d'une facture d'abonnement (hors-ligne). paidAmount
+// de la facture = somme des encaissements NON supprimés. Soft delete via deletedAt.
+model SubscriptionPayment {
+  id          String              @id @default(cuid())
+  invoiceId   String
+  invoice     SubscriptionInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount      Decimal             @db.Decimal(10, 2)
+  method      String? // virement / chèque / espèces / traite / autre
+  reference   String?
+  paidAt      DateTime // date de l'encaissement
+  note        String?
+  createdById String? // auteur (pas de FK — simple traçabilité)
+  deletedAt   DateTime? // soft delete
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([invoiceId])
 }
 
 // Identité de facturation de la PLATEFORME (Evead/Escale) — émetteur des factures
