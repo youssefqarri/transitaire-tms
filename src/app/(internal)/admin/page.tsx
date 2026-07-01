@@ -30,24 +30,20 @@ const SUB_STATUSES = ["TRIAL", "ACTIVE", "PAST_DUE", "SUSPENDED", "CANCELLED"] a
 export default async function AdminOrgsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; sub?: string }>;
+  searchParams: Promise<{ q?: string; slug?: string; sub?: string }>;
 }) {
   const session = await auth();
   if (!session || !isPlatformAdmin(session.user.email)) redirect("/dashboard");
 
   const params = await searchParams;
   const query = (params.q ?? "").trim();
+  const slugQuery = (params.slug ?? "").trim();
   const sub = params.sub ?? "";
-  const hasFilter = !!query || !!sub;
+  const hasFilter = !!query || !!slugQuery || !!sub;
 
   const and: Prisma.OrganizationWhereInput[] = [];
-  if (query)
-    and.push({
-      OR: [
-        { name: { contains: query, mode: "insensitive" } },
-        { slug: { contains: query, mode: "insensitive" } },
-      ],
-    });
+  if (query) and.push({ name: { contains: query, mode: "insensitive" } });
+  if (slugQuery) and.push({ slug: { contains: slugQuery, mode: "insensitive" } });
   if (sub === "NONE") and.push({ subscription: { is: null } });
   else if ((SUB_STATUSES as readonly string[]).includes(sub))
     and.push({ subscription: { status: sub as (typeof SUB_STATUSES)[number] } });
@@ -180,7 +176,7 @@ export default async function AdminOrgsPage({
               <thead>
                 <tr className="border-b border-[var(--color-border)] text-[12px]">
                   <ColumnHeader label="Cabinet" className="px-5" filter={{ type: "text", param: "q" }} />
-                  <ColumnHeader label="Slug" className="px-5" />
+                  <ColumnHeader label="Slug" className="px-5" filter={{ type: "text", param: "slug" }} />
                   <ColumnHeader label="Utilisateurs" align="right" className="px-5" />
                   <ColumnHeader label="Dossiers" align="right" className="px-5" />
                   <ColumnHeader

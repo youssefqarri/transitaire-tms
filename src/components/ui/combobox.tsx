@@ -8,6 +8,7 @@ import {
   useCallback,
   forwardRef,
 } from "react";
+import { createPortal } from "react-dom";
 import { ChevronDown, Check, Search, X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -63,8 +64,45 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
   const [query, setQuery] = useState("");
   const [activeIdx, setActiveIdx] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+
+  // Le menu est rendu dans un portal (position: fixed) pour échapper à tout
+  // conteneur `overflow` parent (ex. table `overflow-x-auto`) qui le tronquerait.
+  // On mesure le trigger et on positionne le menu sous (ou au-dessus) de lui.
+  const [pos, setPos] = useState<
+    { left: number; width: number; top?: number; bottom?: number; maxHeight: number } | null
+  >(null);
+  const updatePosition = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const width = Math.max(r.width, 288); // min-w 18rem
+    const left = Math.max(8, Math.min(r.left, window.innerWidth - width - 8));
+    const spaceBelow = window.innerHeight - r.bottom;
+    const spaceAbove = r.top;
+    const openUp = spaceBelow < 320 && spaceAbove > spaceBelow;
+    setPos({
+      left,
+      width,
+      top: openUp ? undefined : r.bottom + 4,
+      bottom: openUp ? window.innerHeight - r.top + 4 : undefined,
+      maxHeight: Math.max(180, (openUp ? spaceAbove : spaceBelow) - 16),
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    updatePosition();
+    const onScrollOrResize = () => updatePosition();
+    window.addEventListener("scroll", onScrollOrResize, true);
+    window.addEventListener("resize", onScrollOrResize);
+    return () => {
+      window.removeEventListener("scroll", onScrollOrResize, true);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+  }, [open, updatePosition]);
 
   const selected = useMemo(() => items.find((it) => it.id === value), [items, value]);
 
@@ -93,7 +131,9 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      if (!containerRef.current?.contains(e.target as Node)) setOpen(false);
+      const t = e.target as Node;
+      // le menu est portalisé hors du container → tester les deux
+      if (!containerRef.current?.contains(t) && !menuRef.current?.contains(t)) setOpen(false);
     };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
@@ -224,8 +264,12 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
         />
       </button>
 
-      {open && (
-        <div className="absolute z-40 mt-1 w-full min-w-[18rem] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-[0_12px_32px_-12px_rgba(0,0,0,0.15)] overflow-hidden animate-fade-in">
+      {open && pos && createPortal(
+        <div
+          ref={menuRef}
+          style={{ position: "fixed", left: pos.left, width: pos.width, top: pos.top, bottom: pos.bottom }}
+          className="z-[200] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-[0_12px_32px_-12px_rgba(0,0,0,0.15)] overflow-hidden animate-fade-in flex flex-col"
+        >
           {searchable && (
             <div className="relative border-b border-[var(--color-border)]">
               <Search
@@ -249,7 +293,8 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
           <div
             ref={listRef}
             role="listbox"
-            className="max-h-[260px] overflow-y-auto scrollbar-thin py-1"
+            className="overflow-y-auto scrollbar-thin py-1"
+            style={{ maxHeight: Math.min(260, pos.maxHeight) }}
           >
             {filtered.length === 0 && !showCreate && (
               <div className="px-3 py-6 text-center text-[13px] text-[var(--color-fg-3)]">
@@ -315,7 +360,8 @@ export const Combobox = forwardRef<HTMLButtonElement, Props>(function Combobox(
               </button>
             )}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
