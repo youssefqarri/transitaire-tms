@@ -1,6 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, Folder, Building2, Receipt, HardDrive } from "lucide-react";
+import { ArrowLeft, Users, Folder, Building2, Receipt, HardDrive, Download } from "lucide-react";
 import type { ElementType } from "react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
@@ -271,9 +271,20 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
                       </Badge>
                     </td>
                     <td className="px-5 py-2.5 text-right">
-                      {(inv.status === "PENDING" || inv.status === "OVERDUE") && (
-                        <InvoicePaymentButton invoiceId={inv.id} amount={ttc} paidAmount={paid} />
-                      )}
+                      <div className="inline-flex items-center gap-2">
+                        <a
+                          href={`/api/admin/subscription-invoices/${inv.id}/pdf`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[12px] text-[var(--color-fg-3)] hover:text-[var(--color-fg)]"
+                          title="Télécharger le PDF"
+                        >
+                          <Download className="size-3.5" /> PDF
+                        </a>
+                        {(inv.status === "PENDING" || inv.status === "OVERDUE") && (
+                          <InvoicePaymentButton invoiceId={inv.id} amount={ttc} paidAmount={paid} />
+                        )}
+                      </div>
                     </td>
                   </tr>
                   );
