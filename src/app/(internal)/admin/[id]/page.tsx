@@ -1,7 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Users, Folder, Building2, Receipt, HardDrive, Download } from "lucide-react";
-import type { ElementType } from "react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { isPlatformAdmin } from "@/lib/platform";
@@ -10,6 +9,7 @@ import { ROLE_LABELS, ROLE_TONE } from "@/lib/roles";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
+import { StatCard } from "@/components/ui/stat-card";
 import { SubscriptionManager } from "../subscription-manager";
 import { OverageButton } from "../overage-button";
 import { InvoicePayments } from "../invoice-payments";
@@ -165,15 +165,16 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
       />
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <Stat icon={Users} label="Utilisateurs" value={org._count.users} />
-        <Stat icon={Folder} label="Dossiers" value={org._count.dossiers} />
-        <Stat icon={Building2} label="Clients" value={org._count.clients} />
-        <Stat icon={Receipt} label="Factures" value={org._count.invoices} />
-        <Stat
+        <StatCard icon={Users} label="Utilisateurs" value={org._count.users} />
+        <StatCard icon={Folder} label="Dossiers" value={org._count.dossiers} />
+        <StatCard icon={Building2} label="Clients" value={org._count.clients} />
+        <StatCard icon={Receipt} label="Factures" value={org._count.invoices} />
+        <StatCard
           icon={HardDrive}
           label="Stockage S3"
           value={fmtBytes(storageBytes)}
           hint={quotaGb ? `quota ${quotaGb} Go` : undefined}
+          tone={storageOver ? "warn" : "default"}
         />
       </div>
 
@@ -396,24 +397,3 @@ function Usage({
   );
 }
 
-function Stat({
-  icon: Icon,
-  label,
-  value,
-  hint,
-}: {
-  icon: ElementType;
-  label: string;
-  value: string | number;
-  hint?: string;
-}) {
-  return (
-    <div className="rounded-[var(--radius-md)] bg-[var(--color-surface-2)] p-3">
-      <div className="flex items-center gap-1.5 text-[12px] text-[var(--color-fg-3)]">
-        <Icon className="size-3.5" /> {label}
-      </div>
-      <div className="mt-1 text-[20px] font-semibold text-[var(--color-fg)] tnum">{value}</div>
-      {hint && <div className="text-[11px] text-[var(--color-fg-mute)]">{hint}</div>}
-    </div>
-  );
-}

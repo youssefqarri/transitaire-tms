@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { AlertTriangle, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SubscriptionManager, type ManagerPlan } from "./subscription-manager";
 
@@ -31,6 +32,27 @@ type Sub = {
 function fmtDate(iso: string | null): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("fr-FR");
+}
+
+// Échéance avec alerte : icône ⚠ à moins de 7 jours, rouge si dépassée.
+function DueCell({ iso }: { iso: string | null }) {
+  if (!iso) return <span className="text-[var(--color-fg-mute)]">—</span>;
+  const end = new Date(iso);
+  const days = Math.ceil((end.getTime() - Date.now()) / 86400000);
+  const label = end.toLocaleDateString("fr-FR");
+  if (days < 0)
+    return (
+      <span className="inline-flex items-center gap-1 text-[var(--color-danger)] font-medium" title="Échéance dépassée">
+        <AlertCircle className="size-3.5 shrink-0" /> {label}
+      </span>
+    );
+  if (days <= 7)
+    return (
+      <span className="inline-flex items-center gap-1 text-[var(--color-warning)] font-medium" title={`Expire dans ${days} j`}>
+        <AlertTriangle className="size-3.5 shrink-0" /> {label}
+      </span>
+    );
+  return <span className="text-[var(--color-fg-3)]">{label}</span>;
 }
 
 export function OrgRow({
@@ -75,7 +97,9 @@ export function OrgRow({
           <span className="text-[var(--color-fg-mute)]">—</span>
         )}
       </td>
-      <td className="px-5 py-2.5 text-[var(--color-fg-3)] tnum">{fmtDate(sub?.currentPeriodEnd ?? null)}</td>
+      <td className="px-5 py-2.5 tnum">
+        <DueCell iso={sub?.currentPeriodEnd ?? null} />
+      </td>
       {/* stopPropagation : le bouton Abonnement ne déclenche pas la navigation de ligne */}
       <td className="px-5 py-2.5 text-right" onClick={(e) => e.stopPropagation()}>
         <SubscriptionManager

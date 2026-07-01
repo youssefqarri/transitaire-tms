@@ -1,45 +1,76 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Plus, Building2, CreditCard, TrendingUp, FileText } from "lucide-react";
+import { Plus, Building2, CreditCard, TrendingUp, FileText, Wallet, Clock } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { isPlatformAdmin } from "@/lib/platform";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
+import { StatCard } from "@/components/ui/stat-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { OrgRow } from "./org-row";
+import { OrgSearch } from "./org-search";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminOrgsPage() {
+const fmtMAD = (n: number) => `${Math.round(n).toLocaleString("fr-FR")} MAD`;
+
+export default async function AdminOrgsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   const session = await auth();
   if (!session || !isPlatformAdmin(session.user.email)) redirect("/dashboard");
 
-  const [orgs, plansRaw] = await Promise.all([
-    prisma.organization.findMany({
-      include: {
-        _count: { select: { users: true, dossiers: true } },
-        subscription: { include: { plan: { select: { name: true } } } },
-      },
-      orderBy: { createdAt: "asc" },
-    }),
-    prisma.plan.findMany({
-      where: { active: true },
-      orderBy: { price: "asc" },
-      select: {
-        id: true,
-        name: true,
-        price: true,
-        priceYearly: true,
-        maxSeats: true,
-        maxDossiersPerMonth: true,
-        maxStorageGb: true,
-        includedAddons: true,
-      },
-    }),
-  ]);
-  // Decimal → number (sérialisable vers le composant client SubscriptionManager).
+  const query = ((await searchParams).q ?? "").trim();
+  const orgWhere = query
+    ? {
+        OR: [
+          { name: { contains: query, mode: "insensitive" as const } },
+          { slug: { contains: query, mode: "insensitive" as const } },
+        ],
+      }
+    : {};
+
+  const [orgs, plansRaw, totalCabinets, activeCabinets, activeSubs, paymentsAgg, unpaidInvoices] =
+    await Promise.all([
+      prisma.organization.findMany({
+        where: orgWhere,
+        include: {
+          _count: { select: { users: true, dossiers: true } },
+          subscription: { include: { plan: { select: { name: true } } } },
+        },
+        orderBy: { createdAt: "asc" },
+      }),
+      prisma.plan.findMany({
+        where: { active: true },
+        orderBy: { price: "asc" },
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          priceYearly: true,
+          maxSeats: true,
+          maxDossiersPerMonth: true,
+          maxStorageGb: true,
+          includedAddons: true,
+        },
+      }),
+      prisma.organization.count(),
+      prisma.organization.count({ where: { active: true } }),
+      prisma.subscription.findMany({
+        where: { status: "ACTIVE", planId: { not: null } },
+        select: { plan: { select: { price: true } } },
+      }),
+      prisma.subscriptionPayment.aggregate({ _sum: { amount: true }, where: { deletedAt: null } }),
+      prisma.subscriptionInvoice.findMany({
+        where: { status: { in: ["PENDING", "OVERDUE"] } },
+        select: { amount: true, vatRate: true, paidAmount: true },
+      }),
+    ]);
+
   const plans = plansRaw.map((p) => ({
     id: p.id,
     name: p.name,
@@ -51,11 +82,19 @@ export default async function AdminOrgsPage() {
     includedAddons: p.includedAddons,
   }));
 
+  // Indicateurs plateforme (sur l'ensemble des cabinets, indépendamment de la recherche).
+  const mrr = activeSubs.reduce((s, x) => s + Number(x.plan?.price ?? 0), 0);
+  const encaisse = Number(paymentsAgg._sum.amount ?? 0);
+  const reste = unpaidInvoices.reduce((s, inv) => {
+    const ttc = Number(inv.amount) * (1 + Number(inv.vatRate) / 100);
+    return s + Math.max(0, ttc - Number(inv.paidAmount));
+  }, 0);
+
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
         title="Cabinets"
-        subtitle={`${orgs.length} organisation${orgs.length > 1 ? "s" : ""} sur la plateforme`}
+        subtitle={`${totalCabinets} cabinet${totalCabinets > 1 ? "s" : ""} sur la plateforme`}
         actions={
           <div className="flex items-center gap-2">
             <Link href="/admin/revenus">
@@ -82,9 +121,34 @@ export default async function AdminOrgsPage() {
         }
       />
 
+      {/* Indicateurs plateforme */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard
+          icon={Building2}
+          label="Cabinets"
+          value={totalCabinets}
+          hint={`${activeCabinets} actif${activeCabinets > 1 ? "s" : ""}`}
+        />
+        <StatCard icon={TrendingUp} label="MRR (récurrent / mois)" value={fmtMAD(mrr)} href="/admin/revenus" />
+        <StatCard icon={Wallet} label="Encaissé (abonnements)" value={fmtMAD(encaisse)} tone="success" />
+        <StatCard
+          icon={Clock}
+          label="Reste à encaisser"
+          value={fmtMAD(reste)}
+          tone={reste > 0 ? "warn" : "default"}
+        />
+      </div>
+
       <Card>
+        <div className="px-5 py-3 border-b border-[var(--color-border)]">
+          <OrgSearch initial={query} />
+        </div>
         {orgs.length === 0 ? (
-          <EmptyState icon={Building2} title="Aucun cabinet" />
+          <EmptyState
+            icon={Building2}
+            title={query ? "Aucun cabinet ne correspond" : "Aucun cabinet"}
+            hint={query ? `Recherche : « ${query} »` : undefined}
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
