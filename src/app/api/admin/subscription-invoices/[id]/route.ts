@@ -30,7 +30,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!parsed.success) return NextResponse.json({ error: "Données invalides." }, { status: 400 });
   const d = parsed.data;
 
-  const total = Number(inv.amount);
+  // Le cabinet règle le TTC : total à encaisser = HT × (1 + TVA%).
+  const ht = Number(inv.amount);
+  const total = Math.round(ht * (1 + Number(inv.vatRate) / 100) * 100) / 100;
   const already = Number(inv.paidAmount);
   const remaining = Math.max(0, total - already);
   const pay = d.amount ?? remaining; // par défaut : solder le restant

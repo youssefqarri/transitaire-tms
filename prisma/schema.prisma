@@ -1127,15 +1127,47 @@ model SubscriptionInvoice {
   periodStart    DateTime
   periodEnd      DateTime
   dueAt          DateTime
+  number         String?                   @unique // n° de facture (ex. ESC-2026-0001) — attribué à la génération
+  label          String? // libellé de la ligne (ex. « Abonnement Pro — juillet 2026 »)
+  vatRate        Decimal                   @default(20) @db.Decimal(5, 2) // TVA % ; `amount` est HT
   status         SubscriptionInvoiceStatus @default(PENDING)
   paidAt         DateTime?
-  paidAmount     Decimal                   @default(0) @db.Decimal(10, 2) // encaissé (suivi hors-ligne, paiement partiel possible)
+  paidAmount     Decimal                   @default(0) @db.Decimal(10, 2) // encaissé TTC (suivi hors-ligne, paiement partiel possible)
   method         String? // virement / chèque / espèces
   reference      String?
+  remindersSent  Int                       @default(0) // nb de relances envoyées
+  lastReminderAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([orgId])
   @@index([subscriptionId])
+}
+
+// Identité de facturation de la PLATEFORME (Evead/Escale) — émetteur des factures
+// d'abonnement adressées aux cabinets. Singleton (id fixe « platform »).
+model PlatformBilling {
+  id         String  @id @default("platform")
+  name       String? // raison sociale (ex. EVEAD SARL)
+  legalForm  String?
+  address    String?
+  city       String?
+  ice        String?
+  rc         String?
+  taxId      String? // identifiant fiscal (IF)
+  patente    String?
+  cnss       String?
+  capital    String?
+  phone      String?
+  email      String?
+  website    String?
+  bank       String?
+  rib        String?
+  swift      String?
+  invoicePrefix String  @default("ESC") // préfixe de numérotation (ESC-2026-0001)
+  invoiceFooter String? // mention de pied de facture (conditions de paiement…)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

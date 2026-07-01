@@ -13,6 +13,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { SubscriptionManager } from "../subscription-manager";
 import { OverageButton } from "../overage-button";
 import { InvoicePaymentButton } from "../invoice-row";
+import { GenerateInvoiceButton } from "../generate-invoice-button";
 
 export const dynamic = "force-dynamic";
 
@@ -219,8 +220,9 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
       </Card>
 
       <Card>
-        <div className="px-5 py-3 border-b border-[var(--color-border)] text-[13px] font-semibold">
-          Factures d&apos;abonnement ({invoices.length})
+        <div className="px-5 py-3 border-b border-[var(--color-border)] flex items-center justify-between gap-3">
+          <div className="text-[13px] font-semibold">Factures d&apos;abonnement ({invoices.length})</div>
+          {sub && <GenerateInvoiceButton orgId={org.id} />}
         </div>
         {invoices.length === 0 ? (
           <div className="px-5 py-6 text-[13px] text-[var(--color-fg-mute)]">
@@ -231,8 +233,9 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="border-b border-[var(--color-border)] text-[12px] text-[var(--color-fg-3)]">
-                  <th className="px-5 py-2 text-left font-medium">Période</th>
-                  <th className="px-5 py-2 text-right font-medium">Montant HT</th>
+                  <th className="px-5 py-2 text-left font-medium">N°</th>
+                  <th className="px-5 py-2 text-left font-medium">Objet / période</th>
+                  <th className="px-5 py-2 text-right font-medium">TTC</th>
                   <th className="px-5 py-2 text-right font-medium">Encaissé</th>
                   <th className="px-5 py-2 text-left font-medium">Échéance</th>
                   <th className="px-5 py-2 text-left font-medium">Statut</th>
@@ -241,21 +244,25 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
               </thead>
               <tbody>
                 {invoices.map((inv) => {
-                  const total = Number(inv.amount);
+                  const ht = Number(inv.amount);
+                  const ttc = Math.round(ht * (1 + Number(inv.vatRate) / 100) * 100) / 100;
                   const paid = Number(inv.paidAmount);
                   const partial = inv.status === "PENDING" && paid > 0;
                   return (
                   <tr key={inv.id} className="border-b border-[var(--color-border)] last:border-0">
-                    <td className="px-5 py-2.5 text-[var(--color-fg-3)] tnum">
-                      {formatDate(inv.periodStart)} – {formatDate(inv.periodEnd)}
+                    <td className="px-5 py-2.5 font-medium text-[var(--color-fg)] tnum whitespace-nowrap">
+                      {inv.number ?? "—"}
                     </td>
-                    <td className="px-5 py-2.5 text-right font-medium text-[var(--color-fg)] tnum">
-                      {formatCurrency(total, "MAD")}
+                    <td className="px-5 py-2.5 text-[var(--color-fg-3)]">
+                      {inv.label ?? `${formatDate(inv.periodStart)} – ${formatDate(inv.periodEnd)}`}
                     </td>
-                    <td className="px-5 py-2.5 text-right tnum text-[var(--color-fg-3)]">
+                    <td className="px-5 py-2.5 text-right font-medium text-[var(--color-fg)] tnum whitespace-nowrap">
+                      {formatCurrency(ttc, "MAD")}
+                    </td>
+                    <td className="px-5 py-2.5 text-right tnum text-[var(--color-fg-3)] whitespace-nowrap">
                       {paid > 0 ? formatCurrency(paid, "MAD") : "—"}
                     </td>
-                    <td className="px-5 py-2.5 text-[var(--color-fg-3)] tnum">
+                    <td className="px-5 py-2.5 text-[var(--color-fg-3)] tnum whitespace-nowrap">
                       {formatDate(inv.dueAt)}
                     </td>
                     <td className="px-5 py-2.5">
@@ -265,7 +272,7 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
                     </td>
                     <td className="px-5 py-2.5 text-right">
                       {(inv.status === "PENDING" || inv.status === "OVERDUE") && (
-                        <InvoicePaymentButton invoiceId={inv.id} amount={total} paidAmount={paid} />
+                        <InvoicePaymentButton invoiceId={inv.id} amount={ttc} paidAmount={paid} />
                       )}
                     </td>
                   </tr>
