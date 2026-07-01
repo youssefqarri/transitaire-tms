@@ -14,6 +14,7 @@ import { SubscriptionManager } from "../subscription-manager";
 import { OverageButton } from "../overage-button";
 import { InvoicePaymentButton } from "../invoice-row";
 import { GenerateInvoiceButton } from "../generate-invoice-button";
+import { InvoiceSendButtons } from "../invoice-send";
 
 export const dynamic = "force-dynamic";
 
@@ -271,7 +272,11 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
                       </Badge>
                     </td>
                     <td className="px-5 py-2.5 text-right">
-                      <div className="inline-flex items-center gap-2">
+                      <div className="inline-flex items-center gap-1.5">
+                        <InvoiceSendButtons
+                          invoiceId={inv.id}
+                          unpaid={inv.status === "PENDING" || inv.status === "OVERDUE"}
+                        />
                         <a
                           href={`/api/admin/subscription-invoices/${inv.id}/pdf`}
                           target="_blank"
