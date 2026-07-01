@@ -19,6 +19,10 @@ const PUBLIC_PATHS = [
   "/api/files",
   // sonde de monitoring publique
   "/api/health",
+  // cron batch (dépassements) : le handler fait lui-même son auth par
+  // en-tête x-cron-secret (ou session platform-admin) — l'exclure du middleware
+  // évite la redirection login qui empêcherait un appel cron sans cookie
+  "/api/cron",
   // PWA : le manifest et le service worker doivent être servis sans authentification
   "/manifest.webmanifest",
   "/sw.js",
