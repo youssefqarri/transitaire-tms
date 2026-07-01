@@ -16,7 +16,7 @@ export default async function AdminOrgsPage() {
   const session = await auth();
   if (!session || !isPlatformAdmin(session.user.email)) redirect("/dashboard");
 
-  const [orgs, plans] = await Promise.all([
+  const [orgs, plansRaw] = await Promise.all([
     prisma.organization.findMany({
       include: {
         _count: { select: { users: true, dossiers: true } },
@@ -26,10 +26,28 @@ export default async function AdminOrgsPage() {
     }),
     prisma.plan.findMany({
       where: { active: true },
-      orderBy: { name: "asc" },
-      select: { id: true, name: true },
+      orderBy: { price: "asc" },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        priceYearly: true,
+        maxSeats: true,
+        maxDossiersPerMonth: true,
+        maxStorageGb: true,
+      },
     }),
   ]);
+  // Decimal → number (sérialisable vers le composant client SubscriptionManager).
+  const plans = plansRaw.map((p) => ({
+    id: p.id,
+    name: p.name,
+    price: Number(p.price),
+    priceYearly: p.priceYearly != null ? Number(p.priceYearly) : null,
+    maxSeats: p.maxSeats,
+    maxDossiersPerMonth: p.maxDossiersPerMonth,
+    maxStorageGb: p.maxStorageGb,
+  }));
 
   return (
     <div className="space-y-6 animate-fade-in">

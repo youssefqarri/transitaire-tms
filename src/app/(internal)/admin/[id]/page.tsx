@@ -73,11 +73,29 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
   });
   if (!org) notFound();
 
-  const plans = await prisma.plan.findMany({
+  const plansRaw = await prisma.plan.findMany({
     where: { active: true },
-    orderBy: { name: "asc" },
-    select: { id: true, name: true },
+    orderBy: { price: "asc" },
+    select: {
+      id: true,
+      name: true,
+      price: true,
+      priceYearly: true,
+      maxSeats: true,
+      maxDossiersPerMonth: true,
+      maxStorageGb: true,
+    },
   });
+  // Decimal → number (sérialisable vers le composant client SubscriptionManager).
+  const plans = plansRaw.map((p) => ({
+    id: p.id,
+    name: p.name,
+    price: Number(p.price),
+    priceYearly: p.priceYearly != null ? Number(p.priceYearly) : null,
+    maxSeats: p.maxSeats,
+    maxDossiersPerMonth: p.maxDossiersPerMonth,
+    maxStorageGb: p.maxStorageGb,
+  }));
 
   // Monitoring stockage S3 par cabinet : somme des tailles des pièces (documents +
   // pièces jointes d'emails), scopée à l'organisation.

@@ -43,7 +43,7 @@ export default async function PlansPage() {
               "Dossiers · DUM · documents",
               "Facturation · avoirs · export PDF",
               "Portail client",
-              ...(i >= 1 ? ["API v1 (intégrations)", "Notifications WhatsApp"] : []),
+              ...(i >= 1 ? ["Accès API (intégrations)", "Notifications WhatsApp"] : []),
               ...(i >= 2 ? ["Multi-bureau (à venir)", "Reporting avancé (à venir)", "Support dédié"] : []),
             ];
             return (

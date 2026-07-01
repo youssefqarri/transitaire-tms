@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { SubscriptionManager } from "./subscription-manager";
+import { SubscriptionManager, type ManagerPlan } from "./subscription-manager";
 
 const SUB_TONE = {
   TRIAL: "info",
@@ -45,7 +45,7 @@ export function OrgRow({
     dossiers: number;
     subscription: Sub;
   };
-  plans: { id: string; name: string }[];
+  plans: ManagerPlan[];
 }) {
   const router = useRouter();
   const sub = org.subscription;
